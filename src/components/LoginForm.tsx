@@ -1,5 +1,9 @@
-import { doCredentialsLogin, doGoogleLogin } from "@/app/actions";
-import CredentialsForm from "./CredentialsForm";
+import { doGoogleLogin } from '@/app/actions'
+import CredentialsForm from './CredentialsForm'
+import { Divider } from './divider'
+import { Heading } from './heading'
+import { Link } from './link'
+import { Text } from './text'
 
 const GoogleLoginForm = () => {
   return (
@@ -29,25 +33,22 @@ const GoogleLoginForm = () => {
         <span className="text-sm font-semibold leading-6">Google</span>
       </button>
     </form>
-  );
-};
+  )
+}
 export default function LoginForm() {
   return (
     <>
-      <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+      <div className="relative h-full w-full rounded-xl bg-white px-6 py-12 shadow-[0px_0px_0px_1px_rgba(9,9,11,0.07),0px_2px_2px_0px_rgba(9,9,11,0.05)] dark:bg-zinc-900 dark:shadow-[0px_0px_0px_1px_rgba(255,255,255,0.1)] dark:before:pointer-events-none dark:before:absolute dark:before:-inset-px dark:before:rounded-xl dark:before:shadow-[0px_2px_8px_0px_rgba(0,_0,_0,_0.20),_0px_1px_0px_0px_rgba(255,_255,_255,_0.06)_inset] forced-colors:outline">
+        <div className="mb-5">
+          <Heading>Sign in to your account</Heading>
+        </div>
         <CredentialsForm />
         <div>
           <div className="relative mt-10">
-            <div
-              className="absolute inset-0 flex items-center"
-              aria-hidden="true"
-            >
-              <div className="w-full border-t border-gray-200" />
-            </div>
+            <Divider className="absolute inset-3 flex items-center" aria-hidden="true" />
+
             <div className="relative flex justify-center text-sm font-medium leading-6">
-              <span className="bg-white px-6 text-gray-900">
-                Or continue with
-              </span>
+              <span className="bg-white px-6 dark:bg-zinc-900">Or continue with</span>
             </div>
           </div>
 
@@ -55,7 +56,18 @@ export default function LoginForm() {
             <GoogleLoginForm />
           </div>
         </div>
+        <div className="mt-6">
+          <Text>
+            Not a member?{' '}
+            <Link
+              className="font-semibold text-zinc-950 hover:text-zinc-700 dark:text-white dark:hover:text-zinc-300"
+              href="/signup"
+            >
+              Signup
+            </Link>
+          </Text>
+        </div>
       </div>
     </>
-  );
+  )
 }

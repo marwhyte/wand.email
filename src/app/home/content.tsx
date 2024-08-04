@@ -1,293 +1,193 @@
 /* eslint-disable @next/next/no-img-element */
-"use client";
+'use client'
 
-import { useState } from "react";
+import { Avatar } from '@/components/avatar'
 import {
-  Dialog,
-  DialogBackdrop,
-  DialogPanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  TransitionChild,
-} from "@headlessui/react";
-import { Bars3Icon, HomeIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { Session } from "next-auth";
-import Image from "next/image";
-import { doLogout } from "../actions";
+  Dropdown,
+  DropdownButton,
+  DropdownDivider,
+  DropdownItem,
+  DropdownLabel,
+  DropdownMenu,
+} from '@/components/dropdown'
+import { Logo } from '@/components/Logo'
+import { Navbar, NavbarItem, NavbarSection, NavbarSpacer } from '@/components/navbar'
+import {
+  Sidebar,
+  SidebarBody,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarHeading,
+  SidebarItem,
+  SidebarLabel,
+  SidebarSection,
+  SidebarSpacer,
+} from '@/components/sidebar'
+import { SidebarLayout } from '@/components/sidebar-layout'
+import { getFirstTwoInitials } from '@/lib/utils/misc'
+import {
+  ArrowRightStartOnRectangleIcon,
+  ChevronUpIcon,
+  LightBulbIcon,
+  ShieldCheckIcon,
+  UserCircleIcon,
+} from '@heroicons/react/16/solid'
+import { Cog6ToothIcon, HomeIcon, MoonIcon, QuestionMarkCircleIcon, SunIcon } from '@heroicons/react/20/solid'
+import { Session } from 'next-auth'
+import { useTheme } from 'next-themes'
+import { usePathname } from 'next/navigation'
+import { doLogout } from '../actions'
 
-const navigation = [
-  { name: "Templates", href: "/home/templates", icon: HomeIcon, current: true },
-];
+const navigation = [{ name: 'Templates', href: '/home/templates', icon: HomeIcon, current: true }]
 
 function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(" ");
+  return classes.filter(Boolean).join(' ')
 }
 
 type Props = {
-  children: React.ReactNode;
-  session: Session | null;
-};
+  children: React.ReactNode
+  session: Session | null
+}
+
+type AccountDropdownMenuProps = {
+  anchor: 'top start' | 'bottom end'
+  session: Session | null
+}
+
+function AccountDropdownMenu({ anchor, session }: AccountDropdownMenuProps) {
+  return (
+    <DropdownMenu className="min-w-64" anchor={anchor}>
+      <DropdownItem href="/account/settings">
+        <UserCircleIcon />
+        <DropdownLabel>My account</DropdownLabel>
+      </DropdownItem>
+      <DropdownDivider />
+      <DropdownItem href="/">
+        <ShieldCheckIcon />
+        <DropdownLabel>Privacy policy</DropdownLabel>
+      </DropdownItem>
+      <DropdownItem href="mailto:marcowhyte2@gmail">
+        <LightBulbIcon />
+        <DropdownLabel>Share feedback</DropdownLabel>
+      </DropdownItem>
+      <DropdownDivider />
+      <DropdownItem onClick={() => doLogout()}>
+        <ArrowRightStartOnRectangleIcon />
+        <DropdownLabel>Sign out</DropdownLabel>
+      </DropdownItem>
+    </DropdownMenu>
+  )
+}
 
 export default function Content({ children, session }: Props) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  let pathname = usePathname()
+
+  const { resolvedTheme, setTheme } = useTheme()
+
+  const handleToggle = () => {
+    console.log('happens')
+
+    setTheme(resolvedTheme === 'light' ? 'dark' : 'light')
+  }
+
+  const templates = [
+    {
+      id: 'going',
+      name: 'Going',
+      url: '/home/templates/going',
+      current: pathname === '/home/templates/going',
+    },
+  ]
 
   return (
     <>
-      <div>
-        <Dialog
-          open={sidebarOpen}
-          onClose={setSidebarOpen}
-          className="relative z-50 lg:hidden"
-        >
-          <DialogBackdrop
-            transition
-            className="fixed inset-0 bg-gray-900/80 transition-opacity duration-300 ease-linear data-[closed]:opacity-0"
-          />
+      <SidebarLayout
+        navbar={
+          <Navbar>
+            <NavbarSpacer />
+            <NavbarSection>
+              <Dropdown>
+                <DropdownButton as={NavbarItem}>
+                  <Avatar src="/users/erica.jpg" square />
+                </DropdownButton>
+                <AccountDropdownMenu session={session} anchor="bottom end" />
+              </Dropdown>
+            </NavbarSection>
+          </Navbar>
+        }
+        sidebar={
+          <Sidebar>
+            <SidebarHeader>
+              <Logo />
+            </SidebarHeader>
 
-          <div className="fixed inset-0 flex">
-            <DialogPanel
-              transition
-              className="relative mr-16 flex w-full max-w-xs flex-1 transform transition duration-300 ease-in-out data-[closed]:-translate-x-full"
-            >
-              <TransitionChild>
-                <div className="absolute left-full top-0 flex w-16 justify-center pt-5 duration-300 ease-in-out data-[closed]:opacity-0">
-                  <button
-                    type="button"
-                    onClick={() => setSidebarOpen(false)}
-                    className="-m-2.5 p-2.5"
-                  >
-                    <span className="sr-only">Close sidebar</span>
-                    <XMarkIcon
-                      aria-hidden="true"
-                      className="h-6 w-6 text-white"
+            <SidebarBody>
+              <SidebarSection>
+                <SidebarItem href="/home/templates" current={pathname.startsWith('/home/templates')}>
+                  <HomeIcon />
+                  <SidebarLabel>Templates</SidebarLabel>
+                </SidebarItem>
+                <SidebarItem href="/home/settings" current={pathname.startsWith('/home/settings')}>
+                  <Cog6ToothIcon />
+                  <SidebarLabel>Settings</SidebarLabel>
+                </SidebarItem>
+              </SidebarSection>
+
+              <SidebarSection className="max-lg:hidden">
+                <SidebarHeading>Top templates</SidebarHeading>
+                {templates.map((template) => (
+                  <SidebarItem key={template.id} href={template.url}>
+                    {template.name}
+                  </SidebarItem>
+                ))}
+              </SidebarSection>
+
+              <SidebarSpacer />
+
+              <SidebarSection>
+                <SidebarItem href="mailto:marcowhyte2@gmail">
+                  <QuestionMarkCircleIcon />
+                  <SidebarLabel>Support</SidebarLabel>
+                </SidebarItem>
+                <SidebarItem onClick={handleToggle}>
+                  {resolvedTheme === 'dark' ? <SunIcon /> : <MoonIcon />}
+                  <SidebarLabel>{resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}</SidebarLabel>
+                </SidebarItem>
+              </SidebarSection>
+            </SidebarBody>
+
+            <SidebarFooter className="max-lg:hidden">
+              <Dropdown>
+                <DropdownButton as={SidebarItem}>
+                  <span className="flex min-w-0 items-center gap-3">
+                    <Avatar
+                      initials={
+                        session?.user?.name && !session.user.image ? getFirstTwoInitials(session.user.name) : undefined
+                      }
+                      src={session?.user?.image}
+                      className="size-10"
+                      square
+                      alt=""
                     />
-                  </button>
-                </div>
-              </TransitionChild>
-              <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-white px-6 pb-2">
-                <div className="flex h-16 shrink-0 items-center">
-                  <img
-                    alt="Your Company"
-                    src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                    className="h-8 w-auto"
-                  />
-                </div>
-                <nav className="flex flex-1 flex-col">
-                  <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                    <li>
-                      <ul role="list" className="-mx-2 space-y-1">
-                        {navigation.map((item) => (
-                          <li key={item.name}>
-                            <a
-                              href={item.href}
-                              className={classNames(
-                                item.current
-                                  ? "bg-gray-50 text-indigo-600"
-                                  : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                                "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
-                              )}
-                            >
-                              <item.icon
-                                aria-hidden="true"
-                                className={classNames(
-                                  item.current
-                                    ? "text-indigo-600"
-                                    : "text-gray-400 group-hover:text-indigo-600",
-                                  "h-6 w-6 shrink-0"
-                                )}
-                              />
-                              {item.name}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    </li>
-                  </ul>
-                </nav>
-              </div>
-            </DialogPanel>
-          </div>
-        </Dialog>
-
-        <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
-          {/* Sidebar component, swap this element with another sidebar if you like */}
-          <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-gray-200 bg-white px-6">
-            <div className="flex h-16 shrink-0 items-center">
-              <img
-                alt="Your Company"
-                src="https://tailwindui.com/img/logos/mark.svg?color=indigo&shade=600"
-                className="h-8 w-auto"
-              />
-            </div>
-            <nav className="flex flex-1 flex-col">
-              <ul role="list" className="flex flex-1 flex-col gap-y-7">
-                <li>
-                  <ul role="list" className="-mx-2 space-y-1">
-                    {navigation.map((item) => (
-                      <li key={item.name}>
-                        <a
-                          href={item.href}
-                          className={classNames(
-                            item.current
-                              ? "bg-gray-50 text-indigo-600"
-                              : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600",
-                            "group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6"
-                          )}
-                        >
-                          <item.icon
-                            aria-hidden="true"
-                            className={classNames(
-                              item.current
-                                ? "text-indigo-600"
-                                : "text-gray-400 group-hover:text-indigo-600",
-                              "h-6 w-6 shrink-0"
-                            )}
-                          />
-                          {item.name}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </li>
-                <li className="-mx-6 mt-auto">
-                  <Menu
-                    as="div"
-                    className="w-full relative inline-block text-left"
-                  >
-                    <div className="w-full">
-                      <MenuButton className="w-full flex items-center gap-x-4 px-6 py-3 text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50">
-                        {session?.user?.image ? (
-                          <Image
-                            width={32}
-                            height={32}
-                            alt=""
-                            src={session?.user?.image}
-                            className="h-8 w-8 rounded-full bg-gray-50"
-                          />
-                        ) : (
-                          <div className="h-8 w-8 rounded-full bg-gray-600 text-white flex items-center justify-center">
-                            {session?.user?.email?.[0].toUpperCase()}
-                          </div>
-                        )}
-                        <span className="sr-only">Your profile</span>
-                        <span aria-hidden="true">{session?.user?.name}</span>
-                      </MenuButton>
-                    </div>
-
-                    <MenuItems
-                      transition
-                      anchor="top"
-                      style={{ zIndex: 1000 }}
-                      className="absolute right-0 z-1000 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-                    >
-                      <div className="px-4 py-3">
-                        <p className="text-sm">Signed in as</p>
-                        <p className="truncate text-sm font-medium text-gray-900">
-                          {session?.user?.email}
-                        </p>
-                      </div>
-                      <div className="py-1">
-                        <MenuItem>
-                          <a
-                            href="#"
-                            className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-                          >
-                            Account settings
-                          </a>
-                        </MenuItem>
-                      </div>
-                      <div className="py-1">
-                        <MenuItem>
-                          <button
-                            onClick={() => doLogout()}
-                            className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-                          >
-                            Sign out
-                          </button>
-                        </MenuItem>
-                      </div>
-                    </MenuItems>
-                  </Menu>
-                </li>
-              </ul>
-            </nav>
-          </div>
-        </div>
-
-        <div className="sticky top-0 z-40 flex items-center gap-x-6 bg-white px-4 py-4 shadow-sm sm:px-6 lg:hidden">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen(true)}
-            className="-m-2.5 p-2.5 text-gray-700 lg:hidden"
-          >
-            <span className="sr-only">Open sidebar</span>
-            <Bars3Icon aria-hidden="true" className="h-6 w-6" />
-          </button>
-          <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
-            Templates
-          </div>
-          <Menu as="div" className="relative inline-block text-left">
-            <div>
-              <MenuButton className="w-full flex items-center gap-x-4  text-sm font-semibold leading-6 text-gray-900 hover:bg-gray-50">
-                <span className="sr-only">Your profile</span>
-                {session?.user?.image ? (
-                  <Image
-                    width={32}
-                    height={32}
-                    alt=""
-                    src={session?.user?.image}
-                    className="h-8 w-8 rounded-full bg-gray-50"
-                  />
-                ) : (
-                  <div className="h-8 w-8 rounded-full bg-gray-50">
-                    {session?.user?.name?.[0]}
-                  </div>
-                )}
-              </MenuButton>
-            </div>
-
-            <MenuItems
-              transition
-              anchor="bottom start"
-              style={{ zIndex: 1000 }}
-              className="absolute right-0 z-1000 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition focus:outline-none data-[closed]:scale-95 data-[closed]:transform data-[closed]:opacity-0 data-[enter]:duration-100 data-[leave]:duration-75 data-[enter]:ease-out data-[leave]:ease-in"
-            >
-              <div className="px-4 py-3">
-                <p className="text-sm">Signed in as</p>
-                <p className="truncate text-sm font-medium text-gray-900">
-                  {session?.user?.email}
-                </p>
-              </div>
-              <div className="py-1">
-                <MenuItem>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-                  >
-                    Account settings
-                  </a>
-                </MenuItem>
-              </div>
-              <div className="py-1">
-                <MenuItem>
-                  <button
-                    onClick={() => doLogout()}
-                    className="block w-full px-4 py-2 text-left text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-                  >
-                    Sign out
-                  </button>
-                </MenuItem>
-              </div>
-            </MenuItems>
-          </Menu>
-        </div>
-
-        <main className="py-10 lg:py-16 lg:pl-72">
-          <div className="px-4 sm:px-6 lg:px-16">{children}</div>
-        </main>
-      </div>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">
+                        {session?.user?.name}
+                      </span>
+                      <span className="block truncate text-xs/5 font-normal text-zinc-500 dark:text-zinc-400">
+                        {session?.user?.email}
+                      </span>
+                    </span>
+                  </span>
+                  <ChevronUpIcon />
+                </DropdownButton>
+                <AccountDropdownMenu session={session} anchor="top start" />
+              </Dropdown>
+            </SidebarFooter>
+          </Sidebar>
+        }
+      >
+        {children}
+      </SidebarLayout>
     </>
-  );
+  )
 }

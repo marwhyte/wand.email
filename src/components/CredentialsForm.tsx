@@ -1,135 +1,113 @@
-"use client";
+'use client'
 
-import React, { useState } from "react";
-import { doCredentialsLogin } from "@/app/actions";
-import { ExclamationTriangleIcon } from "@heroicons/react/20/solid";
-import { useRouter } from "next/navigation";
-import { Link } from "./link";
-import { Button } from "./button";
+import { doCredentialsLogin } from '@/app/actions'
+import { ExclamationTriangleIcon } from '@heroicons/react/20/solid'
+import { useRouter } from 'next/navigation'
+import React, { useState } from 'react'
+import { Button } from './button'
+import { Field, Label } from './fieldset'
+import { Input } from './input'
+import { Link } from './link'
 
 type Props = {
-  register?: boolean;
-};
+  register?: boolean
+}
 
 const CredentialsForm = ({ register }: Props) => {
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [error, setError] = useState<string | null>(null)
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+    event.preventDefault()
 
-    setLoading(true);
-    setError(null);
-    const formData = new FormData(event.currentTarget);
+    setLoading(true)
+    setError(null)
+    const formData = new FormData(event.currentTarget)
 
-    if (
-      !formData.get("email") ||
-      !formData.get("password") ||
-      (!formData.get("name") && register)
-    ) {
-      setError("Please fill in all fields.");
-      return;
+    if (!formData.get('email') || !formData.get('password') || (!formData.get('name') && register)) {
+      setError('Please fill in all fields.')
+      return
     }
 
     if (register) {
       try {
-        const response = await fetch("/api/register", {
-          method: "POST",
+        const response = await fetch('/api/register', {
+          method: 'POST',
           body: JSON.stringify({
-            name: formData.get("name"),
-            email: formData.get("email"),
-            password: formData.get("password"),
+            name: formData.get('name'),
+            email: formData.get('email'),
+            password: formData.get('password'),
           }),
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
           },
-        });
+        })
         if (response.status === 201) {
-          await doCredentialsLogin(formData);
+          await doCredentialsLogin(formData)
 
-          router.push("/home");
+          router.push('/home')
         } else {
-          setError(await response.text());
+          setError(await response.text())
         }
       } catch (e) {
-        console.error("here", e);
-        setError("Couldn't sign up. Please try again.");
+        console.error('here', e)
+        setError("Couldn't sign up. Please try again.")
       }
     } else {
       try {
-        await doCredentialsLogin(formData);
+        await doCredentialsLogin(formData)
 
-        router.push("/home");
+        router.push('/home')
       } catch (e) {
-        console.error("here", e);
-        setError("Invalid credentials. Please try again.");
+        console.error('here', e)
+        setError('Invalid credentials. Please try again.')
       }
     }
 
-    setLoading(false);
+    setLoading(false)
   }
 
   return (
-    <form className="space-y-3" onSubmit={handleFormSubmit}>
+    <form className="space-y-6" onSubmit={handleFormSubmit}>
       {register && (
         <div>
-          <label
-            htmlFor="name"
-            className="block text-sm font-medium leading-6 text-gray-900"
-          >
-            Name
-          </label>
-          <div className="mt-2">
-            <input
-              id="name"
-              name="name"
-              type="text"
-              autoComplete="email"
-              required
-              className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-            />
-          </div>
+          <Field>
+            <Label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
+              Name
+            </Label>
+            <Input id="name" placeholder="Name" name="name" type="text" autoComplete="name" required />
+          </Field>
         </div>
       )}
 
       <div>
-        <label
-          htmlFor="email"
-          className="block text-sm font-medium leading-6 text-gray-900"
-        >
-          Email
-        </label>
-        <div className="mt-2">
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            required
-            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-          />
+        <div>
+          <Field>
+            <Label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+              Email
+            </Label>
+            <Input id="email" placeholder="Email" name="email" type="email" autoComplete="email" required />
+          </Field>
         </div>
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="block text-sm font-medium leading-6 text-gray-900"
-        >
-          Password
-        </label>
-        <div className="mt-2">
-          <input
+        <Field>
+          <Label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+            Password
+          </Label>
+          <Input
             id="password"
+            placeholder="Password"
             name="password"
             type="password"
             autoComplete="current-password"
             required
-            className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
           />
-        </div>
-        <div className="text-sm leading-6 mt-2">
+        </Field>
+
+        <div className="mt-6 text-sm leading-6">
           <Link href="/reset-password">Forgot password?</Link>
         </div>
       </div>
@@ -138,10 +116,7 @@ const CredentialsForm = ({ register }: Props) => {
         <div className="border-l-4 border-yellow-400 bg-yellow-50 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <ExclamationTriangleIcon
-                className="h-5 w-5 text-yellow-400"
-                aria-hidden="true"
-              />
+              <ExclamationTriangleIcon className="h-5 w-5 text-yellow-400" aria-hidden="true" />
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">{error}</p>
@@ -155,7 +130,7 @@ const CredentialsForm = ({ register }: Props) => {
           <div role="status">
             <svg
               aria-hidden="true"
-              className="w-9 h-9 text-gray-200 animate-spin fill-blue-600"
+              className="h-9 w-9 animate-spin fill-blue-600 text-gray-200"
               viewBox="0 0 100 101"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -173,12 +148,12 @@ const CredentialsForm = ({ register }: Props) => {
           </div>
         ) : (
           <Button className="w-full" type="submit">
-            {register ? "Register" : "Sign in"}
+            {register ? 'Register' : 'Sign in'}
           </Button>
         )}
       </div>
     </form>
-  );
-};
+  )
+}
 
-export default CredentialsForm;
+export default CredentialsForm
