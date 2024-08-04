@@ -77,7 +77,6 @@ const authOptions: NextAuthConfig = {
       if (account?.provider === "google") {
         try {
           let dbUser = await getUserByEmail(credentials?.email as string);
-          console.log(dbUser, "hea");
           if (!dbUser) {
             addUser({
               googleId: account.providerAccountId,

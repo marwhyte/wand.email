@@ -15,8 +15,6 @@ export async function middleware(request: any) {
     PUBLIC_ROUTES.find((route) => nextUrl.pathname.startsWith(route)) ||
     nextUrl.pathname === ROOT;
 
-  console.log("LOOK", nextUrl.pathname, isPublicRoute);
-
   const isRoot = nextUrl.pathname === ROOT || nextUrl.pathname === "";
 
   if (!isAuthenticated && !isPublicRoute) {
@@ -25,6 +23,11 @@ export async function middleware(request: any) {
 
   if (isAuthenticated && isRoot) {
     return NextResponse.redirect(new URL(HOME, nextUrl));
+  }
+
+  // redirect /home to /home/templates
+  if (isAuthenticated && nextUrl.pathname === HOME) {
+    return NextResponse.redirect(new URL("/home/templates", nextUrl));
   }
 }
 

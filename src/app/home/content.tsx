@@ -12,18 +12,13 @@ import {
   MenuItems,
   TransitionChild,
 } from "@headlessui/react";
-import {
-  Bars3Icon,
-  ChevronDownIcon,
-  HomeIcon,
-  XMarkIcon,
-} from "@heroicons/react/24/outline";
+import { Bars3Icon, HomeIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { Session } from "next-auth";
 import Image from "next/image";
 import { doLogout } from "../actions";
 
 const navigation = [
-  { name: "Dashboard", href: "#", icon: HomeIcon, current: true },
+  { name: "Templates", href: "/home/templates", icon: HomeIcon, current: true },
 ];
 
 function classNames(...classes: string[]) {
@@ -31,12 +26,12 @@ function classNames(...classes: string[]) {
 }
 
 type Props = {
+  children: React.ReactNode;
   session: Session | null;
 };
 
-export default function Content({ session }: Props) {
+export default function Content({ children, session }: Props) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [accountOpen, setAccountOpen] = useState(false);
 
   return (
     <>
@@ -231,7 +226,7 @@ export default function Content({ session }: Props) {
             <Bars3Icon aria-hidden="true" className="h-6 w-6" />
           </button>
           <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
-            Dashboard
+            Templates
           </div>
           <Menu as="div" className="relative inline-block text-left">
             <div>
@@ -289,8 +284,8 @@ export default function Content({ session }: Props) {
           </Menu>
         </div>
 
-        <main className="py-10 lg:pl-72">
-          <div className="px-4 sm:px-6 lg:px-8">{/* Your content */}</div>
+        <main className="py-10 lg:py-16 lg:pl-72">
+          <div className="px-4 sm:px-6 lg:px-16">{children}</div>
         </main>
       </div>
     </>

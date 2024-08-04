@@ -58,7 +58,6 @@ const CredentialsForm = ({ register }: Props) => {
       }
     } else {
       try {
-        console.log("hey");
         await doCredentialsLogin(formData);
 
         router.push("/home");
