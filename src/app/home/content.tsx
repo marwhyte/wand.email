@@ -2,6 +2,7 @@
 'use client'
 
 import { Avatar } from '@/components/avatar'
+import DarkModeToggle from '@/components/dark-mode-toggle'
 import {
   Dropdown,
   DropdownButton,
@@ -32,9 +33,8 @@ import {
   ShieldCheckIcon,
   UserCircleIcon,
 } from '@heroicons/react/16/solid'
-import { Cog6ToothIcon, HomeIcon, MoonIcon, QuestionMarkCircleIcon, SunIcon } from '@heroicons/react/20/solid'
+import { Cog6ToothIcon, HomeIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { Session } from 'next-auth'
-import { useTheme } from 'next-themes'
 import { usePathname } from 'next/navigation'
 import { doLogout } from '../actions'
 
@@ -82,14 +82,6 @@ function AccountDropdownMenu({ anchor, session }: AccountDropdownMenuProps) {
 export default function Content({ children, session }: Props) {
   let pathname = usePathname()
 
-  const { resolvedTheme, setTheme } = useTheme()
-
-  const handleToggle = () => {
-    console.log('happens')
-
-    setTheme(resolvedTheme === 'light' ? 'dark' : 'light')
-  }
-
   const templates = [
     {
       id: 'going',
@@ -108,7 +100,12 @@ export default function Content({ children, session }: Props) {
             <NavbarSection>
               <Dropdown>
                 <DropdownButton as={NavbarItem}>
-                  <Avatar src="/users/erica.jpg" square />
+                  <Avatar
+                    initials={
+                      session?.user?.name && !session.user.image ? getFirstTwoInitials(session?.user?.name) : undefined
+                    }
+                    src={session?.user?.image}
+                  />
                 </DropdownButton>
                 <AccountDropdownMenu session={session} anchor="bottom end" />
               </Dropdown>
@@ -145,13 +142,10 @@ export default function Content({ children, session }: Props) {
               <SidebarSpacer />
 
               <SidebarSection>
+                <DarkModeToggle sideBarItem />
                 <SidebarItem href="mailto:marcowhyte2@gmail">
                   <QuestionMarkCircleIcon />
                   <SidebarLabel>Support</SidebarLabel>
-                </SidebarItem>
-                <SidebarItem onClick={handleToggle}>
-                  {resolvedTheme === 'dark' ? <SunIcon /> : <MoonIcon />}
-                  <SidebarLabel>{resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}</SidebarLabel>
                 </SidebarItem>
               </SidebarSection>
             </SidebarBody>

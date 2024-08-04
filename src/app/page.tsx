@@ -1,5 +1,5 @@
-import LoginForm from '@/components/LoginForm'
 import UnauthenticatedHeader from '@/components/UnauthenticatedHeader'
+import LoginForm from '@/forms/login-form'
 
 export default function Home() {
   return (

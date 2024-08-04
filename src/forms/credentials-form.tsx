@@ -1,13 +1,13 @@
 'use client'
 
 import { doCredentialsLogin } from '@/app/actions'
+import { Button } from '@/components/button'
+import { Field, Label } from '@/components/fieldset'
+import { Input } from '@/components/input'
+import { Link } from '@/components/link'
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
-import { Button } from './button'
-import { Field, Label } from './fieldset'
-import { Input } from './input'
-import { Link } from './link'
 
 type Props = {
   register?: boolean

@@ -1,9 +1,9 @@
 import { doGoogleLogin } from '@/app/actions'
-import CredentialsForm from './CredentialsForm'
-import { Divider } from './divider'
-import { Heading } from './heading'
-import { Link } from './link'
-import { Text } from './text'
+import { Divider } from '@/components/divider'
+import { Heading } from '@/components/heading'
+import { Link } from '@/components/link'
+import { Text } from '@/components/text'
+import CredentialsForm from '@/forms/credentials-form'
 
 const GoogleLoginForm = () => {
   return (
@@ -12,7 +12,7 @@ const GoogleLoginForm = () => {
         type="submit"
         className="flex w-full items-center justify-center gap-3 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 focus-visible:ring-transparent"
       >
-        <svg className="h-5 w-5" aria-hidden="true" viewBox="0 0 24 24">
+        <svg style={{ height: '1.25rem', width: '1.25rem' }} aria-hidden="true" viewBox="0 0 24 24">
           <path
             d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
             fill="#EA4335"
@@ -57,13 +57,13 @@ export default function LoginForm() {
           </div>
         </div>
         <div className="mt-6">
-          <Text>
+          <Text className="text-center">
             Not a member?{' '}
             <Link
               className="font-semibold text-zinc-950 hover:text-zinc-700 dark:text-white dark:hover:text-zinc-300"
               href="/signup"
             >
-              Signup
+              Sign up
             </Link>
           </Text>
         </div>

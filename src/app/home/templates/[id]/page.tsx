@@ -14,7 +14,17 @@ export default async function GoingPage({ params }: { params: { id: string } }) 
     }
   }
 
-  const component = getComponent()
+  const getName = () => {
+    switch (params.id) {
+      case 'going':
+        return 'Going'
+      default:
+        break
+    }
+  }
 
-  return <CustomIframe>{component}</CustomIframe>
+  const component = getComponent()
+  const name = getName()
+
+  return <CustomIframe name={name}>{component}</CustomIframe>
 }
