@@ -5,11 +5,12 @@ import { ChevronLeftIcon, ComputerDesktopIcon, DevicePhoneMobileIcon } from '@he
 import Link from 'next/link'
 import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { Button } from './button'
 import { Heading } from './heading'
 
 type Props = {
   children: React.ReactNode
-  name: string
+  name?: string
 }
 
 const CustomIframe = ({ children, name, ...props }: Props) => {
@@ -68,24 +69,35 @@ const CustomIframe = ({ children, name, ...props }: Props) => {
     return () => clearTimeout(timeout)
   }, [rerender])
 
+  if (!name) {
+    return (
+      <>
+        <Heading>Template not found</Heading>
+      </>
+    )
+  }
+
   return (
     <div>
       <div className="mb-4 flex items-center justify-between">
         <Link
           href="/home/templates"
-          className="inline-flex items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400"
+          className="inline-flex w-40 items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400"
         >
           <ChevronLeftIcon className="size-4 fill-zinc-400 dark:fill-zinc-500" />
           Templates
         </Link>
         <Heading level={2}>{name}</Heading>
-        <TabGroup onChange={handleChange}>
-          <TabList>
-            {options.map((option) => (
-              <Tab key={option.value}>{option.name}</Tab>
-            ))}
-          </TabList>
-        </TabGroup>
+        <div className="flex w-40 gap-8">
+          <TabGroup onChange={handleChange}>
+            <TabList>
+              {options.map((option) => (
+                <Tab key={option.value}>{option.name}</Tab>
+              ))}
+            </TabList>
+          </TabGroup>
+          <Button>Send</Button>
+        </div>
       </div>
 
       <div className="flex h-full w-full justify-center">

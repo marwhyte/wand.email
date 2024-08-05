@@ -19,7 +19,7 @@ type TabListProps = ComponentProps<typeof HeadlessTabList>
 
 export function TabList({ children, ...props }: TabListProps) {
   return (
-    <HeadlessTabList className="inline-flex space-x-1 rounded-lg bg-gray-800 p-1" {...props}>
+    <HeadlessTabList className="inline-flex space-x-1 rounded-lg bg-zinc-800 p-1" {...props}>
       {children}
     </HeadlessTabList>
   )
@@ -36,7 +36,7 @@ export function Tab({ children, disabled, ...props }: TabProps) {
         clsx(
           'flex items-center justify-center rounded-lg px-2 py-1.5 text-sm font-medium leading-5',
           'ring-white ring-opacity-60 ring-offset-2 ring-offset-gray-900 focus:outline-none focus:ring-2',
-          selected ? 'bg-gray-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white',
+          selected ? 'bg-zinc-600 text-white' : 'text-gray-400 hover:bg-gray-700 hover:text-white',
           disabled && 'cursor-not-allowed opacity-50'
         )
       }

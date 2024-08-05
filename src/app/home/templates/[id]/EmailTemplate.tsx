@@ -140,7 +140,7 @@ const GoingEmail = () => {
         </Container>
         <Container bgcolor="004449">
           <Container style={{ padding: '30px' }}>
-            <Container align="center" style={{ maxWidth: '450px', borderSpacing: '0' }} width="450">
+            <Container align="center" style={{ maxWidth: '450px', borderSpacing: '0' }}>
               <Row>
                 <Column align="center">
                   <Link>
@@ -177,7 +177,6 @@ const GoingEmail = () => {
                       borderCollapse: 'separate',
                       height: '55px',
                     }}
-                    width="300"
                   >
                     <Button
                       href="/"
@@ -206,7 +205,7 @@ const GoingEmail = () => {
         <Container style={{ padding: '60px 15px 30px' }} bgcolor="FFFFFF">
           <Row>
             <Column align="center" valign="top">
-              <Container width="510">
+              <Container>
                 <Heading
                   style={{
                     color: '004449',
@@ -271,7 +270,7 @@ const GoingEmail = () => {
         >
           <Row align="center">
             <Column>
-              <Container width="480" style={{ maxWidth: '480px' }}>
+              <Container style={{ maxWidth: '480px' }}>
                 <Row style={{ textAlign: 'center' }} align="center">
                   <SocialIcon icon="/going/facebook.png" />
                   <SocialIcon icon="/going/instagram.png" />
