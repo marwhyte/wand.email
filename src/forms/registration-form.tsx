@@ -3,7 +3,6 @@ import { Link } from '@/components/link'
 import { Text } from '@/components/text'
 import { Button } from '../components/button'
 import { Divider } from '../components/divider'
-import { Heading } from '../components/heading'
 import CredentialsForm from './credentials-form'
 
 const GoogleLoginForm = () => {
@@ -37,9 +36,6 @@ export default function RegistrationForm() {
   return (
     <>
       <div>
-        <div className="mb-5">
-          <Heading>Create your account</Heading>
-        </div>
         <CredentialsForm register />
         <div>
           <div className="relative mt-10">

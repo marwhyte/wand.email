@@ -1,6 +1,5 @@
 import { doGoogleLogin } from '@/app/actions'
 import { Divider } from '@/components/divider'
-import { Heading } from '@/components/heading'
 import { Link } from '@/components/link'
 import { Text } from '@/components/text'
 import CredentialsForm from '@/forms/credentials-form'
@@ -39,9 +38,6 @@ export default function LoginForm() {
   return (
     <>
       <div>
-        <div className="mb-5">
-          <Heading>Sign in to your account</Heading>
-        </div>
         <CredentialsForm />
         <div>
           <div className="relative mt-10">
