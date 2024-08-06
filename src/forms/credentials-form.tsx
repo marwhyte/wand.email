@@ -69,7 +69,7 @@ const CredentialsForm = ({ register }: Props) => {
   }
 
   return (
-    <form className="space-y-6" onSubmit={handleFormSubmit}>
+    <form className="flex flex-col gap-6" onSubmit={handleFormSubmit}>
       {register && (
         <div>
           <Field>
