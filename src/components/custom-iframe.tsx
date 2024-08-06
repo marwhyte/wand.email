@@ -2,6 +2,7 @@
 
 import { Tab, TabGroup, TabList } from '@/components/tab'
 import { ChevronLeftIcon, ComputerDesktopIcon, DevicePhoneMobileIcon } from '@heroicons/react/20/solid'
+import { Session } from 'next-auth'
 import Link from 'next/link'
 import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -10,14 +11,26 @@ import { Heading } from './heading'
 
 type Props = {
   children: React.ReactNode
-  name?: string
+  id?: string
+  session: Session | null
 }
 
-const CustomIframe = ({ children, name, ...props }: Props) => {
+const CustomIframe = ({ children, session, id, ...props }: Props) => {
   const options = [
     { name: <ComputerDesktopIcon className="h-5 w-5" />, value: 'desktop' },
     { name: <DevicePhoneMobileIcon className="h-5 w-5" />, value: 'mobile' },
   ]
+
+  const getName = () => {
+    switch (id) {
+      case 'going':
+        return 'Going'
+      default:
+        break
+    }
+  }
+
+  const name = getName()
 
   const [selected, setSelected] = useState(options[0].value)
   const [width, setWidth] = useState('600')
@@ -36,6 +49,28 @@ const CustomIframe = ({ children, name, ...props }: Props) => {
   const contentRef = useRef<HTMLIFrameElement>(null)
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null)
   const [rerender, setRerender] = useState(0)
+
+  const sendEmail = async () => {
+    if (!session?.user?.email) return
+
+    const response = await fetch('/api/send', {
+      method: 'POST',
+      body: JSON.stringify({
+        id: id,
+        email: session?.user?.email || '',
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (response.status === 200) {
+      console.log('email sent')
+    } else {
+      const error = await response.text()
+      console.error(error)
+    }
+  }
 
   const resizeIframe = () => {
     if (contentRef.current) {
@@ -67,7 +102,7 @@ const CustomIframe = ({ children, name, ...props }: Props) => {
       clearInterval(interval)
     }, 500)
     return () => clearTimeout(timeout)
-  }, [rerender])
+  }, [])
 
   if (!name) {
     return (
@@ -96,7 +131,8 @@ const CustomIframe = ({ children, name, ...props }: Props) => {
               ))}
             </TabList>
           </TabGroup>
-          <Button>Send</Button>
+
+          <Button onClick={sendEmail}>Send</Button>
         </div>
       </div>
 

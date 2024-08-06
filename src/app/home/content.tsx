@@ -115,7 +115,9 @@ export default function Content({ children, session }: Props) {
         sidebar={
           <Sidebar>
             <SidebarHeader>
-              <Logo />
+              <a href={process.env.NEXT_PUBLIC_MARKETING_URL} className="-m-1.5 p-1.5">
+                <Logo />
+              </a>
             </SidebarHeader>
 
             <SidebarBody>

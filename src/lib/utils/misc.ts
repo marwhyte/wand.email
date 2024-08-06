@@ -8,3 +8,7 @@ export function getFirstTwoInitials(name: string) {
   // Join the initials
   return initials.join('')
 }
+
+export function getPhotoUrl(name: string, template: string) {
+  return `https://swiftmailer-photos.imgix.net/${template}/${name}`
+}

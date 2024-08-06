@@ -1,3 +1,4 @@
+import { getPhotoUrl } from '@/lib/utils/misc'
 import {
   Body,
   Button,
@@ -21,12 +22,13 @@ const main: CSSProperties = {
 
 type SocialIconProps = {
   icon: string
+  href: string
 }
 
-const SocialIcon = ({ icon }: SocialIconProps) => {
+const SocialIcon = ({ icon, href }: SocialIconProps) => {
   return (
     <Column style={{ display: 'inline-block', padding: '0 8px' }}>
-      <Link href="/" style={{ display: 'inline-block' }}>
+      <Link href={href} style={{ display: 'inline-block' }}>
         <Img width="34" style={{ display: 'block', margin: '0' }} src={icon} alt="logo" />
       </Link>
     </Column>
@@ -78,7 +80,7 @@ const Item = ({ title, description, image }: ItemProps) => {
               textAlign: 'left',
               fontSize: '16px',
               lineHeight: '24px',
-              color: '004449',
+              color: '#004449',
             }}
           >
             <Text
@@ -107,22 +109,22 @@ const GoingEmail = () => {
       <Body style={main}>
         <Container bgcolor="D7FFC2" align="center">
           <Row>
-            <Column style={{ padding: '20 15', color: '004449' }} align="center">
-              <Text style={{ margin: 0, fontSize: '16px', fontWeight: '700' }}>
+            <Column style={{ padding: '20 15' }} align="center">
+              <Text style={{ color: '#004449', margin: 0, fontSize: '16px', fontWeight: '700' }}>
                 Clock&apos;s ticking on your limited time offer
               </Text>
 
               <Link
                 href="/"
                 style={{
-                  color: '004449',
+                  color: '#004449',
                   display: 'inline-block',
                   textDecoration: 'none',
                 }}
               >
                 You have 24 hours to save on your first year of Premium or Elite{' '}
                 <Img
-                  src="/going/plane.png"
+                  src={getPhotoUrl('plane.png', 'going')}
                   width="16"
                   height="16"
                   style={{
@@ -144,7 +146,7 @@ const GoingEmail = () => {
               <Row>
                 <Column align="center">
                   <Link>
-                    <Img src="/going/going-logo.png" width="124" alt="Going" />
+                    <Img src={getPhotoUrl('going-logo.png', 'going')} width="124" alt="Going" />
                   </Link>
                   <Heading
                     style={{
@@ -152,10 +154,10 @@ const GoingEmail = () => {
                       fontSize: '50px',
                       lineHeight: '56px',
                       fontWeight: 700,
-                      color: 'fffef0',
+                      color: '#fffef0',
                     }}
                   >
-                    <span style={{ color: 'd7ffc2', fontWeight: 'normal' }}>Deals</span> coming
+                    <span style={{ color: '#d7ffc2', fontWeight: 'normal' }}>Deals</span> coming
                     <span>
                       <br></br>
                     </span>{' '}
@@ -164,7 +166,7 @@ const GoingEmail = () => {
                   <Text
                     style={{
                       margin: '0 0 30px',
-                      color: 'fffef0',
+                      color: '#fffef0',
                       fontSize: '16px',
                     }}
                   >
@@ -185,10 +187,10 @@ const GoingEmail = () => {
                         verticalAlign: 'middle',
                         borderRadius: '30px',
                         height: '55px',
-                        backgroundColor: '483CFF',
+                        backgroundColor: '#483CFF',
                         fontSize: '15px',
                         fontWeight: 700,
-                        color: 'ffffff',
+                        color: '#ffffff',
                         textTransform: 'uppercase',
                         display: 'block',
                       }}
@@ -200,7 +202,7 @@ const GoingEmail = () => {
               </Row>
             </Container>
           </Container>
-          <Img width="600" style={{ width: '100%' }} src="/going/locations.png" alt="background" />
+          <Img width="600" style={{ width: '100%' }} src={getPhotoUrl('locations.png', 'going')} alt="background" />
         </Container>
         <Container style={{ padding: '60px 15px 30px' }} bgcolor="FFFFFF">
           <Row>
@@ -208,7 +210,7 @@ const GoingEmail = () => {
               <Container>
                 <Heading
                   style={{
-                    color: '004449',
+                    color: '#004449',
                     textAlign: 'center',
                     margin: '0 0 24px',
                     fontSize: '24px',
@@ -224,11 +226,11 @@ const GoingEmail = () => {
           </Row>
           <Item
             title="Get the Going app."
-            image="/going/going-gif-1.gif"
+            image={getPhotoUrl('going-gif-1.gif', 'going')}
             description={
               <Text style={{ fontSize: '16px' }}>
                 Never miss a deal with real-time flight alerts at your fingertips.
-                <Link href="/" style={{ color: '483cff', textDecoration: 'underline' }}>
+                <Link href="/" style={{ color: '#483cff', textDecoration: 'underline' }}>
                   Download on iOS and Android.
                 </Link>
               </Text>
@@ -236,11 +238,11 @@ const GoingEmail = () => {
           />
           <Item
             title="Set up your airports."
-            image="/going/going-gif-2.gif"
+            image={getPhotoUrl('going-gif-2.gif', 'going')}
             description={
               <Text style={{ fontSize: '16px' }}>
                 You’ll only receive deals from departure airports you follow.{' '}
-                <Link href="/" style={{ color: '483cff', textDecoration: 'underline' }}>
+                <Link href="/" style={{ color: '#483cff', textDecoration: 'underline' }}>
                   Choose airports
                 </Link>{' '}
                 like your biggest, closest, and maybe even your parent’s.
@@ -249,11 +251,11 @@ const GoingEmail = () => {
           />
           <Item
             title="Get the Going app."
-            image="/going/going-gif-3.gif"
+            image={getPhotoUrl('going-gif-3.gif', 'going')}
             description={
               <Text style={{ fontSize: '16px' }}>
                 As a Limited member, you get access to Going’s best domestic flights. Check out{' '}
-                <Link href="/" style={{ color: '483cff', textDecoration: 'underline' }}>
+                <Link href="/" style={{ color: '#483cff', textDecoration: 'underline' }}>
                   your deals.
                 </Link>
               </Text>
@@ -264,7 +266,7 @@ const GoingEmail = () => {
           style={{
             padding: '30px 30px 60px',
             width: '100%',
-            backgroundColor: 'FFFFFF',
+            backgroundColor: '#FFFFFF',
           }}
           bgcolor="FFFFFF"
         >
@@ -272,18 +274,18 @@ const GoingEmail = () => {
             <Column>
               <Container style={{ maxWidth: '480px' }}>
                 <Row style={{ textAlign: 'center' }} align="center">
-                  <SocialIcon icon="/going/facebook.png" />
-                  <SocialIcon icon="/going/instagram.png" />
-                  <SocialIcon icon="/going/x.png" />
-                  <SocialIcon icon="/going/tiktok.png" />
-                  <SocialIcon icon="/going/youtube.png" />
+                  <SocialIcon icon={getPhotoUrl('facebook.png', 'going')} href="https://www.facebook.com" />
+                  <SocialIcon icon={getPhotoUrl('instagram.png', 'going')} href="https://www.instagram.com" />
+                  <SocialIcon icon={getPhotoUrl('x.png', 'going')} href="https://www.x.com" />
+                  <SocialIcon icon={getPhotoUrl('tiktok.png', 'going')} href="https://www.tiktok.com" />
+                  <SocialIcon icon={getPhotoUrl('youtube.png', 'going')} href="https://www.youtube.com" />
                 </Row>
               </Container>
               <Container align="center" style={{ textAlign: 'center', padding: '24px 0 0' }}>
-                <Link style={{ color: '004449', fontSize: '12px' }}>© Scott’s Cheap Flights, Inc. DBA Going</Link>
+                <Link style={{ color: '#004449', fontSize: '12px' }}>© Scott’s Cheap Flights, Inc. DBA Going</Link>
                 <Text
                   style={{
-                    color: '004449',
+                    color: '#004449',
                     lineHeight: '16px',
                     margin: 0,
                     fontSize: '12px',
@@ -295,11 +297,11 @@ const GoingEmail = () => {
                   <br></br>
                   Boulder, CO 80301-6112
                 </Text>
-                <Text style={{ color: '004449', padding: '24px 0 0' }}>
+                <Text style={{ color: '#004449', padding: '24px 0 0' }}>
                   <Link
                     href="/"
                     style={{
-                      color: '004449',
+                      color: '#004449',
                       fontSize: '12px',
                       fontWeight: 700,
                     }}
@@ -310,7 +312,7 @@ const GoingEmail = () => {
                   <Link
                     href="/"
                     style={{
-                      color: '004449',
+                      color: '#004449',
                       fontSize: '12px',
                       fontWeight: 700,
                     }}
@@ -321,7 +323,7 @@ const GoingEmail = () => {
                   <Link
                     href="/"
                     style={{
-                      color: '004449',
+                      color: '#004449',
                       fontSize: '12px',
                       fontWeight: 700,
                     }}
@@ -339,7 +341,7 @@ const GoingEmail = () => {
                 textAlign: 'center',
                 fontSize: '12px',
                 lineHeight: '16px',
-                color: '004449',
+                color: '#004449',
                 fontStyle: 'italic',
               }}
             >
