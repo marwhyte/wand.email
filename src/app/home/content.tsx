@@ -57,7 +57,7 @@ type AccountDropdownMenuProps = {
 function AccountDropdownMenu({ anchor, session }: AccountDropdownMenuProps) {
   return (
     <DropdownMenu className="min-w-64" anchor={anchor}>
-      <DropdownItem href="/account/settings">
+      <DropdownItem href="/home/settings">
         <UserCircleIcon />
         <DropdownLabel>My account</DropdownLabel>
       </DropdownItem>
