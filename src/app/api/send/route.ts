@@ -1,44 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 
-import { goingEmail } from '@/app/home/templates/emails/going-template'
-import { renderEmailToString } from '@/app/home/templates/emails/server-email-renderer'
-
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const POST = async (request: NextRequest) => {
-  const { email, id } = await request.json()
+  const { email, id, html } = await request.json()
 
-  if (!email || !id) {
-    return new NextResponse('Email and template id are required', {
+  if (!email || !id || !html) {
+    return new NextResponse('Email, id and html are required', {
       status: 400,
     })
   }
 
   try {
-    const getTemplate = () => {
-      switch (id) {
-        case 'going':
-          return goingEmail
-        default:
-          return null
-      }
-    }
-
-    const getComponent = () => {
-      const template = getTemplate()
-
-      if (template) {
-        return renderEmailToString(template)
-      }
-      return null
-    }
-
     const { data, error } = await resend.emails.send({
       from: 'SwiftMaker <testing@marcowhyte.com>',
       to: [email],
       subject: 'Test from SwiftMailer',
-      react: getComponent(),
+      html: html,
     })
 
     if (error) {

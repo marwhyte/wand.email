@@ -2,10 +2,13 @@
 
 import { Tab, TabGroup, TabList } from '@/app/components/tab'
 import { ChevronLeftIcon, ComputerDesktopIcon, DevicePhoneMobileIcon } from '@heroicons/react/20/solid'
+import { render } from '@react-email/components'
 import { Session } from 'next-auth'
 import Link from 'next/link'
 import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import EmailRenderer from '../home/templates/emails/email-renderer'
+import { goingEmail } from '../home/templates/emails/going-template'
 import { Button } from './button'
 import { Heading } from './heading'
 
@@ -50,11 +53,13 @@ const CustomIframe = ({ children, session, id, ...props }: Props) => {
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null)
 
   const sendEmail = async () => {
+    console.log(render(<EmailRenderer originalTemplate={goingEmail} />))
     if (!session?.user?.email) return
 
     const response = await fetch('/api/send', {
       method: 'POST',
       body: JSON.stringify({
+        html: render(<EmailRenderer originalTemplate={goingEmail} />),
         id: id,
         email: session?.user?.email || '',
       }),
