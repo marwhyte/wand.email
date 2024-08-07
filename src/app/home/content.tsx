@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { Avatar } from '@/components/avatar'
-import DarkModeToggle from '@/components/dark-mode-toggle'
+import { Avatar } from '@/app/components/avatar'
+import DarkModeToggle from '@/app/components/dark-mode-toggle'
 import {
   Dropdown,
   DropdownButton,
@@ -10,9 +10,9 @@ import {
   DropdownItem,
   DropdownLabel,
   DropdownMenu,
-} from '@/components/dropdown'
-import { Logo } from '@/components/Logo'
-import { Navbar, NavbarItem, NavbarSection, NavbarSpacer } from '@/components/navbar'
+} from '@/app/components/dropdown'
+import { Logo } from '@/app/components/Logo'
+import { Navbar, NavbarItem, NavbarSection, NavbarSpacer } from '@/app/components/navbar'
 import {
   Sidebar,
   SidebarBody,
@@ -23,8 +23,8 @@ import {
   SidebarLabel,
   SidebarSection,
   SidebarSpacer,
-} from '@/components/sidebar'
-import { SidebarLayout } from '@/components/sidebar-layout'
+} from '@/app/components/sidebar'
+import { SidebarLayout } from '@/app/components/sidebar-layout'
 import { getFirstTwoInitials } from '@/lib/utils/misc'
 import {
   ArrowRightStartOnRectangleIcon,

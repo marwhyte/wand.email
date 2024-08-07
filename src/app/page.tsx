@@ -1,6 +1,6 @@
-import { Heading } from '@/components/heading'
-import UnauthenticatedHeader from '@/components/UnauthenticatedHeader'
-import LoginForm from '@/forms/login-form'
+import { Heading } from '@/app/components/heading'
+import UnauthenticatedHeader from '@/app/components/UnauthenticatedHeader'
+import LoginForm from '@/app/forms/login-form'
 
 export default function Home() {
   return (

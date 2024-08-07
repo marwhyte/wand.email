@@ -1,6 +1,6 @@
 'use client'
 
-import { Tab, TabGroup, TabList } from '@/components/tab'
+import { Tab, TabGroup, TabList } from '@/app/components/tab'
 import { ChevronLeftIcon, ComputerDesktopIcon, DevicePhoneMobileIcon } from '@heroicons/react/20/solid'
 import { Session } from 'next-auth'
 import Link from 'next/link'
@@ -48,7 +48,6 @@ const CustomIframe = ({ children, session, id, ...props }: Props) => {
 
   const contentRef = useRef<HTMLIFrameElement>(null)
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null)
-  const [rerender, setRerender] = useState(0)
 
   const sendEmail = async () => {
     if (!session?.user?.email) return
@@ -75,34 +74,33 @@ const CustomIframe = ({ children, session, id, ...props }: Props) => {
   const resizeIframe = () => {
     if (contentRef.current) {
       const iframe = contentRef.current
-      iframe.style.height = iframe.contentWindow?.document.documentElement.scrollHeight + 'px'
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          const height = entry.contentRect.height
+          iframe.style.height = `${height}px`
+        }
+      })
+
+      if (iframe.contentWindow?.document.body) {
+        resizeObserver.observe(iframe.contentWindow.document.body)
+      }
+
+      return () => resizeObserver.disconnect()
     }
   }
 
   useEffect(() => {
     if (contentRef.current) {
       setMountNode(contentRef.current.contentWindow?.document.body || null)
-      contentRef.current.onload = resizeIframe
+      const cleanup = resizeIframe()
+      return cleanup
     }
   }, [])
 
   useEffect(() => {
-    if (contentRef.current) {
-      resizeIframe()
-    }
-  }, [children, rerender])
-
-  useEffect(() => {
-    // set an interval every 10 ms for one second
-    const interval = setInterval(() => {
-      setRerender(rerender + 1)
-    }, 10)
-
-    const timeout = setTimeout(() => {
-      clearInterval(interval)
-    }, 500)
-    return () => clearTimeout(timeout)
-  }, [])
+    const cleanup = resizeIframe()
+    return cleanup
+  }, [children])
 
   if (!name) {
     return (

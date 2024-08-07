@@ -1,3 +1,5 @@
+'use client'
+
 import { getPhotoUrl } from '@/lib/utils/misc'
 import {
   Body,
@@ -13,6 +15,7 @@ import {
   Row,
   Text,
 } from '@react-email/components'
+import React, { ComponentProps, useState } from 'react'
 
 import { CSSProperties } from 'react'
 
@@ -101,7 +104,43 @@ const Item = ({ title, description, image }: ItemProps) => {
   )
 }
 
-const GoingEmail = () => {
+type Item =
+  | ({ type: 'text' } & ComponentProps<typeof Text>)
+  | ({ type: 'heading' } & ComponentProps<typeof Heading>)
+  | ({ type: 'button' } & ComponentProps<typeof Button>)
+  | ({ type: 'image' } & ComponentProps<typeof Img>)
+
+type Container = ComponentProps<typeof Container> & {
+  id: string
+  items: Item[]
+}
+
+type EmailTemplate = ComponentProps<typeof Body> & {
+  preview: string
+  containers: Container[]
+}
+const GoingEmailEditor: React.FC = () => {
+  const [template, setTemplate] = useState<EmailTemplate>({
+    preview: 'Yay! Cheap flights are headed your way',
+    style: { fontFamily: 'Arial, sans-serif' },
+    containers: [],
+  })
+
+  const renderSection = (item: Item) => {
+    switch (item.type) {
+      case 'text':
+        return <Text {...item}>{item.children}</Text>
+      case 'heading':
+        return <Heading {...item}>{item.children}</Heading>
+      case 'button':
+        return <Button {...item}>{item.children}</Button>
+      case 'image':
+        return <Img {...item} alt={item.alt || 'Image'} />
+      default:
+        return null
+    }
+  }
+
   return (
     <Html>
       <Head />
@@ -241,11 +280,11 @@ const GoingEmail = () => {
             image={getPhotoUrl('going-gif-2.gif', 'going')}
             description={
               <Text style={{ fontSize: '16px' }}>
-                You’ll only receive deals from departure airports you follow.{' '}
+                You&apos;ll only receive deals from departure airports you follow.{' '}
                 <Link href="/" style={{ color: '#483cff', textDecoration: 'underline' }}>
                   Choose airports
                 </Link>{' '}
-                like your biggest, closest, and maybe even your parent’s.
+                like your biggest, closest, and maybe even your parent&apos;s.
               </Text>
             }
           />
@@ -254,7 +293,7 @@ const GoingEmail = () => {
             image={getPhotoUrl('going-gif-3.gif', 'going')}
             description={
               <Text style={{ fontSize: '16px' }}>
-                As a Limited member, you get access to Going’s best domestic flights. Check out{' '}
+                As a Limited member, you get access to Going&apos;s best domestic flights. Check out{' '}
                 <Link href="/" style={{ color: '#483cff', textDecoration: 'underline' }}>
                   your deals.
                 </Link>
@@ -282,7 +321,9 @@ const GoingEmail = () => {
                 </Row>
               </Container>
               <Container align="center" style={{ textAlign: 'center', padding: '24px 0 0' }}>
-                <Link style={{ color: '#004449', fontSize: '12px' }}>© Scott’s Cheap Flights, Inc. DBA Going</Link>
+                <Link style={{ color: '#004449', fontSize: '12px' }}>
+                  © Scott&apos;s Cheap Flights, Inc. DBA Going
+                </Link>
                 <Text
                   style={{
                     color: '#004449',
@@ -355,4 +396,4 @@ const GoingEmail = () => {
   )
 }
 
-export default GoingEmail
+export default GoingEmailEditor

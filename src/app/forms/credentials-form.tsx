@@ -1,10 +1,11 @@
 'use client'
 
 import { doCredentialsLogin } from '@/app/actions'
-import { Button } from '@/components/button'
-import { Field, Label } from '@/components/fieldset'
-import { Input } from '@/components/input'
-import { Link } from '@/components/link'
+import { Button } from '@/app/components/button'
+import { Field, Label } from '@/app/components/fieldset'
+import { Input } from '@/app/components/input'
+import { Link } from '@/app/components/link'
+import Loading from '@/app/components/loading'
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
@@ -127,9 +128,7 @@ const CredentialsForm = ({ register }: Props) => {
 
       <div>
         {loading ? (
-          <div className="grid min-h-[140px] w-full place-items-center overflow-x-scroll rounded-lg p-6 lg:overflow-visible">
-            loading...
-          </div>
+          <Loading />
         ) : (
           <Button className="w-full" type="submit">
             {register ? 'Register' : 'Sign in'}

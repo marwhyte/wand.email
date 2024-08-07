@@ -1,5 +1,5 @@
+import { Subheading } from '@/app/components/heading'
 import { auth } from '@/auth'
-import { Subheading } from '@/components/heading'
 import Image from 'next/image'
 import Link from 'next/link'
 

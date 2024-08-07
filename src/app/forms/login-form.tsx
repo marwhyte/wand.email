@@ -1,9 +1,9 @@
 import { doGoogleLogin } from '@/app/actions'
-import { Button } from '@/components/button'
-import { Divider } from '@/components/divider'
-import { Link } from '@/components/link'
-import { Text } from '@/components/text'
-import CredentialsForm from '@/forms/credentials-form'
+import { Button } from '@/app/components/button'
+import { Divider } from '@/app/components/divider'
+import { Link } from '@/app/components/link'
+import { Text } from '@/app/components/text'
+import CredentialsForm from '@/app/forms/credentials-form'
 
 const GoogleLoginForm = () => {
   return (

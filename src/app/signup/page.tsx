@@ -1,6 +1,6 @@
-import { Heading } from '@/components/heading'
-import UnauthenticatedHeader from '@/components/UnauthenticatedHeader'
-import RegistrationForm from '@/forms/registration-form'
+import { Heading } from '@/app/components/heading'
+import UnauthenticatedHeader from '@/app/components/UnauthenticatedHeader'
+import RegistrationForm from '@/app/forms/registration-form'
 
 const SignupPage = () => {
   return (
