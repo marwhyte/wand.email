@@ -1,9 +1,14 @@
-export default function Loading() {
+type Props = {
+  height?: number
+  width?: number
+}
+
+export default function Loading({ height = 36, width = 36 }: Props) {
   return (
     <div>
       <svg
-        width="36"
-        height="36"
+        width={width}
+        height={height}
         fill="currentColor"
         className="mr-2 animate-spin"
         viewBox="0 0 1792 1792"

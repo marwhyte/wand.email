@@ -38,12 +38,6 @@ import { Session } from 'next-auth'
 import { usePathname } from 'next/navigation'
 import { doLogout } from '../actions'
 
-const navigation = [{ name: 'Templates', href: '/home/templates', icon: HomeIcon, current: true }]
-
-function classNames(...classes: string[]) {
-  return classes.filter(Boolean).join(' ')
-}
-
 type Props = {
   children: React.ReactNode
   session: Session | null

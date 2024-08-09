@@ -15,8 +15,6 @@ const DarkModeToggle = ({ sideBarItem }: Props) => {
     setTheme(theme === 'light' ? 'dark' : 'light')
   }
 
-  console.log(theme)
-
   useEffect(() => {
     setMounted(true)
   }, [])

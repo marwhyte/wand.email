@@ -1,5 +1,3 @@
-import { EmailTemplate } from '@/app/home/templates/emails/email-renderer'
-
 export function getFirstTwoInitials(name: string) {
   // Split the name by spaces
   const words = name.trim().split(/\s+/)
@@ -15,19 +13,32 @@ export function getPhotoUrl(name: string, template: string) {
   return `https://swiftmailer-photos.imgix.net/${template}/${name}`
 }
 
-export function addIdsToContainers(template: EmailTemplate): EmailTemplate {
-  let idCounter = 0
-  const addIds = (item: any): any => {
-    if (['container', 'row', 'column'].includes(item.type)) {
-      item.id = `${item.type}-${idCounter++}`
-      if (item.items) {
-        item.items = item.items.map(addIds)
-      }
-    }
-    return item
-  }
+export function applyCommonAttributes(block: EmailBlock) {
   return {
-    ...template,
-    containers: template.containers.map(addIds),
+    paddingTop: block.attributes.paddingTop,
+    paddingRight: block.attributes.paddingRight,
+    paddingBottom: block.attributes.paddingBottom,
+    paddingLeft: block.attributes.paddingLeft,
+    marginTop: block.attributes.marginTop,
+    marginRight: block.attributes.marginRight,
+    marginBottom: block.attributes.marginBottom,
+    marginLeft: block.attributes.marginLeft,
+    display: block.attributes.display,
+    width: block.attributes.width,
+    maxWidth: block.attributes.maxWidth,
+    height: block.attributes.height,
+    backgroundColor: block.attributes.backgroundColor,
+    borderRadius: block.attributes.borderRadius,
+    border: block.attributes.border,
+    textAlign: block.attributes.textAlign,
+    verticalAlign: block.attributes.verticalAlign,
+    fontSize: block.attributes.fontSize,
+    lineHeight: block.attributes.lineHeight,
+    color: block.attributes.color,
+    fontWeight: block.attributes.fontWeight,
+    textDecoration: block.attributes.textDecoration,
+    textTransform: block.attributes.textTransform,
+    whiteSpace: block.attributes.whiteSpace,
+    fontStyle: block.attributes.fontStyle,
   }
 }

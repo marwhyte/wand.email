@@ -1,146 +1,57 @@
 'use client'
 
-import { Tab, TabGroup, TabList } from '@/app/components/tab'
-import { ChevronLeftIcon, ComputerDesktopIcon, DevicePhoneMobileIcon } from '@heroicons/react/20/solid'
-import { render } from '@react-email/components'
-import { Session } from 'next-auth'
-import Link from 'next/link'
 import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import EmailRenderer from '../home/templates/emails/email-renderer'
-import { goingEmail } from '../home/templates/emails/going-template'
-import { Button } from './button'
-import { Heading } from './heading'
 
 type Props = {
-  children: React.ReactNode
+  children: React.ReactElement
   id?: string
-  session: Session | null
+  width?: string
 }
 
-const CustomIframe = ({ children, session, id, ...props }: Props) => {
-  const options = [
-    { name: <ComputerDesktopIcon className="h-5 w-5" />, value: 'desktop' },
-    { name: <DevicePhoneMobileIcon className="h-5 w-5" />, value: 'mobile' },
-  ]
-
-  const getName = () => {
-    switch (id) {
-      case 'going':
-        return 'Going'
-      default:
-        break
-    }
-  }
-
-  const name = getName()
-
-  const [selected, setSelected] = useState(options[0].value)
-  const [width, setWidth] = useState('600')
-
-  const handleChange = (index: number) => {
-    const newValue = options[index].value
-    setSelected(newValue)
-
-    if (newValue === 'mobile') {
-      setWidth('360')
-    } else {
-      setWidth('600')
-    }
-  }
-
+const CustomIframe = ({ children, id, width, ...props }: Props) => {
   const contentRef = useRef<HTMLIFrameElement>(null)
   const [mountNode, setMountNode] = useState<HTMLElement | null>(null)
-
-  const sendEmail = async () => {
-    console.log(render(<EmailRenderer originalTemplate={goingEmail} />))
-    if (!session?.user?.email) return
-
-    const response = await fetch('/api/send', {
-      method: 'POST',
-      body: JSON.stringify({
-        html: render(<EmailRenderer originalTemplate={goingEmail} />),
-        id: id,
-        email: session?.user?.email || '',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
-
-    if (response.status === 200) {
-      console.log('email sent')
-    } else {
-      const error = await response.text()
-      console.error(error)
-    }
-  }
+  const [iframeHeight, setIframeHeight] = useState<number | null>(null)
 
   const resizeIframe = () => {
-    if (contentRef.current) {
-      const iframe = contentRef.current
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          const height = entry.contentRect.height
-          iframe.style.height = `${height}px`
-        }
-      })
-
-      if (iframe.contentWindow?.document.body) {
-        resizeObserver.observe(iframe.contentWindow.document.body)
-      }
-
-      return () => resizeObserver.disconnect()
+    if (contentRef.current?.contentWindow?.document.body) {
+      const body = contentRef.current.contentWindow.document.body
+      const html = contentRef.current.contentWindow.document.documentElement
+      const height = Math.max(
+        body.scrollHeight,
+        body.offsetHeight,
+        html.clientHeight,
+        html.scrollHeight,
+        html.offsetHeight
+      )
+      setIframeHeight(height + 50)
     }
   }
 
   useEffect(() => {
     if (contentRef.current) {
       setMountNode(contentRef.current.contentWindow?.document.body || null)
-      const cleanup = resizeIframe()
-      return cleanup
+      resizeIframe()
+      window.addEventListener('resize', resizeIframe)
+      return () => window.removeEventListener('resize', resizeIframe)
     }
   }, [])
 
   useEffect(() => {
-    const cleanup = resizeIframe()
-    return cleanup
+    resizeIframe()
   }, [children])
-
-  if (!name) {
-    return (
-      <>
-        <Heading>Template not found</Heading>
-      </>
-    )
-  }
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <Link
-          href="/home/templates"
-          className="inline-flex w-40 items-center gap-2 text-sm/6 text-zinc-500 dark:text-zinc-400"
-        >
-          <ChevronLeftIcon className="size-4 fill-zinc-400 dark:fill-zinc-500" />
-          Templates
-        </Link>
-        <Heading level={2}>{name}</Heading>
-        <div className="flex w-40 gap-8">
-          <TabGroup onChange={handleChange}>
-            <TabList>
-              {options.map((option) => (
-                <Tab key={option.value}>{option.name}</Tab>
-              ))}
-            </TabList>
-          </TabGroup>
-
-          <Button onClick={sendEmail}>Send</Button>
-        </div>
-      </div>
-
       <div className="flex h-full w-full justify-center">
-        <iframe {...props} ref={contentRef} width={width}>
+        <iframe
+          {...props}
+          ref={contentRef}
+          width={width}
+          height={iframeHeight ? `${iframeHeight}px` : undefined}
+          onLoad={resizeIframe}
+        >
           {mountNode && createPortal(children, mountNode)}
         </iframe>
       </div>
