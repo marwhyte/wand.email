@@ -1,4 +1,4 @@
-import { applyCommonAttributes } from '@/lib/utils/misc'
+import { applyCommonAttributes, joinClassNames } from '@/lib/utils/misc'
 import { Heading } from '@react-email/components'
 import parse from 'html-react-parser'
 import { useBlock } from '../block-provider'
@@ -10,6 +10,14 @@ type Props = {
 export default function EmailHeading({ block }: Props) {
   const { currentBlock, setCurrentBlock } = useBlock()
 
+  const isEditable = !!setCurrentBlock
+  const className = isEditable
+    ? joinClassNames(
+        'cursor-pointer outline-blue-200 hover:outline',
+        currentBlock?.id === block.id ? 'outline !outline-blue-500' : ''
+      )
+    : ''
+
   const additionalStyles = {
     fontFamily: block.attributes.fontFamily,
     letterSpacing: block.attributes.letterSpacing,
@@ -19,8 +27,8 @@ export default function EmailHeading({ block }: Props) {
   return (
     <Heading
       as={block.attributes.as}
-      className={currentBlock?.id === block.id ? 'outline' : 'hover:outline'}
-      onClick={() => setCurrentBlock(block)}
+      className={className}
+      onClick={isEditable ? () => setCurrentBlock(block) : undefined}
       style={{ ...applyCommonAttributes(block), ...additionalStyles }}
     >
       {parse(block.content)}

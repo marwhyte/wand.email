@@ -1,4 +1,4 @@
-import { applyCommonAttributes } from '@/lib/utils/misc'
+import { applyCommonAttributes, joinClassNames } from '@/lib/utils/misc'
 import { Text } from '@react-email/components'
 import parse from 'html-react-parser'
 import { useBlock } from '../block-provider'
@@ -20,10 +20,18 @@ export default function EmailText({ block }: Props) {
     textIndent: block.attributes.textIndent,
   }
 
+  const isEditable = !!setCurrentBlock
+  const className = isEditable
+    ? joinClassNames(
+        'cursor-pointer outline-blue-200 hover:outline',
+        currentBlock?.id === block.id ? 'outline !outline-blue-500' : ''
+      )
+    : ''
+
   return (
     <Text
-      className={currentBlock?.id === block.id ? 'outline' : 'hover:outline'}
-      onClick={() => setCurrentBlock(block)}
+      className={className}
+      onClick={isEditable ? () => setCurrentBlock(block) : undefined}
       style={{ ...applyCommonAttributes(block), ...additionalStyles }}
     >
       {parse(block.content)}

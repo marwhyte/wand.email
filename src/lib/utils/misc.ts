@@ -42,3 +42,7 @@ export function applyCommonAttributes(block: EmailBlock) {
     fontStyle: block.attributes.fontStyle,
   }
 }
+
+export function joinClassNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ')
+}

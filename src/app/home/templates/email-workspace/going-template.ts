@@ -147,7 +147,7 @@ export const goingTemplate: Email = {
     {
       id: uuidv4(),
       type: 'container',
-      attributes: { backgroundColor: 'D7FFC2', align: 'center' },
+      attributes: { backgroundColor: '#D7FFC2', align: 'center' },
       rows: [
         {
           id: uuidv4(),
@@ -173,6 +173,7 @@ export const goingTemplate: Email = {
                     color: '#004449',
                     marginTop: '0',
                     marginRight: '0',
+                    textAlign: 'center',
                     marginBottom: '0',
                     marginLeft: '0',
                     fontSize: '16px',
@@ -218,7 +219,7 @@ export const goingTemplate: Email = {
     {
       id: uuidv4(),
       type: 'container',
-      attributes: { backgroundColor: '004449' },
+      attributes: { backgroundColor: '#004449' },
       rows: [
         {
           id: uuidv4(),
@@ -334,7 +335,7 @@ export const goingTemplate: Email = {
         paddingRight: '15px',
         paddingBottom: '30px',
         paddingLeft: '15px',
-        backgroundColor: 'FFFFFF',
+        backgroundColor: '#FFFFFF',
       },
       rows: [
         {
@@ -379,7 +380,7 @@ export const goingTemplate: Email = {
         paddingBottom: '60px',
         paddingLeft: '30px',
         width: '100%',
-        backgroundColor: 'FFFFFF',
+        backgroundColor: '#FFFFFF',
       },
       rows: [
         {

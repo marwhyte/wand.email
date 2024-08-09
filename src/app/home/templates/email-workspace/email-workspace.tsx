@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@/app/components/button'
-import CustomIframe from '@/app/components/custom-iframe'
 import { Heading } from '@/app/components/heading'
 import Loading from '@/app/components/loading'
 import Notification from '@/app/components/notification'
@@ -61,7 +60,7 @@ export default function Workspace({ id, session }: Props) {
       const response = await fetch('/api/send', {
         method: 'POST',
         body: JSON.stringify({
-          html: render(EmailRenderer({ template })),
+          html: render(EmailRenderer({ template, renderFullEmail: true })),
           id: id,
           email: session?.user?.email || '',
         }),
@@ -125,9 +124,9 @@ export default function Workspace({ id, session }: Props) {
 
         {template ? (
           <div className="flex h-full w-full flex-row gap-4">
-            <CustomIframe id={id} width={width}>
+            <div style={{ width: width }}>
               <EmailRenderer template={template} />
-            </CustomIframe>
+            </div>
             <EmailEditor template={template} onSave={handleSave} />
           </div>
         ) : (
