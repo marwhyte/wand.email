@@ -6,6 +6,8 @@ type Email = {
   blocks: EmailBlock[]
 }
 
+type EmailBlockType = EmailBlock['type']
+
 type EmailBlock =
   | TextBlock
   | ImageBlock
@@ -101,7 +103,7 @@ type CommonAttributes = {
 }
 
 type ContainerBlockAttributes = CommonAttributes & {
-  align?: 'left' | 'center' | 'right'
+  align: 'left' | 'center' | 'right'
   // Add any specific attributes for containers here
 }
 

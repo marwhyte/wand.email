@@ -7,11 +7,8 @@ type Props = {
 }
 
 export default function EmailRow({ block }: Props) {
-  const additionalStyles = {
-    width: block.attributes.width ?? '100%',
-  }
   return (
-    <Row align={block.attributes.align} style={{ ...applyCommonAttributes(block), ...additionalStyles }}>
+    <Row align={block.attributes.align} style={{ ...applyCommonAttributes(block) }}>
       {block.columns.map((column) => (
         <EmailColumn block={column} key={column.id} />
       ))}

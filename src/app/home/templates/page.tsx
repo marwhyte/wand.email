@@ -7,7 +7,7 @@ export default async function TemplatesPage() {
   const session = await auth()
 
   return (
-    <div>
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <Link href="/home/templates/going">
           <li className="col-span-1 flex flex-col divide-y rounded-lg border border-green-200 text-center outline-green-200 hover:outline">

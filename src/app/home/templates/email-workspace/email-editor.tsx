@@ -3,10 +3,15 @@
 import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
+import debounce from 'lodash.debounce'
+import { useCallback } from 'react'
 import { useBlock } from './block-provider'
 
+import Textbox from '@/app/components/textbox'
+import 'react-quill/dist/quill.snow.css'
+
 type Props = {
-  template: Email
+  email: Email
   onSave: (template: Email) => void
 }
 
@@ -21,7 +26,7 @@ enum Options {
   HEIGHT = 'height',
 }
 
-export default function EmailEditor({ template, onSave }: Props) {
+export default function EmailEditor({ email, onSave }: Props) {
   const { currentBlock, setCurrentBlock } = useBlock()
 
   const optionsForItem = () => {
@@ -57,59 +62,75 @@ export default function EmailEditor({ template, onSave }: Props) {
 
   const options = optionsForItem()
 
-  const handleChange = (option: string, value: string) => {
-    if (currentBlock) {
-      const updatedBlock = {
-        ...currentBlock,
-        attributes: { ...currentBlock.attributes, [option]: value },
-      } as EmailBlock // Type assertion to EmailBlock
-      if (option === 'value' && 'content' in updatedBlock) {
-        updatedBlock.content = value
-      }
-      setCurrentBlock(updatedBlock)
-
-      const updateBlockInTemplate = (blocks: EmailBlock[]): EmailBlock[] => {
-        return blocks.map((block) => {
-          if (block.id === updatedBlock.id) {
-            return updatedBlock as EmailBlock
-          }
-          if ('rows' in block) {
-            return {
-              ...block,
-              rows: block.rows.map((row) => ({ ...row, columns: updateBlockInTemplate(row.columns) })),
-            } as EmailBlock
-          }
-          if ('columns' in block) {
-            return { ...block, columns: updateBlockInTemplate(block.columns) } as EmailBlock
-          }
-          if ('blocks' in block) {
-            return { ...block, blocks: updateBlockInTemplate(block.blocks) } as EmailBlock
-          }
-          return block
-        })
-      }
-
-      const updatedTemplate = {
-        ...template,
-        blocks: updateBlockInTemplate(template.blocks),
-      }
+  const debouncedSave = useCallback(
+    debounce((updatedTemplate: Email) => {
       onSave(updatedTemplate)
-    }
-  }
+    }, 300),
+    [onSave]
+  )
+
+  const handleChange = useCallback(
+    (option: string, value: string) => {
+      if (currentBlock) {
+        const updatedBlock = {
+          ...currentBlock,
+          attributes: { ...currentBlock.attributes, [option]: value },
+        } as EmailBlock
+
+        if (option === 'value' && 'content' in updatedBlock) {
+          updatedBlock.content = value
+        }
+
+        // Check if there's an actual change
+        if (JSON.stringify(updatedBlock) !== JSON.stringify(currentBlock)) {
+          setCurrentBlock(updatedBlock)
+
+          const updateBlockInTemplate = (blocks: EmailBlock[]): EmailBlock[] => {
+            return blocks.map((block) => {
+              if (block.id === updatedBlock.id) {
+                return updatedBlock as EmailBlock
+              }
+              if ('rows' in block) {
+                return {
+                  ...block,
+                  rows: block.rows.map((row) => ({ ...row, columns: updateBlockInTemplate(row.columns) })),
+                } as EmailBlock
+              }
+              if ('columns' in block) {
+                return { ...block, columns: updateBlockInTemplate(block.columns) } as EmailBlock
+              }
+              if ('blocks' in block) {
+                return { ...block, blocks: updateBlockInTemplate(block.blocks) } as EmailBlock
+              }
+              return block
+            })
+          }
+
+          const updatedTemplate = {
+            ...email,
+            blocks: updateBlockInTemplate(email.blocks),
+          }
+          debouncedSave(updatedTemplate)
+        }
+      }
+    },
+    [currentBlock, setCurrentBlock, email, debouncedSave]
+  )
 
   return (
-    <div className="relative h-full w-full rounded-xl bg-white shadow-[0px_0px_0px_1px_rgba(9,9,11,0.07),0px_2px_2px_0px_rgba(9,9,11,0.05)] dark:bg-zinc-900 dark:shadow-[0px_0px_0px_1px_rgba(255,255,255,0.1)] dark:before:pointer-events-none dark:before:absolute dark:before:-inset-px dark:before:rounded-xl dark:before:shadow-[0px_2px_8px_0px_rgba(0,_0,_0,_0.20),_0px_1px_0px_0px_rgba(255,_255,_255,_0.06)_inset] forced-colors:outline">
-      <div className="flex flex-col gap-2 p-4">
+    <div className="flex h-full w-full min-w-[180px] max-w-[226px] flex-col justify-between border-l-[0.5px] border-r-[0.5px] border-gray-300 border-zinc-200 bg-gray-50 bg-white lg:min-w-[270px] lg:max-w-[300px] dark:border-zinc-700 dark:bg-zinc-900">
+      <div className="flex flex-col gap-4 p-4">
         {options.includes(Options.TEXT) && currentBlock && 'content' in currentBlock && (
           <Field>
             <Label>Text</Label>
-            <Input value={currentBlock.content} onChange={(e) => handleChange('value', e.target.value)} />
+            <Textbox key={currentBlock.id} value={currentBlock.content} onChange={(e) => handleChange('value', e)} />
           </Field>
         )}
         {options.includes(Options.FONT_SIZE) && (
           <Field>
             <Label>Font Size</Label>
             <Input
+              key={`fontSize-${currentBlock?.id}`}
               type="number"
               value={currentBlock?.attributes.fontSize || ''}
               onChange={(e) => handleChange('fontSize', e.target.value)}
@@ -120,6 +141,7 @@ export default function EmailEditor({ template, onSave }: Props) {
           <Field>
             <Label>Font Weight</Label>
             <Select
+              key={`fontWeight-${currentBlock?.id}`}
               value={currentBlock?.attributes.fontWeight || ''}
               onChange={(e) => handleChange('fontWeight', e.target.value)}
             >
@@ -132,6 +154,7 @@ export default function EmailEditor({ template, onSave }: Props) {
           <Field>
             <Label>Text Align</Label>
             <Select
+              key={`textAlign-${currentBlock?.id}`}
               value={currentBlock?.attributes.textAlign || ''}
               onChange={(e) => handleChange('textAlign', e.target.value)}
             >
@@ -145,6 +168,7 @@ export default function EmailEditor({ template, onSave }: Props) {
           <Field>
             <Label>Text Color</Label>
             <Input
+              key={`color-${currentBlock?.id}`}
               type="color"
               value={currentBlock?.attributes.color || ''}
               onChange={(e) => handleChange('color', e.target.value)}
@@ -155,6 +179,7 @@ export default function EmailEditor({ template, onSave }: Props) {
           <Field>
             <Label>Background Color</Label>
             <Input
+              key={`backgroundColor-${currentBlock?.id}`}
               type="color"
               value={currentBlock?.attributes.backgroundColor || ''}
               onChange={(e) => handleChange('backgroundColor', e.target.value)}
@@ -165,9 +190,10 @@ export default function EmailEditor({ template, onSave }: Props) {
           <Field>
             <Label>Width</Label>
             <Input
+              key={`width-${currentBlock?.id}`}
               type="number"
-              value={currentBlock?.attributes.width || ''}
-              onChange={(e) => handleChange('width', e.target.value)}
+              value={currentBlock?.attributes.width?.replace('px', '') || ''}
+              onChange={(e) => handleChange('width', e.target.value + 'px')}
             />
           </Field>
         )}
@@ -175,9 +201,10 @@ export default function EmailEditor({ template, onSave }: Props) {
           <Field>
             <Label>Height</Label>
             <Input
+              key={`height-${currentBlock?.id}`}
               type="number"
-              value={currentBlock?.attributes.height || ''}
-              onChange={(e) => handleChange('height', e.target.value)}
+              value={currentBlock?.attributes.height?.replace('px', '') || ''}
+              onChange={(e) => handleChange('height', e.target.value + 'px')}
             />
           </Field>
         )}

@@ -127,7 +127,7 @@ const createSocialIcon = (icon: string, href: string) => ({
           content: '',
           attributes: {
             src: getPhotoUrl(icon, 'going'),
-            width: '34',
+            width: '34px',
             display: 'block',
             margin: '0',
             alt: 'Social media icon',
@@ -201,8 +201,8 @@ export const goingTemplate: Email = {
                   content: '',
                   attributes: {
                     src: getPhotoUrl('plane.png', 'going'),
-                    width: '16',
-                    height: '16',
+                    width: '16px',
+                    height: '16px',
                     display: 'inline-block',
                     border: 'none',
                     textDecoration: 'none',
@@ -219,12 +219,19 @@ export const goingTemplate: Email = {
     {
       id: uuidv4(),
       type: 'container',
-      attributes: { backgroundColor: '#004449' },
+      attributes: {
+        backgroundColor: '#004449',
+        align: 'center',
+        paddingTop: '30px',
+        paddingRight: '30px',
+        paddingBottom: '30px',
+        paddingLeft: '30px',
+      },
       rows: [
         {
           id: uuidv4(),
           type: 'row',
-          attributes: { paddingTop: '30px', paddingRight: '30px', paddingBottom: '30px', paddingLeft: '30px' },
+          attributes: {},
           columns: [
             {
               id: uuidv4(),
@@ -238,7 +245,8 @@ export const goingTemplate: Email = {
                   attributes: {
                     textAlign: 'center',
                     src: getPhotoUrl('going-logo.png', 'going'),
-                    width: '124',
+                    width: '124px',
+                    height: '46px',
                     alt: 'Going',
                   },
                 },
@@ -312,7 +320,7 @@ export const goingTemplate: Email = {
                   content: '',
                   attributes: {
                     src: getPhotoUrl('locations.png', 'going'),
-                    width: '600',
+                    width: '100%',
                     display: 'block',
                     marginTop: '0',
                     marginRight: 'auto',
@@ -331,6 +339,7 @@ export const goingTemplate: Email = {
       id: uuidv4(),
       type: 'container',
       attributes: {
+        align: 'center',
         paddingTop: '60px',
         paddingRight: '15px',
         paddingBottom: '30px',
@@ -375,11 +384,11 @@ export const goingTemplate: Email = {
       id: uuidv4(),
       type: 'container',
       attributes: {
+        align: 'center',
         paddingTop: '30px',
         paddingRight: '30px',
         paddingBottom: '60px',
         paddingLeft: '30px',
-        width: '100%',
         backgroundColor: '#FFFFFF',
       },
       rows: [

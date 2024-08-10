@@ -4,10 +4,10 @@ import { Resend } from 'resend'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const POST = async (request: NextRequest) => {
-  const { email, id, html } = await request.json()
+  const { email, html } = await request.json()
 
-  if (!email || !id || !html) {
-    return new NextResponse('Email, id and html are required', {
+  if (!email || !html) {
+    return new NextResponse('Email and html are required', {
       status: 400,
     })
   }

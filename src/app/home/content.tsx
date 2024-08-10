@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 'use client'
 
-import { Avatar } from '@/app/components/avatar'
+import { AvatarButton } from '@/app/components/avatar'
 import DarkModeToggle from '@/app/components/dark-mode-toggle'
 import {
   Dropdown,
@@ -12,28 +12,14 @@ import {
   DropdownMenu,
 } from '@/app/components/dropdown'
 import { Logo } from '@/app/components/Logo'
-import { Navbar, NavbarItem, NavbarSection, NavbarSpacer } from '@/app/components/navbar'
-import {
-  Sidebar,
-  SidebarBody,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarHeading,
-  SidebarItem,
-  SidebarLabel,
-  SidebarSection,
-  SidebarSpacer,
-} from '@/app/components/sidebar'
-import { SidebarLayout } from '@/app/components/sidebar-layout'
+import { Navbar, NavbarItem, NavbarLabel, NavbarSection } from '@/app/components/navbar'
 import { getFirstTwoInitials } from '@/lib/utils/misc'
 import {
   ArrowRightStartOnRectangleIcon,
-  ChevronUpIcon,
   LightBulbIcon,
   ShieldCheckIcon,
   UserCircleIcon,
 } from '@heroicons/react/16/solid'
-import { Cog6ToothIcon, HomeIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { Session } from 'next-auth'
 import { usePathname } from 'next/navigation'
 import { doLogout } from '../actions'
@@ -76,108 +62,51 @@ function AccountDropdownMenu({ anchor, session }: AccountDropdownMenuProps) {
 export default function Content({ children, session }: Props) {
   let pathname = usePathname()
 
-  const templates = [
-    {
-      id: 'going',
-      name: 'Going',
-      url: '/home/templates/going',
-      current: pathname === '/home/templates/going',
-    },
+  const navItems = [
+    { name: 'Templates', href: '/home/templates', current: pathname.startsWith('/home/templates') },
+    { name: 'Settings', href: '/home/settings', current: pathname.startsWith('/home/settings') },
   ]
 
   return (
-    <>
-      <SidebarLayout
-        navbar={
-          <Navbar>
-            <NavbarSpacer />
-            <NavbarSection>
-              <Dropdown>
-                <DropdownButton as={NavbarItem}>
-                  <Avatar
-                    initials={
-                      session?.user?.name && !session.user.image ? getFirstTwoInitials(session?.user?.name) : undefined
-                    }
-                    src={session?.user?.image}
-                  />
-                </DropdownButton>
-                <AccountDropdownMenu session={session} anchor="bottom end" />
-              </Dropdown>
-            </NavbarSection>
-          </Navbar>
-        }
-        sidebar={
-          <Sidebar>
-            <SidebarHeader>
+    <div className="flex h-screen flex-col">
+      <header className="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <Navbar className="h-16">
+            <div className="flex w-full items-center justify-between">
               <a href={process.env.NEXT_PUBLIC_MARKETING_URL} className="-m-1.5 p-1.5">
                 <Logo />
               </a>
-            </SidebarHeader>
-
-            <SidebarBody>
-              <SidebarSection>
-                <SidebarItem href="/home/templates" current={pathname.startsWith('/home/templates')}>
-                  <HomeIcon />
-                  <SidebarLabel>Templates</SidebarLabel>
-                </SidebarItem>
-                <SidebarItem href="/home/settings" current={pathname.startsWith('/home/settings')}>
-                  <Cog6ToothIcon />
-                  <SidebarLabel>Settings</SidebarLabel>
-                </SidebarItem>
-              </SidebarSection>
-
-              <SidebarSection className="max-lg:hidden">
-                <SidebarHeading>Top templates</SidebarHeading>
-                {templates.map((template) => (
-                  <SidebarItem key={template.id} href={template.url}>
-                    {template.name}
-                  </SidebarItem>
+              <NavbarSection>
+                {navItems.map((item) => (
+                  <NavbarItem key={item.name} href={item.href} current={item.current}>
+                    <NavbarLabel>{item.name}</NavbarLabel>
+                  </NavbarItem>
                 ))}
-              </SidebarSection>
-
-              <SidebarSpacer />
-
-              <SidebarSection>
-                <DarkModeToggle sideBarItem />
-                <SidebarItem href="mailto:marcowhyte2@gmail">
-                  <QuestionMarkCircleIcon />
-                  <SidebarLabel>Support</SidebarLabel>
-                </SidebarItem>
-              </SidebarSection>
-            </SidebarBody>
-
-            <SidebarFooter className="max-lg:hidden">
-              <Dropdown>
-                <DropdownButton as={SidebarItem}>
-                  <span className="flex min-w-0 items-center gap-3">
-                    <Avatar
+              </NavbarSection>
+              <div className="flex items-center">
+                <DarkModeToggle />
+                <Dropdown>
+                  <DropdownButton as="div" className="ml-4">
+                    <AvatarButton
+                      className="h-8 w-8"
                       initials={
-                        session?.user?.name && !session.user.image ? getFirstTwoInitials(session.user.name) : undefined
+                        session?.user?.name && !session.user.image
+                          ? getFirstTwoInitials(session?.user?.name)
+                          : undefined
                       }
                       src={session?.user?.image}
-                      className="size-10"
-                      square
-                      alt=""
                     />
-                    <span className="min-w-0">
-                      <span className="block truncate text-sm/5 font-medium text-zinc-950 dark:text-white">
-                        {session?.user?.name}
-                      </span>
-                      <span className="block truncate text-xs/5 font-normal text-zinc-500 dark:text-zinc-400">
-                        {session?.user?.email}
-                      </span>
-                    </span>
-                  </span>
-                  <ChevronUpIcon />
-                </DropdownButton>
-                <AccountDropdownMenu session={session} anchor="top start" />
-              </Dropdown>
-            </SidebarFooter>
-          </Sidebar>
-        }
-      >
-        {children}
-      </SidebarLayout>
-    </>
+                  </DropdownButton>
+                  <AccountDropdownMenu session={session} anchor="bottom end" />
+                </Dropdown>
+              </div>
+            </div>
+          </Navbar>
+        </div>
+      </header>
+      <main className="flex-grow overflow-y-auto">
+        <div className="h-full">{children}</div>
+      </main>
+    </div>
   )
 }

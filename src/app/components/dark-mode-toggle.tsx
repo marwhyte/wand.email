@@ -36,9 +36,9 @@ const DarkModeToggle = ({ sideBarItem }: Props) => {
     <label className="swap swap-rotate cursor-pointer">
       <input type="checkbox" checked={theme === 'light'} onChange={handleToggle} className="hidden" />
       {theme === 'dark' ? (
-        <SunIcon className="swap-on h-7 w-7 text-yellow-500" />
+        <SunIcon className="swap-on h-8 w-8 text-yellow-500" />
       ) : (
-        <MoonIcon className="swap-off h-7 w-7 text-gray-400" />
+        <MoonIcon className="swap-off h-8 w-8 text-gray-400" />
       )}
     </label>
   )

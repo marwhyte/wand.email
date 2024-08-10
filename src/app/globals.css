@@ -5,3 +5,7 @@
 input {
     padding: .5rem .75rem;
 }
+
+.ql-toolbar.ql-snow .ql-formats {
+    margin-right: 0 !important;
+}

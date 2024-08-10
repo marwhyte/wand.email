@@ -9,38 +9,72 @@ export function getFirstTwoInitials(name: string) {
   return initials.join('')
 }
 
+export function capitalizeFirstLetter(string: string) {
+  return string.charAt(0).toUpperCase() + string.slice(1)
+}
+
 export function getPhotoUrl(name: string, template: string) {
   return `https://swiftmailer-photos.imgix.net/${template}/${name}`
 }
 
 export function applyCommonAttributes(block: EmailBlock) {
-  return {
-    paddingTop: block.attributes.paddingTop,
-    paddingRight: block.attributes.paddingRight,
-    paddingBottom: block.attributes.paddingBottom,
-    paddingLeft: block.attributes.paddingLeft,
-    marginTop: block.attributes.marginTop,
-    marginRight: block.attributes.marginRight,
-    marginBottom: block.attributes.marginBottom,
-    marginLeft: block.attributes.marginLeft,
-    display: block.attributes.display,
-    width: block.attributes.width,
-    maxWidth: block.attributes.maxWidth,
-    height: block.attributes.height,
-    backgroundColor: block.attributes.backgroundColor,
-    borderRadius: block.attributes.borderRadius,
-    border: block.attributes.border,
-    textAlign: block.attributes.textAlign,
-    verticalAlign: block.attributes.verticalAlign,
-    fontSize: block.attributes.fontSize,
-    lineHeight: block.attributes.lineHeight,
-    color: block.attributes.color,
-    fontWeight: block.attributes.fontWeight,
-    textDecoration: block.attributes.textDecoration,
-    textTransform: block.attributes.textTransform,
-    whiteSpace: block.attributes.whiteSpace,
-    fontStyle: block.attributes.fontStyle,
-  }
+  const {
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
+    marginTop,
+    marginRight,
+    marginBottom,
+    marginLeft,
+    display,
+    width,
+    maxWidth,
+    height,
+    backgroundColor,
+    borderRadius,
+    border,
+    textAlign,
+    verticalAlign,
+    fontSize,
+    lineHeight,
+    color,
+    fontWeight,
+    textDecoration,
+    textTransform,
+    whiteSpace,
+    fontStyle,
+  } = block.attributes
+
+  return Object.fromEntries(
+    Object.entries({
+      paddingTop,
+      paddingRight,
+      paddingBottom,
+      paddingLeft,
+      marginTop,
+      marginRight,
+      marginBottom,
+      marginLeft,
+      display,
+      width,
+      maxWidth,
+      height,
+      backgroundColor,
+      borderRadius,
+      border,
+      textAlign,
+      verticalAlign,
+      fontSize,
+      lineHeight,
+      color,
+      fontWeight,
+      textDecoration,
+      textTransform,
+      whiteSpace,
+      fontStyle,
+    }).filter(([_, value]) => value !== undefined)
+  )
 }
 
 export function joinClassNames(...classes: string[]) {

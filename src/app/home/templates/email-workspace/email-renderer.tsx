@@ -3,23 +3,32 @@
 import { Body, Container, Head, Html, Preview } from '@react-email/components'
 import EmailBlock from './email-components/email-block'
 
-const EmailRenderer = ({ template, renderFullEmail = false }: { template: Email; renderFullEmail?: boolean }) => {
-  const emailBlocks = template.blocks.map((block) => <EmailBlock key={block.id} block={block} />)
+type Props = {
+  email: Email
+  renderFullEmail?: boolean
+  width?: '600' | '360'
+}
+
+const EmailRenderer = ({ email, renderFullEmail = false, width = '600' }: Props) => {
+  const emailBlocks = email.blocks.map((block) => <EmailBlock key={block.id} block={block} />)
 
   if (renderFullEmail) {
     return (
       <Html>
         <Head />
-        <Preview>{template.preview}</Preview>
-        <Body style={{ fontFamily: template.fontFamily, margin: 0, maxWidth: '600px' }}>
-          <Container width={600}>{emailBlocks}</Container>
-          {emailBlocks}
+        <Preview>{email.preview}</Preview>
+        <Body style={{ fontFamily: email.fontFamily, margin: 0 }}>
+          <Container>{emailBlocks}</Container>
         </Body>
       </Html>
     )
   }
 
-  return <>{emailBlocks}</>
+  return (
+    <div className="flex flex-grow items-start justify-center overflow-y-scroll p-4">
+      <div className={`max-w-[600px] w-[${width}px]`}>{emailBlocks}</div>
+    </div>
+  )
 }
 
 export default EmailRenderer

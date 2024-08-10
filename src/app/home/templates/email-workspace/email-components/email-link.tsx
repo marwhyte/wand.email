@@ -1,5 +1,6 @@
 import { applyCommonAttributes, joinClassNames } from '@/lib/utils/misc'
 import { Link } from '@react-email/components'
+import parse from 'html-react-parser'
 import { useBlock } from '../block-provider'
 
 type Props = {
@@ -33,7 +34,7 @@ export default function EmailLink({ block }: Props) {
       }
       style={applyCommonAttributes(block)}
     >
-      {block.content}
+      {parse(block.content)}
     </Link>
   )
 }
