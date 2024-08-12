@@ -24,7 +24,7 @@
           "url": ""
         },
         {
-          "fontFamily": "Georgia, Times, 'Times New Roman', serif",
+          "fontFamily": "Georgia, Times, 'Times New Roman'",
           "fontWeight": { "400": "Regular", "700": "Bold" },
           "name": "Georgia",
           "type": "default",
