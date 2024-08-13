@@ -17,7 +17,7 @@ export function getPhotoUrl(name: string, template: string) {
   return `https://swiftmailer-photos.imgix.net/${template}/${name}`
 }
 
-export function applyCommonAttributes(block: EmailBlock) {
+export function applyCommonAttributes(attributes: CommonAttributes) {
   const {
     paddingTop,
     paddingRight,
@@ -44,7 +44,7 @@ export function applyCommonAttributes(block: EmailBlock) {
     textTransform,
     whiteSpace,
     fontStyle,
-  } = block.attributes
+  } = attributes
 
   return Object.fromEntries(
     Object.entries({

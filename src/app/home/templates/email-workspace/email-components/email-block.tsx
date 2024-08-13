@@ -1,28 +1,13 @@
 import EmailButton from './email-button'
-import EmailColumn from './email-column'
-import EmailContainer from './email-container'
 import EmailHeading from './email-heading'
 import EmailImage from './email-image'
 import EmailLink from './email-link'
-import EmailRow from './email-row'
 import EmailText from './email-text'
 
 type Props = {
   block: EmailBlock
 }
 export default function EmailBlock({ block }: Props) {
-  if (block.type === 'row') {
-    return <EmailRow block={block} />
-  }
-
-  if (block.type === 'column') {
-    return <EmailColumn block={block} />
-  }
-
-  if (block.type === 'container') {
-    return <EmailContainer block={block} />
-  }
-
   if (block.type === 'text') {
     return <EmailText block={block} />
   }

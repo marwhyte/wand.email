@@ -8,7 +8,11 @@ type Props = {
 
 export default function EmailColumn({ block }: Props) {
   return (
-    <Column valign={block.attributes.valign} align={block.attributes.align} style={applyCommonAttributes(block)}>
+    <Column
+      valign={block.attributes.valign}
+      align={block.attributes.align}
+      style={applyCommonAttributes(block.attributes)}
+    >
       {block.blocks.map((block) => (
         <EmailBlock key={block.id} block={block} />
       ))}

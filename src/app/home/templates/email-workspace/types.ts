@@ -3,34 +3,24 @@ type Email = {
   name: string
   preview: string
   fontFamily: string
-  blocks: EmailBlock[]
+  bgColor: string
+  rows: RowBlock[]
 }
 
 type EmailBlockType = EmailBlock['type']
-
-type EmailBlock =
-  | TextBlock
-  | ImageBlock
-  | ButtonBlock
-  | LinkBlock
-  | ContainerBlock
-  | ColumnBlock
-  | RowBlock
-  | HeadingBlock
-
-type ContainerBlock = {
-  id: string
-  type: 'container'
-  attributes: ContainerBlockAttributes
-  rows: RowBlock[]
-}
 
 type RowBlock = {
   id: string
   type: 'row'
   attributes: RowBlockAttributes
+  container: {
+    align?: 'left' | 'center' | 'right'
+    attributes: ContainerBlockAttributes
+  }
   columns: ColumnBlock[]
 }
+
+type EmailBlock = TextBlock | ImageBlock | ButtonBlock | LinkBlock | HeadingBlock
 
 type ColumnBlock = {
   id: string
@@ -103,7 +93,7 @@ type CommonAttributes = {
 }
 
 type ContainerBlockAttributes = CommonAttributes & {
-  align: 'left' | 'center' | 'right'
+  align?: 'left' | 'center' | 'right'
   // Add any specific attributes for containers here
 }
 

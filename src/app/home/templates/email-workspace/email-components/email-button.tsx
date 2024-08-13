@@ -32,7 +32,7 @@ export default function EmailButton({ block }: Props) {
       href={isEditable ? undefined : block.attributes.href}
       target={isEditable ? undefined : block.attributes.target}
       rel={isEditable ? undefined : block.attributes.rel}
-      style={applyCommonAttributes(block)}
+      style={applyCommonAttributes(block.attributes)}
     >
       {parse(block.content)}
     </Button>

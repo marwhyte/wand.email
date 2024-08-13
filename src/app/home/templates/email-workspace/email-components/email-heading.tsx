@@ -29,7 +29,7 @@ export default function EmailHeading({ block }: Props) {
       as={block.attributes.as}
       className={className}
       onClick={isEditable ? () => setCurrentBlock(block) : undefined}
-      style={{ ...applyCommonAttributes(block), ...additionalStyles }}
+      style={{ ...applyCommonAttributes(block.attributes), ...additionalStyles }}
     >
       {parse(block.content)}
     </Heading>

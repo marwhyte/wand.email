@@ -32,7 +32,7 @@ export default function EmailText({ block }: Props) {
     <Text
       className={className}
       onClick={isEditable ? () => setCurrentBlock(block) : undefined}
-      style={{ ...applyCommonAttributes(block), ...additionalStyles }}
+      style={{ ...applyCommonAttributes(block.attributes), ...additionalStyles }}
     >
       {parse(block.content)}
     </Text>

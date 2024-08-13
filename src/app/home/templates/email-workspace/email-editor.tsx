@@ -85,32 +85,18 @@ export default function EmailEditor({ email, onSave }: Props) {
         if (JSON.stringify(updatedBlock) !== JSON.stringify(currentBlock)) {
           setCurrentBlock(updatedBlock)
 
-          const updateBlockInTemplate = (blocks: EmailBlock[]): EmailBlock[] => {
-            return blocks.map((block) => {
-              if (block.id === updatedBlock.id) {
-                return updatedBlock as EmailBlock
-              }
-              if ('rows' in block) {
-                return {
-                  ...block,
-                  rows: block.rows.map((row) => ({ ...row, columns: updateBlockInTemplate(row.columns) })),
-                } as EmailBlock
-              }
-              if ('columns' in block) {
-                return { ...block, columns: updateBlockInTemplate(block.columns) } as EmailBlock
-              }
-              if ('blocks' in block) {
-                return { ...block, blocks: updateBlockInTemplate(block.blocks) } as EmailBlock
-              }
-              return block
-            })
+          const updatedEmail = {
+            ...email,
+            rows: email.rows.map((row) => ({
+              ...row,
+              columns: row.columns.map((column) => ({
+                ...column,
+                blocks: column.blocks.map((block) => (block.id === updatedBlock.id ? updatedBlock : block)),
+              })),
+            })),
           }
 
-          const updatedTemplate = {
-            ...email,
-            blocks: updateBlockInTemplate(email.blocks),
-          }
-          debouncedSave(updatedTemplate)
+          debouncedSave(updatedEmail)
         }
       }
     },

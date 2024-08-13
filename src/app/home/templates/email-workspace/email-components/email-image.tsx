@@ -27,7 +27,7 @@ export default function EmailImage({ block }: Props) {
       onClick={isEditable ? () => setCurrentBlock(block) : undefined}
       src={block.attributes.src}
       alt={block.attributes.alt}
-      style={{ ...applyCommonAttributes(block), ...additionalStyles }}
+      style={{ ...applyCommonAttributes(block.attributes), ...additionalStyles }}
     />
   )
 }

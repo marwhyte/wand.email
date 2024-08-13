@@ -32,7 +32,7 @@ export default function EmailLink({ block }: Props) {
             }
           : undefined
       }
-      style={applyCommonAttributes(block)}
+      style={applyCommonAttributes(block.attributes)}
     >
       {parse(block.content)}
     </Link>

@@ -1,6 +1,15 @@
 import { getPhotoUrl } from '@/lib/utils/misc'
 import { v4 as uuidv4 } from 'uuid'
 
+const defaultContainerStyles = {
+  attributes: {
+    backgroundColor: '#ffffff',
+    backgroundImage: 'none',
+    backgroundPosition: 'top left',
+    backgroundRepeat: 'no-repeat',
+  },
+}
+
 const generateItems = (): RowBlock[] => {
   const items = [
     {
@@ -24,9 +33,15 @@ const generateItems = (): RowBlock[] => {
     },
   ]
 
-  const blocks: RowBlock[] = items.map((item) => ({
+  const rows: RowBlock[] = items.map((item) => ({
     id: uuidv4(),
-    type: 'row',
+    type: 'row' as const,
+    container: {
+      ...defaultContainerStyles,
+      attributes: {
+        ...defaultContainerStyles.attributes,
+      },
+    },
     attributes: {
       verticalAlign: 'top',
       valign: 'top',
@@ -34,7 +49,7 @@ const generateItems = (): RowBlock[] => {
     columns: [
       {
         id: uuidv4(),
-        type: 'column',
+        type: 'column' as const,
         attributes: { paddingBottom: '5px', width: '30%' },
         blocks: [
           {
@@ -107,7 +122,7 @@ const generateItems = (): RowBlock[] => {
     ],
   }))
 
-  return blocks
+  return rows
 }
 
 const createSocialIcon = (icon: string, href: string) => ({
@@ -139,410 +154,429 @@ const createSocialIcon = (icon: string, href: string) => ({
 })
 
 export const goingTemplate: Email = {
-  id: '1',
+  id: uuidv4(),
   name: 'Going Template',
   preview: 'Yay! Cheap flights are headed your way',
   fontFamily: 'Arial, sans-serif',
-  blocks: [
+  bgColor: '#FFFFFF',
+  rows: [
     {
       id: uuidv4(),
-      type: 'container',
-      attributes: { backgroundColor: '#D7FFC2', align: 'center' },
-      rows: [
+      type: 'row' as const,
+      container: {
+        ...defaultContainerStyles,
+        align: 'center' as const,
+        attributes: {
+          ...defaultContainerStyles.attributes,
+          backgroundColor: '#D7FFC2',
+        },
+      },
+      attributes: {},
+      columns: [
         {
           id: uuidv4(),
-          type: 'row',
-          attributes: {},
-          columns: [
+          type: 'column',
+          attributes: {
+            paddingTop: '20px',
+            paddingRight: '15px',
+            paddingBottom: '20px',
+            paddingLeft: '15px',
+            align: 'center',
+          },
+          blocks: [
             {
               id: uuidv4(),
-              type: 'column',
+              type: 'text',
+              content: "Clock's ticking on your limited time offer",
               attributes: {
-                paddingTop: '20px',
-                paddingRight: '15px',
-                paddingBottom: '20px',
-                paddingLeft: '15px',
-                align: 'center',
+                color: '#004449',
+                marginTop: '0',
+                marginRight: '0',
+                textAlign: 'center',
+                marginBottom: '0',
+                marginLeft: '0',
+                fontSize: '16px',
+                fontWeight: 'bold',
               },
-              blocks: [
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content: "Clock's ticking on your limited time offer",
-                  attributes: {
-                    color: '#004449',
-                    marginTop: '0',
-                    marginRight: '0',
-                    textAlign: 'center',
-                    marginBottom: '0',
-                    marginLeft: '0',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'link',
-                  content: 'You have 24 hours to save on your first year of Premium or Elite ',
-                  attributes: {
-                    href: '/',
-                    color: '#004449',
-                    display: 'inline-block',
-                    textDecoration: 'none',
-                    marginTop: '0',
-                    marginRight: '0',
-                    marginBottom: '0',
-                    marginLeft: '0',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'image',
-                  content: '',
-                  attributes: {
-                    src: getPhotoUrl('plane.png', 'going'),
-                    width: '16px',
-                    height: '16px',
-                    display: 'inline-block',
-                    border: 'none',
-                    textDecoration: 'none',
-                    aspectRatio: 'auto 16 / 16',
-                    alt: 'plane logo',
-                  },
-                },
-              ],
             },
-          ],
-        },
-      ],
-    },
-    {
-      id: uuidv4(),
-      type: 'container',
-      attributes: {
-        backgroundColor: '#004449',
-        align: 'center',
-        paddingTop: '30px',
-        paddingRight: '30px',
-        paddingBottom: '30px',
-        paddingLeft: '30px',
-      },
-      rows: [
-        {
-          id: uuidv4(),
-          type: 'row',
-          attributes: {},
-          columns: [
             {
               id: uuidv4(),
-              type: 'column',
-              attributes: { align: 'center', maxWidth: '450px', borderSpacing: '0' },
-              blocks: [
-                {
-                  id: uuidv4(),
-                  type: 'image',
-                  content: '',
-                  attributes: {
-                    textAlign: 'center',
-                    src: getPhotoUrl('going-logo.png', 'going'),
-                    width: '124px',
-                    height: '46px',
-                    alt: 'Going',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'heading',
-                  content:
-                    "<span style='color: #d7ffc2; font-weight: normal'>Deals</span> coming<span><br></span> your way",
-                  attributes: {
-                    as: 'h1',
-                    textAlign: 'center',
-                    marginTop: '30px',
-                    marginRight: '0',
-                    marginBottom: '30px',
-                    marginLeft: '0',
-                    fontSize: '50px',
-                    lineHeight: '56px',
-                    fontWeight: 'bold',
-                    color: '#fffef0',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content:
-                    'We are thrilled to help you never overpay for travel again. Keep your eyes peeled for deals from LAX and other departure airports you follow.',
-                  attributes: {
-                    marginTop: '0',
-                    marginRight: '0',
-                    marginBottom: '30px',
-                    marginLeft: '0',
-                    color: '#fffef0',
-                    fontSize: '16px',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'button',
-                  content: "<span style='line-height: 55px'>VIEW MY CURRENT DEALS</span>",
-                  attributes: {
-                    href: '/',
-                    textAlign: 'center',
-                    verticalAlign: 'middle',
-                    borderRadius: '30px',
-                    height: '55px',
-                    backgroundColor: '#483CFF',
-                    fontSize: '15px',
-                    fontWeight: 'bold',
-                    color: '#ffffff',
-                    textTransform: 'uppercase',
-                    display: 'block',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: uuidv4(),
-          type: 'row',
-          attributes: { align: 'center' },
-          columns: [
-            {
-              id: uuidv4(),
-              type: 'column',
-              attributes: { align: 'center' },
-              blocks: [
-                {
-                  id: uuidv4(),
-                  type: 'image',
-                  content: '',
-                  attributes: {
-                    src: getPhotoUrl('locations.png', 'going'),
-                    width: '100%',
-                    display: 'block',
-                    marginTop: '0',
-                    marginRight: 'auto',
-                    marginBottom: '0',
-                    marginLeft: 'auto',
-                    alt: 'background',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: uuidv4(),
-      type: 'container',
-      attributes: {
-        align: 'center',
-        paddingTop: '60px',
-        paddingRight: '15px',
-        paddingBottom: '30px',
-        paddingLeft: '15px',
-        backgroundColor: '#FFFFFF',
-      },
-      rows: [
-        {
-          id: uuidv4(),
-          type: 'row',
-          attributes: {},
-          columns: [
-            {
-              id: uuidv4(),
-              type: 'column',
-              attributes: { align: 'center', valign: 'top' },
-              blocks: [
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content: 'Tips to get the most bang for your buck with Going',
-                  attributes: {
-                    color: '#004449',
-                    textAlign: 'center',
-                    marginTop: '0',
-                    marginRight: '0',
-                    marginBottom: '24px',
-                    marginLeft: '0',
-                    fontSize: '24px',
-                    lineHeight: '32px',
-                    fontWeight: 'bold',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        ...generateItems(),
-      ],
-    },
-    {
-      id: uuidv4(),
-      type: 'container',
-      attributes: {
-        align: 'center',
-        paddingTop: '30px',
-        paddingRight: '30px',
-        paddingBottom: '60px',
-        paddingLeft: '30px',
-        backgroundColor: '#FFFFFF',
-      },
-      rows: [
-        {
-          id: uuidv4(),
-          type: 'row',
-          attributes: { align: 'center' },
-          columns: [
-            {
-              id: uuidv4(),
-              type: 'column',
-              attributes: { maxWidth: '480px', textAlign: 'center' },
-              blocks: [
-                // ...createSocialIcon('facebook.png', 'https://www.facebook.com').blocks,
-                // ...createSocialIcon('instagram.png', 'https://www.instagram.com').blocks,
-                // ...createSocialIcon('x.png', 'https://www.x.com').blocks,
-                // ...createSocialIcon('tiktok.png', 'https://www.tiktok.com').blocks,
-                // ...createSocialIcon('youtube.png', 'https://www.youtube.com').blocks,
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content: "© Scott's Cheap Flights, Inc. DBA Going",
-                  attributes: {
-                    color: '#004449',
-                    fontSize: '12px',
-                    textAlign: 'center',
-                    paddingTop: '24px',
-                    paddingRight: '0',
-                    paddingBottom: '0',
-                    paddingLeft: '0',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content: '4845 Pearl East Circle, Suite 118<br>PMB 28648<br>Boulder, CO 80301-6112',
-                  attributes: {
-                    color: '#004449',
-                    lineHeight: '16px',
-                    marginTop: '0',
-                    marginRight: '0',
-                    marginBottom: '0',
-                    marginLeft: '0',
-                    fontSize: '12px',
-                    textAlign: 'center',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content: '|',
-                  attributes: {
-                    color: '#004449',
-                    fontSize: '12px',
-                    paddingTop: '0',
-                    paddingRight: '4px',
-                    paddingBottom: '0',
-                    paddingLeft: '4px',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'link',
-                  content: 'Advertise',
-                  attributes: {
-                    href: '/',
-                    color: '#004449',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    textDecoration: 'none',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content: '|',
-                  attributes: {
-                    color: '#004449',
-                    fontSize: '12px',
-                    paddingTop: '0',
-                    paddingRight: '4px',
-                    paddingBottom: '0',
-                    paddingLeft: '4px',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'link',
-                  content: 'Email Preferences',
-                  attributes: {
-                    href: '/',
-                    color: '#004449',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    textDecoration: 'none',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content: '|',
-                  attributes: {
-                    color: '#004449',
-                    fontSize: '12px',
-                    paddingTop: '0',
-                    paddingRight: '4px',
-                    paddingBottom: '0',
-                    paddingLeft: '4px',
-                  },
-                },
-                {
-                  id: uuidv4(),
-                  type: 'link',
-                  content: 'Unsubscribe',
-                  attributes: {
-                    href: '/',
-                    color: '#004449',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    textDecoration: 'none',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: uuidv4(),
-          type: 'row',
-          attributes: {},
-          columns: [
-            {
-              id: uuidv4(),
-              type: 'column',
+              type: 'link',
+              content: 'You have 24 hours to save on your first year of Premium or Elite ',
               attributes: {
+                href: '/',
+                color: '#004449',
+                display: 'inline-block',
+                textDecoration: 'none',
+                marginTop: '0',
+                marginRight: '0',
+                marginBottom: '0',
+                marginLeft: '0',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'image',
+              content: '',
+              attributes: {
+                src: getPhotoUrl('plane.png', 'going'),
+                width: '16px',
+                height: '16px',
+                display: 'inline-block',
+                border: 'none',
+                textDecoration: 'none',
+                aspectRatio: 'auto 16 / 16',
+                alt: 'plane logo',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      type: 'row' as const,
+      container: {
+        ...defaultContainerStyles,
+        align: 'center',
+        attributes: {
+          ...defaultContainerStyles.attributes,
+          backgroundColor: '#004449',
+        },
+      },
+      attributes: {
+        paddingTop: '30px',
+        paddingRight: '30px',
+        paddingBottom: '30px',
+        paddingLeft: '30px',
+      },
+      columns: [
+        {
+          id: uuidv4(),
+          type: 'column',
+          attributes: { align: 'center', borderSpacing: '0' },
+          blocks: [
+            {
+              id: uuidv4(),
+              type: 'image',
+              content: '',
+              attributes: {
+                textAlign: 'center',
+                src: getPhotoUrl('going-logo.png', 'going'),
+                width: '124px',
+                height: '46px',
+                alt: 'Going',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'heading',
+              content:
+                "<span style='color: #d7ffc2; font-weight: normal'>Deals</span> coming<span><br></span> your way",
+              attributes: {
+                as: 'h1',
+                textAlign: 'center',
+                marginTop: '30px',
+                marginRight: '0',
+                marginBottom: '30px',
+                marginLeft: '0',
+                fontSize: '50px',
+                lineHeight: '56px',
+                fontWeight: 'bold',
+                color: '#fffef0',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'text',
+              content:
+                'We are thrilled to help you never overpay for travel again. Keep your eyes peeled for deals from LAX and other departure airports you follow.',
+              attributes: {
+                marginTop: '0',
+                marginRight: '0',
+                marginBottom: '30px',
+                marginLeft: '0',
+                color: '#fffef0',
+                fontSize: '16px',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'button',
+              content: "<span style='line-height: 55px'>VIEW MY CURRENT DEALS</span>",
+              attributes: {
+                href: '/',
+                textAlign: 'center',
+                verticalAlign: 'middle',
+                borderRadius: '30px',
+                height: '55px',
+                backgroundColor: '#483CFF',
+                fontSize: '15px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                textTransform: 'uppercase',
+                display: 'block',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      type: 'row' as const,
+      container: {
+        ...defaultContainerStyles,
+        align: 'center',
+        attributes: {
+          ...defaultContainerStyles.attributes,
+          paddingTop: '60px',
+          paddingRight: '15px',
+          paddingBottom: '30px',
+          paddingLeft: '15px',
+          backgroundColor: '#004449',
+        },
+      },
+      attributes: {},
+      columns: [
+        {
+          id: uuidv4(),
+          type: 'column',
+          attributes: { align: 'center' },
+          blocks: [
+            {
+              id: uuidv4(),
+              type: 'image',
+              content: '',
+              attributes: {
+                src: getPhotoUrl('locations.png', 'going'),
+                width: '100%',
+                display: 'block',
+                marginTop: '0',
+                marginRight: 'auto',
+                marginBottom: '0',
+                marginLeft: 'auto',
+                alt: 'background',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      type: 'row' as const,
+      container: {
+        ...defaultContainerStyles,
+        align: 'center',
+        attributes: {
+          ...defaultContainerStyles.attributes,
+          paddingTop: '60px',
+          paddingRight: '15px',
+          paddingBottom: '30px',
+          paddingLeft: '15px',
+          backgroundColor: '#FFFFFF',
+        },
+      },
+      attributes: {},
+      columns: [
+        {
+          id: uuidv4(),
+          type: 'column',
+          attributes: { align: 'center', valign: 'top' },
+          blocks: [
+            {
+              id: uuidv4(),
+              type: 'text',
+              content: 'Tips to get the most bang for your buck with Going',
+              attributes: {
+                color: '#004449',
+                textAlign: 'center',
+                marginTop: '0',
+                marginRight: '0',
+                marginBottom: '24px',
+                marginLeft: '0',
+                fontSize: '24px',
+                lineHeight: '32px',
+                fontWeight: 'bold',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    ...generateItems(),
+    {
+      id: uuidv4(),
+      type: 'row' as const,
+      container: {
+        ...defaultContainerStyles,
+        align: 'center',
+        attributes: {
+          ...defaultContainerStyles.attributes,
+          paddingTop: '30px',
+          paddingRight: '30px',
+          paddingBottom: '60px',
+          paddingLeft: '30px',
+          backgroundColor: '#FFFFFF',
+        },
+      },
+      attributes: {},
+      columns: [
+        {
+          id: uuidv4(),
+          type: 'column',
+          attributes: { maxWidth: '480px', textAlign: 'center' },
+          blocks: [
+            // ...createSocialIcon('facebook.png', 'https://www.facebook.com').blocks,
+            // ...createSocialIcon('instagram.png', 'https://www.instagram.com').blocks,
+            // ...createSocialIcon('x.png', 'https://www.x.com').blocks,
+            // ...createSocialIcon('tiktok.png', 'https://www.tiktok.com').blocks,
+            // ...createSocialIcon('youtube.png', 'https://www.youtube.com').blocks,
+            {
+              id: uuidv4(),
+              type: 'text',
+              content: "© Scott's Cheap Flights, Inc. DBA Going",
+              attributes: {
+                color: '#004449',
+                fontSize: '12px',
+                textAlign: 'center',
                 paddingTop: '24px',
                 paddingRight: '0',
                 paddingBottom: '0',
                 paddingLeft: '0',
-                textAlign: 'center',
-                fontSize: '12px',
-                lineHeight: '16px',
-                color: '#004449',
-                fontStyle: 'italic',
               },
-              blocks: [
-                {
-                  id: uuidv4(),
-                  type: 'text',
-                  content:
-                    "Offer not combinable with other discounts or previous subscriptions. Redeemable only at <a href='www.going.com'>Going.com</a>, not via the mobile app.",
-                  attributes: {},
-                },
-              ],
+            },
+            {
+              id: uuidv4(),
+              type: 'text',
+              content: '4845 Pearl East Circle, Suite 118<br>PMB 28648<br>Boulder, CO 80301-6112',
+              attributes: {
+                color: '#004449',
+                lineHeight: '16px',
+                marginTop: '0',
+                marginRight: '0',
+                marginBottom: '0',
+                marginLeft: '0',
+                fontSize: '12px',
+                textAlign: 'center',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'text',
+              content: '|',
+              attributes: {
+                color: '#004449',
+                fontSize: '12px',
+                paddingTop: '0',
+                paddingRight: '4px',
+                paddingBottom: '0',
+                paddingLeft: '4px',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'link',
+              content: 'Advertise',
+              attributes: {
+                href: '/',
+                color: '#004449',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textDecoration: 'none',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'text',
+              content: '|',
+              attributes: {
+                color: '#004449',
+                fontSize: '12px',
+                paddingTop: '0',
+                paddingRight: '4px',
+                paddingBottom: '0',
+                paddingLeft: '4px',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'link',
+              content: 'Email Preferences',
+              attributes: {
+                href: '/',
+                color: '#004449',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textDecoration: 'none',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'text',
+              content: '|',
+              attributes: {
+                color: '#004449',
+                fontSize: '12px',
+                paddingTop: '0',
+                paddingRight: '4px',
+                paddingBottom: '0',
+                paddingLeft: '4px',
+              },
+            },
+            {
+              id: uuidv4(),
+              type: 'link',
+              content: 'Unsubscribe',
+              attributes: {
+                href: '/',
+                color: '#004449',
+                fontSize: '12px',
+                fontWeight: 'bold',
+                textDecoration: 'none',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      type: 'row' as const,
+      container: {
+        ...defaultContainerStyles,
+        attributes: {
+          ...defaultContainerStyles.attributes,
+          paddingTop: '24px',
+          paddingRight: '0',
+          paddingBottom: '0',
+          paddingLeft: '0',
+        },
+      },
+      attributes: {},
+      columns: [
+        {
+          id: uuidv4(),
+          type: 'column',
+          attributes: {
+            paddingTop: '24px',
+            paddingRight: '0',
+            paddingBottom: '0',
+            paddingLeft: '0',
+            textAlign: 'center',
+            fontSize: '12px',
+            lineHeight: '16px',
+            color: '#004449',
+            fontStyle: 'italic',
+          },
+          blocks: [
+            {
+              id: uuidv4(),
+              type: 'text',
+              content:
+                "Offer not combinable with other discounts or previous subscriptions. Redeemable only at <a href='www.going.com'>Going.com</a>, not via the mobile app.",
+              attributes: {},
             },
           ],
         },
