@@ -12,12 +12,17 @@ type Props = {
 }
 
 const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }: Props) => {
-  const [dropLine, setDropLine] = useState<number | null>(null)
+  const [dropLine, setDropLine] = useState<string | null>(null)
 
-  const moveRow = (dragIndex: number, hoverIndex: number) => {
+  const moveRow = (dragId: string, hoverId: string) => {
     const newRows = [...email.rows]
+    const dragIndex = newRows.findIndex((row) => row.id === dragId)
+    const hoverIndex = newRows.findIndex((row) => row.id === hoverId)
     const [draggedRow] = newRows.splice(dragIndex, 1)
-    newRows.splice(hoverIndex, 0, draggedRow)
+
+    // Adjust the insertion index based on whether we're moving up or down
+    const insertIndex = dragIndex < hoverIndex ? hoverIndex - 1 : hoverIndex
+    newRows.splice(insertIndex, 0, draggedRow)
 
     onSave({
       ...email,
@@ -26,9 +31,14 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
     setDropLine(null)
   }
 
-  const handleHover = (index: number, hoverClientY: number, hoverMiddleY: number) => {
-    const dropIndex = hoverClientY < hoverMiddleY ? index : index + 1
-    setDropLine(dropIndex)
+  const handleHover = (id: string, hoverClientY: number, hoverMiddleY: number) => {
+    const hoverIndex = email.rows.findIndex((row) => row.id === id)
+    const dropId = hoverClientY < hoverMiddleY ? id : email.rows[hoverIndex + 1]?.id || 'end'
+    setDropLine(dropId)
+  }
+
+  const handleDragEnd = () => {
+    setDropLine(null)
   }
 
   const emailRows = email.rows.map((row, index) => (
@@ -37,10 +47,10 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
       email={email}
       key={row.id}
       row={row}
-      index={index}
       moveRow={moveRow}
       dropLine={dropLine}
       onHover={handleHover}
+      onDragEnd={handleDragEnd}
     />
   ))
 

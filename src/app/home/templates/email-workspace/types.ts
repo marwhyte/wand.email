@@ -25,6 +25,7 @@ type EmailBlock = TextBlock | ImageBlock | ButtonBlock | LinkBlock | HeadingBloc
 type ColumnBlock = {
   id: string
   type: 'column'
+  gridColumns: number
   attributes: ColumnBlockAttributes
   blocks: (TextBlock | ImageBlock | ButtonBlock | LinkBlock | HeadingBlock)[]
 }
@@ -106,6 +107,9 @@ type ColumnBlockAttributes = CommonAttributes & {
   align?: 'left' | 'center' | 'right'
   valign?: 'top' | 'middle' | 'bottom'
   borderSpacing?: string
+  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
+  borderWidth?: string
+  borderColor?: string
   // Add any specific attributes for columns here
 }
 

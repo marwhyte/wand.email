@@ -7,8 +7,8 @@ import debounce from 'lodash.debounce'
 import { useCallback } from 'react'
 import { useBlock } from './block-provider'
 
-import Textbox from '@/app/components/textbox'
 import 'react-quill/dist/quill.snow.css'
+import RowEditor from './row-editor'
 
 type Props = {
   email: Email
@@ -24,6 +24,7 @@ enum Options {
   BACKGROUND_COLOR = 'background-color',
   WIDTH = 'width',
   HEIGHT = 'height',
+  GRID_COLUMNS = 'grid-columns',
 }
 
 export default function EmailEditor({ email, onSave }: Props) {
@@ -55,6 +56,8 @@ export default function EmailEditor({ email, onSave }: Props) {
           Options.TEXT_ALIGN,
           Options.TEXT,
         ]
+      case 'row':
+        return [Options.GRID_COLUMNS]
       default:
         return []
     }
@@ -81,6 +84,10 @@ export default function EmailEditor({ email, onSave }: Props) {
           updatedBlock.content = value
         }
 
+        if (option === 'gridColumns' && 'gridColumns' in updatedBlock) {
+          updatedBlock.gridColumns = value
+        }
+
         // Check if there's an actual change
         if (JSON.stringify(updatedBlock) !== JSON.stringify(currentBlock)) {
           setCurrentBlock(updatedBlock)
@@ -103,13 +110,63 @@ export default function EmailEditor({ email, onSave }: Props) {
     [currentBlock, setCurrentBlock, email, debouncedSave]
   )
 
+  const handleColumnWidthChange = useCallback(
+    (newColumns: ColumnBlock[]) => {
+      if (currentBlock && currentBlock.type === 'row') {
+        const updatedBlock = {
+          ...currentBlock,
+          columns: newColumns,
+        } as RowBlock
+
+        setCurrentBlock(updatedBlock)
+
+        const updatedEmail = {
+          ...email,
+          rows: email.rows.map((row) => (row.id === updatedBlock.id ? updatedBlock : row)),
+        }
+
+        debouncedSave(updatedEmail)
+      }
+    },
+    [currentBlock, setCurrentBlock, email, debouncedSave]
+  )
+
+  const handleColumnAttributeChange = useCallback(
+    (columnId: string, attribute: string, value: string) => {
+      if (currentBlock && currentBlock.type === 'row') {
+        const updatedBlock = {
+          ...currentBlock,
+          columns: currentBlock.columns.map((column) =>
+            column.id === columnId ? { ...column, attributes: { ...column.attributes, [attribute]: value } } : column
+          ),
+        } as RowBlock
+
+        console.log(updatedBlock)
+
+        setCurrentBlock(updatedBlock)
+
+        const updatedEmail = {
+          ...email,
+          rows: email.rows.map((row) => (row.id === updatedBlock.id ? updatedBlock : row)),
+        }
+
+        debouncedSave(updatedEmail)
+      }
+    },
+    [currentBlock, setCurrentBlock, email, debouncedSave]
+  )
+
   return (
     <div className="flex h-full w-full min-w-[180px] max-w-[226px] flex-col justify-between border-l-[0.5px] border-r-[0.5px] border-gray-300 border-zinc-200 bg-gray-50 bg-white lg:min-w-[270px] lg:max-w-[300px] dark:border-zinc-700 dark:bg-zinc-900">
       <div className="flex flex-col gap-4 p-4">
         {options.includes(Options.TEXT) && currentBlock && 'content' in currentBlock && (
           <Field>
             <Label>Text</Label>
-            <Textbox key={currentBlock.id} value={currentBlock.content} onChange={(e) => handleChange('value', e)} />
+            <Input
+              key={currentBlock.id}
+              value={currentBlock.content}
+              onChange={(e) => handleChange('value', e.target.value)}
+            />
           </Field>
         )}
         {options.includes(Options.FONT_SIZE) && (
@@ -191,6 +248,16 @@ export default function EmailEditor({ email, onSave }: Props) {
               type="number"
               value={currentBlock?.attributes.height?.replace('px', '') || ''}
               onChange={(e) => handleChange('height', e.target.value + 'px')}
+            />
+          </Field>
+        )}
+        {options.includes(Options.GRID_COLUMNS) && currentBlock?.type === 'row' && (
+          <Field>
+            <Label>Column Widths</Label>
+            <RowEditor
+              columns={currentBlock.columns}
+              onColumnWidthChange={handleColumnWidthChange}
+              onColumnAttributeChange={handleColumnAttributeChange}
             />
           </Field>
         )}

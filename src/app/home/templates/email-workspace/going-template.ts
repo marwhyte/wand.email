@@ -50,7 +50,8 @@ const generateItems = (): RowBlock[] => {
       {
         id: uuidv4(),
         type: 'column' as const,
-        attributes: { paddingBottom: '5px', width: '30%' },
+        attributes: { paddingBottom: '5px', align: 'center' },
+        gridColumns: 4,
         blocks: [
           {
             id: uuidv4(),
@@ -58,7 +59,6 @@ const generateItems = (): RowBlock[] => {
             content: '',
             attributes: {
               src: getPhotoUrl(item.image, 'going'),
-
               maxWidth: '150px',
               display: 'inline-block',
               verticalAlign: 'middle',
@@ -75,13 +75,13 @@ const generateItems = (): RowBlock[] => {
         id: uuidv4(),
         type: 'column',
         attributes: {
-          width: '70%',
           valign: 'top',
           paddingTop: '15px',
           paddingRight: '15px',
           paddingBottom: '15px',
           paddingLeft: '15px',
         },
+        gridColumns: 8,
         blocks: [
           {
             id: uuidv4(),
@@ -129,6 +129,7 @@ const createSocialIcon = (icon: string, href: string) => ({
   id: uuidv4(),
   type: 'column',
   attributes: { display: 'inline-block', paddingTop: '0', paddingRight: '8px', paddingBottom: '0', paddingLeft: '8px' },
+  gridColumns: 12,
   blocks: [
     {
       id: uuidv4(),
@@ -183,6 +184,7 @@ export const goingTemplate: Email = {
             paddingLeft: '15px',
             align: 'center',
           },
+          gridColumns: 12,
           blocks: [
             {
               id: uuidv4(),
@@ -242,19 +244,17 @@ export const goingTemplate: Email = {
         attributes: {
           ...defaultContainerStyles.attributes,
           backgroundColor: '#004449',
+          paddingTop: '30px',
+          paddingBottom: '0',
         },
       },
-      attributes: {
-        paddingTop: '30px',
-        paddingRight: '30px',
-        paddingBottom: '30px',
-        paddingLeft: '30px',
-      },
+      attributes: {},
       columns: [
         {
           id: uuidv4(),
           type: 'column',
           attributes: { align: 'center', borderSpacing: '0' },
+          gridColumns: 12,
           blocks: [
             {
               id: uuidv4(),
@@ -268,6 +268,34 @@ export const goingTemplate: Email = {
                 alt: 'Going',
               },
             },
+          ],
+        },
+      ],
+    },
+    {
+      id: uuidv4(),
+      type: 'row' as const,
+      container: {
+        ...defaultContainerStyles,
+        align: 'center',
+        attributes: {
+          ...defaultContainerStyles.attributes,
+          backgroundColor: '#004449',
+        },
+      },
+      attributes: {
+        paddingTop: '30px',
+        paddingRight: '30px',
+        paddingBottom: '30px',
+        paddingLeft: '30px',
+      },
+      columns: [
+        {
+          id: uuidv4(),
+          type: 'column',
+          attributes: { align: 'center', borderSpacing: '0' },
+          gridColumns: 12,
+          blocks: [
             {
               id: uuidv4(),
               type: 'heading',
@@ -276,7 +304,7 @@ export const goingTemplate: Email = {
               attributes: {
                 as: 'h1',
                 textAlign: 'center',
-                marginTop: '30px',
+                marginTop: '0',
                 marginRight: '0',
                 marginBottom: '30px',
                 marginLeft: '0',
@@ -343,6 +371,7 @@ export const goingTemplate: Email = {
           id: uuidv4(),
           type: 'column',
           attributes: { align: 'center' },
+          gridColumns: 12,
           blocks: [
             {
               id: uuidv4(),
@@ -384,6 +413,7 @@ export const goingTemplate: Email = {
           id: uuidv4(),
           type: 'column',
           attributes: { align: 'center', valign: 'top' },
+          gridColumns: 12,
           blocks: [
             {
               id: uuidv4(),
@@ -427,6 +457,7 @@ export const goingTemplate: Email = {
           id: uuidv4(),
           type: 'column',
           attributes: { maxWidth: '480px', textAlign: 'center' },
+          gridColumns: 12,
           blocks: [
             // ...createSocialIcon('facebook.png', 'https://www.facebook.com').blocks,
             // ...createSocialIcon('instagram.png', 'https://www.instagram.com').blocks,
@@ -570,6 +601,7 @@ export const goingTemplate: Email = {
             color: '#004449',
             fontStyle: 'italic',
           },
+          gridColumns: 12,
           blocks: [
             {
               id: uuidv4(),

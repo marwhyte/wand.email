@@ -34,7 +34,7 @@ export default function Workspace({ id, session }: Props) {
       <DndProvider backend={HTML5Backend}>
         <div>
           {email ? (
-            <div className="flex h-full w-full flex-row gap-4 overflow-hidden" style={{ height: 'calc(100vh - 65px)' }}>
+            <div className="flex h-full w-full flex-row overflow-hidden" style={{ height: 'calc(100vh - 65px)' }}>
               <EmailComponents email={email} session={session} setWidth={setWidth} />
               <EmailRenderer onSave={handleSave} width={width} email={email} />
               <EmailEditor email={email} onSave={handleSave} />

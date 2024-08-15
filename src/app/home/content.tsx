@@ -86,7 +86,7 @@ export default function Content({ children, session }: Props) {
               <div className="flex items-center">
                 <DarkModeToggle />
                 <Dropdown>
-                  <DropdownButton as="div" className="ml-4">
+                  <DropdownButton as="div" className="ml-4 flex items-center">
                     <AvatarButton
                       className="h-8 w-8"
                       initials={
