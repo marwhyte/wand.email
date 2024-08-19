@@ -7,6 +7,12 @@ import debounce from 'lodash.debounce'
 import { useCallback } from 'react'
 import { useBlock } from './block-provider'
 
+import { ColorInput } from '@/app/components/color-input'
+import { Divider } from '@/app/components/divider'
+import { Heading } from '@/app/components/heading'
+import Textbox from '@/app/components/textbox'
+import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
+import { capitalizeFirstLetter } from '@/lib/utils/misc'
 import 'react-quill/dist/quill.snow.css'
 import RowEditor from './row-editor'
 
@@ -25,6 +31,7 @@ enum Options {
   WIDTH = 'width',
   HEIGHT = 'height',
   GRID_COLUMNS = 'grid-columns',
+  PADDING = 'padding',
 }
 
 export default function EmailEditor({ email, onSave }: Props) {
@@ -40,13 +47,14 @@ export default function EmailEditor({ email, onSave }: Props) {
           Options.TEXT_COLOR,
           Options.BACKGROUND_COLOR,
           Options.TEXT,
+          Options.PADDING,
         ]
       case 'image':
-        return [Options.WIDTH, Options.HEIGHT]
+        return [Options.WIDTH, Options.HEIGHT, Options.PADDING]
       case 'button':
-        return [Options.WIDTH, Options.HEIGHT, Options.TEXT, Options.TEXT_COLOR, Options.BACKGROUND_COLOR]
+        return [Options.TEXT, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.PADDING]
       case 'heading':
-        return [Options.FONT_SIZE, Options.FONT_WEIGHT, Options.TEXT_COLOR, Options.TEXT]
+        return [Options.FONT_SIZE, Options.FONT_WEIGHT, Options.TEXT_COLOR, Options.TEXT, Options.PADDING]
       case 'link':
         return [
           Options.TEXT_COLOR,
@@ -55,9 +63,8 @@ export default function EmailEditor({ email, onSave }: Props) {
           Options.FONT_WEIGHT,
           Options.TEXT_ALIGN,
           Options.TEXT,
+          Options.PADDING,
         ]
-      case 'row':
-        return [Options.GRID_COLUMNS]
       default:
         return []
     }
@@ -73,19 +80,19 @@ export default function EmailEditor({ email, onSave }: Props) {
   )
 
   const handleChange = useCallback(
-    (option: string, value: string) => {
+    (attributes: Partial<CommonAttributes | TextBlock>) => {
       if (currentBlock) {
         const updatedBlock = {
           ...currentBlock,
-          attributes: { ...currentBlock.attributes, [option]: value },
+          attributes: { ...currentBlock.attributes, ...attributes },
         } as EmailBlock
 
-        if (option === 'value' && 'content' in updatedBlock) {
-          updatedBlock.content = value
+        if ('content' in updatedBlock && 'value' in attributes) {
+          updatedBlock.content = attributes.value as string
         }
 
-        if (option === 'gridColumns' && 'gridColumns' in updatedBlock) {
-          updatedBlock.gridColumns = value
+        if ('gridColumns' in updatedBlock && 'gridColumns' in attributes) {
+          updatedBlock.gridColumns = attributes.gridColumns as string
         }
 
         // Check if there's an actual change
@@ -132,16 +139,35 @@ export default function EmailEditor({ email, onSave }: Props) {
   )
 
   const handleColumnAttributeChange = useCallback(
-    (columnId: string, attribute: string, value: string) => {
+    (columnId: string, attributes: Partial<ColumnBlockAttributes>) => {
       if (currentBlock && currentBlock.type === 'row') {
         const updatedBlock = {
           ...currentBlock,
           columns: currentBlock.columns.map((column) =>
-            column.id === columnId ? { ...column, attributes: { ...column.attributes, [attribute]: value } } : column
+            column.id === columnId ? { ...column, attributes: { ...column.attributes, ...attributes } } : column
           ),
         } as RowBlock
 
-        console.log(updatedBlock)
+        setCurrentBlock(updatedBlock)
+
+        const updatedEmail = {
+          ...email,
+          rows: email.rows.map((row) => (row.id === updatedBlock.id ? updatedBlock : row)),
+        }
+
+        debouncedSave(updatedEmail)
+      }
+    },
+    [currentBlock, setCurrentBlock, email, debouncedSave]
+  )
+
+  const handleRowAttributeChange = useCallback(
+    (attributes: Partial<RowBlockAttributes>) => {
+      if (currentBlock && currentBlock.type === 'row') {
+        const updatedBlock = {
+          ...currentBlock,
+          attributes: { ...currentBlock.attributes, ...attributes },
+        } as RowBlock
 
         setCurrentBlock(updatedBlock)
 
@@ -157,15 +183,22 @@ export default function EmailEditor({ email, onSave }: Props) {
   )
 
   return (
-    <div className="flex h-full w-full min-w-[180px] max-w-[226px] flex-col justify-between border-l-[0.5px] border-r-[0.5px] border-gray-300 border-zinc-200 bg-gray-50 bg-white lg:min-w-[270px] lg:max-w-[300px] dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="flex h-full w-full min-w-[180px] max-w-[226px] flex-col overflow-y-scroll border-l-[0.5px] border-r-[0.5px] border-zinc-200 bg-white lg:min-w-[270px] lg:max-w-[300px] dark:border-zinc-700 dark:bg-zinc-900">
+      {currentBlock && (
+        <div className="bg-zinc-50 p-3">
+          <Heading level={3}>{capitalizeFirstLetter(currentBlock.type)} properties</Heading>
+        </div>
+      )}
+      <Divider />
+
       <div className="flex flex-col gap-4 p-4">
         {options.includes(Options.TEXT) && currentBlock && 'content' in currentBlock && (
           <Field>
-            <Label>Text</Label>
-            <Input
+            <Label>Content</Label>
+            <Textbox
               key={currentBlock.id}
               value={currentBlock.content}
-              onChange={(e) => handleChange('value', e.target.value)}
+              onChange={(e) => handleChange({ content: e })}
             />
           </Field>
         )}
@@ -175,8 +208,8 @@ export default function EmailEditor({ email, onSave }: Props) {
             <Input
               key={`fontSize-${currentBlock?.id}`}
               type="number"
-              value={currentBlock?.attributes.fontSize || ''}
-              onChange={(e) => handleChange('fontSize', e.target.value)}
+              value={currentBlock?.attributes.fontSize?.replace('px', '') || ''}
+              onChange={(e) => handleChange({ fontSize: e.target.value + 'px' })}
             />
           </Field>
         )}
@@ -186,7 +219,7 @@ export default function EmailEditor({ email, onSave }: Props) {
             <Select
               key={`fontWeight-${currentBlock?.id}`}
               value={currentBlock?.attributes.fontWeight || ''}
-              onChange={(e) => handleChange('fontWeight', e.target.value)}
+              onChange={(e) => handleChange({ fontWeight: e.target.value as CommonAttributes['fontWeight'] })}
             >
               <option value="normal">Normal</option>
               <option value="bold">Bold</option>
@@ -199,7 +232,7 @@ export default function EmailEditor({ email, onSave }: Props) {
             <Select
               key={`textAlign-${currentBlock?.id}`}
               value={currentBlock?.attributes.textAlign || ''}
-              onChange={(e) => handleChange('textAlign', e.target.value)}
+              onChange={(e) => handleChange({ textAlign: e.target.value as CommonAttributes['textAlign'] })}
             >
               <option value="left">Left</option>
               <option value="center">Center</option>
@@ -210,22 +243,20 @@ export default function EmailEditor({ email, onSave }: Props) {
         {options.includes(Options.TEXT_COLOR) && (
           <Field>
             <Label>Text Color</Label>
-            <Input
+            <ColorInput
               key={`color-${currentBlock?.id}`}
-              type="color"
               value={currentBlock?.attributes.color || ''}
-              onChange={(e) => handleChange('color', e.target.value)}
+              onChange={(e) => handleChange({ color: e })}
             />
           </Field>
         )}
         {options.includes(Options.BACKGROUND_COLOR) && (
           <Field>
             <Label>Background Color</Label>
-            <Input
+            <ColorInput
               key={`backgroundColor-${currentBlock?.id}`}
-              type="color"
               value={currentBlock?.attributes.backgroundColor || ''}
-              onChange={(e) => handleChange('backgroundColor', e.target.value)}
+              onChange={(e) => handleChange({ backgroundColor: e })}
             />
           </Field>
         )}
@@ -236,7 +267,7 @@ export default function EmailEditor({ email, onSave }: Props) {
               key={`width-${currentBlock?.id}`}
               type="number"
               value={currentBlock?.attributes.width?.replace('px', '') || ''}
-              onChange={(e) => handleChange('width', e.target.value + 'px')}
+              onChange={(e) => handleChange({ width: e.target.value + 'px' })}
             />
           </Field>
         )}
@@ -247,19 +278,36 @@ export default function EmailEditor({ email, onSave }: Props) {
               key={`height-${currentBlock?.id}`}
               type="number"
               value={currentBlock?.attributes.height?.replace('px', '') || ''}
-              onChange={(e) => handleChange('height', e.target.value + 'px')}
+              onChange={(e) => handleChange({ height: e.target.value + 'px' })}
             />
           </Field>
         )}
-        {options.includes(Options.GRID_COLUMNS) && currentBlock?.type === 'row' && (
-          <Field>
-            <Label>Column Widths</Label>
-            <RowEditor
-              columns={currentBlock.columns}
-              onColumnWidthChange={handleColumnWidthChange}
-              onColumnAttributeChange={handleColumnAttributeChange}
-            />
-          </Field>
+        {options.includes(Options.PADDING) && (
+          <PaddingForm
+            padding={{
+              top: currentBlock?.attributes.paddingTop ?? currentBlock?.attributes.padding ?? '0px',
+              right: currentBlock?.attributes.paddingRight ?? currentBlock?.attributes.padding ?? '0px',
+              bottom: currentBlock?.attributes.paddingBottom ?? currentBlock?.attributes.padding ?? '0px',
+              left: currentBlock?.attributes.paddingLeft ?? currentBlock?.attributes.padding ?? '0px',
+            }}
+            onChange={(values: Partial<PaddingValues>) => {
+              const rowAttributes: Partial<RowBlockAttributes> = {
+                paddingTop: values.top,
+                paddingRight: values.right,
+                paddingBottom: values.bottom,
+                paddingLeft: values.left,
+              }
+              handleChange(rowAttributes)
+            }}
+          />
+        )}
+        {currentBlock?.type === 'row' && (
+          <RowEditor
+            row={currentBlock}
+            onColumnWidthChange={handleColumnWidthChange}
+            onColumnAttributeChange={handleColumnAttributeChange}
+            onRowAttributeChange={handleRowAttributeChange}
+          />
         )}
       </div>
     </div>

@@ -12,7 +12,7 @@ export default function EmailButton({ block }: Props) {
       href={block.attributes.href}
       target={block.attributes.target}
       rel={block.attributes.rel}
-      style={applyCommonAttributes(block.attributes)}
+      style={{ ...applyCommonAttributes(block.attributes), display: 'inline-block' }}
     >
       {parse(block.content)}
     </Button>

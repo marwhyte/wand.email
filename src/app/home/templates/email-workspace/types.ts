@@ -70,6 +70,7 @@ type CommonAttributes = {
   paddingRight?: string
   paddingBottom?: string
   paddingLeft?: string
+  padding?: string
   marginTop?: string
   marginRight?: string
   marginBottom?: string
@@ -100,6 +101,9 @@ type ContainerBlockAttributes = CommonAttributes & {
 
 type RowBlockAttributes = CommonAttributes & {
   align?: 'left' | 'center' | 'right'
+  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
+  borderWidth?: string
+  borderColor?: string
   // Add any specific attributes for rows here
 }
 

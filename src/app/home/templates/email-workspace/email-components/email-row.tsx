@@ -1,45 +1,41 @@
-import { Button } from '@/app/components/button'
+import DragLine from '@/app/components/drag-line'
 import { applyCommonAttributes, joinClassNames } from '@/lib/utils/misc'
-import { ArrowsPointingOutIcon, PlusIcon } from '@heroicons/react/24/solid'
+import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { Container, Row } from '@react-email/components'
 import { useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
 import { useBlock } from '../block-provider'
 import EmailColumn from './email-column'
 
-const DragLine = () => {
-  return (
-    <div className="absolute left-0 right-0 top-0 z-10" style={{ transform: 'translateY(-50%)' }}>
-      <div className="flex items-center justify-center">
-        <div aria-hidden="true" className="absolute inset-0 flex items-center">
-          <div className="w-full border-2 border-t border-blue-400" />
-        </div>
-        <div className="relative flex justify-center">
-          <Button
-            color="blue"
-            type="button"
-            className="inline-flex items-center gap-x-1.5 rounded-full px-3 py-1.5 text-sm font-semibold"
-          >
-            <PlusIcon aria-hidden="true" className="-ml-1 -mr-0.5 h-5 w-5" />
-            Drop here
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 type Props = {
   row: RowBlock
   email: Email
   onSave?: (email: Email) => void
   moveRow: (dragId: string, hoverId: string) => void
+  width?: string
   dropLine: string | null
   onHover: (id: string, hoverClientY: number, hoverMiddleY: number) => void
   onDragEnd: () => void
+  dropTarget: { type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null
+  setDropTarget: React.Dispatch<
+    React.SetStateAction<{ type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null>
+  >
+  onBlockDrop: (blockId: string, targetType: 'block' | 'column', targetId: string, position: 'above' | 'below') => void
 }
 
-export default function EmailRow({ row, email, onSave, moveRow, dropLine, onHover, onDragEnd }: Props) {
+export default function EmailRow({
+  row,
+  email,
+  onSave,
+  moveRow,
+  dropLine,
+  onHover,
+  onDragEnd,
+  dropTarget,
+  setDropTarget,
+  width,
+  onBlockDrop,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const { currentBlock, setCurrentBlock } = useBlock()
   const [isChildHovered, setIsChildHovered] = useState(false)
@@ -54,7 +50,7 @@ export default function EmailRow({ row, email, onSave, moveRow, dropLine, onHove
   })
 
   const [, drop] = useDrop({
-    accept: 'row',
+    accept: ['row'],
     hover(item: { type: string; id: string }, monitor) {
       if (!ref.current) return
 
@@ -73,10 +69,21 @@ export default function EmailRow({ row, email, onSave, moveRow, dropLine, onHove
       const hoverClientY = clientOffset!.y - hoverRect.top
 
       onHover(hoverId, hoverClientY, hoverMiddleY)
+
+      if (item.type === 'block') {
+        // Handle block hover logic
+        if (hoverClientY < hoverMiddleY) {
+          setDropTarget({ type: 'column', id: row.columns[0].id, position: 'above' })
+        } else {
+          setDropTarget({ type: 'column', id: row.columns[row.columns.length - 1].id, position: 'below' })
+        }
+      }
     },
     drop(item: { type: string; id: string }) {
-      if (dropLine !== null && item.id !== row.id) {
+      if (item.type === 'row' && dropLine !== null && item.id !== row.id) {
         moveRow(item.id, row.id)
+      } else if (item.type === 'block' && dropTarget) {
+        onBlockDrop(item.id, dropTarget.type, dropTarget.id, dropTarget.position)
       }
     },
   })
@@ -121,7 +128,7 @@ export default function EmailRow({ row, email, onSave, moveRow, dropLine, onHove
         style={{ backgroundColor: 'rgb(59, 130, 246)', zIndex: 5 }}
       />
 
-      {dropLine === row.id && <DragLine />}
+      {dropLine === row.id && <DragLine direction="above" />}
       <DragPreviewImage connect={preview} src="/row.svg" />
 
       {onSave && (
@@ -144,7 +151,12 @@ export default function EmailRow({ row, email, onSave, moveRow, dropLine, onHove
 
       {/* Wrap the content in a relative div */}
       <div className="relative" style={{ zIndex: 2 }}>
-        <Container style={{ ...applyCommonAttributes(row.container.attributes) }}>
+        <Container
+          style={{
+            ...applyCommonAttributes(row.container.attributes),
+            ...(width ? { width: `${width}px` } : {}),
+          }}
+        >
           <Row align={row.attributes.align} style={{ ...applyCommonAttributes(row.attributes) }}>
             {row.columns.map((column) => (
               <EmailColumn
@@ -153,6 +165,9 @@ export default function EmailRow({ row, email, onSave, moveRow, dropLine, onHove
                 onBlockHover={(isHovered) => setIsChildHovered(isHovered)}
                 onBlockSelect={handleBlockSelect}
                 onColumnClick={handleRowOrColumnClick}
+                dropTarget={dropTarget}
+                setDropTarget={setDropTarget}
+                onBlockDrop={onBlockDrop}
               />
             ))}
           </Row>

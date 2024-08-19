@@ -1,18 +1,23 @@
 'use client'
 
 import { Body, Container, Head, Html, Preview } from '@react-email/components'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import EmailRow from './email-components/email-row'
 
 type Props = {
   email: Email
-  onSave: (email: Email) => void
+  onSave?: (email: Email) => void
   renderFullEmail?: boolean
   width?: '600' | '360'
 }
 
 const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }: Props) => {
   const [dropLine, setDropLine] = useState<string | null>(null)
+  const [dropTarget, setDropTarget] = useState<{
+    type: 'block' | 'column'
+    id: string
+    position: 'above' | 'below'
+  } | null>(null)
 
   const moveRow = (dragId: string, hoverId: string) => {
     const newRows = [...email.rows]
@@ -24,21 +29,105 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
     const insertIndex = dragIndex < hoverIndex ? hoverIndex - 1 : hoverIndex
     newRows.splice(insertIndex, 0, draggedRow)
 
-    onSave({
+    onSave?.({
       ...email,
       rows: newRows,
     })
     setDropLine(null)
   }
 
-  const handleHover = (id: string, hoverClientY: number, hoverMiddleY: number) => {
-    const hoverIndex = email.rows.findIndex((row) => row.id === id)
-    const dropId = hoverClientY < hoverMiddleY ? id : email.rows[hoverIndex + 1]?.id || 'end'
-    setDropLine(dropId)
-  }
+  const handleHover = useCallback(
+    (id: string, hoverClientY: number, hoverMiddleY: number) => {
+      const hoverIndex = email.rows.findIndex((row) => row.id === id)
+      const dropId = hoverClientY < hoverMiddleY ? id : email.rows[hoverIndex + 1]?.id || 'end'
+      setDropLine(dropId)
+    },
+    [email.rows]
+  )
 
   const handleDragEnd = () => {
     setDropLine(null)
+  }
+
+  const handleBlockDrop = (
+    blockId: string,
+    targetType: 'block' | 'column',
+    targetId: string,
+    position: 'above' | 'below'
+  ): void => {
+    const newEmail: Email = JSON.parse(JSON.stringify(email)) // Deep clone to avoid mutations
+    let sourceRow: RowBlock | undefined
+    let sourceColumn: ColumnBlock | undefined
+    let sourceIndex: number | undefined
+    let targetRow: RowBlock | undefined
+    let targetColumn: ColumnBlock | undefined
+    let targetIndex: number | undefined
+
+    // Find the source block
+    newEmail.rows.forEach((row) => {
+      row.columns.forEach((column) => {
+        const index = column.blocks.findIndex((block) => block.id === blockId)
+        if (index !== -1) {
+          sourceRow = row
+          sourceColumn = column
+          sourceIndex = index
+        }
+      })
+    })
+
+    if (!sourceRow || !sourceColumn || sourceIndex === undefined) {
+      console.error('Source block not found')
+      return
+    }
+
+    // Remove the block from its original position
+    const [movedBlock] = sourceColumn.blocks.splice(sourceIndex, 1)
+
+    // Find the target position
+    if (targetType === 'block') {
+      newEmail.rows.forEach((row) => {
+        row.columns.forEach((column) => {
+          const index = column.blocks.findIndex((block) => block.id === targetId)
+          if (index !== -1) {
+            targetRow = row
+            targetColumn = column
+            targetIndex = index
+          }
+        })
+      })
+
+      if (!targetRow || !targetColumn || targetIndex === undefined) {
+        console.error('Target block not found')
+        return
+      }
+
+      // Insert the block at the new position
+      targetColumn.blocks.splice(position === 'above' ? targetIndex : targetIndex + 1, 0, movedBlock)
+    } else if (targetType === 'column') {
+      newEmail.rows.forEach((row) => {
+        const columnIndex = row.columns.findIndex((column) => column.id === targetId)
+        if (columnIndex !== -1) {
+          targetRow = row
+          targetColumn = row.columns[columnIndex]
+        }
+      })
+
+      if (!targetRow || !targetColumn) {
+        console.error('Target column not found')
+        return
+      }
+
+      // Insert the block at the beginning or end of the column
+      if (position === 'above') {
+        targetColumn.blocks.unshift(movedBlock)
+      } else {
+        targetColumn.blocks.push(movedBlock)
+      }
+    }
+
+    // Save the updated email
+    onSave?.(newEmail)
+    setDropTarget(null)
   }
 
   const emailRows = email.rows.map((row, index) => (
@@ -48,9 +137,13 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
       key={row.id}
       row={row}
       moveRow={moveRow}
+      width={width}
       dropLine={dropLine}
       onHover={handleHover}
       onDragEnd={handleDragEnd}
+      dropTarget={dropTarget}
+      setDropTarget={setDropTarget}
+      onBlockDrop={handleBlockDrop}
     />
   ))
 
@@ -68,10 +161,7 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
 
   return (
     <div className="flex-grow overflow-scroll pt-4">
-      <div>
-        <div></div>
-        {emailRows}
-      </div>
+      <div>{emailRows}</div>
     </div>
   )
 }

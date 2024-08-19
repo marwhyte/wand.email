@@ -1,5 +1,8 @@
+import DragLine from '@/app/components/drag-line'
 import { joinClassNames } from '@/lib/utils/misc'
-import { useCallback, useState } from 'react'
+import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
+import { useCallback, useRef, useState } from 'react'
+import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
 import { useBlock } from '../block-provider'
 import EmailButton from './email-button'
 import EmailHeading from './email-heading'
@@ -9,13 +12,26 @@ import EmailText from './email-text'
 
 type Props = {
   block: EmailBlock
-  onHover?: (isHovered: boolean) => void
+  onHover: (isHovered: boolean) => void
   onSelect?: (block: EmailBlock) => void
+  dropTarget: { type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null
+  setDropTarget: React.Dispatch<
+    React.SetStateAction<{ type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null>
+  >
 }
 
-export default function EmailBlock({ block, onHover, onSelect }: Props) {
+export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDropTarget }: Props) {
   const { currentBlock } = useBlock()
   const [isHovered, setIsHovered] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+
+  const [{ isDragging }, drag, preview] = useDrag({
+    type: 'block',
+    item: { type: 'block', id: block.id },
+    collect: (monitor) => ({
+      isDragging: monitor.isDragging(),
+    }),
+  })
 
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true)
@@ -52,8 +68,30 @@ export default function EmailBlock({ block, onHover, onSelect }: Props) {
     }
   }
 
+  const [, drop] = useDrop({
+    accept: 'block',
+    hover(item: { type: string; id: string }, monitor) {
+      if (item.id === block.id) return
+
+      const hoverRect = ref.current?.getBoundingClientRect()
+      if (!hoverRect) return
+      const hoverMiddleY = (hoverRect.bottom - hoverRect.top) / 2
+      const clientOffset = monitor.getClientOffset()
+      const hoverClientY = clientOffset!.y - hoverRect.top
+
+      if (hoverClientY < hoverMiddleY) {
+        setDropTarget({ type: 'block', id: block.id, position: 'above' })
+      } else {
+        setDropTarget({ type: 'block', id: block.id, position: 'below' })
+      }
+    },
+  })
+
+  drag(drop(ref))
+
   return (
     <div
+      ref={ref}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -61,16 +99,36 @@ export default function EmailBlock({ block, onHover, onSelect }: Props) {
         'group relative inline-block',
         currentBlock?.id === block.id || isHovered ? 'outline outline-2 outline-blue-500' : ''
       )}
+      style={{ opacity: isDragging ? 0.4 : 1 }}
     >
-      {/* Blue overlay div */}
+      <div
+        // @ts-ignore
+        ref={drag}
+        className={joinClassNames(
+          'absolute -right-5 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-move items-center justify-center rounded-full bg-blue-500',
+          currentBlock?.id === block.id || isHovered ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
+        )}
+        style={{ zIndex: 1001 }}
+      >
+        <ArrowsPointingOutIcon className="h-6 w-6 text-white" />
+      </div>
+
+      <DragPreviewImage connect={preview} src="/block.svg" />
+
+      {renderBlock()}
+
+      {/* Block type label */}
       <div
         className={joinClassNames(
-          'absolute inset-0 transition-opacity duration-200',
-          currentBlock?.id !== block.id && isHovered ? 'opacity-20' : 'opacity-0'
+          'absolute -bottom-7 right-1 bg-blue-500 px-2 py-1 text-sm font-semibold text-white transition-opacity duration-200',
+          isHovered && currentBlock?.id !== block.id ? 'opacity-100' : 'opacity-0'
         )}
-        style={{ backgroundColor: 'rgb(59, 130, 246)', zIndex: 1 }}
-      />
-      {renderBlock()}
+        style={{ zIndex: 1002 }}
+      >
+        {block.type.charAt(0).toUpperCase() + block.type.slice(1)}
+      </div>
+
+      {dropTarget && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
     </div>
   )
 }

@@ -1,20 +1,29 @@
+import { Button } from '@/app/components/button'
+import Disclosure, { DisclosureBody } from '@/app/components/disclosure'
 import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
-import { Bars3Icon } from '@heroicons/react/24/solid'
+import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
+import { Bars3Icon, PlusIcon } from '@heroicons/react/20/solid'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
 interface RowEditorProps {
-  columns: ColumnBlock[]
+  row: RowBlock
   onColumnWidthChange: (newColumns: ColumnBlock[]) => void
-  onColumnAttributeChange: (columnId: string, attribute: string, value: string) => void
+  onColumnAttributeChange: (columnId: string, attributes: Partial<ColumnBlockAttributes>) => void
+  onRowAttributeChange: (attributes: Partial<RowBlockAttributes>) => void
 }
 
-export default function RowEditor({ columns, onColumnWidthChange, onColumnAttributeChange }: RowEditorProps) {
+export default function RowEditor({
+  row,
+  onColumnWidthChange,
+  onColumnAttributeChange,
+  onRowAttributeChange,
+}: RowEditorProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [activeColumnIndex, setActiveColumnIndex] = useState(-1)
-  const [selectedColumnId, setSelectedColumnId] = useState<string | null>(null)
+  const [selectedColumnId, setSelectedColumnId] = useState<string>(row.columns[0].id)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleDragStart = (e: React.MouseEvent<HTMLDivElement>, columnIndex: number) => {
@@ -30,7 +39,7 @@ export default function RowEditor({ columns, onColumnWidthChange, onColumnAttrib
         const containerWidth = bounds.width
         const newColumnWidth = Math.round((x / containerWidth) * 12)
 
-        const newColumns = [...columns]
+        const newColumns = [...row.columns]
         const totalWidth = newColumns.reduce((sum, col) => sum + col.gridColumns, 0)
         const leftColumnWidth = Math.max(2, Math.min(10, newColumnWidth))
 
@@ -49,7 +58,7 @@ export default function RowEditor({ columns, onColumnWidthChange, onColumnAttrib
         }
       }
     },
-    [isDragging, columns, activeColumnIndex, onColumnWidthChange]
+    [isDragging, row.columns, activeColumnIndex, onColumnWidthChange]
   )
 
   const handleDragEnd = useCallback(() => {
@@ -58,7 +67,7 @@ export default function RowEditor({ columns, onColumnWidthChange, onColumnAttrib
   }, [])
 
   const handleAddColumn = () => {
-    if (columns.length < 4) {
+    if (row.columns.length < 4) {
       const newColumn: ColumnBlock = {
         id: uuidv4(),
         type: 'column',
@@ -67,7 +76,7 @@ export default function RowEditor({ columns, onColumnWidthChange, onColumnAttrib
         blocks: [],
       }
 
-      let newColumns = [...columns]
+      let newColumns = [...row.columns]
       let spaceFound = false
 
       // Try to take space from the last column first
@@ -95,32 +104,29 @@ export default function RowEditor({ columns, onColumnWidthChange, onColumnAttrib
     }
   }
 
-  const handleColumnClick = useCallback(
-    (e: React.MouseEvent, columnId: string) => {
-      e.stopPropagation() // Prevent event from bubbling up
-      setSelectedColumnId(columnId === selectedColumnId ? null : columnId)
-    },
-    [selectedColumnId]
-  )
+  const handleColumnClick = useCallback((e: React.MouseEvent, columnId: string) => {
+    e.stopPropagation()
+    setSelectedColumnId(columnId)
+  }, [])
 
-  const handlePaddingChange = (columnId: string, side: 'Top' | 'Right' | 'Bottom' | 'Left', value: string) => {
-    const numValue = parseInt(value, 10)
-    const newValue = isNaN(numValue) ? '0px' : `${numValue}px`
-    onColumnAttributeChange(columnId, `padding${side}`, newValue)
+  const handlePaddingChange = (columnId: string, paddingValues: Partial<ColumnBlockAttributes>) => {
+    onColumnAttributeChange(columnId, paddingValues)
   }
 
-  const handlePaddingToggle = (columnId: string, side: 'Top' | 'Right' | 'Bottom' | 'Left') => {
-    const column = columns.find((col) => col.id === columnId)
-    if (!column) return
-
-    const currentPadding = column.attributes[`padding${side}` as keyof ColumnBlockAttributes] || '0px'
-    const newPadding = currentPadding === '0px' ? '8px' : '0px'
-
-    onColumnAttributeChange(columnId, `padding${side}`, newPadding)
+  const handleRowPaddingChange = (paddingValues: Partial<RowBlockAttributes>) => {
+    onRowAttributeChange(paddingValues)
   }
 
   const handleBorderChange = (columnId: string, attribute: string, value: string) => {
-    onColumnAttributeChange(columnId, attribute, value)
+    onColumnAttributeChange(columnId, { [attribute]: value })
+  }
+
+  const handleRowBorderChange = (attribute: string, value: string) => {
+    onRowAttributeChange({ [attribute]: value })
+  }
+
+  const handleRowBackgroundColorChange = (value: string) => {
+    onRowAttributeChange({ backgroundColor: value })
   }
 
   useEffect(() => {
@@ -134,69 +140,39 @@ export default function RowEditor({ columns, onColumnWidthChange, onColumnAttrib
     }
   }, [isDragging, handleDrag, handleDragEnd])
 
-  console.log(columns.find((col) => col.id === selectedColumnId)?.attributes['paddingBottom'])
+  const selectedColumn = row.columns.find((col) => col.id === selectedColumnId)
 
   return (
-    <div className="space-y-2">
-      <div ref={containerRef} className="w-ful relative flex h-8">
-        {columns.map((column, index) => (
-          <Fragment key={column.id}>
-            <div
-              className={`relative z-10 flex items-center justify-center rounded-md border border-gray-300 ${
-                selectedColumnId === column.id ? 'bg-blue-100 ring-2 ring-blue-500' : ''
-              }`}
-              style={{
-                width: `${(column.gridColumns / 12) * 100}%`,
-                margin: '0 2px',
-              }}
-              onClick={(e) => handleColumnClick(e, column.id)}
-            >
-              <div className={`text-xs font-medium ${isDragging ? 'select-none' : ''}`}>{column.gridColumns}</div>
-            </div>
-            {index < columns.length - 1 && (
-              <div
-                className="relative z-20 mr-[2px] flex h-full w-3 cursor-col-resize items-center justify-center"
-                onMouseDown={(e) => handleDragStart(e, index)}
-              >
-                <Bars3Icon
-                  className={`h-10 w-10 text-gray-400 hover:text-blue-500 ${
-                    isDragging && activeColumnIndex === index ? 'text-blue-500' : ''
-                  }`}
-                />
-              </div>
-            )}
-          </Fragment>
-        ))}
-      </div>
-      {selectedColumnId && (
-        <>
+    <div className="space-y-4">
+      <Disclosure title="Layout">
+        <DisclosureBody>
+          <PaddingForm
+            padding={{
+              top: row.attributes.paddingTop ?? row.attributes.padding ?? '0px',
+              right: row.attributes.paddingRight ?? row.attributes.padding ?? '0px',
+              bottom: row.attributes.paddingBottom ?? row.attributes.padding ?? '0px',
+              left: row.attributes.paddingLeft ?? row.attributes.padding ?? '0px',
+            }}
+            onChange={(values: Partial<PaddingValues>) => {
+              const rowAttributes: Partial<RowBlockAttributes> = {
+                paddingTop: values.top,
+                paddingRight: values.right,
+                paddingBottom: values.bottom,
+                paddingLeft: values.left,
+              }
+              handleRowPaddingChange(rowAttributes)
+            }}
+          />
+        </DisclosureBody>
+      </Disclosure>
+      <Disclosure title="Borders">
+        <DisclosureBody>
           <Field>
-            <Label>Padding</Label>
-
-            <div className="mt-2 flex flex-wrap gap-2">
-              {(['Top', 'Right', 'Bottom', 'Left'] as const).map((side) => (
-                <div key={side} className="flex items-center">
-                  <Input
-                    type="number"
-                    value={
-                      columns
-                        .find((col) => col.id === selectedColumnId)
-                        ?.attributes[`padding${side}`]?.replace('px', '') || '0'
-                    }
-                    onChange={(e) => handlePaddingChange(selectedColumnId, side, e.target.value)}
-                    placeholder="In px"
-                  />
-                  <span className="ml-2 text-sm">{side}</span>
-                </div>
-              ))}
-            </div>
-          </Field>
-          <Field>
-            <Label>Border</Label>
+            <Label>Row Border</Label>
             <div className="flex gap-2">
               <Select
-                value={columns.find((col) => col.id === selectedColumnId)?.attributes.borderStyle || 'solid'}
-                onChange={(e) => handleBorderChange(selectedColumnId, 'borderStyle', e.target.value)}
+                value={row.attributes.borderStyle || 'solid'}
+                onChange={(e) => handleRowBorderChange('borderStyle', e.target.value)}
               >
                 <option value="solid">Solid</option>
                 <option value="dashed">Dashed</option>
@@ -204,21 +180,123 @@ export default function RowEditor({ columns, onColumnWidthChange, onColumnAttrib
               </Select>
               <Input
                 type="number"
-                value={
-                  columns.find((col) => col.id === selectedColumnId)?.attributes.borderWidth?.replace('px', '') || ''
-                }
-                onChange={(e) => handleBorderChange(selectedColumnId, 'borderWidth', `${e.target.value}px`)}
+                value={row.attributes.borderWidth?.replace('px', '') || ''}
+                onChange={(e) => handleRowBorderChange('borderWidth', `${e.target.value}px`)}
                 placeholder="Width"
               />
               <Input
                 type="color"
-                value={columns.find((col) => col.id === selectedColumnId)?.attributes.borderColor || ''}
-                onChange={(e) => handleBorderChange(selectedColumnId, 'borderColor', e.target.value)}
+                value={row.attributes.borderColor || ''}
+                onChange={(e) => handleRowBorderChange('borderColor', e.target.value)}
               />
             </div>
           </Field>
-        </>
-      )}
+        </DisclosureBody>
+      </Disclosure>
+
+      <Disclosure title="Background">
+        <DisclosureBody>
+          <Field>
+            <Label>Row Background Color</Label>
+            <Input
+              type="color"
+              value={row.attributes.backgroundColor || ''}
+              onChange={(e) => handleRowBackgroundColorChange(e.target.value)}
+            />
+          </Field>
+        </DisclosureBody>
+      </Disclosure>
+
+      <Disclosure title="Column Structure">
+        <DisclosureBody>
+          <div className="flex justify-end">
+            <Button plain onClick={handleAddColumn} disabled={row.columns.length >= 4} className="mb-2 text-blue-500">
+              Add
+              <PlusIcon className="h-4 w-4" />
+            </Button>
+          </div>
+          <div ref={containerRef} className="relative flex h-8 w-full">
+            {row.columns.map((column, index) => (
+              <Fragment key={column.id}>
+                <div
+                  className={`relative z-10 flex items-center justify-center rounded-md border border-gray-300 ${
+                    selectedColumnId === column.id ? 'bg-blue-100 ring-2 ring-blue-500' : ''
+                  }`}
+                  style={{
+                    width: `${(column.gridColumns / 12) * 100}%`,
+                    margin: '0 2px',
+                  }}
+                  onClick={(e) => handleColumnClick(e, column.id)}
+                >
+                  <div className={`text-xs font-medium ${isDragging ? 'select-none' : ''}`}>{column.gridColumns}</div>
+                </div>
+                {index < row.columns.length - 1 && (
+                  <div
+                    className="relative z-20 mr-[2px] flex h-full w-3 cursor-col-resize items-center justify-center"
+                    onMouseDown={(e) => handleDragStart(e, index)}
+                  >
+                    <Bars3Icon
+                      className={`h-10 w-10 text-gray-400 hover:text-blue-500 ${
+                        isDragging && activeColumnIndex === index ? 'text-blue-500' : ''
+                      }`}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            ))}
+          </div>
+
+          {selectedColumnId && (
+            <div className="mt-4">
+              <PaddingForm
+                padding={{
+                  top: selectedColumn?.attributes.paddingTop ?? selectedColumn?.attributes.padding ?? '0px',
+                  right: selectedColumn?.attributes.paddingRight ?? selectedColumn?.attributes.padding ?? '0px',
+                  bottom: selectedColumn?.attributes.paddingBottom ?? selectedColumn?.attributes.padding ?? '0px',
+                  left: selectedColumn?.attributes.paddingLeft ?? selectedColumn?.attributes.padding ?? '0px',
+                }}
+                onChange={(paddingValues) =>
+                  handlePaddingChange(selectedColumnId, paddingValues as Partial<ColumnBlockAttributes>)
+                }
+              />
+
+              <Field>
+                <Label>Column Border</Label>
+                <div className="flex gap-2">
+                  <Select
+                    value={selectedColumn?.attributes.borderStyle || 'solid'}
+                    onChange={(e) => handleBorderChange(selectedColumnId, 'borderStyle', e.target.value)}
+                  >
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                    <option value="dotted">Dotted</option>
+                  </Select>
+                  <Input
+                    type="number"
+                    value={selectedColumn?.attributes.borderWidth?.replace('px', '') || ''}
+                    onChange={(e) => handleBorderChange(selectedColumnId, 'borderWidth', `${e.target.value}px`)}
+                    placeholder="Width"
+                  />
+                  <Input
+                    type="color"
+                    value={selectedColumn?.attributes.borderColor || ''}
+                    onChange={(e) => handleBorderChange(selectedColumnId, 'borderColor', e.target.value)}
+                  />
+                </div>
+              </Field>
+
+              <Field>
+                <Label>Column Background Color</Label>
+                <Input
+                  type="color"
+                  value={selectedColumn?.attributes.backgroundColor || ''}
+                  onChange={(e) => onColumnAttributeChange(selectedColumnId, { backgroundColor: e.target.value })}
+                />
+              </Field>
+            </div>
+          )}
+        </DisclosureBody>
+      </Disclosure>
     </div>
   )
 }
