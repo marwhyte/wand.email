@@ -7,8 +7,8 @@ import { useState } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import { BlockProvider } from './block-provider'
-import EmailComponents from './email-components'
 import EmailEditor from './email-editor'
+import EmailHeader from './email-header'
 import EmailRenderer from './email-renderer'
 
 type Props = {
@@ -33,9 +33,9 @@ export default function Workspace({ id, session }: Props) {
     <BlockProvider>
       <DndProvider backend={HTML5Backend}>
         <div>
+          <EmailHeader email={email} session={session} setWidth={setWidth} />
           {email ? (
             <div className="flex h-full w-full flex-row overflow-hidden" style={{ height: 'calc(100vh - 65px)' }}>
-              <EmailComponents email={email} session={session} setWidth={setWidth} />
               <EmailRenderer onSave={handleSave} width={width} email={email} />
               <EmailEditor email={email} onSave={handleSave} />
             </div>

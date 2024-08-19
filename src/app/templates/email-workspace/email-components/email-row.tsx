@@ -20,7 +20,13 @@ type Props = {
   setDropTarget: React.Dispatch<
     React.SetStateAction<{ type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null>
   >
-  onBlockDrop: (blockId: string, targetType: 'block' | 'column', targetId: string, position: 'above' | 'below') => void
+  onBlockDrop: (
+    blockType: 'block' | 'newBlock',
+    blockId: string,
+    targetType: 'block' | 'column',
+    targetId: string,
+    position: 'above' | 'below'
+  ) => void
 }
 
 export default function EmailRow({
@@ -69,21 +75,10 @@ export default function EmailRow({
       const hoverClientY = clientOffset!.y - hoverRect.top
 
       onHover(hoverId, hoverClientY, hoverMiddleY)
-
-      if (item.type === 'block') {
-        // Handle block hover logic
-        if (hoverClientY < hoverMiddleY) {
-          setDropTarget({ type: 'column', id: row.columns[0].id, position: 'above' })
-        } else {
-          setDropTarget({ type: 'column', id: row.columns[row.columns.length - 1].id, position: 'below' })
-        }
-      }
     },
     drop(item: { type: string; id: string }) {
       if (item.type === 'row' && dropLine !== null && item.id !== row.id) {
         moveRow(item.id, row.id)
-      } else if (item.type === 'block' && dropTarget) {
-        onBlockDrop(item.id, dropTarget.type, dropTarget.id, dropTarget.position)
       }
     },
   })

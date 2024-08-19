@@ -1,4 +1,5 @@
-import { goingTemplate } from '@/app/home/templates/email-workspace/going-template'
+import { goingTemplate } from '@/app/templates/email-workspace/going-template'
+import { v4 as uuidv4 } from 'uuid'
 
 export const templates = [
   {
@@ -26,4 +27,28 @@ export const getTemplate = (id: string) => {
   if (!template) return null
 
   return template
+}
+
+export function createNewBlock(type: EmailBlockType): EmailBlock {
+  const baseBlock = {
+    id: uuidv4(),
+    type,
+    content: type.toUpperCase(),
+    attributes: {},
+  }
+
+  switch (baseBlock.type) {
+    case 'heading':
+      return { ...baseBlock, type: 'heading', attributes: { as: 'h2' } }
+    case 'text':
+      return { ...baseBlock, type: 'text' }
+    case 'image':
+      return { ...baseBlock, type: 'image', attributes: { src: '' } }
+    case 'button':
+      return { ...baseBlock, type: 'button', attributes: { href: '#' } }
+    case 'link':
+      return { ...baseBlock, type: 'link', attributes: { href: '#' } }
+    default:
+      throw new Error(`Unsupported block type: ${type}`)
+  }
 }

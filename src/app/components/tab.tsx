@@ -35,7 +35,7 @@ export function Tab({ children, disabled, ...props }: TabProps) {
       className={({ selected }: { selected: boolean }) =>
         clsx(
           'flex items-center justify-center rounded-lg px-2 py-1.5 text-sm font-medium leading-5',
-          'ring-white ring-opacity-60 ring-offset-2 ring-offset-zinc-100 focus:outline-none focus:ring-2 dark:ring-offset-zinc-900',
+          'ring-blue-300 ring-opacity-60 ring-offset-2 ring-offset-zinc-100 focus:outline-none focus:ring-2 dark:ring-offset-zinc-900',
           selected
             ? 'bg-white text-zinc-900 dark:bg-zinc-700 dark:text-white'
             : 'text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white',

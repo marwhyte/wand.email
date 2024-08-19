@@ -1,8 +1,9 @@
 import DragLine from '@/app/components/drag-line'
 import { joinClassNames } from '@/lib/utils/misc'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
+import { createPortal } from 'react-dom'
 import { useBlock } from '../block-provider'
 import EmailButton from './email-button'
 import EmailHeading from './email-heading'
@@ -69,7 +70,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
   }
 
   const [, drop] = useDrop({
-    accept: 'block',
+    accept: ['block', 'newBlock'],
     hover(item: { type: string; id: string }, monitor) {
       if (item.id === block.id) return
 
@@ -89,46 +90,66 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
 
   drag(drop(ref))
 
+  const [labelPosition, setLabelPosition] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (isHovered && ref.current) {
+      const rect = ref.current.getBoundingClientRect()
+      setLabelPosition({
+        top: rect.bottom + window.scrollY,
+        left: rect.right + window.scrollX - 1, // -1 to align with the right edge
+      })
+    }
+  }, [isHovered])
+
   return (
-    <div
-      ref={ref}
-      onClick={handleClick}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={joinClassNames(
-        'group relative inline-block',
-        currentBlock?.id === block.id || isHovered ? 'outline outline-2 outline-blue-500' : ''
-      )}
-      style={{ opacity: isDragging ? 0.4 : 1 }}
-    >
+    <>
       <div
-        // @ts-ignore
-        ref={drag}
+        ref={ref}
+        onClick={handleClick}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         className={joinClassNames(
-          'absolute -right-5 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-move items-center justify-center rounded-full bg-blue-500',
-          currentBlock?.id === block.id || isHovered ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
+          'group relative inline-block w-full',
+          currentBlock?.id === block.id || isHovered ? 'outline outline-2 outline-blue-500' : ''
         )}
-        style={{ zIndex: 1001 }}
+        style={{ opacity: isDragging ? 0.4 : 1 }}
       >
-        <ArrowsPointingOutIcon className="h-6 w-6 text-white" />
+        <div
+          // @ts-ignore
+          ref={drag}
+          className={joinClassNames(
+            'absolute -right-5 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-move items-center justify-center rounded-full bg-blue-500',
+            currentBlock?.id === block.id || isHovered ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
+          )}
+          style={{ zIndex: 1001 }}
+        >
+          <ArrowsPointingOutIcon className="h-5 w-5 text-white" />
+        </div>
+
+        <DragPreviewImage connect={preview} src="/block.svg" />
+
+        {renderBlock()}
+
+        {dropTarget && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
       </div>
 
-      <DragPreviewImage connect={preview} src="/block.svg" />
-
-      {renderBlock()}
-
-      {/* Block type label */}
-      <div
-        className={joinClassNames(
-          'absolute -bottom-7 right-1 bg-blue-500 px-2 py-1 text-sm font-semibold text-white transition-opacity duration-200',
-          isHovered && currentBlock?.id !== block.id ? 'opacity-100' : 'opacity-0'
+      {isHovered &&
+        currentBlock?.id !== block.id &&
+        createPortal(
+          <div
+            className="fixed bg-blue-500 px-2 py-1 text-sm font-semibold text-white transition-opacity duration-200"
+            style={{
+              zIndex: 2004,
+              top: `${labelPosition.top}px`,
+              left: `${labelPosition.left}px`,
+              transform: 'translateX(-94%)',
+            }}
+          >
+            {block.type.charAt(0).toUpperCase() + block.type.slice(1)}
+          </div>,
+          document.body
         )}
-        style={{ zIndex: 1002 }}
-      >
-        {block.type.charAt(0).toUpperCase() + block.type.slice(1)}
-      </div>
-
-      {dropTarget && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
-    </div>
+    </>
   )
 }

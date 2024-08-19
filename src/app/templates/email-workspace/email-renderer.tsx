@@ -1,5 +1,6 @@
 'use client'
 
+import { createNewBlock } from '@/lib/data/templates'
 import { Body, Container, Head, Html, Preview } from '@react-email/components'
 import { useCallback, useState } from 'react'
 import EmailRow from './email-components/email-row'
@@ -49,41 +50,109 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
     setDropLine(null)
   }
 
+  console.log(dropTarget)
+
   const handleBlockDrop = (
+    blockType: 'block' | 'newBlock',
     blockId: string,
     targetType: 'block' | 'column',
     targetId: string,
-    position: 'above' | 'below'
+    position: 'above' | 'below',
+    newBlockType?: EmailBlockType
   ): void => {
-    const newEmail: Email = JSON.parse(JSON.stringify(email)) // Deep clone to avoid mutations
-    let sourceRow: RowBlock | undefined
-    let sourceColumn: ColumnBlock | undefined
-    let sourceIndex: number | undefined
+    if (blockType === 'newBlock' && newBlockType) {
+      handleNewBlockDrop(newBlockType, targetType, targetId, position)
+    } else {
+      console.log('handleBlockDrop', blockId, targetType, targetId, position)
+      const newEmail: Email = JSON.parse(JSON.stringify(email)) // Deep clone to avoid mutations
+      let sourceRow: RowBlock | undefined
+      let sourceColumn: ColumnBlock | undefined
+      let sourceIndex: number | undefined
+      let targetRow: RowBlock | undefined
+      let targetColumn: ColumnBlock | undefined
+      let targetIndex: number | undefined
+
+      // Find the source block
+      newEmail.rows.forEach((row) => {
+        row.columns.forEach((column) => {
+          const index = column.blocks.findIndex((block) => block.id === blockId)
+          if (index !== -1) {
+            sourceRow = row
+            sourceColumn = column
+            sourceIndex = index
+          }
+        })
+      })
+
+      if (!sourceRow || !sourceColumn || sourceIndex === undefined) {
+        console.error('Source block not found')
+        return
+      }
+
+      // Remove the block from its original position
+      const [movedBlock] = sourceColumn.blocks.splice(sourceIndex, 1)
+
+      // Find the target position
+      if (targetType === 'block') {
+        newEmail.rows.forEach((row) => {
+          row.columns.forEach((column) => {
+            const index = column.blocks.findIndex((block) => block.id === targetId)
+            if (index !== -1) {
+              targetRow = row
+              targetColumn = column
+              targetIndex = index
+            }
+          })
+        })
+
+        if (!targetRow || !targetColumn || targetIndex === undefined) {
+          console.error('Target block not found')
+          return
+        }
+
+        // Insert the block at the new position
+        targetColumn.blocks.splice(position === 'above' ? targetIndex : targetIndex + 1, 0, movedBlock)
+      } else if (targetType === 'column') {
+        newEmail.rows.forEach((row) => {
+          const columnIndex = row.columns.findIndex((column) => column.id === targetId)
+          if (columnIndex !== -1) {
+            targetRow = row
+            targetColumn = row.columns[columnIndex]
+          }
+        })
+
+        if (!targetRow || !targetColumn) {
+          console.error('Target column not found')
+          return
+        }
+
+        // Insert the block at the beginning or end of the column
+        if (position === 'above') {
+          targetColumn.blocks.unshift(movedBlock)
+        } else {
+          targetColumn.blocks.push(movedBlock)
+        }
+      }
+
+      // Save the updated email
+      onSave?.(newEmail)
+      setDropTarget(null)
+    }
+  }
+
+  const handleNewBlockDrop = (
+    blockType: EmailBlockType,
+    targetType: 'block' | 'column',
+    targetId: string,
+    position: 'above' | 'below'
+  ) => {
+    const newEmail: Email = JSON.parse(JSON.stringify(email))
+    const newBlock = createNewBlock(blockType)
+
     let targetRow: RowBlock | undefined
     let targetColumn: ColumnBlock | undefined
     let targetIndex: number | undefined
 
-    // Find the source block
-    newEmail.rows.forEach((row) => {
-      row.columns.forEach((column) => {
-        const index = column.blocks.findIndex((block) => block.id === blockId)
-        if (index !== -1) {
-          sourceRow = row
-          sourceColumn = column
-          sourceIndex = index
-        }
-      })
-    })
-
-    if (!sourceRow || !sourceColumn || sourceIndex === undefined) {
-      console.error('Source block not found')
-      return
-    }
-
-    // Remove the block from its original position
-    const [movedBlock] = sourceColumn.blocks.splice(sourceIndex, 1)
-
-    // Find the target position
     if (targetType === 'block') {
       newEmail.rows.forEach((row) => {
         row.columns.forEach((column) => {
@@ -101,8 +170,7 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
         return
       }
 
-      // Insert the block at the new position
-      targetColumn.blocks.splice(position === 'above' ? targetIndex : targetIndex + 1, 0, movedBlock)
+      targetColumn.blocks.splice(position === 'above' ? targetIndex : targetIndex + 1, 0, newBlock)
     } else if (targetType === 'column') {
       newEmail.rows.forEach((row) => {
         const columnIndex = row.columns.findIndex((column) => column.id === targetId)
@@ -117,15 +185,13 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
         return
       }
 
-      // Insert the block at the beginning or end of the column
       if (position === 'above') {
-        targetColumn.blocks.unshift(movedBlock)
+        targetColumn.blocks.unshift(newBlock)
       } else {
-        targetColumn.blocks.push(movedBlock)
+        targetColumn.blocks.push(newBlock)
       }
     }
 
-    // Save the updated email
     onSave?.(newEmail)
     setDropTarget(null)
   }

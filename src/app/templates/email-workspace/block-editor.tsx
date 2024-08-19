@@ -7,12 +7,13 @@ import debounce from 'lodash.debounce'
 import { useCallback } from 'react'
 import { useBlock } from './block-provider'
 
+import { Button } from '@/app/components/button'
 import { ColorInput } from '@/app/components/color-input'
-import { Divider } from '@/app/components/divider'
-import { Heading } from '@/app/components/heading'
+import { Text } from '@/app/components/text'
 import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
+import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import 'react-quill/dist/quill.snow.css'
 import RowEditor from './row-editor'
 
@@ -34,7 +35,7 @@ enum Options {
   PADDING = 'padding',
 }
 
-export default function EmailEditor({ email, onSave }: Props) {
+const BlockEditor = ({ email, onSave }: Props) => {
   const { currentBlock, setCurrentBlock } = useBlock()
 
   const optionsForItem = () => {
@@ -182,134 +183,139 @@ export default function EmailEditor({ email, onSave }: Props) {
     [currentBlock, setCurrentBlock, email, debouncedSave]
   )
 
-  return (
-    <div className="flex h-full w-full min-w-[180px] max-w-[226px] flex-col overflow-y-scroll border-l-[0.5px] border-r-[0.5px] border-zinc-200 bg-white lg:min-w-[270px] lg:max-w-[300px] dark:border-zinc-700 dark:bg-zinc-900">
-      {currentBlock && (
-        <div className="bg-zinc-50 p-3">
-          <Heading level={3}>{capitalizeFirstLetter(currentBlock.type)} properties</Heading>
-        </div>
-      )}
-      <Divider />
+  if (!currentBlock) return null
 
-      <div className="flex flex-col gap-4 p-4">
-        {options.includes(Options.TEXT) && currentBlock && 'content' in currentBlock && (
-          <Field>
-            <Label>Content</Label>
-            <Textbox
-              key={currentBlock.id}
-              value={currentBlock.content}
-              onChange={(e) => handleChange({ content: e })}
-            />
-          </Field>
-        )}
-        {options.includes(Options.FONT_SIZE) && (
-          <Field>
-            <Label>Font Size</Label>
-            <Input
-              key={`fontSize-${currentBlock?.id}`}
-              type="number"
-              value={currentBlock?.attributes.fontSize?.replace('px', '') || ''}
-              onChange={(e) => handleChange({ fontSize: e.target.value + 'px' })}
-            />
-          </Field>
-        )}
-        {options.includes(Options.FONT_WEIGHT) && (
-          <Field>
-            <Label>Font Weight</Label>
-            <Select
-              key={`fontWeight-${currentBlock?.id}`}
-              value={currentBlock?.attributes.fontWeight || ''}
-              onChange={(e) => handleChange({ fontWeight: e.target.value as CommonAttributes['fontWeight'] })}
-            >
-              <option value="normal">Normal</option>
-              <option value="bold">Bold</option>
-            </Select>
-          </Field>
-        )}
-        {options.includes(Options.TEXT_ALIGN) && (
-          <Field>
-            <Label>Text Align</Label>
-            <Select
-              key={`textAlign-${currentBlock?.id}`}
-              value={currentBlock?.attributes.textAlign || ''}
-              onChange={(e) => handleChange({ textAlign: e.target.value as CommonAttributes['textAlign'] })}
-            >
-              <option value="left">Left</option>
-              <option value="center">Center</option>
-              <option value="right">Right</option>
-            </Select>
-          </Field>
-        )}
-        {options.includes(Options.TEXT_COLOR) && (
-          <Field>
-            <Label>Text Color</Label>
-            <ColorInput
-              key={`color-${currentBlock?.id}`}
-              value={currentBlock?.attributes.color || ''}
-              onChange={(e) => handleChange({ color: e })}
-            />
-          </Field>
-        )}
-        {options.includes(Options.BACKGROUND_COLOR) && (
-          <Field>
-            <Label>Background Color</Label>
-            <ColorInput
-              key={`backgroundColor-${currentBlock?.id}`}
-              value={currentBlock?.attributes.backgroundColor || ''}
-              onChange={(e) => handleChange({ backgroundColor: e })}
-            />
-          </Field>
-        )}
-        {options.includes(Options.WIDTH) && (
-          <Field>
-            <Label>Width</Label>
-            <Input
-              key={`width-${currentBlock?.id}`}
-              type="number"
-              value={currentBlock?.attributes.width?.replace('px', '') || ''}
-              onChange={(e) => handleChange({ width: e.target.value + 'px' })}
-            />
-          </Field>
-        )}
-        {options.includes(Options.HEIGHT) && (
-          <Field>
-            <Label>Height</Label>
-            <Input
-              key={`height-${currentBlock?.id}`}
-              type="number"
-              value={currentBlock?.attributes.height?.replace('px', '') || ''}
-              onChange={(e) => handleChange({ height: e.target.value + 'px' })}
-            />
-          </Field>
-        )}
-        {options.includes(Options.PADDING) && (
-          <PaddingForm
-            padding={{
-              top: currentBlock?.attributes.paddingTop ?? currentBlock?.attributes.padding ?? '0px',
-              right: currentBlock?.attributes.paddingRight ?? currentBlock?.attributes.padding ?? '0px',
-              bottom: currentBlock?.attributes.paddingBottom ?? currentBlock?.attributes.padding ?? '0px',
-              left: currentBlock?.attributes.paddingLeft ?? currentBlock?.attributes.padding ?? '0px',
-            }}
-            onChange={(values: Partial<PaddingValues>) => {
-              const rowAttributes: Partial<RowBlockAttributes> = {
-                paddingTop: values.top,
-                paddingRight: values.right,
-                paddingBottom: values.bottom,
-                paddingLeft: values.left,
-              }
-              handleChange(rowAttributes)
-            }}
-          />
-        )}
-        {currentBlock?.type === 'row' && (
-          <RowEditor
-            row={currentBlock}
-            onColumnWidthChange={handleColumnWidthChange}
-            onColumnAttributeChange={handleColumnAttributeChange}
-            onRowAttributeChange={handleRowAttributeChange}
-          />
-        )}
+  return (
+    <div className="flex flex-col gap-4 p-4">
+      <div className="flex items-center justify-between gap-4">
+        <Text>{capitalizeFirstLetter(currentBlock.type)} Properties</Text>
+        <div className="flex gap-2">
+          <Button outline tooltip="Delete Block">
+            <TrashIcon className="!h-6 !w-6" />
+          </Button>
+          <Button outline tooltip="Duplicate Block">
+            <Square2StackIcon className="!h-6 !w-6" />
+          </Button>
+          <Button outline tooltip="Close Editor">
+            <XMarkIcon className="!h-6 !w-6" />
+          </Button>
+        </div>
       </div>
+      {options.includes(Options.TEXT) && currentBlock && 'content' in currentBlock && (
+        <Field>
+          <Label>Content</Label>
+          <Textbox key={currentBlock.id} value={currentBlock.content} onChange={(e) => handleChange({ content: e })} />
+        </Field>
+      )}
+      {options.includes(Options.FONT_SIZE) && (
+        <Field>
+          <Label>Font Size</Label>
+          <Input
+            key={`fontSize-${currentBlock?.id}`}
+            type="number"
+            value={currentBlock?.attributes.fontSize?.replace('px', '') || ''}
+            onChange={(e) => handleChange({ fontSize: e.target.value + 'px' })}
+          />
+        </Field>
+      )}
+      {options.includes(Options.FONT_WEIGHT) && (
+        <Field>
+          <Label>Font Weight</Label>
+          <Select
+            key={`fontWeight-${currentBlock?.id}`}
+            value={currentBlock?.attributes.fontWeight || ''}
+            onChange={(e) => handleChange({ fontWeight: e.target.value as CommonAttributes['fontWeight'] })}
+          >
+            <option value="normal">Normal</option>
+            <option value="bold">Bold</option>
+          </Select>
+        </Field>
+      )}
+      {options.includes(Options.TEXT_ALIGN) && (
+        <Field>
+          <Label>Text Align</Label>
+          <Select
+            key={`textAlign-${currentBlock?.id}`}
+            value={currentBlock?.attributes.textAlign || ''}
+            onChange={(e) => handleChange({ textAlign: e.target.value as CommonAttributes['textAlign'] })}
+          >
+            <option value="left">Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+          </Select>
+        </Field>
+      )}
+      {options.includes(Options.TEXT_COLOR) && (
+        <Field>
+          <Label>Text Color</Label>
+          <ColorInput
+            key={`color-${currentBlock?.id}`}
+            value={currentBlock?.attributes.color || ''}
+            onChange={(e) => handleChange({ color: e })}
+          />
+        </Field>
+      )}
+      {options.includes(Options.BACKGROUND_COLOR) && (
+        <Field>
+          <Label>Background Color</Label>
+          <ColorInput
+            key={`backgroundColor-${currentBlock?.id}`}
+            value={currentBlock?.attributes.backgroundColor || ''}
+            onChange={(e) => handleChange({ backgroundColor: e })}
+          />
+        </Field>
+      )}
+      {options.includes(Options.WIDTH) && (
+        <Field>
+          <Label>Width</Label>
+          <Input
+            key={`width-${currentBlock?.id}`}
+            type="number"
+            value={currentBlock?.attributes.width?.replace('px', '') || ''}
+            onChange={(e) => handleChange({ width: e.target.value + 'px' })}
+          />
+        </Field>
+      )}
+      {options.includes(Options.HEIGHT) && (
+        <Field>
+          <Label>Height</Label>
+          <Input
+            key={`height-${currentBlock?.id}`}
+            type="number"
+            value={currentBlock?.attributes.height?.replace('px', '') || ''}
+            onChange={(e) => handleChange({ height: e.target.value + 'px' })}
+          />
+        </Field>
+      )}
+      {options.includes(Options.PADDING) && (
+        <PaddingForm
+          padding={{
+            top: currentBlock?.attributes.paddingTop ?? currentBlock?.attributes.padding ?? '0px',
+            right: currentBlock?.attributes.paddingRight ?? currentBlock?.attributes.padding ?? '0px',
+            bottom: currentBlock?.attributes.paddingBottom ?? currentBlock?.attributes.padding ?? '0px',
+            left: currentBlock?.attributes.paddingLeft ?? currentBlock?.attributes.padding ?? '0px',
+          }}
+          onChange={(values: Partial<PaddingValues>) => {
+            const rowAttributes: Partial<RowBlockAttributes> = {
+              paddingTop: values.top,
+              paddingRight: values.right,
+              paddingBottom: values.bottom,
+              paddingLeft: values.left,
+            }
+            handleChange(rowAttributes)
+          }}
+        />
+      )}
+      {currentBlock?.type === 'row' && (
+        <RowEditor
+          row={currentBlock}
+          onColumnWidthChange={handleColumnWidthChange}
+          onColumnAttributeChange={handleColumnAttributeChange}
+          onRowAttributeChange={handleRowAttributeChange}
+        />
+      )}
     </div>
   )
 }
+
+export default BlockEditor

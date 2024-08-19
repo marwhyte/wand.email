@@ -63,7 +63,7 @@ export default function Content({ children, session }: Props) {
   let pathname = usePathname()
 
   const navItems = [
-    { name: 'Templates', href: '/home/templates', current: pathname.startsWith('/home/templates') },
+    { name: 'Templates', href: '/home', current: pathname.startsWith('/home') },
     { name: 'Settings', href: '/home/settings', current: pathname.startsWith('/home/settings') },
   ]
 

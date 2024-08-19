@@ -1,5 +1,6 @@
+import DragLine from '@/app/components/drag-line'
 import { applyCommonAttributes } from '@/lib/utils/misc'
-import { ArrowUpCircleIcon } from '@heroicons/react/20/solid'
+import { ArrowDownCircleIcon, ArrowUpCircleIcon } from '@heroicons/react/20/solid'
 import { Column } from '@react-email/components'
 import React, { useRef } from 'react'
 import { useDrop } from 'react-dnd'
@@ -14,7 +15,14 @@ type Props = {
   setDropTarget: React.Dispatch<
     React.SetStateAction<{ type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null>
   >
-  onBlockDrop: (blockId: string, targetType: 'block' | 'column', targetId: string, position: 'above' | 'below') => void
+  onBlockDrop: (
+    blockType: 'block' | 'newBlock',
+    blockId: string,
+    targetType: 'block' | 'column',
+    targetId: string,
+    position: 'above' | 'below',
+    newBlockType?: EmailBlockType
+  ) => void
 }
 
 export default function EmailColumn({
@@ -36,26 +44,18 @@ export default function EmailColumn({
 
   const width = `${(column.gridColumns / 12) * 100}%`
 
-  const [, drop] = useDrop({
-    accept: 'block',
-    hover(item: { type: string; id: string }, monitor) {
-      const hoverRect = ref.current?.getBoundingClientRect()
-      if (!hoverRect) return
-      const hoverMiddleY = (hoverRect.bottom - hoverRect.top) / 2
-      const clientOffset = monitor.getClientOffset()
-      const hoverClientY = clientOffset!.y - hoverRect.top
+  const isDropTarget = dropTarget?.type === 'column' && dropTarget.id === column.id
 
+  const [, drop] = useDrop({
+    accept: ['block', 'newBlock'],
+    hover(item: { type: 'block' | 'newBlock'; id: string; newBlockType?: EmailBlockType }, monitor) {
       if (column.blocks.length === 0) {
         setDropTarget({ type: 'column', id: column.id, position: 'above' })
-      } else if (hoverClientY < hoverMiddleY) {
-        setDropTarget({ type: 'block', id: column.blocks[0].id, position: 'above' })
-      } else {
-        setDropTarget({ type: 'block', id: column.blocks[column.blocks.length - 1].id, position: 'below' })
       }
     },
-    drop(item: { type: string; id: string }) {
+    drop(item: { type: 'block' | 'newBlock'; id: string; newBlockType?: EmailBlockType }) {
       if (dropTarget) {
-        onBlockDrop(item.id, dropTarget.type, dropTarget.id, dropTarget.position)
+        onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position, item.newBlockType)
       }
     },
   })
@@ -71,16 +71,26 @@ export default function EmailColumn({
         borderWidth: column.attributes.borderWidth,
         borderColor: column.attributes.borderColor,
       }}
-      className={column.blocks.length === 0 ? 'border-2 border-dashed border-blue-500 bg-blue-50 text-blue-500' : ''}
+      className={`${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget ? 'border-green-500 bg-green-100' : 'border-blue-500 text-blue-500'}`}
       onClick={handleColumnClick}
       width={width}
       // @ts-ignore
       ref={drop}
     >
       {column.blocks.length === 0 && (
-        <div className="justify-cente flex h-full w-full flex-col items-center">
-          <ArrowUpCircleIcon className="h-4 w-4" />
-          <div className="mt-2 text-center text-xs font-medium">Drag content here</div>
+        <div className="flex h-full w-full flex-col items-center justify-center py-2">
+          {isDropTarget ? (
+            <>
+              <ArrowDownCircleIcon className="h-6 w-6 text-green-500" />
+              <div className="mt-2 text-center text-sm font-medium text-green-600">Drop here</div>
+            </>
+          ) : (
+            <>
+              <ArrowUpCircleIcon className="h-6 w-6" />
+              <div className="mt-2 text-center text-sm font-medium">Drag content here</div>
+            </>
+          )}
+          {dropTarget && dropTarget.id === column.id && <DragLine direction={dropTarget.position} />}
         </div>
       )}
       {column.blocks.map((block) => (

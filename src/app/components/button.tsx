@@ -162,28 +162,42 @@ type ButtonProps = (
   | { color?: keyof typeof styles.colors; outline?: never; plain?: never }
   | { color?: never; outline: true; plain?: never }
   | { color?: never; outline?: never; plain: true }
-) & { className?: string; children: React.ReactNode } & (
-    | Omit<Headless.ButtonProps, 'className'>
-    | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>
-  )
+) & {
+  className?: string
+  children: React.ReactNode
+  tooltip?: string
+} & (Omit<Headless.ButtonProps, 'className'> | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>)
 
 export const Button = forwardRef(function Button(
-  { color, outline, plain, className, children, ...props }: ButtonProps,
+  { color, outline, plain, className, children, tooltip, ...props }: ButtonProps,
   ref: React.ForwardedRef<HTMLElement>
 ) {
   let classes = clsx(
     className,
     styles.base,
-    outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc'])
+    outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
+    tooltip && 'group relative'
+  )
+
+  const content = (
+    <>
+      <TouchTarget>{children}</TouchTarget>
+      {tooltip && (
+        <span className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100">
+          {tooltip}
+          <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
+        </span>
+      )}
+    </>
   )
 
   return 'href' in props ? (
     <Link {...props} className={classes} ref={ref as React.ForwardedRef<HTMLAnchorElement>}>
-      <TouchTarget>{children}</TouchTarget>
+      {content}
     </Link>
   ) : (
     <Headless.Button {...props} className={clsx(classes, 'cursor-pointer')} ref={ref}>
-      <TouchTarget>{children}</TouchTarget>
+      {content}
     </Headless.Button>
   )
 })
