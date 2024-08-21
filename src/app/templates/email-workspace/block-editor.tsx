@@ -58,7 +58,14 @@ const BlockEditor = ({ email, onSave }: Props) => {
       case 'button':
         return [Options.TEXT, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.PADDING]
       case 'heading':
-        return [Options.FONT_SIZE, Options.FONT_WEIGHT, Options.TEXT_COLOR, Options.TEXT, Options.PADDING]
+        return [
+          Options.TEXT,
+          Options.FONT_SIZE,
+          Options.FONT_WEIGHT,
+          Options.TEXT_COLOR,
+          Options.TEXT_ALIGN,
+          Options.PADDING,
+        ]
       case 'link':
         return [
           Options.TEXT_COLOR,
@@ -244,15 +251,11 @@ const BlockEditor = ({ email, onSave }: Props) => {
       {options.includes(Options.TEXT_ALIGN) && (
         <Field>
           <Label>Text Align</Label>
-          <Select
-            key={`textAlign-${currentBlock?.id}`}
-            value={currentBlock?.attributes.textAlign || ''}
-            onChange={(e) => handleChange({ textAlign: e.target.value as CommonAttributes['textAlign'] })}
-          >
-            <option value="left">Left</option>
-            <option value="center">Center</option>
-            <option value="right">Right</option>
-          </Select>
+          <div className="flex gap-2">
+            <Button onClick={() => handleChange({ textAlign: 'left' })}>Left</Button>
+            <Button onClick={() => handleChange({ textAlign: 'center' })}>Center</Button>
+            <Button onClick={() => handleChange({ textAlign: 'right' })}>Right</Button>
+          </div>
         </Field>
       )}
       {options.includes(Options.TEXT_COLOR) && (

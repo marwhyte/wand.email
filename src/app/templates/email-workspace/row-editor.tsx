@@ -207,7 +207,7 @@ export default function RowEditor({
         </DisclosureBody>
       </Disclosure>
 
-      <Disclosure title="Column Structure">
+      <Disclosure defaultOpen title="Column Structure">
         <DisclosureBody>
           <div className="flex justify-end">
             <Button plain onClick={handleAddColumn} disabled={row.columns.length >= 4} className="mb-2 text-blue-500">
@@ -247,7 +247,7 @@ export default function RowEditor({
           </div>
 
           {selectedColumnId && (
-            <div className="mt-4">
+            <div className="mt-4 space-y-4">
               <PaddingForm
                 padding={{
                   top: selectedColumn?.attributes.paddingTop ?? selectedColumn?.attributes.padding ?? '0px',
@@ -292,6 +292,15 @@ export default function RowEditor({
                   value={selectedColumn?.attributes.backgroundColor || ''}
                   onChange={(e) => onColumnAttributeChange(selectedColumnId, { backgroundColor: e.target.value })}
                 />
+              </Field>
+
+              <Field>
+                <Label>Column Align</Label>
+                <div className="flex gap-2">
+                  <Button onClick={() => onColumnAttributeChange(selectedColumnId, { align: 'left' })}>Left</Button>
+                  <Button onClick={() => onColumnAttributeChange(selectedColumnId, { align: 'center' })}>Center</Button>
+                  <Button onClick={() => onColumnAttributeChange(selectedColumnId, { align: 'right' })}>Right</Button>
+                </div>
               </Field>
             </div>
           )}
