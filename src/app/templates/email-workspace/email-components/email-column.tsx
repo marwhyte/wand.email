@@ -1,4 +1,3 @@
-import DragLine from '@/app/components/drag-line'
 import { applyCommonAttributes } from '@/lib/utils/misc'
 import { ArrowDownCircleIcon, ArrowUpCircleIcon } from '@heroicons/react/20/solid'
 import { Column } from '@react-email/components'
@@ -55,7 +54,7 @@ export default function EmailColumn({
     },
     drop(item: { type: 'block' | 'newBlock'; id: string; newBlockType?: EmailBlockType }) {
       if (dropTarget) {
-        onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position, item.newBlockType)
+        onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position)
       }
     },
   })
@@ -71,18 +70,18 @@ export default function EmailColumn({
         borderWidth: column.attributes.borderWidth,
         borderColor: column.attributes.borderColor,
       }}
-      className={`${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget ? 'border-green-500 bg-green-100' : 'border-blue-500 text-blue-500'}`}
+      className={`${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
       width={width}
       // @ts-ignore
       ref={drop}
     >
       {column.blocks.length === 0 && (
-        <div className="flex h-full w-full flex-col items-center justify-center py-2">
+        <div className="relative flex h-full w-full flex-col items-center justify-center py-2">
           {isDropTarget ? (
             <>
               <ArrowDownCircleIcon className="h-6 w-6 text-green-500" />
-              <div className="mt-2 text-center text-sm font-medium text-green-600">Drop here</div>
+              <div className="mt-2 text-center text-sm font-medium text-green-600">Drop content here</div>
             </>
           ) : (
             <>
@@ -90,7 +89,6 @@ export default function EmailColumn({
               <div className="mt-2 text-center text-sm font-medium">Drag content here</div>
             </>
           )}
-          {dropTarget && dropTarget.id === column.id && <DragLine direction={dropTarget.position} />}
         </div>
       )}
       {column.blocks.map((block) => (

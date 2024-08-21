@@ -9,10 +9,16 @@ import {
 import clsx from 'clsx'
 import { ComponentProps } from 'react'
 
-type TabGroupProps = ComponentProps<typeof HeadlessTabGroup>
+type TabGroupProps = ComponentProps<typeof HeadlessTabGroup> & {
+  value?: string
+}
 
-export function TabGroup({ children, ...props }: TabGroupProps) {
-  return <HeadlessTabGroup {...props}>{children}</HeadlessTabGroup>
+export function TabGroup({ children, value, ...props }: TabGroupProps) {
+  return (
+    <HeadlessTabGroup selectedIndex={value !== undefined ? parseInt(value) : undefined} {...props}>
+      {children}
+    </HeadlessTabGroup>
+  )
 }
 
 type TabListProps = ComponentProps<typeof HeadlessTabList>
@@ -25,23 +31,23 @@ export function TabList({ children, ...props }: TabListProps) {
   )
 }
 
-type TabProps = ComponentProps<typeof HeadlessTab>
+type TabProps = ComponentProps<typeof HeadlessTab> & {
+  selected: boolean
+}
 
-export function Tab({ children, disabled, ...props }: TabProps) {
+export function Tab({ children, disabled, selected, ...props }: TabProps) {
   return (
     <HeadlessTab
       {...props}
       disabled={disabled}
-      className={({ selected }: { selected: boolean }) =>
-        clsx(
-          'flex items-center justify-center rounded-lg px-2 py-1.5 text-sm font-medium leading-5',
-          'ring-blue-300 ring-opacity-60 ring-offset-2 ring-offset-zinc-100 focus:outline-none focus:ring-2 dark:ring-offset-zinc-900',
-          selected
-            ? 'bg-white text-zinc-900 dark:bg-zinc-700 dark:text-white'
-            : 'text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white',
-          disabled && 'cursor-not-allowed opacity-50'
-        )
-      }
+      className={clsx(
+        'flex items-center justify-center rounded-lg px-2 py-1.5 text-sm font-medium leading-5',
+        'ring-blue-300 ring-opacity-60 ring-offset-2 ring-offset-zinc-100 focus:outline-none focus:ring-2 dark:ring-offset-zinc-900',
+        selected
+          ? 'bg-white text-zinc-900 dark:bg-zinc-700 dark:text-white'
+          : 'text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white',
+        disabled && 'cursor-not-allowed opacity-50'
+      )}
     >
       {children}
     </HeadlessTab>

@@ -33,7 +33,7 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
   const baseBlock = {
     id: uuidv4(),
     type,
-    content: type.toUpperCase(),
+    content: type === 'button' ? 'Button' : `I'm a new ${type} block`,
     attributes: {},
   }
 

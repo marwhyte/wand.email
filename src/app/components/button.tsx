@@ -176,14 +176,14 @@ export const Button = forwardRef(function Button(
     className,
     styles.base,
     outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
-    tooltip && 'group relative'
+    tooltip && 'group'
   )
 
   const content = (
     <>
       <TouchTarget>{children}</TouchTarget>
       {tooltip && (
-        <span className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100">
           {tooltip}
           <span className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-800"></span>
         </span>

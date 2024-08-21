@@ -9,6 +9,7 @@ import { useBlock } from './block-provider'
 
 import { Button } from '@/app/components/button'
 import { ColorInput } from '@/app/components/color-input'
+import { Divider } from '@/app/components/divider'
 import { Text } from '@/app/components/text'
 import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
@@ -87,9 +88,9 @@ const BlockEditor = ({ email, onSave }: Props) => {
           ...currentBlock,
           attributes: { ...currentBlock.attributes, ...attributes },
         } as EmailBlock
-
-        if ('content' in updatedBlock && 'value' in attributes) {
-          updatedBlock.content = attributes.value as string
+        console.log(attributes)
+        if ('content' in updatedBlock && 'content' in attributes) {
+          updatedBlock.content = attributes.content as string
         }
 
         if ('gridColumns' in updatedBlock && 'gridColumns' in attributes) {
@@ -189,18 +190,19 @@ const BlockEditor = ({ email, onSave }: Props) => {
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between gap-4">
         <Text>{capitalizeFirstLetter(currentBlock.type)} Properties</Text>
-        <div className="flex gap-2">
+        <div className="mr-4 flex gap-2">
           <Button outline tooltip="Delete Block">
             <TrashIcon className="!h-6 !w-6" />
           </Button>
           <Button outline tooltip="Duplicate Block">
             <Square2StackIcon className="!h-6 !w-6" />
           </Button>
-          <Button outline tooltip="Close Editor">
+          <Button onClick={() => setCurrentBlock(null)} outline tooltip="Close Editor">
             <XMarkIcon className="!h-6 !w-6" />
           </Button>
         </div>
       </div>
+      <Divider className="mb-2" />
       {options.includes(Options.TEXT) && currentBlock && 'content' in currentBlock && (
         <Field>
           <Label>Content</Label>

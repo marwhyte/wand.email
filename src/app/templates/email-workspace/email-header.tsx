@@ -26,16 +26,18 @@ type Props = {
 
 const EmailHeader = ({ email, session, setWidth }: Props) => {
   const router = useRouter()
+  const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
-  const deviceOptions = [
+  const deviceOptions: { name: React.ReactNode; value: 'desktop' | 'mobile' }[] = [
     { name: <ComputerDesktopIcon className="h-5 w-5" />, value: 'desktop' },
     { name: <DevicePhoneMobileIcon className="h-5 w-5" />, value: 'mobile' },
   ]
 
   const handleDeviceChange = (index: number) => {
-    const newValue = deviceOptions[index].value
+    const newValue: 'desktop' | 'mobile' = deviceOptions[index].value
     setWidth(newValue === 'mobile' ? '360' : '600')
+    setSelectedDevice(newValue)
   }
 
   const sendTestEmail = async () => {
@@ -79,10 +81,12 @@ const EmailHeader = ({ email, session, setWidth }: Props) => {
             </div>
             <div className="flex items-center space-x-4">
               <DarkModeToggle />
-              <TabGroup className="flex justify-center" onChange={handleDeviceChange}>
+              <TabGroup value={selectedDevice} className="flex justify-center" onChange={handleDeviceChange}>
                 <TabList>
                   {deviceOptions.map((option) => (
-                    <Tab key={option.value}>{option.name}</Tab>
+                    <Tab selected={option.value === selectedDevice} key={option.value}>
+                      {option.name}
+                    </Tab>
                   ))}
                 </TabList>
               </TabGroup>

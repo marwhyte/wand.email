@@ -86,9 +86,9 @@ const generateItems = (): RowBlock[] => {
           {
             id: uuidv4(),
             type: 'heading',
-            as: 'h2',
             content: item.title,
             attributes: {
+              as: 'h2',
               maxWidth: '360px',
               display: 'inline-block',
               verticalAlign: 'middle',
@@ -159,6 +159,7 @@ export const goingTemplate: Email = {
   name: 'Going Template',
   preview: 'Yay! Cheap flights are headed your way',
   fontFamily: 'Arial, sans-serif',
+  color: '#3b82f6',
   bgColor: '#FFFFFF',
   rows: [
     {

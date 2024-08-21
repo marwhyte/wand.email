@@ -12,6 +12,7 @@ type Props = {
   email: Email
   onSave?: (email: Email) => void
   moveRow: (dragId: string, hoverId: string) => void
+  addRow: (gridColumns: number[], hoverId: string) => void
   width?: string
   dropLine: string | null
   onHover: (id: string, hoverClientY: number, hoverMiddleY: number) => void
@@ -25,7 +26,8 @@ type Props = {
     blockId: string,
     targetType: 'block' | 'column',
     targetId: string,
-    position: 'above' | 'below'
+    position: 'above' | 'below',
+    newBlockType?: EmailBlockType
   ) => void
 }
 
@@ -34,6 +36,7 @@ export default function EmailRow({
   email,
   onSave,
   moveRow,
+  addRow,
   dropLine,
   onHover,
   onDragEnd,
@@ -56,9 +59,11 @@ export default function EmailRow({
   })
 
   const [, drop] = useDrop({
-    accept: ['row'],
-    hover(item: { type: string; id: string }, monitor) {
+    accept: ['row', 'newBlock', 'block', 'newRow'],
+    hover(item: { type: 'row' | 'newBlock' | 'block' | 'newRow'; id: string }, monitor) {
       if (!ref.current) return
+
+      if (item.type !== 'row' && item.type !== 'newRow') return
 
       const dragId = item.id
       const hoverId = row.id
@@ -76,9 +81,18 @@ export default function EmailRow({
 
       onHover(hoverId, hoverClientY, hoverMiddleY)
     },
-    drop(item: { type: string; id: string }) {
+    drop(item: {
+      type: 'row' | 'newBlock' | 'block' | 'newRow'
+      id: string
+      newBlockType?: EmailBlockType
+      gridColumns?: number[]
+    }) {
       if (item.type === 'row' && dropLine !== null && item.id !== row.id) {
         moveRow(item.id, row.id)
+      } else if (dropLine !== null && item.type === 'newRow') {
+        addRow(item.gridColumns ?? [12], row.id)
+      } else if (dropTarget && item.type !== 'row' && item.type !== 'newRow') {
+        onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position, item.newBlockType)
       }
     },
   })

@@ -3,6 +3,7 @@
 import { createNewBlock } from '@/lib/data/templates'
 import { Body, Container, Head, Html, Preview } from '@react-email/components'
 import { useCallback, useState } from 'react'
+import { v4 as uuidv4 } from 'uuid' // Make sure to import uuid
 import EmailRow from './email-components/email-row'
 
 type Props = {
@@ -196,6 +197,47 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
     setDropTarget(null)
   }
 
+  const addRow = (gridColumns: number[]) => {
+    const newRows = [...email.rows]
+    const newRow: RowBlock = {
+      id: uuidv4(),
+      type: 'row',
+      attributes: {},
+      container: {
+        attributes: {},
+      },
+      columns: gridColumns.map((gridColumn) => ({
+        id: uuidv4(),
+        type: 'column',
+        gridColumns: gridColumn,
+        attributes: {
+          paddingTop: '10px',
+          paddingBottom: '10px',
+          paddingLeft: '10px',
+          paddingRight: '10px',
+        },
+        blocks: [],
+      })),
+    }
+
+    if (dropLine === 'end') {
+      newRows.push(newRow)
+    } else {
+      const dropIndex = newRows.findIndex((row) => row.id === dropLine)
+      if (dropIndex !== -1) {
+        newRows.splice(dropIndex, 0, newRow)
+      } else {
+        newRows.push(newRow) // Fallback to adding at the end if dropLine is not found
+      }
+    }
+
+    onSave?.({
+      ...email,
+      rows: newRows,
+    })
+    setDropLine(null)
+  }
+
   const emailRows = email.rows.map((row, index) => (
     <EmailRow
       onSave={onSave}
@@ -210,6 +252,7 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
       dropTarget={dropTarget}
       setDropTarget={setDropTarget}
       onBlockDrop={handleBlockDrop}
+      addRow={addRow}
     />
   ))
 
@@ -218,7 +261,7 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
       <Html>
         <Head />
         <Preview>{email.preview}</Preview>
-        <Body style={{ fontFamily: email.fontFamily, margin: 0, backgroundColor: email.bgColor }}>
+        <Body style={{ fontFamily: email.fontFamily, margin: 0, backgroundColor: email.bgColor, color: email.color }}>
           <Container>{emailRows}</Container>
         </Body>
       </Html>
@@ -227,7 +270,9 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
 
   return (
     <div className="flex-grow overflow-scroll pt-4">
-      <div>{emailRows}</div>
+      <div style={{ fontFamily: email.fontFamily, margin: 0, backgroundColor: email.bgColor, color: email.color }}>
+        {emailRows}
+      </div>
     </div>
   )
 }

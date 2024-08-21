@@ -4,6 +4,7 @@ type Email = {
   preview: string
   fontFamily: string
   bgColor: string
+  color: string
   rows: RowBlock[]
 }
 
@@ -127,7 +128,7 @@ type HeadingBlockAttributes = CommonAttributes & {
   fontFamily?: string
   letterSpacing?: string
   textIndent?: string
-  as?: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+  as: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
 }
 
 type ImageBlockAttributes = CommonAttributes & {
