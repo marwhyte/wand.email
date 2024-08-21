@@ -10,6 +10,7 @@ import { useBlock } from './block-provider'
 import { Button } from '@/app/components/button'
 import { ColorInput } from '@/app/components/color-input'
 import { Divider } from '@/app/components/divider'
+import FileUploader from '@/app/components/file-uploader'
 import { Text } from '@/app/components/text'
 import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
@@ -34,6 +35,7 @@ enum Options {
   HEIGHT = 'height',
   GRID_COLUMNS = 'grid-columns',
   PADDING = 'padding',
+  SRC = 'src',
 }
 
 const BlockEditor = ({ email, onSave }: Props) => {
@@ -52,7 +54,7 @@ const BlockEditor = ({ email, onSave }: Props) => {
           Options.PADDING,
         ]
       case 'image':
-        return [Options.WIDTH, Options.HEIGHT, Options.PADDING]
+        return [Options.WIDTH, Options.HEIGHT, Options.PADDING, Options.SRC]
       case 'button':
         return [Options.TEXT, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.PADDING]
       case 'heading':
@@ -82,7 +84,7 @@ const BlockEditor = ({ email, onSave }: Props) => {
   )
 
   const handleChange = useCallback(
-    (attributes: Partial<CommonAttributes | TextBlock>) => {
+    (attributes: Partial<CommonAttributes | TextBlock | ImageBlockAttributes>) => {
       if (currentBlock) {
         const updatedBlock = {
           ...currentBlock,
@@ -203,6 +205,12 @@ const BlockEditor = ({ email, onSave }: Props) => {
         </div>
       </div>
       <Divider className="mb-2" />
+      {options.includes(Options.SRC) && currentBlock && 'src' in currentBlock.attributes && (
+        <Field>
+          <Label>Image</Label>
+          <FileUploader onUpload={(src) => handleChange({ src })} />
+        </Field>
+      )}
       {options.includes(Options.TEXT) && currentBlock && 'content' in currentBlock && (
         <Field>
           <Label>Content</Label>

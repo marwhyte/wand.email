@@ -72,10 +72,6 @@ type CommonAttributes = {
   paddingBottom?: string
   paddingLeft?: string
   padding?: string
-  marginTop?: string
-  marginRight?: string
-  marginBottom?: string
-  marginLeft?: string
   display?: string
   width?: string
   maxWidth?: string

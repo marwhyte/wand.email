@@ -8,10 +8,11 @@ type Props = {
 
 export default function EmailText({ block }: Props) {
   const additionalStyles = {
-    marginTop: block.attributes.marginTop ?? '0',
-    marginBottom: block.attributes.marginBottom ?? '0',
-    marginLeft: block.attributes.marginLeft ?? '0',
-    marginRight: block.attributes.marginRight ?? '0',
+    paddingTop: block.attributes.paddingTop ?? '10px',
+    paddingBottom: block.attributes.paddingBottom ?? '10px',
+    paddingLeft: block.attributes.paddingLeft ?? '0',
+    paddingRight: block.attributes.paddingRight ?? '0',
+    margin: 0,
     fontFamily: block.attributes.fontFamily,
     letterSpacing: block.attributes.letterSpacing,
     textIndent: block.attributes.textIndent,
