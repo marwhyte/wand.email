@@ -97,7 +97,6 @@ const BlockEditor = ({ email, onSave }: Props) => {
           ...currentBlock,
           attributes: { ...currentBlock.attributes, ...attributes },
         } as EmailBlock
-        console.log(attributes)
         if ('content' in updatedBlock && 'content' in attributes) {
           updatedBlock.content = attributes.content as string
         }
@@ -197,17 +196,17 @@ const BlockEditor = ({ email, onSave }: Props) => {
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <div className="flex items-center justify-between gap-4">
+      <div className="mx-4 flex items-center justify-between gap-4">
         <Text>{capitalizeFirstLetter(currentBlock.type)} Properties</Text>
-        <div className="mr-4 flex gap-2">
+        <div className="flex gap-2">
           <Button outline tooltip="Delete Block">
-            <TrashIcon className="!h-6 !w-6" />
+            <TrashIcon className="!h-4 !w-4" />
           </Button>
           <Button outline tooltip="Duplicate Block">
-            <Square2StackIcon className="!h-6 !w-6" />
+            <Square2StackIcon className="!h-4 !w-4" />
           </Button>
           <Button onClick={() => setCurrentBlock(null)} outline tooltip="Close Editor">
-            <XMarkIcon className="!h-6 !w-6" />
+            <XMarkIcon className="!h-4 !w-4" />
           </Button>
         </div>
       </div>
@@ -251,7 +250,7 @@ const BlockEditor = ({ email, onSave }: Props) => {
       {options.includes(Options.TEXT_ALIGN) && (
         <Field>
           <Label>Text Align</Label>
-          <div className="flex gap-2">
+          <div className="mt-2 flex gap-2">
             <Button onClick={() => handleChange({ textAlign: 'left' })}>Left</Button>
             <Button onClick={() => handleChange({ textAlign: 'center' })}>Center</Button>
             <Button onClick={() => handleChange({ textAlign: 'right' })}>Right</Button>

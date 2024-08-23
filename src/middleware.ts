@@ -2,7 +2,7 @@ import NextAuth from 'next-auth'
 import { NextResponse } from 'next/server'
 import { authConfig } from './auth.config'
 
-import { HOME, PUBLIC_ROUTES, ROOT } from './lib/routes'
+import { PUBLIC_ROUTES, ROOT } from './lib/routes'
 
 const { auth } = NextAuth(authConfig)
 export async function middleware(request: any) {
@@ -17,10 +17,6 @@ export async function middleware(request: any) {
 
   if (!isAuthenticated && !isPublicRoute) {
     return NextResponse.redirect(new URL('/', nextUrl))
-  }
-
-  if (isAuthenticated && isRoot) {
-    return NextResponse.redirect(new URL(HOME, nextUrl))
   }
 }
 

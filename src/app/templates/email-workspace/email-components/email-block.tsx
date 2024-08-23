@@ -5,11 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
 import { createPortal } from 'react-dom'
 import { useBlock } from '../block-provider'
-import EmailButton from './email-button'
-import EmailHeading from './email-heading'
-import EmailImage from './email-image'
-import EmailLink from './email-link'
-import EmailText from './email-text'
+import RenderBlock from '../render-block'
 
 type Props = {
   block: EmailBlock
@@ -51,23 +47,6 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
     },
     [block, onSelect]
   )
-
-  const renderBlock = () => {
-    switch (block.type) {
-      case 'text':
-        return <EmailText block={block} />
-      case 'heading':
-        return <EmailHeading block={block} />
-      case 'image':
-        return <EmailImage block={block} />
-      case 'button':
-        return <EmailButton block={block} />
-      case 'link':
-        return <EmailLink block={block} />
-      default:
-        return null
-    }
-  }
 
   const [, drop] = useDrop({
     accept: ['block', 'newBlock'],
@@ -122,14 +101,14 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
             'absolute -right-5 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-move items-center justify-center rounded-full bg-blue-500',
             currentBlock?.id === block.id || isHovered ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
           )}
-          style={{ zIndex: 1001 }}
+          style={{ zIndex: 11 }}
         >
           <ArrowsPointingOutIcon className="h-5 w-5 text-white" />
         </div>
 
         <DragPreviewImage connect={preview} src="/block.svg" />
 
-        {renderBlock()}
+        <RenderBlock block={block} />
 
         {dropTarget && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
       </div>
@@ -140,7 +119,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
           <div
             className="fixed bg-blue-500 px-2 py-1 text-sm font-semibold text-white transition-opacity duration-200"
             style={{
-              zIndex: 2004,
+              zIndex: 13,
               top: `${labelPosition.top}px`,
               left: `${labelPosition.left}px`,
               transform: 'translateX(-94%)',

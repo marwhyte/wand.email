@@ -10,7 +10,7 @@ export default async function TemplatesPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <ul role="list" className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         <Link href="/templates/going">
-          <li className="col-span-1 flex flex-col divide-y rounded-lg border border-green-200 text-center outline-green-200 hover:outline">
+          <li className="col-span-1 flex flex-col divide-y rounded-lg border border-green-200 bg-white text-center outline-green-200 hover:outline">
             <div className="flex flex-1 flex-col py-8">
               <Image alt="Going logo" src="/going/going-logo.png" width={100} height={100} className="mx-auto mb-4" />
               <img alt="Going demo" src="/going/demo.png" className="full-w" />

@@ -1,7 +1,6 @@
 'use client'
 
 import { createNewBlock } from '@/lib/data/templates'
-import { Body, Container, Head, Html, Preview } from '@react-email/components'
 import { useCallback, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid' // Make sure to import uuid
 import EmailRow from './email-components/email-row'
@@ -9,11 +8,10 @@ import EmailRow from './email-components/email-row'
 type Props = {
   email: Email
   onSave?: (email: Email) => void
-  renderFullEmail?: boolean
   width?: '600' | '360'
 }
 
-const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }: Props) => {
+const EmailRenderer = ({ email, onSave, width = '600' }: Props) => {
   const [dropLine, setDropLine] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<{
     type: 'block' | 'column'
@@ -50,8 +48,6 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
   const handleDragEnd = () => {
     setDropLine(null)
   }
-
-  console.log(dropTarget)
 
   const handleBlockDrop = (
     blockType: 'block' | 'newBlock',
@@ -256,23 +252,9 @@ const EmailRenderer = ({ email, onSave, renderFullEmail = false, width = '600' }
     />
   ))
 
-  if (renderFullEmail) {
-    return (
-      <Html>
-        <Head />
-        <Preview>{email.preview}</Preview>
-        <Body style={{ fontFamily: email.fontFamily, margin: 0, backgroundColor: email.bgColor, color: email.color }}>
-          <Container>{emailRows}</Container>
-        </Body>
-      </Html>
-    )
-  }
-
   return (
     <div className="flex-grow overflow-scroll pt-4">
-      <div style={{ fontFamily: email.fontFamily, margin: 0, backgroundColor: email.bgColor, color: email.color }}>
-        {emailRows}
-      </div>
+      <div style={{ fontFamily: email.fontFamily, margin: 0, color: email.color }}>{emailRows}</div>
     </div>
   )
 }

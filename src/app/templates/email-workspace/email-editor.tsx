@@ -44,7 +44,6 @@ export default function EmailEditor({ email, onSave }: Props) {
 
   const handleTabChange = (index: number) => {
     const newTab = Object.values(Tabs)[index]
-    console.log(newTab)
     if (newTab !== Tabs.ROWS && currentBlock?.type === 'row') {
       setCurrentBlock?.(null)
     } else if (newTab === Tabs.ROWS && currentBlock && currentBlock?.type !== 'row') {
@@ -54,6 +53,9 @@ export default function EmailEditor({ email, onSave }: Props) {
   }
 
   const getTabDescription = () => {
+    if (currentBlock) {
+      return null
+    }
     if (tab === Tabs.CONTENT) {
       return 'Drag a piece of content into the email to add it'
     } else if (tab === Tabs.ROWS) {

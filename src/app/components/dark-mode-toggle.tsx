@@ -19,6 +19,8 @@ const DarkModeToggle = ({ sideBarItem }: Props) => {
     setMounted(true)
   }, [])
 
+  return null
+
   if (!mounted) {
     return null
   }

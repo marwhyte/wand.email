@@ -1,6 +1,8 @@
+import { auth } from '@/auth'
 import type { Metadata } from 'next'
 import { ThemeProvider } from 'next-themes'
 import { Inter } from 'next/font/google'
+import Content from './content'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -18,6 +20,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const session = await auth()
+
   return (
     <html
       suppressHydrationWarning
@@ -29,7 +33,7 @@ export default async function RootLayout({
       </head>
       <body className={inter.className + ' h-full'}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
+          <Content session={session}>{children}</Content>
         </ThemeProvider>
       </body>
     </html>

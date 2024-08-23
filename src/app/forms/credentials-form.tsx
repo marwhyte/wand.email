@@ -47,7 +47,7 @@ const CredentialsForm = ({ register }: Props) => {
         if (response.status === 201) {
           await doCredentialsLogin(formData)
 
-          router.push('/home')
+          router.push('/templates')
         } else {
           setError(await response.text())
         }
@@ -59,7 +59,7 @@ const CredentialsForm = ({ register }: Props) => {
       try {
         await doCredentialsLogin(formData)
 
-        router.push('/home')
+        router.push('/templates')
       } catch (e) {
         console.error('here', e)
         setError('Invalid credentials. Please try again.')

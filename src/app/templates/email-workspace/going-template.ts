@@ -245,11 +245,12 @@ export const goingTemplate: Email = {
         attributes: {
           ...defaultContainerStyles.attributes,
           backgroundColor: '#004449',
-          paddingTop: '30px',
-          paddingBottom: '0',
         },
       },
-      attributes: {},
+      attributes: {
+        paddingTop: '30px',
+        paddingBottom: '0',
+      },
       columns: [
         {
           id: uuidv4(),
@@ -458,11 +459,6 @@ export const goingTemplate: Email = {
           attributes: { maxWidth: '480px', textAlign: 'center' },
           gridColumns: 12,
           blocks: [
-            // ...createSocialIcon('facebook.png', 'https://www.facebook.com').blocks,
-            // ...createSocialIcon('instagram.png', 'https://www.instagram.com').blocks,
-            // ...createSocialIcon('x.png', 'https://www.x.com').blocks,
-            // ...createSocialIcon('tiktok.png', 'https://www.tiktok.com').blocks,
-            // ...createSocialIcon('youtube.png', 'https://www.youtube.com').blocks,
             {
               id: uuidv4(),
               type: 'text',
@@ -495,7 +491,8 @@ export const goingTemplate: Email = {
             {
               id: uuidv4(),
               type: 'text',
-              content: '|',
+              content:
+                '<a href="/" style="color: #004449; font-size: 12px; font-weight: bold; text-decoration: none;">Advertise</a> | <a href="/" style="color: #004449; font-size: 12px; font-weight: bold; text-decoration: none;">Email Preferences</a> | <a href="/" style="color: #004449; font-size: 12px; font-weight: bold; text-decoration: none;">Unsubscribe</a>',
               attributes: {
                 color: '#004449',
                 fontSize: '12px',
@@ -503,68 +500,6 @@ export const goingTemplate: Email = {
                 paddingRight: '4px',
                 paddingBottom: '0',
                 paddingLeft: '4px',
-              },
-            },
-            {
-              id: uuidv4(),
-              type: 'link',
-              content: 'Advertise',
-              attributes: {
-                href: '/',
-                color: '#004449',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                textDecoration: 'none',
-              },
-            },
-            {
-              id: uuidv4(),
-              type: 'text',
-              content: '|',
-              attributes: {
-                color: '#004449',
-                fontSize: '12px',
-                paddingTop: '0',
-                paddingRight: '4px',
-                paddingBottom: '0',
-                paddingLeft: '4px',
-              },
-            },
-            {
-              id: uuidv4(),
-              type: 'link',
-              content: 'Email Preferences',
-              attributes: {
-                href: '/',
-                color: '#004449',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                textDecoration: 'none',
-              },
-            },
-            {
-              id: uuidv4(),
-              type: 'text',
-              content: '|',
-              attributes: {
-                color: '#004449',
-                fontSize: '12px',
-                paddingTop: '0',
-                paddingRight: '4px',
-                paddingBottom: '0',
-                paddingLeft: '4px',
-              },
-            },
-            {
-              id: uuidv4(),
-              type: 'link',
-              content: 'Unsubscribe',
-              attributes: {
-                href: '/',
-                color: '#004449',
-                fontSize: '12px',
-                fontWeight: 'bold',
-                textDecoration: 'none',
               },
             },
           ],

@@ -122,7 +122,7 @@ export default function EmailRow({
               : 'opacity-0 group-hover:opacity-100'
         )}
         style={{
-          zIndex: 1000,
+          zIndex: 10,
           boxShadow: '0 0 0 2px rgb(59, 130, 246)',
           borderRadius: '2px',
         }}
@@ -152,7 +152,7 @@ export default function EmailRow({
                 ? 'opacity-0'
                 : 'opacity-0 transition-opacity duration-200 group-hover:opacity-100'
           )}
-          style={{ zIndex: 1001 }}
+          style={{ zIndex: 11 }}
         >
           <ArrowsPointingOutIcon className="h-6 w-6 text-white" />
         </div>
@@ -187,7 +187,7 @@ export default function EmailRow({
           className={`absolute -bottom-7 right-1 bg-blue-500 px-2 py-1 text-sm font-semibold text-white transition-opacity duration-200 ${
             currentBlock?.id !== row.id && !isChildHovered ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'
           }`}
-          style={{ zIndex: 1002 }}
+          style={{ zIndex: 12 }}
         >
           Row
         </div>

@@ -142,6 +142,8 @@ export default function RowEditor({
 
   const selectedColumn = row.columns.find((col) => col.id === selectedColumnId)
 
+  console.log(row.attributes)
+
   return (
     <div className="space-y-4">
       <Disclosure title="Layout">
