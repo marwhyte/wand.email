@@ -22,10 +22,10 @@ import EmailRendererFinal from './email-renderer-final'
 type Props = {
   email: Email
   session: Session | null
-  setWidth: (width: '600' | '360') => void
+  setMobileView: (mobileView: boolean) => void
 }
 
-const EmailHeader = ({ email, session, setWidth }: Props) => {
+const EmailHeader = ({ email, session, setMobileView }: Props) => {
   const router = useRouter()
   const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -38,7 +38,7 @@ const EmailHeader = ({ email, session, setWidth }: Props) => {
 
   const handleDeviceChange = (index: number) => {
     const newValue: 'desktop' | 'mobile' = deviceOptions[index].value
-    setWidth(newValue === 'mobile' ? '360' : '600')
+    setMobileView(newValue === 'mobile')
     setSelectedDevice(newValue)
   }
 

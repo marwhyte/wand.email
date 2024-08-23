@@ -5,6 +5,7 @@ type Email = {
   fontFamily: string
   bgColor: string
   color: string
+  width: string
   rows: RowBlock[]
 }
 
@@ -77,6 +78,10 @@ type CommonAttributes = {
   maxWidth?: string
   height?: string
   backgroundColor?: string
+  backgroundImage?: string
+  backgroundSize?: string
+  backgroundPosition?: string
+  backgroundRepeat?: string
   borderRadius?: string
   border?: string
   textAlign?: 'left' | 'center' | 'right' | 'justify'

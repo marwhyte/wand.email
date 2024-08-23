@@ -11,13 +11,15 @@ const EmailRendererFinal = ({ email }: Props) => {
     <Html>
       <Head />
       <Preview>{email.preview}</Preview>
-      <Body style={{ fontFamily: email.fontFamily, margin: 0, backgroundColor: email.bgColor, color: email.color }}>
-        <Container>
+      <Body style={{ margin: 0, backgroundColor: email.bgColor, color: email.color, fontFamily: email.fontFamily }}>
+        <Container width={email.width} style={{ maxWidth: email.width }}>
           {email.rows.map((row) => (
             <Container
               key={row.id}
               style={{
                 ...applyCommonAttributes(row.container.attributes),
+                width: email.width,
+                maxWidth: email.width,
               }}
             >
               <Row align={row.attributes.align} style={{ ...applyCommonAttributes(row.attributes) }}>

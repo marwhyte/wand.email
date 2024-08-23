@@ -11,6 +11,7 @@ import 'react-quill/dist/quill.snow.css'
 import BlockEditor from './block-editor'
 import EmailComponents from './email-components'
 import EmailRows from './email-rows'
+import EmailSettings from './email-settings'
 
 type Props = {
   email: Email
@@ -92,6 +93,7 @@ export default function EmailEditor({ email, onSave }: Props) {
       {currentBlock && <BlockEditor email={email} onSave={onSave} />}
       {tab === Tabs.CONTENT && !currentBlock && <EmailComponents email={email} />}
       {tab === Tabs.ROWS && !currentBlock && <EmailRows />}
+      {tab === Tabs.SETTINGS && <EmailSettings email={email} onSave={onSave} />}
     </div>
   )
 }

@@ -3,7 +3,6 @@
 import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
-import debounce from 'lodash.debounce'
 import { useCallback } from 'react'
 import { useBlock } from './block-provider'
 
@@ -84,9 +83,12 @@ const BlockEditor = ({ email, onSave }: Props) => {
   const options = optionsForItem()
 
   const debouncedSave = useCallback(
-    debounce((updatedTemplate: Email) => {
+    (updatedTemplate: Email) => {
       onSave(updatedTemplate)
-    }, 300),
+    },
+    // debounce((updatedTemplate: Email) => {
+    //   onSave(updatedTemplate)
+    // }, 300)
     [onSave]
   )
 

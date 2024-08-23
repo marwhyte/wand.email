@@ -8,10 +8,10 @@ import EmailRow from './email-components/email-row'
 type Props = {
   email: Email
   onSave?: (email: Email) => void
-  width?: '600' | '360'
+  mobileView: boolean
 }
 
-const EmailRenderer = ({ email, onSave, width = '600' }: Props) => {
+const EmailRenderer = ({ email, onSave, mobileView }: Props) => {
   const [dropLine, setDropLine] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<{
     type: 'block' | 'column'
@@ -241,7 +241,7 @@ const EmailRenderer = ({ email, onSave, width = '600' }: Props) => {
       key={row.id}
       row={row}
       moveRow={moveRow}
-      width={width}
+      mobileView={mobileView}
       dropLine={dropLine}
       onHover={handleHover}
       onDragEnd={handleDragEnd}

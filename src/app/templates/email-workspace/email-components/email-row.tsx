@@ -13,7 +13,7 @@ type Props = {
   onSave?: (email: Email) => void
   moveRow: (dragId: string, hoverId: string) => void
   addRow: (gridColumns: number[], hoverId: string) => void
-  width?: string
+  mobileView: boolean
   dropLine: string | null
   onHover: (id: string, hoverClientY: number, hoverMiddleY: number) => void
   onDragEnd: () => void
@@ -42,7 +42,7 @@ export default function EmailRow({
   onDragEnd,
   dropTarget,
   setDropTarget,
-  width,
+  mobileView,
   onBlockDrop,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
@@ -161,9 +161,12 @@ export default function EmailRow({
       {/* Wrap the content in a relative div */}
       <div className="relative" style={{ zIndex: 2 }}>
         <Container
+          bgcolor={email.bgColor}
+          width={mobileView ? '360' : `${email.width}`}
           style={{
+            backgroundColor: email.bgColor,
             ...applyCommonAttributes(row.container.attributes),
-            ...(width ? { width: `${width}px` } : {}),
+            maxWidth: mobileView ? '360px' : `${email.width}px`,
           }}
         >
           <Row align={row.attributes.align} style={{ ...applyCommonAttributes(row.attributes) }}>

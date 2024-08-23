@@ -3,7 +3,6 @@ import { v4 as uuidv4 } from 'uuid'
 
 const defaultContainerStyles = {
   attributes: {
-    backgroundColor: '#ffffff',
     backgroundImage: 'none',
     backgroundPosition: 'top left',
     backgroundRepeat: 'no-repeat',
@@ -159,6 +158,7 @@ export const goingTemplate: Email = {
   name: 'Going Template',
   preview: 'Yay! Cheap flights are headed your way',
   fontFamily: 'Arial, sans-serif',
+  width: '600',
   color: '#3b82f6',
   bgColor: '#FFFFFF',
   rows: [
@@ -404,7 +404,6 @@ export const goingTemplate: Email = {
           paddingRight: '15px',
           paddingBottom: '30px',
           paddingLeft: '15px',
-          backgroundColor: '#FFFFFF',
         },
       },
       attributes: {},
@@ -448,7 +447,6 @@ export const goingTemplate: Email = {
           paddingRight: '30px',
           paddingBottom: '60px',
           paddingLeft: '30px',
-          backgroundColor: '#FFFFFF',
         },
       },
       attributes: {},

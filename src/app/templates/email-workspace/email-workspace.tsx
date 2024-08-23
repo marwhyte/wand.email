@@ -23,7 +23,7 @@ export default function Workspace({ id, session }: Props) {
     setEmail(email)
   }
 
-  const [width, setWidth] = useState<'600' | '360'>('600')
+  const [mobileView, setMobileView] = useState(false)
 
   if (!email) {
     return <div>Email not found</div>
@@ -33,10 +33,10 @@ export default function Workspace({ id, session }: Props) {
     <BlockProvider>
       <DndProvider backend={HTML5Backend}>
         <div>
-          <EmailHeader email={email} session={session} setWidth={setWidth} />
+          <EmailHeader email={email} session={session} setMobileView={setMobileView} />
           {email ? (
             <div className="flex h-full w-full flex-row overflow-hidden" style={{ height: 'calc(100vh - 65px)' }}>
-              <EmailRenderer onSave={handleSave} width={width} email={email} />
+              <EmailRenderer onSave={handleSave} mobileView={mobileView} email={email} />
               <EmailEditor email={email} onSave={handleSave} />
             </div>
           ) : (
