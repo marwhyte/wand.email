@@ -18,6 +18,6 @@ export interface ProjectTable {
   id: Generated<string>
   title: string
   user_id: string
-  content: string
+  content: unknown
   created_at: Date
 }

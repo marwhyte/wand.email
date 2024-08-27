@@ -63,8 +63,8 @@ function AccountDropdownMenu({ anchor, session }: AccountDropdownMenuProps) {
 export default function Content({ children, session }: Props) {
   let pathname = usePathname()
 
-  // Check if the pathname matches /template/:id
-  const isTemplatePage = /^\/templates\/[^/]+$/.test(pathname)
+  // Check if the pathname matches /templates/:id or /projects/:id
+  const isTemplatePage = /^\/templates\/[^/]+$/.test(pathname) || /^\/projects\/[^/]+$/.test(pathname)
 
   const navItems = [
     { name: 'Why SwiftMailer', href: '/', current: pathname === '/' },

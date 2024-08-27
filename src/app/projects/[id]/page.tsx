@@ -11,7 +11,9 @@ export default async function ProjectsPage({ params }: { params: { id: string } 
     return <div>Project not found</div>
   }
 
-  const email = JSON.parse(project.content)
+  console.log(project.content)
+
+  const email = project.content
 
   return (
     <EmailProvider defaultEmail={email}>

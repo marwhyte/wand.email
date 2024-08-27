@@ -1,6 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
+import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db'
 
 export async function getProjects() {
@@ -19,13 +20,23 @@ export async function addProject(title: string, content?: string) {
     throw new Error('User not authenticated')
   }
 
+  const defaultContent = JSON.stringify({
+    id: uuidv4(),
+    name: title,
+    preview: '',
+    fontFamily: 'Arial',
+    bgColor: '#FFFFFF',
+    color: '#000000',
+    width: '600px',
+    rows: [],
+  })
   const project = await db
     .insertInto('projects')
     .values({
       created_at: new Date(),
       user_id: session.user.id,
       title,
-      content: content || '',
+      content: content || defaultContent,
     })
     .returningAll()
     .executeTakeFirst()

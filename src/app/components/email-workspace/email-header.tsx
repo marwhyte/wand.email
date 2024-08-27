@@ -20,6 +20,7 @@ import { render } from '@react-email/components'
 import { Session } from 'next-auth'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { Heading } from '../heading'
 import { useEmail } from './email-provider'
 import EmailRendererFinal from './email-renderer-final'
 
@@ -101,16 +102,19 @@ const EmailHeader = ({ session, setMobileView }: Props) => {
   return (
     <>
       <header className="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
           <Navbar className="h-16">
-            <div className="flex w-full items-center justify-between">
-              <div className="flex items-center">
+            <div className="flex w-full items-center">
+              <div className="flex flex-1 items-center">
                 <NavbarItem href="/templates" className="ml-4">
                   <ChevronLeftIcon className="size-4" />
                   Back to Templates
                 </NavbarItem>
               </div>
-              <div className="flex items-center space-x-4">
+              <div className="flex-1 text-center">
+                <Heading level={1}>{email.name}</Heading>
+              </div>
+              <div className="flex flex-1 items-center justify-end space-x-4">
                 <DarkModeToggle />
                 <TabGroup value={selectedDevice} className="flex justify-center" onChange={handleDeviceChange}>
                   <TabList>

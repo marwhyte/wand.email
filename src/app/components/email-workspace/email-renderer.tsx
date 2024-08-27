@@ -2,6 +2,7 @@
 
 import { createNewBlock } from '@/lib/data/templates'
 import { useCallback, useState } from 'react'
+import { useDrop } from 'react-dnd'
 import { v4 as uuidv4 } from 'uuid' // Make sure to import uuid
 import EmailRow from './email-components/email-row'
 import { useEmail } from './email-provider'
@@ -234,25 +235,85 @@ const EmailRenderer = ({ mobileView }: Props) => {
     setDropLine(null)
   }
 
-  const emailRows = email.rows.map((row, index) => (
-    <EmailRow
-      key={row.id}
-      row={row}
-      moveRow={moveRow}
-      mobileView={mobileView}
-      dropLine={dropLine}
-      onHover={handleHover}
-      onDragEnd={handleDragEnd}
-      dropTarget={dropTarget}
-      setDropTarget={setDropTarget}
-      onBlockDrop={handleBlockDrop}
-      addRow={addRow}
-    />
-  ))
+  const handleEmptyStateDrop = (item: {
+    type: 'newBlock' | 'newRow'
+    id: string
+    newBlockType?: EmailBlockType
+    gridColumns?: number[]
+  }) => {
+    if (item.type === 'newRow') {
+      addRow(item.gridColumns ?? [12])
+    } else if (item.type === 'newBlock' && item.newBlockType) {
+      const newRow: RowBlock = {
+        id: uuidv4(),
+        type: 'row',
+        attributes: {},
+        container: {
+          attributes: {},
+        },
+        columns: [
+          {
+            id: uuidv4(),
+            type: 'column',
+            gridColumns: 12,
+            attributes: {
+              paddingTop: '10px',
+              paddingBottom: '10px',
+              paddingLeft: '10px',
+              paddingRight: '10px',
+            },
+            blocks: [createNewBlock(item.newBlockType)],
+          },
+        ],
+      }
+      setEmail({
+        ...email,
+        rows: [newRow],
+      })
+    }
+  }
+
+  const [{ isOver }, drop] = useDrop({
+    accept: ['newBlock', 'newRow'],
+    drop: handleEmptyStateDrop,
+    collect: (monitor) => ({
+      isOver: !!monitor.isOver(),
+    }),
+  })
 
   return (
     <div className="flex-grow overflow-scroll pt-4">
-      <div style={{ fontFamily: email.fontFamily, margin: 0, color: email.color }}>{emailRows}</div>
+      <div style={{ fontFamily: email.fontFamily, margin: 0, color: email.color }}>
+        {email.rows.length > 0 ? (
+          email.rows.map((row) => (
+            <EmailRow
+              key={row.id}
+              row={row}
+              moveRow={moveRow}
+              mobileView={mobileView}
+              dropLine={dropLine}
+              onHover={handleHover}
+              onDragEnd={handleDragEnd}
+              dropTarget={dropTarget}
+              setDropTarget={setDropTarget}
+              onBlockDrop={handleBlockDrop}
+              addRow={addRow}
+            />
+          ))
+        ) : (
+          <div
+            ref={drop}
+            className={`flex h-64 items-center justify-center rounded-lg border-2 border-dashed transition-colors duration-200 ${
+              isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+            }`}
+            style={{ width: '600px', maxWidth: '100%', margin: '0 auto' }}
+          >
+            <p className={`text-lg ${isOver ? 'text-blue-500' : 'text-gray-500'}`}>
+              {isOver ? 'Drop here' : 'Drag your first row or block here'}
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
