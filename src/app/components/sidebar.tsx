@@ -2,8 +2,7 @@
 
 import * as Headless from '@headlessui/react'
 import clsx from 'clsx'
-import { LayoutGroup, motion } from 'framer-motion'
-import React, { Fragment, forwardRef, useId } from 'react'
+import React, { Fragment, forwardRef } from 'react'
 import { TouchTarget } from './button'
 import { Link } from './link'
 
@@ -48,13 +47,7 @@ export function SidebarFooter({ className, ...props }: React.ComponentPropsWitho
 }
 
 export function SidebarSection({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
-  let id = useId()
-
-  return (
-    <LayoutGroup id={id}>
-      <div {...props} data-slot="section" className={clsx(className, 'flex flex-col gap-0.5')} />
-    </LayoutGroup>
-  )
+  return <div {...props} data-slot="section" className={clsx(className, 'flex flex-col gap-0.5')} />
 }
 
 export function SidebarDivider({ className, ...props }: React.ComponentPropsWithoutRef<'hr'>) {
@@ -107,12 +100,7 @@ export const SidebarItem = forwardRef(function SidebarItem(
 
   return (
     <span className={clsx(className, 'relative')}>
-      {current && (
-        <motion.span
-          layoutId="current-indicator"
-          className="absolute inset-y-2 -left-4 w-0.5 rounded-full bg-zinc-950 dark:bg-white"
-        />
-      )}
+      {current && <span className="absolute inset-y-2 -left-4 w-0.5 rounded-full bg-zinc-950 dark:bg-white" />}
       {'href' in props ? (
         <Headless.CloseButton as={Fragment} ref={ref}>
           <Link className={classes} {...props} data-current={current ? 'true' : undefined}>

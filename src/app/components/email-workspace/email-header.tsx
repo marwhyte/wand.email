@@ -3,33 +3,39 @@
 import { Button } from '@/app/components/button'
 import DarkModeToggle from '@/app/components/dark-mode-toggle'
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/app/components/dialog'
+import { Input } from '@/app/components/input'
 import Loading from '@/app/components/loading'
 import { Navbar, NavbarItem } from '@/app/components/navbar'
 import Notification from '@/app/components/notification'
 import { Tab, TabGroup, TabList } from '@/app/components/tab'
 import {
   ArrowDownTrayIcon,
+  BookmarkSquareIcon,
   ChevronLeftIcon,
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
+  PaperAirplaneIcon,
 } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
 import { Session } from 'next-auth'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import { useEmail } from './email-provider'
 import EmailRendererFinal from './email-renderer-final'
 
 type Props = {
-  email: Email
   session: Session | null
   setMobileView: (mobileView: boolean) => void
 }
 
-const EmailHeader = ({ email, session, setMobileView }: Props) => {
+const EmailHeader = ({ session, setMobileView }: Props) => {
+  const { email } = useEmail()
   const router = useRouter()
   const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [showSignUpDialog, setShowSignUpDialog] = useState(false)
+  const [showProjectDialog, setShowProjectDialog] = useState(false)
+  const [projectTitle, setProjectTitle] = useState('')
 
   const deviceOptions: { name: React.ReactNode; value: 'desktop' | 'mobile' }[] = [
     { name: <ComputerDesktopIcon className="h-5 w-5" />, value: 'desktop' },
@@ -41,6 +47,8 @@ const EmailHeader = ({ email, session, setMobileView }: Props) => {
     setMobileView(newValue === 'mobile')
     setSelectedDevice(newValue)
   }
+
+  const handleSave = () => {}
 
   const sendTestEmail = async () => {
     if (!session?.user?.email) {
@@ -75,6 +83,21 @@ const EmailHeader = ({ email, session, setMobileView }: Props) => {
     }
   }
 
+  const handleAddToProjects = () => {
+    if (!session?.user?.email) {
+      setShowSignUpDialog(true)
+    } else {
+      setShowProjectDialog(true)
+    }
+  }
+
+  const handleSaveProject = () => {
+    // TODO: Implement project saving logic
+    console.log('Saving project:', projectTitle)
+    setShowProjectDialog(false)
+    setProjectTitle('')
+  }
+
   return (
     <>
       <header className="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
@@ -98,8 +121,21 @@ const EmailHeader = ({ email, session, setMobileView }: Props) => {
                     ))}
                   </TabList>
                 </TabGroup>
-                <Button onClick={sendTestEmail} disabled={emailStatus === 'loading'}>
-                  {emailStatus === 'loading' ? <Loading height={24} width={24} /> : 'Send test email'}
+                <Button
+                  tooltipPosition="bottom"
+                  tooltip="Send test email"
+                  onClick={sendTestEmail}
+                  disabled={emailStatus === 'loading'}
+                >
+                  {emailStatus === 'loading' ? (
+                    <Loading height={24} width={24} />
+                  ) : (
+                    <PaperAirplaneIcon className="h-4 w-4 !text-white" />
+                  )}
+                </Button>
+                <Button color="green" onClick={handleAddToProjects}>
+                  <BookmarkSquareIcon className="h-4 w-4 !text-white" />
+                  Add to projects
                 </Button>
                 <Button color="blue">
                   <ArrowDownTrayIcon className="!text-white" />
@@ -123,6 +159,27 @@ const EmailHeader = ({ email, session, setMobileView }: Props) => {
           <Button onClick={() => setShowSignUpDialog(false)}>Cancel</Button>
           <Button color="blue" onClick={() => router.push('/signup')}>
             Sign Up
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={showProjectDialog} onClose={() => setShowProjectDialog(false)} className="z-50">
+        <DialogTitle>Add to Projects</DialogTitle>
+        <DialogBody>
+          <DialogDescription>
+            Give your project a title and click &quot;Add&quot; to save it to your projects.
+          </DialogDescription>
+          <Input
+            type="text"
+            placeholder="Project title"
+            value={projectTitle}
+            onChange={(e) => setProjectTitle(e.target.value)}
+            className="mt-2"
+          />
+        </DialogBody>
+        <DialogActions>
+          <Button onClick={() => setShowProjectDialog(false)}>Cancel</Button>
+          <Button color="blue" onClick={handleSaveProject} disabled={!projectTitle.trim()}>
+            Add
           </Button>
         </DialogActions>
       </Dialog>

@@ -4,7 +4,7 @@ import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
 import { createPortal } from 'react-dom'
-import { useBlock } from '../block-provider'
+import { useEmail } from '../email-provider'
 import RenderBlock from '../render-block'
 
 type Props = {
@@ -18,7 +18,7 @@ type Props = {
 }
 
 export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDropTarget }: Props) {
-  const { currentBlock } = useBlock()
+  const { currentBlock } = useEmail()
   const [isHovered, setIsHovered] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -95,6 +95,13 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
         style={{ opacity: isDragging ? 0.4 : 1 }}
       >
         <div
+          className={joinClassNames(
+            'pointer-events-none absolute inset-0 transition-opacity duration-200',
+            currentBlock?.id === block.id || !isHovered ? 'opacity-0' : 'opacity-0 group-hover:opacity-20'
+          )}
+          style={{ backgroundColor: 'rgb(59, 130, 246)', zIndex: 5 }}
+        />
+        <div
           // @ts-ignore
           ref={drag}
           className={joinClassNames(
@@ -108,7 +115,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
 
         <DragPreviewImage connect={preview} src="/block.svg" />
 
-        <RenderBlock block={block} />
+        <RenderBlock block={block} isEditing />
 
         {dropTarget && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
       </div>

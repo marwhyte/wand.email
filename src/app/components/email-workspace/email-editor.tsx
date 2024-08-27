@@ -1,6 +1,6 @@
 'use client'
 
-import { useBlock } from './block-provider'
+import { useEmail } from './email-provider'
 
 import { Tab, TabGroup, TabList } from '@/app/components/tab'
 import { Text } from '@/app/components/text'
@@ -12,11 +12,6 @@ import BlockEditor from './block-editor'
 import EmailComponents from './email-components'
 import EmailRows from './email-rows'
 import EmailSettings from './email-settings'
-
-type Props = {
-  email: Email
-  onSave: (template: Email) => void
-}
 
 enum Tabs {
   CONTENT = 'content',
@@ -30,8 +25,8 @@ const tabIcons = {
   [Tabs.SETTINGS]: Cog6ToothIcon,
 }
 
-export default function EmailEditor({ email, onSave }: Props) {
-  const { currentBlock, setCurrentBlock } = useBlock()
+export default function EmailEditor() {
+  const { currentBlock, setCurrentBlock } = useEmail()
 
   const [tab, setTab] = useState<Tabs>(Tabs.CONTENT)
 
@@ -90,10 +85,10 @@ export default function EmailEditor({ email, onSave }: Props) {
           <Text>{description}</Text>
         </div>
       )}
-      {currentBlock && <BlockEditor email={email} onSave={onSave} />}
-      {tab === Tabs.CONTENT && !currentBlock && <EmailComponents email={email} />}
+      {currentBlock && <BlockEditor />}
+      {tab === Tabs.CONTENT && !currentBlock && <EmailComponents />}
       {tab === Tabs.ROWS && !currentBlock && <EmailRows />}
-      {tab === Tabs.SETTINGS && <EmailSettings email={email} onSave={onSave} />}
+      {tab === Tabs.SETTINGS && <EmailSettings />}
     </div>
   )
 }

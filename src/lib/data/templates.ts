@@ -1,4 +1,4 @@
-import { goingTemplate } from '@/app/templates/email-workspace/going-template'
+import { goingTemplate } from '@/app/components/email-workspace/going-template'
 import { v4 as uuidv4 } from 'uuid'
 
 export const templates = [

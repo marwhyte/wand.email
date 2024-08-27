@@ -166,10 +166,22 @@ type ButtonProps = (
   className?: string
   children: React.ReactNode
   tooltip?: string
+  tooltipTransform?: string
+  tooltipPosition?: 'top' | 'bottom' // New prop for tooltip position
 } & (Omit<Headless.ButtonProps, 'className'> | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>)
 
 export const Button = forwardRef(function Button(
-  { color, outline, plain, className, children, tooltip, ...props }: ButtonProps,
+  {
+    color,
+    outline,
+    plain,
+    className,
+    children,
+    tooltip,
+    tooltipTransform,
+    tooltipPosition = 'top',
+    ...props
+  }: ButtonProps,
   ref: React.ForwardedRef<HTMLElement>
 ) {
   let classes = clsx(
@@ -183,7 +195,11 @@ export const Button = forwardRef(function Button(
     <>
       <TouchTarget>{children}</TouchTarget>
       {tooltip && (
-        <span className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100">
+        <span
+          className={`pointer-events-none absolute ${
+            tooltipPosition === 'top' ? '-top-9' : '-bottom-9'
+          } left-1/2 ${tooltipTransform || '-translate-x-1/2'} whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100`}
+        >
           {tooltip}
         </span>
       )}

@@ -1,8 +1,8 @@
 import { doGoogleLogin } from '@/app/actions'
 import { Link } from '@/app/components/link'
 import { Text } from '@/app/components/text'
-import { Button } from '../components/button'
-import { Divider } from '../components/divider'
+import { Button } from '@components/button'
+import { Divider } from '@components/divider'
 import CredentialsForm from './credentials-form'
 
 const GoogleLoginForm = () => {

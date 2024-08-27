@@ -6,9 +6,10 @@ import EmailText from './email-components/email-text'
 
 type Props = {
   block: EmailBlock
+  isEditing: boolean
 }
 
-const RenderBlock = ({ block }: Props) => {
+const RenderBlock = ({ block, isEditing }: Props) => {
   if (block.type === 'text') {
     return <EmailText block={block} />
   }
@@ -19,10 +20,10 @@ const RenderBlock = ({ block }: Props) => {
     return <EmailImage block={block} />
   }
   if (block.type === 'button') {
-    return <EmailButton block={block} />
+    return <EmailButton block={block} isEditing={isEditing} />
   }
   if (block.type === 'link') {
-    return <EmailLink block={block} />
+    return <EmailLink block={block} isEditing={isEditing} />
   }
 }
 

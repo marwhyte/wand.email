@@ -1,62 +1,59 @@
-import NextAuth, { NextAuthConfig } from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
-import CredentialProvider from "next-auth/providers/credentials";
-import { addUser, getUserByEmail } from "./lib/database/queries/users";
-import { authConfig } from "./auth.config";
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs'
+import NextAuth, { NextAuthConfig } from 'next-auth'
+import CredentialProvider from 'next-auth/providers/credentials'
+import GoogleProvider from 'next-auth/providers/google'
+import { authConfig } from './auth.config'
+import { addUser, getUserByEmail } from './lib/database/queries/users'
 
 interface Credentials {
-  email: string;
-  password: string;
+  email: string
+  password: string
 }
 
 const authOptions: NextAuthConfig = {
   ...authConfig,
   providers: [
     CredentialProvider({
-      name: "Credentials",
+      name: 'Credentials',
       credentials: {
-        email: { label: "Email", type: "text" },
-        password: { label: "Password", type: "password" },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("Email and password are required");
+          throw new Error('Email and password are required')
         }
 
         try {
-          const user = await getUserByEmail(credentials.email as string);
+          const user = await getUserByEmail(credentials.email as string)
 
           if (!user) {
-            throw new Error("User not found");
+            throw new Error('User not found')
           }
 
           if (!user.password) {
-            throw new Error("Invalid credentials");
+            throw new Error('Invalid credentials')
           }
 
-          const isMatch = await bcrypt.compare(
-            credentials.password as string,
-            user.password
-          );
+          const isMatch = await bcrypt.compare(credentials.password as string, user.password)
 
           if (!isMatch) {
-            throw new Error("Invalid credentials");
+            throw new Error('Invalid credentials')
           }
 
           return {
-            id: user.id.toString(),
+            id: user.id,
             email: user.email,
             name: user.name,
-          };
+          }
         } catch (error) {
-          if (error instanceof Error && error.message === "User not found") {
-            console.error("User not found");
-            throw new Error("User not found");
+          if (error instanceof Error && error.message === 'User not found') {
+            console.error('User not found')
+            throw new Error('User not found')
           }
 
-          console.error("Error during authorization:", error);
-          throw new Error("Invalid credentials");
+          console.error('Error during authorization:', error)
+          throw new Error('Invalid credentials')
         }
       },
     }),
@@ -65,49 +62,62 @@ const authOptions: NextAuthConfig = {
       clientSecret: process.env.GOOGLE_SECRET!,
       authorization: {
         params: {
-          prompt: "consent",
-          access_type: "offline",
-          response_type: "code",
+          prompt: 'consent',
+          access_type: 'offline',
+          response_type: 'code',
         },
       },
     }),
   ],
   callbacks: {
     async signIn({ user, account, profile, credentials }) {
-      if (account?.provider === "google") {
+      if (account?.provider === 'google') {
         try {
-          let dbUser = await getUserByEmail(credentials?.email as string);
+          let dbUser = await getUserByEmail(credentials?.email as string)
           if (!dbUser) {
             addUser({
               googleId: account.providerAccountId,
               name: profile?.name as string,
               email: user.email as string,
-            });
+            })
           }
-          return true;
+          user.id = dbUser?.id
+          return true
         } catch (error) {
-          console.error("Error during Google sign-in:", error);
-          return false;
+          console.error('Error during Google sign-in:', error)
+          return false
         }
       }
-      return true;
+      return true
     },
-    async session({ session, token, user }) {
-      return session;
-    },
-    async jwt({ token, user, account, profile, isNewUser }) {
-      // Persist user ID in token
-      if (user) {
-        token.id = user.id;
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string
       }
-      return token;
+      return session
+    },
+    async jwt({ token, user, account }) {
+      if (user) {
+        token.id = user.id
+      }
+      if (account && account.provider === 'google') {
+        try {
+          const dbUser = await getUserByEmail(token.email as string)
+          if (dbUser) {
+            token.id = dbUser.id
+          }
+        } catch (error) {
+          console.error('Error fetching user from database:', error)
+        }
+      }
+      return token
     },
   },
-};
+}
 
 export const {
   handlers: { GET, POST },
   auth,
   signIn,
   signOut,
-} = NextAuth(authOptions);
+} = NextAuth(authOptions)

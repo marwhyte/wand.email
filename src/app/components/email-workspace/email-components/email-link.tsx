@@ -1,14 +1,13 @@
 import { applyCommonAttributes } from '@/lib/utils/misc'
 import { Link } from '@react-email/components'
 import parse from 'html-react-parser'
-import { useBlock } from '../block-provider'
 
 type Props = {
   block: LinkBlock
+  isEditing: boolean
 }
 
-export default function EmailLink({ block }: Props) {
-  const { setCurrentBlock } = useBlock()
+export default function EmailLink({ block, isEditing }: Props) {
   const defaultStyles = {
     color: '#3b82f6',
     textDecoration: 'underline',
@@ -19,7 +18,7 @@ export default function EmailLink({ block }: Props) {
 
   return (
     <Link
-      href={setCurrentBlock ? undefined : block.attributes.href}
+      href={isEditing ? undefined : block.attributes.href}
       target={block.attributes.target}
       rel={block.attributes.rel}
       style={{

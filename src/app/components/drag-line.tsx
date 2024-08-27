@@ -1,4 +1,4 @@
-import { Button } from '@/app/components/button'
+import { Button } from '@components/button'
 import { PlusIcon } from '@heroicons/react/20/solid'
 
 type DragLineProps = {

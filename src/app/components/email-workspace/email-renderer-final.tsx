@@ -40,7 +40,7 @@ const EmailRendererFinal = ({ email }: Props) => {
                       }}
                     >
                       {column.blocks.map((block) => (
-                        <RenderBlock key={block.id} block={block} />
+                        <RenderBlock isEditing={false} key={block.id} block={block} />
                       ))}
                     </Column>
                   )

@@ -1,8 +1,8 @@
 import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Switch, SwitchField } from '@/app/components/switch'
+import { Text } from '@components/text'
 import { useEffect, useState } from 'react'
-import { Text } from '../components/text'
 
 export type PaddingValues = {
   top: string

@@ -4,14 +4,14 @@ import { createNewBlock } from '@/lib/data/templates'
 import { useCallback, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid' // Make sure to import uuid
 import EmailRow from './email-components/email-row'
+import { useEmail } from './email-provider'
 
 type Props = {
-  email: Email
-  onSave?: (email: Email) => void
   mobileView: boolean
 }
 
-const EmailRenderer = ({ email, onSave, mobileView }: Props) => {
+const EmailRenderer = ({ mobileView }: Props) => {
+  const { email, setEmail } = useEmail()
   const [dropLine, setDropLine] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<{
     type: 'block' | 'column'
@@ -29,7 +29,7 @@ const EmailRenderer = ({ email, onSave, mobileView }: Props) => {
     const insertIndex = dragIndex < hoverIndex ? hoverIndex - 1 : hoverIndex
     newRows.splice(insertIndex, 0, draggedRow)
 
-    onSave?.({
+    setEmail({
       ...email,
       rows: newRows,
     })
@@ -132,7 +132,7 @@ const EmailRenderer = ({ email, onSave, mobileView }: Props) => {
       }
 
       // Save the updated email
-      onSave?.(newEmail)
+      setEmail(newEmail)
       setDropTarget(null)
     }
   }
@@ -189,7 +189,7 @@ const EmailRenderer = ({ email, onSave, mobileView }: Props) => {
       }
     }
 
-    onSave?.(newEmail)
+    setEmail(newEmail)
     setDropTarget(null)
   }
 
@@ -227,7 +227,7 @@ const EmailRenderer = ({ email, onSave, mobileView }: Props) => {
       }
     }
 
-    onSave?.({
+    setEmail({
       ...email,
       rows: newRows,
     })
@@ -236,8 +236,6 @@ const EmailRenderer = ({ email, onSave, mobileView }: Props) => {
 
   const emailRows = email.rows.map((row, index) => (
     <EmailRow
-      onSave={onSave}
-      email={email}
       key={row.id}
       row={row}
       moveRow={moveRow}

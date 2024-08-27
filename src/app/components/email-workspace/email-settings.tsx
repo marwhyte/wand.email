@@ -2,18 +2,16 @@ import { ColorInput } from '@/app/components/color-input'
 import { Field, Label } from '@/app/components/fieldset'
 import { Select } from '@/app/components/select'
 import { useCallback } from 'react'
+import { useEmail } from './email-provider'
 
-type Props = {
-  email: Email
-  onSave: (email: Email) => void
-}
+const EmailSettings = () => {
+  const { email, setEmail } = useEmail()
 
-const EmailSettings = ({ email, onSave }: Props) => {
   const handleChange = useCallback(
     (attributes: Partial<Email>) => {
-      onSave({ ...email, ...attributes })
+      setEmail({ ...email, ...attributes })
     },
-    [email, onSave]
+    [email, setEmail]
   )
 
   const fontFamilies = [

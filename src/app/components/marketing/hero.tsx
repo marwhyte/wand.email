@@ -2,6 +2,7 @@
 
 import Image from 'next/image'
 
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Heading } from '../heading'
 
@@ -32,7 +33,7 @@ export function Hero() {
             <div className="relative flex items-center gap-x-4 rounded-full px-4 py-1 text-sm leading-6 text-gray-600 ring-1 ring-gray-900/10 hover:ring-gray-900/20 dark:text-gray-300 dark:ring-white/10 dark:hover:ring-white/20">
               <span className="font-semibold text-indigo-600 dark:text-indigo-400">New designs!</span>
               <span className="h-4 w-px bg-slate-900/10 dark:bg-white/10" aria-hidden="true"></span>
-              <a href={`/templates`} className="flex items-center gap-x-1">
+              <Link href="/templates" className="flex items-center gap-x-1">
                 <span className="absolute inset-0" aria-hidden="true"></span>
                 See new templates
                 <svg
@@ -47,7 +48,7 @@ export function Hero() {
                     clip-rule="evenodd"
                   />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
           <h1 className="font-display mx-auto mt-5 max-w-4xl text-5xl font-medium tracking-tight text-slate-900 sm:text-7xl dark:text-white">
@@ -69,15 +70,15 @@ export function Hero() {
             SwiftMaker is a easy to plug in email builder. It works well with React, NextJS, and HTML projects.
           </p>
           <div className="mt-10 flex items-center gap-x-6">
-            <a
+            <Link
               href="/templates"
               className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
             >
               Start building
-            </a>
-            <a href="/templates" className="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100">
+            </Link>
+            <Link href="/templates" className="text-sm font-semibold leading-6 text-gray-900 dark:text-gray-100">
               No signup required <span aria-hidden="true">→</span>
-            </a>
+            </Link>
           </div>
         </div>
         <div className="mt-16 sm:mt-24 lg:mt-0 lg:flex-shrink-0 lg:flex-grow">

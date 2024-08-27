@@ -4,13 +4,11 @@ import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { Container, Row } from '@react-email/components'
 import { useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
-import { useBlock } from '../block-provider'
+import { useEmail } from '../email-provider'
 import EmailColumn from './email-column'
 
 type Props = {
   row: RowBlock
-  email: Email
-  onSave?: (email: Email) => void
   moveRow: (dragId: string, hoverId: string) => void
   addRow: (gridColumns: number[], hoverId: string) => void
   mobileView: boolean
@@ -33,8 +31,6 @@ type Props = {
 
 export default function EmailRow({
   row,
-  email,
-  onSave,
   moveRow,
   addRow,
   dropLine,
@@ -46,7 +42,7 @@ export default function EmailRow({
   onBlockDrop,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
-  const { currentBlock, setCurrentBlock } = useBlock()
+  const { currentBlock, setCurrentBlock, setEmail, email } = useEmail()
   const [isChildHovered, setIsChildHovered] = useState(false)
 
   const [{ isDragging }, drag, preview] = useDrag({
@@ -140,23 +136,21 @@ export default function EmailRow({
       {dropLine === row.id && <DragLine direction="above" />}
       <DragPreviewImage connect={preview} src="/row.svg" />
 
-      {onSave && (
-        <div
-          // @ts-ignore
-          ref={drag}
-          className={joinClassNames(
-            'absolute left-0 top-1/2 flex h-8 w-10 -translate-y-1/2 cursor-move items-center justify-center rounded-r-full bg-blue-500',
-            currentBlock?.id === row.id
-              ? 'opacity-100'
-              : isChildHovered
-                ? 'opacity-0'
-                : 'opacity-0 transition-opacity duration-200 group-hover:opacity-100'
-          )}
-          style={{ zIndex: 11 }}
-        >
-          <ArrowsPointingOutIcon className="h-6 w-6 text-white" />
-        </div>
-      )}
+      <div
+        // @ts-ignore
+        ref={drag}
+        className={joinClassNames(
+          'absolute left-0 top-1/2 flex h-8 w-10 -translate-y-1/2 cursor-move items-center justify-center rounded-r-full bg-blue-500',
+          currentBlock?.id === row.id
+            ? 'opacity-100'
+            : isChildHovered
+              ? 'opacity-0'
+              : 'opacity-0 transition-opacity duration-200 group-hover:opacity-100'
+        )}
+        style={{ zIndex: 11 }}
+      >
+        <ArrowsPointingOutIcon className="h-6 w-6 text-white" />
+      </div>
 
       {/* Wrap the content in a relative div */}
       <div className="relative" style={{ zIndex: 2 }}>

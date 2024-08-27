@@ -1,7 +1,9 @@
 'use client'
 
-import { AvatarButton } from '@/app/components/avatar'
-import DarkModeToggle from '@/app/components/dark-mode-toggle'
+import { getFirstTwoInitials } from '@/lib/utils/misc'
+import { AvatarButton } from '@components/avatar'
+import { Button } from '@components/button'
+import DarkModeToggle from '@components/dark-mode-toggle'
 import {
   Dropdown,
   DropdownButton,
@@ -9,10 +11,9 @@ import {
   DropdownItem,
   DropdownLabel,
   DropdownMenu,
-} from '@/app/components/dropdown'
-import { Logo } from '@/app/components/Logo'
-import { Navbar, NavbarItem, NavbarLabel, NavbarSection } from '@/app/components/navbar'
-import { getFirstTwoInitials } from '@/lib/utils/misc'
+} from '@components/dropdown'
+import { Logo } from '@components/Logo'
+import { Navbar, NavbarItem, NavbarLabel, NavbarSection } from '@components/navbar'
 import {
   ArrowRightStartOnRectangleIcon,
   LightBulbIcon,
@@ -20,9 +21,9 @@ import {
   UserCircleIcon,
 } from '@heroicons/react/16/solid'
 import { Session } from 'next-auth'
+import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { doLogout } from './actions'
-import { Button } from './components/button'
 
 type Props = {
   children: React.ReactNode
@@ -68,7 +69,7 @@ export default function Content({ children, session }: Props) {
   const navItems = [
     { name: 'Why SwiftMailer', href: '/', current: pathname === '/' },
     { name: 'Templates', href: '/templates', current: pathname.startsWith('/templates') },
-    // Only show Settings if there's a session
+    ...(session ? [{ name: 'My projects', href: '/projects', current: pathname.startsWith('/projects') }] : []),
     ...(session ? [{ name: 'Settings', href: '/settings', current: pathname.startsWith('/settings') }] : []),
   ]
 
@@ -79,9 +80,9 @@ export default function Content({ children, session }: Props) {
           <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
             <Navbar className="h-16">
               <div className="flex w-full items-center justify-between">
-                <a href="/" className="-m-1.5 p-1.5">
+                <Link href="/" className="-m-1.5 p-1.5">
                   <Logo />
-                </a>
+                </Link>
                 <NavbarSection>
                   {navItems.map((item) => (
                     <NavbarItem key={item.name} href={item.href} current={item.current}>

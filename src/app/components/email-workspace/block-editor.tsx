@@ -4,7 +4,7 @@ import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import { useCallback } from 'react'
-import { useBlock } from './block-provider'
+import { useEmail } from './email-provider'
 
 import { Button } from '@/app/components/button'
 import { ColorInput } from '@/app/components/color-input'
@@ -16,12 +16,8 @@ import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
 import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import 'react-quill/dist/quill.snow.css'
+import { v4 as uuidv4 } from 'uuid' // Add this import for generating new IDs
 import RowEditor from './row-editor'
-
-type Props = {
-  email: Email
-  onSave: (template: Email) => void
-}
 
 enum Options {
   TEXT = 'text',
@@ -37,8 +33,8 @@ enum Options {
   SRC = 'src',
 }
 
-const BlockEditor = ({ email, onSave }: Props) => {
-  const { currentBlock, setCurrentBlock } = useBlock()
+const BlockEditor = () => {
+  const { currentBlock, setCurrentBlock, email, setEmail } = useEmail()
 
   const optionsForItem = () => {
     switch (currentBlock?.type) {
@@ -84,12 +80,12 @@ const BlockEditor = ({ email, onSave }: Props) => {
 
   const debouncedSave = useCallback(
     (updatedTemplate: Email) => {
-      onSave(updatedTemplate)
+      setEmail(updatedTemplate)
     },
     // debounce((updatedTemplate: Email) => {
     //   onSave(updatedTemplate)
     // }, 300)
-    [onSave]
+    [setEmail]
   )
 
   const handleChange = useCallback(
@@ -194,20 +190,93 @@ const BlockEditor = ({ email, onSave }: Props) => {
     [currentBlock, setCurrentBlock, email, debouncedSave]
   )
 
+  const deleteBlock = useCallback(() => {
+    if (currentBlock) {
+      let updatedEmail: Email
+      if (currentBlock.type === 'row') {
+        updatedEmail = {
+          ...email,
+          rows: email.rows.filter((row) => row.id !== currentBlock.id),
+        }
+      } else {
+        updatedEmail = {
+          ...email,
+          rows: email.rows.map((row) => ({
+            ...row,
+            columns: row.columns.map((column) => ({
+              ...column,
+              blocks: column.blocks.filter((block) => block.id !== currentBlock.id),
+            })),
+          })),
+        }
+      }
+
+      setCurrentBlock(null)
+      debouncedSave(updatedEmail)
+    }
+  }, [currentBlock, email, setCurrentBlock, debouncedSave])
+
+  const duplicateBlock = useCallback(() => {
+    if (currentBlock) {
+      const newBlock = {
+        ...currentBlock,
+        id: uuidv4(), // Generate a new ID for the duplicated block
+      }
+
+      let updatedEmail: Email
+      if (newBlock.type === 'row') {
+        const rowIndex = email.rows.findIndex((row) => row.id === currentBlock.id)
+        updatedEmail = {
+          ...email,
+          rows: [...email.rows.slice(0, rowIndex + 1), newBlock as RowBlock, ...email.rows.slice(rowIndex + 1)],
+        }
+      } else {
+        updatedEmail = {
+          ...email,
+          rows: email.rows.map((row) => ({
+            ...row,
+            columns: row.columns.map((column) => {
+              const blockIndex = column.blocks.findIndex((block) => block.id === currentBlock.id)
+              if (blockIndex !== -1) {
+                return {
+                  ...column,
+                  blocks: [...column.blocks.slice(0, blockIndex + 1), newBlock, ...column.blocks.slice(blockIndex + 1)],
+                }
+              }
+              return column
+            }),
+          })),
+        }
+      }
+
+      setCurrentBlock(newBlock)
+      debouncedSave(updatedEmail)
+    }
+  }, [currentBlock, email, setCurrentBlock, debouncedSave])
+
   if (!currentBlock) return null
 
   return (
     <div className="flex flex-col gap-4 p-4">
-      <div className="mx-4 flex items-center justify-between gap-4">
+      <div className="flex items-center justify-between gap-4">
         <Text>{capitalizeFirstLetter(currentBlock.type)} Properties</Text>
         <div className="flex gap-2">
-          <Button outline tooltip="Delete Block">
+          <Button onClick={deleteBlock} outline tooltip={currentBlock.type === 'row' ? 'Delete Row' : 'Delete Block'}>
             <TrashIcon className="!h-4 !w-4" />
           </Button>
-          <Button outline tooltip="Duplicate Block">
+          <Button
+            onClick={duplicateBlock}
+            outline
+            tooltip={currentBlock.type === 'row' ? 'Duplicate Row' : 'Duplicate Block'}
+          >
             <Square2StackIcon className="!h-4 !w-4" />
           </Button>
-          <Button onClick={() => setCurrentBlock(null)} outline tooltip="Close Editor">
+          <Button
+            tooltipTransform="-translate-x-3/4"
+            onClick={() => setCurrentBlock(null)}
+            outline
+            tooltip="Close Editor"
+          >
             <XMarkIcon className="!h-4 !w-4" />
           </Button>
         </div>
