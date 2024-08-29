@@ -17,9 +17,11 @@ import {
   PaperAirplaneIcon,
 } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
+import debounce from 'lodash.debounce'
 import { Session } from 'next-auth'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import { Badge } from '../badge'
 import { Heading } from '../heading'
 import { useEmail } from './email-provider'
 import EmailRendererFinal from './email-renderer-final'
@@ -27,10 +29,12 @@ import EmailRendererFinal from './email-renderer-final'
 type Props = {
   session: Session | null
   setMobileView: (mobileView: boolean) => void
+  isProjects: boolean
 }
 
-const EmailHeader = ({ session, setMobileView }: Props) => {
+const EmailHeader = ({ session, isProjects, setMobileView }: Props) => {
   const { email } = useEmail()
+  const [emailCopy, setEmailCopy] = useState(email)
   const router = useRouter()
   const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>('desktop')
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
@@ -99,6 +103,23 @@ const EmailHeader = ({ session, setMobileView }: Props) => {
     setProjectTitle('')
   }
 
+  const isSaving = email !== emailCopy
+
+  const debouncedSave = useCallback(
+    debounce((updatedEmail) => {
+      console.log('yo')
+      setEmailCopy(updatedEmail)
+    }, 3000),
+    []
+  )
+
+  useEffect(() => {
+    console.log('hey')
+    if (JSON.stringify(email) !== JSON.stringify(emailCopy)) {
+      debouncedSave(email)
+    }
+  }, [debouncedSave, email, emailCopy])
+
   return (
     <>
       <header className="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
@@ -106,9 +127,9 @@ const EmailHeader = ({ session, setMobileView }: Props) => {
           <Navbar className="h-16">
             <div className="flex w-full items-center">
               <div className="flex flex-1 items-center">
-                <NavbarItem href="/templates" className="ml-4">
+                <NavbarItem href={isProjects ? '/projects' : '/templates'} className="ml-4">
                   <ChevronLeftIcon className="size-4" />
-                  Back to Templates
+                  Back to {isProjects ? 'Projects' : 'Templates'}
                 </NavbarItem>
               </div>
               <div className="flex-1 text-center">
@@ -137,10 +158,15 @@ const EmailHeader = ({ session, setMobileView }: Props) => {
                     <PaperAirplaneIcon className="h-4 w-4 !text-white" />
                   )}
                 </Button>
-                <Button color="green" onClick={handleAddToProjects}>
-                  <BookmarkSquareIcon className="h-4 w-4 !text-white" />
-                  Add to projects
-                </Button>
+                {!isProjects && (
+                  <Button color="green" onClick={handleAddToProjects}>
+                    <BookmarkSquareIcon className="h-4 w-4 !text-white" />
+                    Add to projects
+                  </Button>
+                )}
+                {isProjects && isSaving && <Badge color="yellow">Saving</Badge>}
+                {isProjects && !isSaving && <Badge color="lime">Saved!</Badge>}
+
                 <Button color="blue">
                   <ArrowDownTrayIcon className="!text-white" />
                   {session?.user?.email ? 'Export' : 'Sign up to export'}

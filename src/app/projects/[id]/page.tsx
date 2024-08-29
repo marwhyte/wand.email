@@ -17,7 +17,7 @@ export default async function ProjectsPage({ params }: { params: { id: string } 
 
   return (
     <EmailProvider defaultEmail={email}>
-      <Workspace session={session} />
+      <Workspace isProjects session={session} />
     </EmailProvider>
   )
 }

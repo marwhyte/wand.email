@@ -61,7 +61,6 @@ const EmailRenderer = ({ mobileView }: Props) => {
     if (blockType === 'newBlock' && newBlockType) {
       handleNewBlockDrop(newBlockType, targetType, targetId, position)
     } else {
-      console.log('handleBlockDrop', blockId, targetType, targetId, position)
       const newEmail: Email = JSON.parse(JSON.stringify(email)) // Deep clone to avoid mutations
       let sourceRow: RowBlock | undefined
       let sourceColumn: ColumnBlock | undefined
@@ -302,6 +301,7 @@ const EmailRenderer = ({ mobileView }: Props) => {
           ))
         ) : (
           <div
+            // @ts-ignore
             ref={drop}
             className={`flex h-64 items-center justify-center rounded-lg border-2 border-dashed transition-colors duration-200 ${
               isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'

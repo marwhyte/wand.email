@@ -16,8 +16,9 @@ export interface UserTable {
 
 export interface ProjectTable {
   id: Generated<string>
+  deleted_at: Date | null
   title: string
   user_id: string
-  content: unknown
+  content: Email
   created_at: Date
 }

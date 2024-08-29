@@ -14,7 +14,7 @@ export async function getProjects() {
   return projects
 }
 
-export async function addProject(title: string, content?: string) {
+export async function addProject(title: string, content?: Email) {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
@@ -33,10 +33,11 @@ export async function addProject(title: string, content?: string) {
   const project = await db
     .insertInto('projects')
     .values({
+      deleted_at: null,
       created_at: new Date(),
       user_id: session.user.id,
       title,
-      content: content || defaultContent,
+      content: (content || defaultContent) as Email,
     })
     .returningAll()
     .executeTakeFirst()
@@ -59,11 +60,37 @@ export async function getProject(id: string) {
   return project
 }
 
-export async function updateProject(id: string, content: string) {
+export async function updateProject(id: string, updates: { content?: Email; title?: string }) {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
   }
 
-  await db.updateTable('projects').set({ content }).where('id', '=', id).execute()
+  const updateFields: { content?: Email; title?: string } = {}
+  if (updates.content !== undefined) updateFields.content = updates.content
+  if (updates.title !== undefined) updateFields.title = updates.title
+
+  if (Object.keys(updateFields).length === 0) {
+    throw new Error('No fields to update')
+  }
+
+  await db
+    .updateTable('projects')
+    .set(updateFields)
+    .where('id', '=', id)
+    .where('user_id', '=', session.user.id)
+    .execute()
+}
+
+export async function deleteProject(id: string) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+  await db
+    .updateTable('projects')
+    .set({ deleted_at: new Date() })
+    .where('id', '=', id)
+    .where('user_id', '=', session.user.id)
+    .execute()
 }

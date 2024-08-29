@@ -291,7 +291,15 @@ const BlockEditor = () => {
       {options.includes(Options.TEXT) && currentBlock && 'content' in currentBlock && (
         <Field>
           <Label>Content</Label>
-          <Textbox key={currentBlock.id} value={currentBlock.content} onChange={(e) => handleChange({ content: e })} />
+          <Textbox
+            key={currentBlock.id}
+            value={
+              currentBlock.type === 'heading'
+                ? `<${currentBlock.attributes.as}>${currentBlock.content}</${currentBlock.attributes.as}>`
+                : `<p>${currentBlock.content}</p>`
+            }
+            onChange={(e) => handleChange({ content: e })}
+          />
         </Field>
       )}
       {options.includes(Options.FONT_SIZE) && (
