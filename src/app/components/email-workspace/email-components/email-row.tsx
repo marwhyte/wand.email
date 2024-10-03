@@ -42,22 +42,23 @@ export default function EmailRow({
   onBlockDrop,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
-  const { currentBlock, setCurrentBlock, setEmail, email } = useEmail()
+  const { currentBlock, setCurrentBlock, email } = useEmail()
   const [isChildHovered, setIsChildHovered] = useState(false)
 
-  const [{ isDragging }, drag, preview] = useDrag({
+  const [{ isDraggingRow }, drag, preview] = useDrag({
     type: 'row',
     item: { type: 'row', id: row.id },
     collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
+      isDraggingRow: monitor.isDragging(),
     }),
     end: onDragEnd,
   })
 
-  const [, drop] = useDrop({
+  const [{ isOverRow }, drop] = useDrop({
     accept: ['row', 'newBlock', 'block', 'newRow'],
     hover(item: { type: 'row' | 'newBlock' | 'block' | 'newRow'; id: string }, monitor) {
       if (!ref.current) return
+      if (!isOverRow) return
 
       if (item.type !== 'row' && item.type !== 'newRow') return
 
@@ -91,11 +92,14 @@ export default function EmailRow({
         onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position, item.newBlockType)
       }
     },
+    collect: (monitor) => ({
+      isOverRow: monitor.isOver({ shallow: true }),
+    }),
   })
 
   drop(ref)
 
-  const opacity = isDragging ? 0.4 : 1
+  const opacity = isDraggingRow ? 0.4 : 1
 
   const handleRowOrColumnClick = () => {
     setCurrentBlock?.(row)
@@ -133,7 +137,7 @@ export default function EmailRow({
         style={{ backgroundColor: 'rgb(59, 130, 246)', zIndex: 5 }}
       />
 
-      {dropLine === row.id && <DragLine direction="above" />}
+      {dropLine === row.id && isOverRow && <DragLine direction="above" />}
       <DragPreviewImage connect={preview} src="/row.svg" />
 
       <div

@@ -231,3 +231,11 @@ export function TouchTarget({ children }: { children: React.ReactNode }) {
     </>
   )
 }
+
+export function TextButton({ children, ...props }: React.ComponentPropsWithoutRef<typeof Headless.Button>) {
+  return (
+    <Headless.Button {...props} className="font-semibold text-blue-500 hover:text-blue-700">
+      {children}
+    </Headless.Button>
+  )
+}

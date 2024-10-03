@@ -12,9 +12,10 @@ import React, { useState } from 'react'
 
 type Props = {
   register?: boolean
+  redirectToInitialProject?: boolean
 }
 
-const CredentialsForm = ({ register }: Props) => {
+const CredentialsForm = ({ register, redirectToInitialProject }: Props) => {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -47,7 +48,7 @@ const CredentialsForm = ({ register }: Props) => {
         if (response.status === 201) {
           await doCredentialsLogin(formData)
 
-          router.push('/templates')
+          router.push(redirectToInitialProject ? '/add-initial-project' : '/templates')
         } else {
           setError(await response.text())
         }
@@ -70,7 +71,7 @@ const CredentialsForm = ({ register }: Props) => {
   }
 
   return (
-    <form className="flex flex-col gap-6" onSubmit={handleFormSubmit}>
+    <form className="flex flex-col gap-3" onSubmit={handleFormSubmit}>
       {register && (
         <div>
           <Field>
@@ -109,7 +110,7 @@ const CredentialsForm = ({ register }: Props) => {
         </Field>
 
         <div className="mt-6 text-sm leading-6">
-          <Link href="/reset-password">Forgot password?</Link>
+          {!register && <Link href="/reset-password">Forgot password?</Link>}
         </div>
       </div>
 

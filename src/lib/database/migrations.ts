@@ -3,7 +3,7 @@ import { FileMigrationProvider, Migrator } from 'kysely'
 import path from 'path'
 import { db } from './db'
 
-export async function executeMigration() {
+async function executeMigration(down = false) {
   const migrator = new Migrator({
     db,
     provider: new FileMigrationProvider({
@@ -13,19 +13,26 @@ export async function executeMigration() {
     }),
   })
 
-  const { error, results } = await migrator.migrateToLatest()
+  let result
+  if (down) {
+    result = await migrator.migrateDown()
+  } else {
+    result = await migrator.migrateToLatest()
+  }
+
+  const { error, results } = result
 
   console.log(results)
   results?.forEach((it) => {
     if (it.status === 'Success') {
-      console.log(`migration "${it.migrationName}" was executed successfully`)
+      console.log(`migration "${it.migrationName}" was ${down ? 'reverted' : 'executed'} successfully`)
     } else if (it.status === 'Error') {
-      console.error(`failed to execute migration "${it.migrationName}"`)
+      console.error(`failed to ${down ? 'revert' : 'execute'} migration "${it.migrationName}"`)
     }
   })
 
   if (error) {
-    console.error('failed to migrate')
+    console.error(`failed to ${down ? 'revert' : 'execute'} migration`)
     console.error(error)
     process.exit(1)
   }
@@ -33,4 +40,7 @@ export async function executeMigration() {
   await db.destroy()
 }
 
-executeMigration()
+const args = process.argv.slice(2)
+const down = args.includes('--down')
+
+executeMigration(down)

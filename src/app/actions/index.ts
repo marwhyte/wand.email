@@ -23,3 +23,7 @@ export async function doCredentialsLogin(formData: FormData) {
 export async function doLogout() {
   await signOut({ redirectTo: '/' })
 }
+
+export async function doGoogleLoginWithInitialProject() {
+  await signIn('google', { redirectTo: '/add-initial-project' })
+}

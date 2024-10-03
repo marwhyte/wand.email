@@ -1,13 +1,17 @@
-import { doGoogleLogin } from '@/app/actions'
+import { doGoogleLogin, doGoogleLoginWithInitialProject } from '@/app/actions'
 import { Link } from '@/app/components/link'
 import { Text } from '@/app/components/text'
-import { Button } from '@components/button'
+import { Button, TextButton } from '@components/button'
 import { Divider } from '@components/divider'
 import CredentialsForm from './credentials-form'
 
-const GoogleLoginForm = () => {
+type GoogleProps = {
+  redirectToInitialProject?: boolean
+}
+
+const GoogleLoginForm = ({ redirectToInitialProject }: GoogleProps) => {
   return (
-    <form action={doGoogleLogin}>
+    <form action={redirectToInitialProject ? doGoogleLoginWithInitialProject : doGoogleLogin}>
       <Button color="white" type="submit" className="flex w-full items-center justify-center gap-3 rounded-md">
         <svg style={{ height: '1.25rem', width: '1.25rem' }} aria-hidden="true" viewBox="0 0 24 24">
           <path
@@ -32,11 +36,17 @@ const GoogleLoginForm = () => {
     </form>
   )
 }
-export default function RegistrationForm() {
+
+type Props = {
+  onSwitchType?: () => void
+  redirectToInitialProject?: boolean
+}
+
+export default function RegistrationForm({ onSwitchType, redirectToInitialProject = false }: Props) {
   return (
     <>
       <div>
-        <CredentialsForm register />
+        <CredentialsForm register redirectToInitialProject={redirectToInitialProject} />
         <div>
           <div className="relative mt-10">
             <Divider className="absolute inset-3 flex items-center" aria-hidden="true" />
@@ -47,12 +57,13 @@ export default function RegistrationForm() {
           </div>
 
           <div className="mt-6">
-            <GoogleLoginForm />
+            <GoogleLoginForm redirectToInitialProject={redirectToInitialProject} />
           </div>
         </div>
         <div className="mt-6">
           <Text className="text-center">
-            Already a member? <Link href="/">Login</Link>
+            Already a member?{' '}
+            {onSwitchType ? <TextButton onClick={onSwitchType}>Login</TextButton> : <Link href="/login">Login</Link>}
           </Text>
         </div>
       </div>

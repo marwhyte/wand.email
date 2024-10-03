@@ -301,8 +301,7 @@ export const goingTemplate: Email = {
             {
               id: uuidv4(),
               type: 'heading',
-              content:
-                "<span style='color: #d7ffc2; font-weight: normal'>Deals</span> coming<span><br></span> your way",
+              content: "<span style='color: #d7ffc2;'>Deals</span><strong> coming<span><br></span> your way</strong",
               attributes: {
                 as: 'h1',
                 textAlign: 'center',
@@ -312,7 +311,6 @@ export const goingTemplate: Email = {
                 paddingLeft: '0',
                 fontSize: '50px',
                 lineHeight: '56px',
-                fontWeight: 'bold',
                 color: '#fffef0',
               },
             },

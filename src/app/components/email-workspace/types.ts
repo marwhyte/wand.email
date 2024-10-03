@@ -9,6 +9,15 @@ type Email = {
   rows: RowBlock[]
 }
 
+type Project = {
+  id: string
+  deleted_at: Date | null
+  title: string
+  user_id: string
+  content: Email
+  created_at: Date
+}
+
 type EmailBlockType = EmailBlock['type']
 
 type RowBlock = {

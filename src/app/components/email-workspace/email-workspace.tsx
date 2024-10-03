@@ -10,16 +10,22 @@ import EmailRenderer from './email-renderer'
 
 type Props = {
   session: Session | null
-  isProjects?: boolean
+  project?: Project
+  monthlyExportCount: number | null
 }
 
-export default function Workspace({ session, isProjects = false }: Props) {
+export default function Workspace({ session, project, monthlyExportCount }: Props) {
   const [mobileView, setMobileView] = useState(false)
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div>
-        <EmailHeader isProjects={isProjects} session={session} setMobileView={setMobileView} />
+        <EmailHeader
+          project={project}
+          session={session}
+          setMobileView={setMobileView}
+          monthlyExportCount={monthlyExportCount}
+        />
         <div className="flex h-full w-full flex-row overflow-hidden" style={{ height: 'calc(100vh - 65px)' }}>
           <EmailRenderer mobileView={mobileView} />
           <EmailEditor />

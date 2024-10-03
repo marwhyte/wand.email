@@ -207,6 +207,7 @@ const EmailRenderer = ({ mobileView }: Props) => {
         type: 'column',
         gridColumns: gridColumn,
         attributes: {
+          align: 'center',
           paddingTop: '10px',
           paddingBottom: '10px',
           paddingLeft: '10px',
@@ -256,6 +257,7 @@ const EmailRenderer = ({ mobileView }: Props) => {
             type: 'column',
             gridColumns: 12,
             attributes: {
+              align: 'center',
               paddingTop: '10px',
               paddingBottom: '10px',
               paddingLeft: '10px',

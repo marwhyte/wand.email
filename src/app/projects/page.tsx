@@ -1,6 +1,6 @@
 import { auth } from '@/auth'
 import { getProjects } from '@/lib/database/queries/projects'
-import { joinClassNames } from '@/lib/utils/misc'
+import { joinClassNames, sortByCreatedAt } from '@/lib/utils/misc'
 import { Button } from '@components/button'
 import AddProjectButton from '@components/email-workspace/add-project-button'
 import { Heading } from '@components/heading'
@@ -10,8 +10,7 @@ import ProjectDropdown from '../components/email-workspace/project-dropdown'
 
 export default async function ProjectsPage() {
   const session = await auth()
-  console.log(session?.user)
-  const projectsData = await getProjects()
+  const projectsData = session?.user?.id ? await getProjects(session.user.id) : []
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -43,8 +42,8 @@ export default async function ProjectsPage() {
         <div>
           <h2 className="text-sm font-medium text-gray-500">My Projects</h2>
           <ul role="list" className="mt-3 grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4">
-            {projectsData.map((project, index) => (
-              <li key={project.title} className="col-span-1 rounded-md shadow-sm">
+            {sortByCreatedAt(projectsData).map((project, index) => (
+              <li key={project.id} className="col-span-1 rounded-md shadow-sm">
                 <Link
                   href={`/projects/${project.id}`}
                   key={project.title}

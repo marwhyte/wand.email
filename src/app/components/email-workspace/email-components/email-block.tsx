@@ -22,11 +22,11 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
   const [isHovered, setIsHovered] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  const [{ isDragging }, drag, preview] = useDrag({
+  const [{ isDraggingBlock }, drag, preview] = useDrag({
     type: 'block',
     item: { type: 'block', id: block.id },
     collect: (monitor) => ({
-      isDragging: monitor.isDragging(),
+      isDraggingBlock: monitor.isDragging(),
     }),
   })
 
@@ -48,7 +48,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
     [block, onSelect]
   )
 
-  const [, drop] = useDrop({
+  const [{ isOver }, drop] = useDrop({
     accept: ['block', 'newBlock'],
     hover(item: { type: string; id: string }, monitor) {
       if (item.id === block.id) return
@@ -65,6 +65,10 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
         setDropTarget({ type: 'block', id: block.id, position: 'below' })
       }
     },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+      canDrop: monitor.canDrop(),
+    }),
   })
 
   drag(drop(ref))
@@ -92,7 +96,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
           'group relative inline-block w-full',
           currentBlock?.id === block.id || isHovered ? 'outline outline-2 outline-blue-500' : ''
         )}
-        style={{ opacity: isDragging ? 0.4 : 1 }}
+        style={{ opacity: isDraggingBlock ? 0.4 : 1 }}
       >
         <div
           className={joinClassNames(
@@ -117,7 +121,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
 
         <RenderBlock block={block} isEditing />
 
-        {dropTarget && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
+        {dropTarget && isOver && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
       </div>
 
       {isHovered &&

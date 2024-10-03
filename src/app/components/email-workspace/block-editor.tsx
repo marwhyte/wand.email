@@ -13,7 +13,7 @@ import FileUploader from '@/app/components/file-uploader'
 import { Text } from '@/app/components/text'
 import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
-import { capitalizeFirstLetter } from '@/lib/utils/misc'
+import { capitalizeFirstLetter, isValidHttpUrl } from '@/lib/utils/misc'
 import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import 'react-quill/dist/quill.snow.css'
 import { v4 as uuidv4 } from 'uuid' // Add this import for generating new IDs
@@ -27,6 +27,7 @@ enum Options {
   TEXT_COLOR = 'text-color',
   BACKGROUND_COLOR = 'background-color',
   WIDTH = 'width',
+  HREF = 'href',
   HEIGHT = 'height',
   GRID_COLUMNS = 'grid-columns',
   PADDING = 'padding',
@@ -51,7 +52,7 @@ const BlockEditor = () => {
       case 'image':
         return [Options.WIDTH, Options.HEIGHT, Options.PADDING, Options.SRC]
       case 'button':
-        return [Options.TEXT, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.PADDING]
+        return [Options.TEXT, Options.HREF, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.PADDING]
       case 'heading':
         return [
           Options.TEXT,
@@ -64,6 +65,7 @@ const BlockEditor = () => {
       case 'link':
         return [
           Options.TEXT_COLOR,
+          Options.HREF,
           Options.BACKGROUND_COLOR,
           Options.FONT_SIZE,
           Options.FONT_WEIGHT,
@@ -89,7 +91,7 @@ const BlockEditor = () => {
   )
 
   const handleChange = useCallback(
-    (attributes: Partial<CommonAttributes | TextBlock | ImageBlockAttributes>) => {
+    (attributes: Partial<CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes>) => {
       if (currentBlock) {
         const updatedBlock = {
           ...currentBlock,
@@ -294,11 +296,40 @@ const BlockEditor = () => {
           <Textbox
             key={currentBlock.id}
             value={
-              currentBlock.type === 'heading'
-                ? `<${currentBlock.attributes.as}>${currentBlock.content}</${currentBlock.attributes.as}>`
-                : `<p>${currentBlock.content}</p>`
+              currentBlock.content
+              // currentBlock.type === 'heading'
+              //   ? `<${currentBlock.attributes.as}>${currentBlock.content}</${currentBlock.attributes.as}>`
+              //   : `<p>${currentBlock.content}</p>`
             }
-            onChange={(e) => handleChange({ content: e })}
+            onChange={(e) => {
+              // const content =
+              //   currentBlock.type === 'heading'
+              //     ? e.replace(new RegExp(`^<${currentBlock.attributes.as}>|</${currentBlock.attributes.as}>$`, 'g'), '')
+              //     : e.replace(/^<p>|<\/p>$/g, '')
+              handleChange({ content: e })
+            }}
+          />
+        </Field>
+      )}
+      {options.includes(Options.HREF) && currentBlock && 'href' in currentBlock.attributes && (
+        <Field>
+          <Label>Link</Label>
+          <Input
+            key={`href-${currentBlock?.id}`}
+            type="url"
+            invalid={!isValidHttpUrl(currentBlock?.attributes.href || '')}
+            value={currentBlock?.attributes.href || ''}
+            onChange={(e) => {
+              handleChange({ href: e.target.value })
+            }}
+            error={
+              !isValidHttpUrl(currentBlock?.attributes.href || '')
+                ? 'Please enter a valid URL (e.g., https://example.com)'
+                : undefined
+            }
+            placeholder="https://example.com"
+            pattern="https?://.*"
+            title="Please enter a valid URL (e.g., https://example.com)"
           />
         </Field>
       )}

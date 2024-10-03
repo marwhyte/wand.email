@@ -4,9 +4,11 @@ import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
-import { Bars3Icon, PlusIcon } from '@heroicons/react/20/solid'
+import { Bars3Icon, PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { Divider } from '../divider'
+import { Text } from '../text'
 
 interface RowEditorProps {
   row: RowBlock
@@ -142,7 +144,30 @@ export default function RowEditor({
 
   const selectedColumn = row.columns.find((col) => col.id === selectedColumnId)
 
-  console.log(row.attributes)
+  const handleDeleteColumn = (columnId: string) => {
+    if (row.columns.length > 1) {
+      const newColumns = row.columns.filter((col) => col.id !== columnId)
+      const deletedColumn = row.columns.find((col) => col.id === columnId)
+
+      // Redistribute the width of the deleted column
+      if (deletedColumn) {
+        const widthToDistribute = deletedColumn.gridColumns
+        const columnsToAdjust = newColumns.length
+        const widthPerColumn = Math.floor(widthToDistribute / columnsToAdjust)
+        const remainder = widthToDistribute % columnsToAdjust
+
+        newColumns.forEach((col, index) => {
+          col.gridColumns += widthPerColumn
+          if (index < remainder) {
+            col.gridColumns += 1
+          }
+        })
+      }
+
+      onColumnWidthChange(newColumns)
+      setSelectedColumnId(newColumns[0].id)
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -217,11 +242,11 @@ export default function RowEditor({
               <PlusIcon className="h-4 w-4" />
             </Button>
           </div>
-          <div ref={containerRef} className="relative flex h-8 w-full">
+          <div ref={containerRef} className="relative flex h-12 w-full">
             {row.columns.map((column, index) => (
               <Fragment key={column.id}>
                 <div
-                  className={`relative z-10 flex items-center justify-center rounded-md border border-gray-300 ${
+                  className={`relative z-10 flex flex-col items-center justify-center rounded-md border border-gray-300 ${
                     selectedColumnId === column.id ? 'bg-blue-100 ring-2 ring-blue-500' : ''
                   }`}
                   style={{
@@ -248,8 +273,15 @@ export default function RowEditor({
             ))}
           </div>
 
-          {selectedColumnId && (
+          {selectedColumn && (
             <div className="mt-4 space-y-4">
+              <div className="flex w-full items-center justify-between">
+                <Text>Column {row.columns.indexOf(selectedColumn) + 1}</Text>
+                <Button plain onClick={() => handleDeleteColumn(selectedColumnId)}>
+                  <TrashIcon className="h-4 w-4 cursor-pointer !text-red-500" />
+                </Button>
+              </div>
+              <Divider className="!mt-1" />
               <PaddingForm
                 padding={{
                   top: selectedColumn?.attributes.paddingTop ?? selectedColumn?.attributes.padding ?? '0px',

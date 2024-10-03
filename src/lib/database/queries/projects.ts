@@ -1,18 +1,26 @@
 'use server'
 
 import { auth } from '@/auth'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db'
 
-export async function getProjects() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    throw new Error('User not authenticated')
+export const getProjects = unstable_cache(
+  async (sessionUserId: string) => {
+    const projects = await db
+      .selectFrom('projects')
+      .selectAll()
+      .where('user_id', '=', sessionUserId)
+      .where('deleted_at', 'is', null)
+      .execute()
+    return projects
+  },
+  ['projects'],
+  {
+    tags: ['projects'],
+    revalidate: 60 * 60 * 24,
   }
-
-  const projects = await db.selectFrom('projects').selectAll().where('user_id', '=', session.user.id).execute()
-  return projects
-}
+)
 
 export async function addProject(title: string, content?: Email) {
   const session = await auth()
@@ -42,23 +50,26 @@ export async function addProject(title: string, content?: Email) {
     .returningAll()
     .executeTakeFirst()
 
+  revalidateTag('projects')
   return project
 }
 
-export async function getProject(id: string) {
-  const session = await auth()
-  if (!session?.user?.id) {
-    throw new Error('User not authenticated')
+export const getProject = unstable_cache(
+  async (id: string, sessionUserId: string): Promise<Project | undefined> => {
+    const project = await db
+      .selectFrom('projects')
+      .selectAll()
+      .where('id', '=', id)
+      .where('user_id', '=', sessionUserId)
+      .executeTakeFirst()
+    return project
+  },
+  ['project'],
+  {
+    tags: ['project'],
+    revalidate: 60 * 60,
   }
-
-  const project = await db
-    .selectFrom('projects')
-    .selectAll()
-    .where('id', '=', id)
-    .where('user_id', '=', session.user.id)
-    .executeTakeFirst()
-  return project
-}
+)
 
 export async function updateProject(id: string, updates: { content?: Email; title?: string }) {
   const session = await auth()
@@ -80,6 +91,9 @@ export async function updateProject(id: string, updates: { content?: Email; titl
     .where('id', '=', id)
     .where('user_id', '=', session.user.id)
     .execute()
+
+  // Revalidate cache
+  revalidateTag('projects')
 }
 
 export async function deleteProject(id: string) {
@@ -93,4 +107,7 @@ export async function deleteProject(id: string) {
     .where('id', '=', id)
     .where('user_id', '=', session.user.id)
     .execute()
+
+  // Revalidate cache
+  revalidateTag('projects')
 }

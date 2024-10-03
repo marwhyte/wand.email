@@ -47,13 +47,17 @@ export default function Notification({ title, description, status, duration = 50
                   </div>
                   <div className="ml-3 w-0 flex-1 pt-0.5">
                     <Text className="text-sm font-medium text-white dark:text-gray-200">{title}</Text>
-                    {description && <Text className="mt-1 text-sm text-white dark:text-gray-200">{description}</Text>}
+                    {description && (
+                      <Text className="mt-1 text-wrap text-sm text-white dark:text-gray-200">{description}</Text>
+                    )}
                   </div>
                   <div className="ml-4 flex flex-shrink-0">
                     <Button
                       outline
                       type="button"
-                      onClick={() => {
+                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                        e.stopPropagation()
+                        e.preventDefault()
                         setShow(false)
                       }}
                     >

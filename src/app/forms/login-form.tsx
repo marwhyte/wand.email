@@ -1,13 +1,17 @@
-import { doGoogleLogin } from '@/app/actions'
+import { doGoogleLogin, doGoogleLoginWithInitialProject } from '@/app/actions'
 import CredentialsForm from '@/app/forms/credentials-form'
-import { Button } from '@components/button'
+import { Button, TextButton } from '@components/button'
 import { Divider } from '@components/divider'
 import { Link } from '@components/link'
 import { Text } from '@components/text'
 
-const GoogleLoginForm = () => {
+type GoogleLoginFormProps = {
+  redirectToInitialProject?: boolean
+}
+
+const GoogleLoginForm = ({ redirectToInitialProject }: GoogleLoginFormProps) => {
   return (
-    <form action={doGoogleLogin}>
+    <form action={redirectToInitialProject ? doGoogleLoginWithInitialProject : doGoogleLogin}>
       <Button color="white" type="submit" className="flex w-full items-center justify-center gap-3 rounded-md">
         <svg style={{ height: '1.25rem', width: '1.25rem' }} aria-hidden="true" viewBox="0 0 24 24">
           <path
@@ -32,11 +36,17 @@ const GoogleLoginForm = () => {
     </form>
   )
 }
-export default function LoginForm() {
+
+type LoginFormProps = {
+  onSwitchType?: () => void
+  redirectToInitialProject?: boolean
+}
+
+export default function LoginForm({ onSwitchType, redirectToInitialProject = false }: LoginFormProps) {
   return (
     <>
       <div>
-        <CredentialsForm />
+        <CredentialsForm redirectToInitialProject={redirectToInitialProject} />
         <div>
           <div className="relative mt-10">
             <Divider className="absolute inset-3 flex items-center" aria-hidden="true" />
@@ -47,18 +57,17 @@ export default function LoginForm() {
           </div>
 
           <div className="mt-6">
-            <GoogleLoginForm />
+            <GoogleLoginForm redirectToInitialProject={redirectToInitialProject} />
           </div>
         </div>
         <div className="mt-6">
           <Text className="text-center">
             Not a member?{' '}
-            <Link
-              className="font-semibold text-zinc-950 hover:text-zinc-700 dark:text-white dark:hover:text-zinc-300"
-              href="/signup"
-            >
-              Sign up
-            </Link>
+            {onSwitchType ? (
+              <TextButton onClick={onSwitchType}>Sign up</TextButton>
+            ) : (
+              <Link href="/signup">Sign up</Link>
+            )}
           </Text>
         </div>
       </div>

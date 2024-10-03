@@ -7,7 +7,6 @@ import { Button } from '../button'
 import { Dialog, DialogActions, DialogBody, DialogTitle } from '../dialog'
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from '../dropdown'
 import { Input } from '../input'
-import Notification from '../notification'
 
 type Props = {
   project: {
@@ -19,52 +18,24 @@ type Props = {
 const ProjectDropdown = ({ project }: Props) => {
   const [isEditOpen, setIsEditOpen] = useState(false)
   const [newTitle, setNewTitle] = useState(project.title)
-  const [showNotification, setShowNotification] = useState(false)
-  const [notificationProps, setNotificationProps] = useState({
-    title: '',
-    description: '',
-    status: 'success' as 'success' | 'failure',
-  })
 
   const handleEditProject = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault()
+      e.stopPropagation()
       try {
         await updateProject(project.id, { title: newTitle })
-        setNotificationProps({
-          title: 'Project updated successfully',
-          description: `The project "${project.title}" has been renamed to "${newTitle}".`,
-          status: 'success',
-        })
+
         setIsEditOpen(false)
-      } catch (error) {
-        setNotificationProps({
-          title: 'Failed to update project',
-          description: 'An error occurred while updating the project. Please try again.',
-          status: 'failure',
-        })
-      }
-      setShowNotification(true)
+      } catch (error) {}
     },
-    [project.id, project.title, newTitle]
+    [project.id, newTitle]
   )
 
   const handleDeleteProject = async () => {
     try {
       await deleteProject(project.id)
-      setNotificationProps({
-        title: 'Project deleted successfully',
-        description: `The project "${project.title}" has been deleted.`,
-        status: 'success',
-      })
-    } catch (error) {
-      setNotificationProps({
-        title: 'Failed to delete project',
-        description: 'An error occurred while deleting the project. Please try again.',
-        status: 'failure',
-      })
-    }
-    setShowNotification(true)
+    } catch (error) {}
   }
 
   const handleDropdownClick = (e: React.MouseEvent) => {
@@ -109,15 +80,6 @@ const ProjectDropdown = ({ project }: Props) => {
           </DialogActions>
         </form>
       </Dialog>
-
-      {showNotification && (
-        <Notification
-          title={notificationProps.title}
-          description={notificationProps.description}
-          status={notificationProps.status}
-          duration={5000}
-        />
-      )}
     </>
   )
 }
