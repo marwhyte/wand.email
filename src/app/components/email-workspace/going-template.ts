@@ -107,6 +107,10 @@ const generateItems = (): RowBlock[] => {
             type: 'text',
             content: `${item.description} <a href='/' style='color: #483cff; text-decoration: underline'>${item.linkText}</a>${item.additionalText ? ' ' + item.additionalText : ''}`,
             attributes: {
+              paddingTop: '10px',
+              paddingRight: '0',
+              paddingBottom: '10px',
+              paddingLeft: '0',
               maxWidth: '360px',
               display: 'inline-block',
               verticalAlign: 'middle',
@@ -538,7 +542,12 @@ export const goingTemplate: Email = {
               type: 'text',
               content:
                 "Offer not combinable with other discounts or previous subscriptions. Redeemable only at <a href='www.going.com'>Going.com</a>, not via the mobile app.",
-              attributes: {},
+              attributes: {
+                paddingTop: '0',
+                paddingRight: '0',
+                paddingBottom: '0',
+                paddingLeft: '0',
+              },
             },
           ],
         },

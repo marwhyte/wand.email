@@ -129,6 +129,10 @@ type ColumnBlockAttributes = CommonAttributes & {
 }
 
 type TextBlockAttributes = CommonAttributes & {
+  paddingTop: string
+  paddingBottom: string
+  paddingLeft: string
+  paddingRight: string
   fontFamily?: string
   letterSpacing?: string
   textIndent?: string

@@ -1,5 +1,6 @@
 import { addExport } from '@/lib/database/queries/exports'
 import { ExportType } from '@/lib/database/types'
+import { getReactEmailCode } from '@/lib/utils/misc'
 import { ChevronLeftIcon, ChevronRightIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
 import { CodeBlock, CodeInline, dracula, render } from '@react-email/components'
 import { useCallback, useState } from 'react'
@@ -32,91 +33,8 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
     setExportType(type)
   }
 
-  const reactEmailCode = `import { applyCommonAttributes } from '@/lib/utils/misc'
-import { Body, Column, Container, Head, Html, Preview, Row } from '@react-email/components'
-import EmailButton from './email-components/email-button'
-import EmailHeading from './email-components/email-heading'
-import EmailImage from './email-components/email-image'
-import EmailLink from './email-components/email-link'
-import EmailText from './email-components/email-text'
-
-const Email = () => {
-  const renderBlock = (block) => {
-    if (block.type === 'text') {
-      return <EmailText block={block} />
-    }
-    if (block.type === 'heading') {
-      return <EmailHeading block={block} />
-    }
-    if (block.type === 'image') {
-      return <EmailImage block={block} />
-    }
-    if (block.type === 'button') {
-      return <EmailButton block={block} isEditing={false} />
-    }
-    if (block.type === 'link') {
-      return <EmailLink block={block} isEditing={false} />
-    }
-  }
-
-  return (
-    <Html>
-      <Head />
-      <Preview>${email.preview}</Preview>
-      <Body style={{ margin: 0, backgroundColor: '${email.bgColor}', color: '${email.color}', fontFamily: '${email.fontFamily}' }}>
-        <Container width={${email.width}} style={{ maxWidth: ${email.width} }}>
-          ${email.rows
-            .map(
-              (row) => `
-            <Container
-              key="${row.id}"
-              style={{
-                ...applyCommonAttributes(${JSON.stringify(row.container.attributes)}),
-                width: ${email.width},
-                maxWidth: ${email.width},
-              }}
-            >
-              <Row align="${row.attributes.align}" style={{ ...applyCommonAttributes(${JSON.stringify(row.attributes)}) }}>
-                ${row.columns
-                  .map(
-                    (column) => `
-                  <Column
-                    key="${column.id}"
-                    valign="${column.attributes.valign}"
-                    align="${column.attributes.align}"
-                    style={{
-                      ...applyCommonAttributes(${JSON.stringify(column.attributes)}),
-                      width: '${(column.gridColumns / 12) * 100}%',
-                      borderStyle: '${column.attributes.borderStyle}',
-                      borderWidth: '${column.attributes.borderWidth}',
-                      borderColor: '${column.attributes.borderColor}',
-                    }}
-                  >
-                    ${column.blocks
-                      .map(
-                        (block) => `
-                      {renderBlock(${JSON.stringify(block)})}
-                    `
-                      )
-                      .join('')}
-                  </Column>
-                `
-                  )
-                  .join('')}
-              </Row>
-            </Container>
-          `
-            )
-            .join('')}
-        </Container>
-      </Body>
-    </Html>
-  )
-}
-
-export default Email`
-
   const htmlEmailCode = render(EmailRendererFinal({ email: email }))
+  const reactEmailCode = getReactEmailCode(email)
 
   const handleCopyReact = useCallback(async () => {
     try {
@@ -168,7 +86,7 @@ export default Email`
               <Text className="text-sm">
                 With these options, images are hosted by SentSwiftly. <Strong>Charges may apply.</Strong>
                 <Nbsp />
-                <TextLink href="https://swiftmailer.com/image-hosting" target="_blank">
+                <TextLink href="https://sentswiftly.com/image-hosting" target="_blank">
                   Learn more
                 </TextLink>
               </Text>

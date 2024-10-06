@@ -41,7 +41,11 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
     case 'heading':
       return { ...baseBlock, type: 'heading', attributes: { as: 'h2' } }
     case 'text':
-      return { ...baseBlock, type: 'text' }
+      return {
+        ...baseBlock,
+        type: 'text',
+        attributes: { paddingTop: '10px', paddingBottom: '10px', paddingLeft: '0', paddingRight: '0' },
+      }
     case 'image':
       return { ...baseBlock, type: 'image', attributes: { src: '' } }
     case 'button':
