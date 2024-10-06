@@ -22,7 +22,7 @@ export function sortByCreatedAt<T extends ObjectWithCreatedAt>(projects: T[]): T
 }
 
 export function getPhotoUrl(name: string, template: string) {
-  return `https://swiftmailer-photos.imgix.net/${template}/${name}`
+  return `https://d7fuhokyircdv.cloudfront.net/${template}/${name}`
 }
 
 export function isValidHttpUrl(string: string) {

@@ -3,7 +3,6 @@
 import { getFirstTwoInitials } from '@/lib/utils/misc'
 import { AvatarButton } from '@components/avatar'
 import { Button } from '@components/button'
-import DarkModeToggle from '@components/dark-mode-toggle'
 import {
   Dropdown,
   DropdownButton,
@@ -91,7 +90,6 @@ export default function Content({ children, session }: Props) {
                   ))}
                 </NavbarSection>
                 <div className="flex items-center">
-                  <DarkModeToggle />
                   {session ? (
                     <Dropdown>
                       <DropdownButton as="div" className="ml-4 flex items-center">

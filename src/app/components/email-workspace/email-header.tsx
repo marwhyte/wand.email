@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@/app/components/button'
-import DarkModeToggle from '@/app/components/dark-mode-toggle'
 import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '@/app/components/dialog'
 import { Input } from '@/app/components/input'
 import Loading from '@/app/components/loading'
@@ -186,7 +185,6 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
                 <Heading level={1}>{project ? project.title : email.name}</Heading>
               </div>
               <div className="flex flex-1 items-center justify-end space-x-4">
-                <DarkModeToggle />
                 <TabGroup value={selectedDevice} className="flex justify-center" onChange={handleDeviceChange}>
                   <TabList>
                     {deviceOptions.map((option) => (

@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { Logo } from './Logo'
 import { Button } from './button'
-import DarkModeToggle from './dark-mode-toggle'
 
 type Props = {
   isLogin?: boolean
@@ -23,7 +22,6 @@ export default function UnauthenticatedHeader({ isLogin, isSignup }: Props) {
         <div className="flex flex-1 items-center justify-end gap-x-6">
           {!isLogin && <Button href="/">Log in</Button>}
           {!isSignup && <Button href="/signup">Sign up</Button>}
-          <DarkModeToggle />
         </div>
       </nav>
     </header>
