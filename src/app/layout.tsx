@@ -9,10 +9,10 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
-    template: '%s - SwiftMailer',
-    default: 'SwiftMailer - Create stunning emails with ease',
+    template: '%s - SentSwiftly',
+    default: 'SentSwiftly - Create stunning emails with ease',
   },
-  description: 'SwiftMailer is an email integration that allows you to create stunning emails with ease.',
+  description: 'SentSwiftly is an email integration that allows you to create stunning emails with ease.',
 }
 
 export default async function RootLayout({

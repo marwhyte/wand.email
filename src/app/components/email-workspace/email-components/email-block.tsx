@@ -52,6 +52,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
     accept: ['block', 'newBlock'],
     hover(item: { type: string; id: string }, monitor) {
       if (item.id === block.id) return
+      if (!isOver) return
 
       const hoverRect = ref.current?.getBoundingClientRect()
       if (!hoverRect) return

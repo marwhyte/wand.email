@@ -166,7 +166,7 @@ export default Email`
           {exportType === null && (
             <div className="m mb-4">
               <Text className="text-sm">
-                With these options, images are hosted by SwiftMailer. <Strong>Charges may apply.</Strong>
+                With these options, images are hosted by SentSwiftly. <Strong>Charges may apply.</Strong>
                 <Nbsp />
                 <TextLink href="https://swiftmailer.com/image-hosting" target="_blank">
                   Learn more

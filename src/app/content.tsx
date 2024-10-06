@@ -67,7 +67,7 @@ export default function Content({ children, session }: Props) {
   const isTemplatePage = /^\/templates\/[^/]+$/.test(pathname) || /^\/projects\/[^/]+$/.test(pathname)
 
   const navItems = [
-    { name: 'Why SwiftMailer', href: '/', current: pathname === '/' },
+    { name: 'Why SentSwiftly', href: '/', current: pathname === '/' },
     { name: 'Templates', href: '/templates', current: pathname.startsWith('/templates') },
     ...(session ? [{ name: 'My projects', href: '/projects', current: pathname.startsWith('/projects') }] : []),
     ...(session ? [{ name: 'Settings', href: '/settings', current: pathname.startsWith('/settings') }] : []),

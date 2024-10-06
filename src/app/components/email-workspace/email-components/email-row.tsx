@@ -84,6 +84,8 @@ export default function EmailRow({
       newBlockType?: EmailBlockType
       gridColumns?: number[]
     }) {
+      if (!isOverRow) return
+
       if (item.type === 'row' && dropLine !== null && item.id !== row.id) {
         moveRow(item.id, row.id)
       } else if (dropLine !== null && item.type === 'newRow') {
