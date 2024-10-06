@@ -1,14 +1,19 @@
 import { CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, XCircleIcon } from '@heroicons/react/20/solid'
 import { ReactNode } from 'react'
+import { TextButton } from './button'
 
-type AlertStatus = 'error' | 'success' | 'information' | 'warning'
+type AlertStatus = 'error' | 'success' | 'info' | 'warning'
 
 interface AlertBoxProps {
   children: ReactNode
   status: AlertStatus
+  action?: {
+    onClick: () => void
+    text: string
+  }
 }
 
-export default function AlertBox({ children, status }: AlertBoxProps) {
+export default function AlertBox({ children, status, action }: AlertBoxProps) {
   const config = {
     error: {
       icon: XCircleIcon,
@@ -24,7 +29,7 @@ export default function AlertBox({ children, status }: AlertBoxProps) {
       textColor: 'text-green-700',
       iconColor: 'text-green-400',
     },
-    information: {
+    info: {
       icon: InformationCircleIcon,
       bgColor: 'bg-blue-50',
       borderColor: 'border-blue-400',
@@ -48,9 +53,18 @@ export default function AlertBox({ children, status }: AlertBoxProps) {
         <div className="flex-shrink-0">
           <Icon aria-hidden="true" className={`h-5 w-5 ${iconColor}`} />
         </div>
-        <div className="ml-3">
+        <div className="ml-3 flex-grow">
           <p className={`text-sm ${textColor}`}>{children}</p>
         </div>
+        {action && (
+          <div className="ml-auto pl-3">
+            <div className="-mx-1.5 -my-1.5">
+              <TextButton onClick={action.onClick}>
+                <span className="text-sm font-medium">{action.text}</span>
+              </TextButton>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

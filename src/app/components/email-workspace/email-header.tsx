@@ -131,15 +131,18 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
   const isSaving = JSON.stringify(email) !== JSON.stringify(emailCopy)
 
   const debouncedSave = useCallback(
-    debounce((updatedEmail) => {
-      if (project) {
-        setEmailCopy(updatedEmail)
-        updateProject(project.id.toString(), { content: updatedEmail })
-      } else {
-        sessionStorage.setItem('template_email', JSON.stringify(updatedEmail))
-      }
-    }, 1500),
-    []
+    (updatedEmail: Email) => {
+      const save = debounce((email: Email) => {
+        if (project) {
+          setEmailCopy(email)
+          updateProject(project.id.toString(), { content: email })
+        } else {
+          sessionStorage.setItem('template_email', JSON.stringify(email))
+        }
+      }, 1500)
+      save(updatedEmail)
+    },
+    [project]
   )
 
   useEffect(() => {
@@ -152,11 +155,16 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
     if (!project && !sessionStorage.getItem('template_email')) {
       sessionStorage.setItem('template_email', JSON.stringify(email))
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleBackClick = () => {
     if (!project) {
-      setShowBackWarningDialog(true)
+      if (JSON.stringify(email) !== JSON.stringify(emailCopy)) {
+        setShowBackWarningDialog(true)
+      } else {
+        router.push('/templates')
+      }
     } else {
       router.push('/projects')
     }

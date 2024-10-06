@@ -6,6 +6,8 @@ export interface Database {
   exports: ExportTable
 }
 
+export type ExportType = 'react' | 'html'
+
 export interface UserTable {
   google_id?: string
   id: Generated<string>
@@ -28,5 +30,6 @@ export interface ExportTable {
   id: Generated<string>
   user_id: string
   content: Email
+  type: ExportType
   created_at: Date
 }

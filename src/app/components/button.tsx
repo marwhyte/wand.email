@@ -12,7 +12,7 @@ const styles = {
     // Focus
     'focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-blue-500',
     // Disabled
-    'data-[disabled]:opacity-50',
+    'data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed',
     // Icon
     '[&>[data-slot=icon]]:-mx-0.5 [&>[data-slot=icon]]:my-0.5 [&>[data-slot=icon]]:size-5 [&>[data-slot=icon]]:shrink-0 [&>[data-slot=icon]]:text-[--btn-icon] [&>[data-slot=icon]]:sm:my-1 [&>[data-slot=icon]]:sm:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:data-[hover]:[--btn-icon:ButtonText]',
   ],
@@ -155,6 +155,11 @@ const styles = {
       'text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.rose.500)] [--btn-border:theme(colors.rose.600/90%)]',
       '[--btn-icon:theme(colors.rose.300)] data-[active]:[--btn-icon:theme(colors.rose.200)] data-[hover]:[--btn-icon:theme(colors.rose.200)]',
     ],
+    grey: [
+      'text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.gray.500)] [--btn-border:theme(colors.gray.600/90%)]',
+      'dark:[--btn-hover-overlay:theme(colors.white/5%)]',
+      '[--btn-icon:theme(colors.gray.300)] data-[active]:[--btn-icon:theme(colors.gray.200)] data-[hover]:[--btn-icon:theme(colors.gray.200)]',
+    ],
   },
 }
 
@@ -234,7 +239,7 @@ export function TouchTarget({ children }: { children: React.ReactNode }) {
 
 export function TextButton({ children, ...props }: React.ComponentPropsWithoutRef<typeof Headless.Button>) {
   return (
-    <Headless.Button {...props} className="font-semibold text-blue-500 hover:text-blue-700">
+    <Headless.Button className="font-semibold text-blue-500 hover:text-blue-700" {...props}>
       {children}
     </Headless.Button>
   )
