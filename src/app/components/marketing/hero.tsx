@@ -1,7 +1,5 @@
 'use client'
 
-import Image from 'next/image'
-
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { Heading } from '../heading'
@@ -103,7 +101,7 @@ export function Hero() {
               transform="translate(24 24)"
               clipPath="url(#2ade4387-9c63-4fc4-b754-10e687a0d332)"
             >
-              <Image src={selectedImage} alt="" width={316} height={684} />
+              <img src={selectedImage} alt="" width={316} height={684} />
             </foreignObject>
           </svg>
         </div>
