@@ -53,7 +53,6 @@ export default function EmailColumn({
       }
     },
     drop(item: { type: 'block' | 'newBlock'; id: string; newBlockType?: EmailBlockType }) {
-      if (!isOver) return
       if (dropTarget) {
         onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position)
       }

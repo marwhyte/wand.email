@@ -58,7 +58,6 @@ export default function EmailRow({
     accept: ['row', 'newBlock', 'block', 'newRow'],
     hover(item: { type: 'row' | 'newBlock' | 'block' | 'newRow'; id: string }, monitor) {
       if (!ref.current) return
-      if (!isOverRow) return
 
       if (item.type !== 'row' && item.type !== 'newRow') return
 
@@ -84,8 +83,6 @@ export default function EmailRow({
       newBlockType?: EmailBlockType
       gridColumns?: number[]
     }) {
-      if (!isOverRow) return
-
       if (item.type === 'row' && dropLine !== null && item.id !== row.id) {
         moveRow(item.id, row.id)
       } else if (dropLine !== null && item.type === 'newRow') {
