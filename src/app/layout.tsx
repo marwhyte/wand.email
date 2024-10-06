@@ -1,6 +1,5 @@
 import { auth } from '@/auth'
 import type { Metadata } from 'next'
-import { ThemeProvider } from 'next-themes'
 import { Inter } from 'next/font/google'
 import Content from './content'
 import './globals.css'
@@ -32,9 +31,7 @@ export default async function RootLayout({
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </head>
       <body className={inter.className + ' h-full'}>
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <Content session={session}>{children}</Content>
-        </ThemeProvider>
+        <Content session={session}>{children}</Content>
       </body>
     </html>
   )
