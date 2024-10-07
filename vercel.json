@@ -1,0 +1,9 @@
+{
+  "buildCommand": "pnpm run migrate && pnpm run build",
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/node"
+    }
+  ]
+}
