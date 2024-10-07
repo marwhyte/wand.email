@@ -3,7 +3,7 @@ import NextAuth, { NextAuthConfig } from 'next-auth'
 import CredentialProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
 import { authConfig } from './auth.config'
-import { addUser, getUserByEmail } from './lib/database/queries/users'
+import { addUser, getUserByEmail, userExists } from './lib/database/queries/users'
 
 interface Credentials {
   email: string
@@ -91,6 +91,10 @@ const authOptions: NextAuthConfig = {
       return true
     },
     async session({ session, token }) {
+      const exists = await userExists(session.user.email as string)
+      if (!exists) {
+        await signOut({ redirectTo: '/' })
+      }
       if (session.user) {
         session.user.id = token.id as string
       }

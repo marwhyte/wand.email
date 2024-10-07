@@ -36,3 +36,30 @@ export async function addUser(user: {
 
   return result
 }
+
+export async function userExists(email: string): Promise<boolean> {
+  const user = await db.selectFrom('users').select('id').where('email', '=', email).executeTakeFirst()
+
+  return !!user
+}
+
+export async function deleteUserByEmail(email: string): Promise<boolean> {
+  return await db.transaction().execute(async (trx) => {
+    // Get the user ID first
+    const user = await trx.selectFrom('users').select('id').where('email', '=', email).executeTakeFirst()
+
+    if (!user) {
+      return false // User not found
+    }
+
+    // Delete related records
+    await trx.deleteFrom('files').where('user_id', '=', user.id).execute()
+    await trx.deleteFrom('exports').where('user_id', '=', user.id).execute()
+    await trx.deleteFrom('projects').where('user_id', '=', user.id).execute()
+
+    // Delete the user
+    const result = await trx.deleteFrom('users').where('id', '=', user.id).execute()
+
+    return result[0].numDeletedRows > 0
+  })
+}
