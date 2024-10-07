@@ -31,10 +31,9 @@ type Props = {
 
 type AccountDropdownMenuProps = {
   anchor: 'top start' | 'bottom end'
-  session: Session | null
 }
 
-function AccountDropdownMenu({ anchor, session }: AccountDropdownMenuProps) {
+function AccountDropdownMenu({ anchor }: AccountDropdownMenuProps) {
   return (
     <DropdownMenu className="min-w-64" anchor={anchor}>
       <DropdownItem href="/settings">
@@ -107,7 +106,7 @@ export default function Content({ children, session }: Props) {
                           src={session.user?.image}
                         />
                       </DropdownButton>
-                      <AccountDropdownMenu session={session} anchor="bottom end" />
+                      <AccountDropdownMenu anchor="bottom end" />
                     </Dropdown>
                   ) : (
                     <div className="ml-4 flex items-center space-x-4">

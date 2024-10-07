@@ -1,6 +1,6 @@
 'use client'
 
-import { doCredentialsLogin } from '@/app/actions'
+import { doCredentialsLogin } from '@/app/actions/authentication'
 import { Button } from '@components/button'
 import { Field, Label } from '@components/fieldset'
 import { Input } from '@components/input'

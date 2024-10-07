@@ -1,5 +1,5 @@
-import { doLogout } from "@/app/actions";
-import { Button } from "./button";
+import { doLogout } from '@/app/actions/authentication'
+import { Button } from '@components/button'
 
 const Logout = () => {
   return (
@@ -8,7 +8,7 @@ const Logout = () => {
         logout
       </Button>
     </form>
-  );
-};
+  )
+}
 
-export default Logout;
+export default Logout

@@ -4,6 +4,7 @@ export interface Database {
   users: UserTable
   projects: ProjectTable
   exports: ExportTable
+  files: FileTable
 }
 
 export type ExportType = 'react' | 'html'
@@ -32,4 +33,13 @@ export interface ExportTable {
   content: Email
   type: ExportType
   created_at: Date
+}
+
+export interface FileTable {
+  id: Generated<string>
+  file_name: string
+  image_key: string
+  user_id: string
+  created_at: Date
+  size_bytes: number
 }

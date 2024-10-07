@@ -1,4 +1,4 @@
-import { doGoogleLogin, doGoogleLoginWithInitialProject } from '@/app/actions'
+import { doGoogleLogin, doGoogleLoginWithInitialProject } from '@/app/actions/authentication'
 import CredentialsForm from '@/app/forms/credentials-form'
 import { Button, TextButton } from '@components/button'
 import { Divider } from '@components/divider'

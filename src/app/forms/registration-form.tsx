@@ -1,4 +1,4 @@
-import { doGoogleLogin, doGoogleLoginWithInitialProject } from '@/app/actions'
+import { doGoogleLogin, doGoogleLoginWithInitialProject } from '@/app/actions/authentication'
 import { Link } from '@/app/components/link'
 import { Text } from '@/app/components/text'
 import { Button, TextButton } from '@components/button'
