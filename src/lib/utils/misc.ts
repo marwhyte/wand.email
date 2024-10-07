@@ -85,35 +85,36 @@ const renderBlock = (block: EmailBlock) => {
     return `<Text style={{ ...applyCommonAttributes(${JSON.stringify(block.attributes)}), ${Object.entries(
       getAdditionalTextStyles(block.attributes)
     )
-      .map(([key, value]) => `${key}: ${value}`)
+      .map(([key, value]) => `${key}: "${value}"`)
       .join(', ')} }}>${parse(block.content)}</Text>`
   }
   if (block.type === 'heading') {
-    return `<Heading as={${block.attributes.as}} style={{ ...applyCommonAttributes(${JSON.stringify(
+    return `<Heading as="${block.attributes.as}" style={{ ...applyCommonAttributes(${JSON.stringify(
       block.attributes
     )}), ${Object.entries(getAdditionalHeadingStyles(block.attributes))
-      .map(([key, value]) => `${key}: ${value}`)
+      .map(([key, value]) => `${key}: "${value}"`)
       .join(', ')} }}>${parse(block.content)}</Heading>`
   }
   if (block.type === 'image') {
-    return `<Img src={${block.attributes.src}} alt={${block.attributes.alt}} style={{ ...applyCommonAttributes(${JSON.stringify(
+    return `<Img src="${block.attributes.src}" alt="${block.attributes.alt}" style={{ ...applyCommonAttributes(${JSON.stringify(
       block.attributes
     )}), ${Object.entries(getAdditionalImageStyles(block.attributes))
-      .map(([key, value]) => `${key}: ${value}`)
+      .map(([key, value]) => `${key}: "${value}"`)
       .join(', ')} }} />`
   }
   if (block.type === 'button') {
-    return `<Button href={${block.attributes.href}} target={${block.attributes.target}} rel={${block.attributes.rel}} style={{ ${Object.entries(
+    return `<Button href="${block.attributes.href}" target="${block.attributes.target}" rel="${block.attributes.rel}" style={{ ${Object.entries(
       getAdditionalButtonStyles(block.attributes)
     )
-      .map(([key, value]) => `${key}: ${value}`)
-      .join(', ')}, ...applyCommonAttributes(${JSON.stringify(block.attributes)}) }}>${parse(block.content)}</Button>`
+      .map(([key, value]) => `${key}: "${value}"`)
+      .join(', ')}, 
+      ...applyCommonAttributes(${JSON.stringify(block.attributes)}) }}>${parse(block.content)}</Button>`
   }
   if (block.type === 'link') {
-    return `<Link href={${block.attributes.href}} target={${block.attributes.target}} rel={${block.attributes.rel}} style={{ ${Object.entries(
+    return `<Link href="${block.attributes.href}" target="${block.attributes.target}" rel="${block.attributes.rel}" style={{ ${Object.entries(
       getAdditionalLinkStyles(block.attributes)
     )
-      .map(([key, value]) => `${key}: ${value}`)
+      .map(([key, value]) => `${key}: "${value}"`)
       .join(', ')}, ...applyCommonAttributes(${JSON.stringify(block.attributes)}) }}>${parse(block.content)}</Link>`
   }
 }
@@ -121,7 +122,7 @@ const renderBlock = (block: EmailBlock) => {
 export function getReactEmailCode(email: Email) {
   return `
 import React from 'react'
-import { Body, Column, Container, Head, Html, Preview, Row, Text } from '@react-email/components'
+import { Body, Column, Container, Head, Html, Preview, Row, Text, Link, Button, Img, Heading } from '@react-email/components'
 
 const Email = () => {
   function applyCommonAttributes(attributes) {

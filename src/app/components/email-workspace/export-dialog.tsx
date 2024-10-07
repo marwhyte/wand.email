@@ -28,6 +28,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const [notificationMessage, setNotificationMessage] = useState('')
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
 
+  console.log(notificationOpen)
   const handleExport = (type: ExportType) => {
     addExport(email, type)
     setExportType(type)
