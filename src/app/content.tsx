@@ -42,11 +42,15 @@ function AccountDropdownMenu({ anchor, session }: AccountDropdownMenuProps) {
         <DropdownLabel>My account</DropdownLabel>
       </DropdownItem>
       <DropdownDivider />
-      <DropdownItem href="/">
+      <DropdownItem href="/tos.html">
+        <ShieldCheckIcon />
+        <DropdownLabel>Terms of service</DropdownLabel>
+      </DropdownItem>
+      <DropdownItem href="/privacy.html">
         <ShieldCheckIcon />
         <DropdownLabel>Privacy policy</DropdownLabel>
       </DropdownItem>
-      <DropdownItem href="mailto:marcowhyte2@gmail">
+      <DropdownItem href="mailto:support@sentswiftly.com">
         <LightBulbIcon />
         <DropdownLabel>Share feedback</DropdownLabel>
       </DropdownItem>

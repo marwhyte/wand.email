@@ -15,9 +15,12 @@ export function Footer() {
             </div>
           </Link>
           <nav className="mt-10 text-sm" aria-label="quick links">
-            <div className="-my-1 flex justify-center gap-x-6">
+            <div className="-my-1 flex flex-wrap justify-center gap-x-6">
               <NavLink href="/">Why SentSwiftly</NavLink>
               <NavLink href="/templates">Templates</NavLink>
+              <NavLink href="/privacy.html">Privacy policy</NavLink>
+              <NavLink href="/tos.html">Terms of service</NavLink>
+              <NavLink href="mailto:support@sentswiftly.com">Contact us</NavLink>
             </div>
           </nav>
         </div>

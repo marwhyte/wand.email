@@ -1,4 +1,11 @@
 import parse from 'html-react-parser'
+import {
+  getAdditionalButtonStyles,
+  getAdditionalHeadingStyles,
+  getAdditionalImageStyles,
+  getAdditionalLinkStyles,
+  getAdditionalTextStyles,
+} from './defaultStyles'
 
 export function getFirstTwoInitials(name: string) {
   // Split the name by spaces
@@ -75,30 +82,40 @@ export function joinClassNames(...classes: string[]) {
 
 const renderBlock = (block: EmailBlock) => {
   if (block.type === 'text') {
-    const additionalStyles = {
-      margin: 0,
-      fontFamily: block.attributes.fontFamily,
-      letterSpacing: block.attributes.letterSpacing,
-      textIndent: block.attributes.textIndent,
-    }
     return `<Text style={{ ...applyCommonAttributes(${JSON.stringify(block.attributes)}), ${Object.entries(
-      additionalStyles
+      getAdditionalTextStyles(block.attributes)
     )
       .map(([key, value]) => `${key}: ${value}`)
       .join(', ')} }}>${parse(block.content)}</Text>`
   }
-  // if (block.type === 'heading') {
-  //   return `<EmailHeading block={block} />`
-  // }
-  // if (block.type === 'image') {
-  //   return `<EmailImage block={block} />`
-  // }
-  // if (block.type === 'button') {
-  //   return `<EmailButton block={block} isEditing={false} />`
-  // }
-  // if (block.type === 'link') {
-  //   return `<EmailLink block={block} isEditing={false} />`
-  // }
+  if (block.type === 'heading') {
+    return `<Heading as={${block.attributes.as}} style={{ ...applyCommonAttributes(${JSON.stringify(
+      block.attributes
+    )}), ${Object.entries(getAdditionalHeadingStyles(block.attributes))
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ')} }}>${parse(block.content)}</Heading>`
+  }
+  if (block.type === 'image') {
+    return `<Img src={${block.attributes.src}} alt={${block.attributes.alt}} style={{ ...applyCommonAttributes(${JSON.stringify(
+      block.attributes
+    )}), ${Object.entries(getAdditionalImageStyles(block.attributes))
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ')} }} />`
+  }
+  if (block.type === 'button') {
+    return `<Button href={${block.attributes.href}} target={${block.attributes.target}} rel={${block.attributes.rel}} style={{ ${Object.entries(
+      getAdditionalButtonStyles(block.attributes)
+    )
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ')}, ...applyCommonAttributes(${JSON.stringify(block.attributes)}) }}>${parse(block.content)}</Button>`
+  }
+  if (block.type === 'link') {
+    return `<Link href={${block.attributes.href}} target={${block.attributes.target}} rel={${block.attributes.rel}} style={{ ${Object.entries(
+      getAdditionalLinkStyles(block.attributes)
+    )
+      .map(([key, value]) => `${key}: ${value}`)
+      .join(', ')}, ...applyCommonAttributes(${JSON.stringify(block.attributes)}) }}>${parse(block.content)}</Link>`
+  }
 }
 
 export function getReactEmailCode(email: Email) {

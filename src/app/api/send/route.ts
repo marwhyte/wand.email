@@ -14,7 +14,7 @@ export const POST = async (request: NextRequest) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'SwiftMaker <testing@marcowhyte.com>',
+      from: 'SwiftMaker <testing@sentswiftly.com>',
       to: [email],
       subject: 'Test from SentSwiftly',
       html: html,

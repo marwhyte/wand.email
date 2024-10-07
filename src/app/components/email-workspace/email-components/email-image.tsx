@@ -1,3 +1,4 @@
+import { getAdditionalImageStyles } from '@/lib/utils/defaultStyles'
 import { applyCommonAttributes } from '@/lib/utils/misc'
 import { Img } from '@react-email/components'
 import Image from 'next/image'
@@ -7,11 +8,6 @@ type Props = {
 }
 
 export default function EmailImage({ block }: Props) {
-  const additionalStyles = {
-    aspectRatio: block.attributes.aspectRatio,
-    objectFit: block.attributes.objectFit,
-  }
-
   if (!block.attributes.src) {
     return (
       <div className="flex h-full w-full items-center justify-center rounded bg-gray-100">
@@ -24,7 +20,7 @@ export default function EmailImage({ block }: Props) {
     <Img
       src={block.attributes.src}
       alt={block.attributes.alt}
-      style={{ ...applyCommonAttributes(block.attributes), ...additionalStyles }}
+      style={{ ...applyCommonAttributes(block.attributes), ...getAdditionalImageStyles(block.attributes) }}
     />
   )
 }

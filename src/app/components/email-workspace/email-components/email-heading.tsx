@@ -1,3 +1,4 @@
+import { getAdditionalHeadingStyles } from '@/lib/utils/defaultStyles'
 import { applyCommonAttributes } from '@/lib/utils/misc'
 import { Heading } from '@react-email/components'
 import parse from 'html-react-parser'
@@ -7,15 +8,9 @@ type Props = {
 }
 
 export default function EmailHeading({ block }: Props) {
-  const additionalStyles = {
-    fontFamily: block.attributes.fontFamily,
-    letterSpacing: block.attributes.letterSpacing,
-    textIndent: block.attributes.textIndent,
-  }
-
   const headingStyle = {
     ...applyCommonAttributes(block.attributes),
-    ...additionalStyles,
+    ...getAdditionalHeadingStyles(block.attributes),
   }
 
   return (
