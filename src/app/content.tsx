@@ -1,5 +1,6 @@
 'use client'
 
+import { doLogout } from '@/app/actions/authentication'
 import { getFirstTwoInitials } from '@/lib/utils/misc'
 import { AvatarButton } from '@components/avatar'
 import { Button } from '@components/button'
@@ -22,7 +23,6 @@ import {
 import { Session } from 'next-auth'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { doLogout } from './actions'
 
 type Props = {
   children: React.ReactNode
