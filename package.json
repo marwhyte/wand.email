@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "bun run migrate && next build",
     "migrate": "bun run src/lib/database/migrations.ts",
     "migrate:down": "bun run src/lib/database/migrations.ts --down",
     "start": "next start",
