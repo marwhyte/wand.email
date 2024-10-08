@@ -1,6 +1,6 @@
 import { addExport } from '@/lib/database/queries/exports'
 import { ExportType } from '@/lib/database/types'
-import { getReactEmailCode } from '@/lib/utils/misc'
+import { getReactEmailCode } from '@/lib/utils/code-generation'
 import { ChevronLeftIcon, ChevronRightIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
 import { CodeBlock, CodeInline, dracula, render } from '@react-email/components'
 import { useCallback, useState } from 'react'
@@ -24,11 +24,9 @@ type Props = {
 const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const { email } = useEmail()
   const [exportType, setExportType] = useState<ExportType | null>(null)
-  const [notificationOpen, setNotificationOpen] = useState(false)
-  const [notificationMessage, setNotificationMessage] = useState('')
+  const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
 
-  console.log(notificationOpen)
   const handleExport = (type: ExportType) => {
     addExport(email, type)
     setExportType(type)
@@ -42,12 +40,10 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
       await navigator.clipboard.writeText(reactEmailCode)
       setNotificationMessage('Code copied to clipboard')
       setNotificationStatus('success')
-      setNotificationOpen(true)
     } catch (err) {
       console.error('Failed to copy: ', err)
       setNotificationMessage('Failed to copy code')
       setNotificationStatus('failure')
-      setNotificationOpen(true)
     }
   }, [reactEmailCode])
 
@@ -227,8 +223,15 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           )}
         </DialogBody>
       </Dialog>
-
-      {notificationOpen && <Notification title={notificationMessage} status={notificationStatus} duration={5000} />}
+      {notificationMessage && (
+        <Notification
+          onClose={() => setNotificationMessage(null)}
+          title={notificationMessage}
+          status={notificationStatus}
+          duration={4000}
+          skipClose
+        />
+      )}
     </>
   )
 }

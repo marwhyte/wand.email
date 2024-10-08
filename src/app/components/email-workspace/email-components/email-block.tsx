@@ -119,7 +119,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
 
         <DragPreviewImage connect={preview} src="/block.svg" />
 
-        <RenderBlock block={block} isEditing />
+        <RenderBlock block={block} />
 
         {dropTarget && isOver && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
       </div>

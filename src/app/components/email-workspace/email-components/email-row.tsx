@@ -1,5 +1,6 @@
 import DragLine from '@/app/components/drag-line'
-import { applyCommonAttributes, joinClassNames } from '@/lib/utils/misc'
+import { applyCommonAttributes, generateRowProps } from '@/lib/utils/attributes'
+import { joinClassNames } from '@/lib/utils/misc'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { Container, Row } from '@react-email/components'
 import { useRef, useState } from 'react'
@@ -166,7 +167,7 @@ export default function EmailRow({
             maxWidth: mobileView ? '360px' : `${email.width}px`,
           }}
         >
-          <Row align={row.attributes.align} style={{ ...applyCommonAttributes(row.attributes) }}>
+          <Row {...generateRowProps(row)}>
             {row.columns.map((column) => (
               <EmailColumn
                 column={column}

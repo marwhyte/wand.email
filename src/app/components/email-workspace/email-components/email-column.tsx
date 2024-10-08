@@ -1,4 +1,4 @@
-import { applyCommonAttributes } from '@/lib/utils/misc'
+import { generateColumnProps } from '@/lib/utils/attributes'
 import { ArrowDownCircleIcon, ArrowUpCircleIcon } from '@heroicons/react/20/solid'
 import { Column } from '@react-email/components'
 import React, { useRef } from 'react'
@@ -45,7 +45,7 @@ export default function EmailColumn({
 
   const isDropTarget = dropTarget?.type === 'column' && dropTarget.id === column.id
 
-  const [{ isOver }, drop] = useDrop({
+  const [drop] = useDrop({
     accept: ['block', 'newBlock'],
     hover(item: { type: 'block' | 'newBlock'; id: string; newBlockType?: EmailBlockType }, monitor) {
       if (column.blocks.length === 0) {
@@ -57,27 +57,13 @@ export default function EmailColumn({
         onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position, item.newBlockType)
       }
     },
-    collect: (monitor) => ({
-      isOver: monitor.isOver(),
-    }),
   })
 
   return (
     <Column
-      valign={column.attributes.valign}
-      align={column.attributes.align}
-      style={{
-        ...applyCommonAttributes(column.attributes),
-        width: width,
-        borderStyle: column.attributes.borderStyle,
-        borderWidth: column.attributes.borderWidth,
-        borderColor: column.attributes.borderColor,
-      }}
+      {...generateColumnProps(column)}
       className={`${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
-      width={width}
-      // @ts-ignore
-      ref={drop}
     >
       {column.blocks.length === 0 && (
         <div className="relative flex h-full w-full flex-col items-center justify-center py-2">

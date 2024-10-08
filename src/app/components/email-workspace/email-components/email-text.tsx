@@ -1,5 +1,4 @@
-import { getAdditionalTextStyles } from '@/lib/utils/defaultStyles'
-import { applyCommonAttributes } from '@/lib/utils/misc'
+import { generateBlockProps } from '@/lib/utils/attributes'
 import { Text } from '@react-email/components'
 import parse from 'html-react-parser'
 
@@ -8,9 +7,5 @@ type Props = {
 }
 
 export default function EmailText({ block }: Props) {
-  return (
-    <Text style={{ ...applyCommonAttributes(block.attributes), ...getAdditionalTextStyles(block.attributes) }}>
-      {parse(block.content)}
-    </Text>
-  )
+  return <Text {...generateBlockProps(block)}>{parse(block.content)}</Text>
 }

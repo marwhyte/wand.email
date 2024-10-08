@@ -11,10 +11,19 @@ interface NotificationProps {
   title: string
   description?: string
   status: 'success' | 'failure'
+  skipClose?: boolean
   duration?: number
+  onClose?: () => void
 }
 
-export default function Notification({ title, description, status, duration = 5000 }: NotificationProps) {
+export default function Notification({
+  title,
+  description,
+  status,
+  duration = 5000,
+  onClose,
+  skipClose,
+}: NotificationProps) {
   const [show, setShow] = useState(true)
 
   useEffect(() => {
@@ -27,14 +36,12 @@ export default function Notification({ title, description, status, duration = 50
 
   return (
     <>
-      {/* Global notification live region, render this permanently at the end of the document */}
       <div
         aria-live="assertive"
-        className="pointer-events-none fixed inset-0 z-50 flex items-end px-4 py-6 sm:items-start sm:p-6"
+        className="z-100 pointer-events-none fixed inset-0 flex items-end px-4 py-6 sm:items-start sm:p-6"
       >
         <div className="flex w-full flex-col items-center space-y-4 sm:items-end">
-          {/* Notification panel, dynamically insert this into the live region when it needs to be displayed */}
-          <Transition show={show}>
+          <Transition afterLeave={onClose} show={show}>
             <div className="pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5 transition data-[closed]:data-[enter]:translate-y-2 data-[enter]:transform data-[closed]:opacity-0 data-[enter]:duration-300 data-[leave]:duration-100 data-[enter]:ease-out data-[leave]:ease-in data-[closed]:data-[enter]:sm:translate-x-2 data-[closed]:data-[enter]:sm:translate-y-0 dark:bg-gray-800">
               <div className="p-4">
                 <div className="flex items-center">
@@ -52,18 +59,20 @@ export default function Notification({ title, description, status, duration = 50
                     )}
                   </div>
                   <div className="ml-4 flex flex-shrink-0">
-                    <Button
-                      outline
-                      type="button"
-                      onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                        e.stopPropagation()
-                        e.preventDefault()
-                        setShow(false)
-                      }}
-                    >
-                      <span className="sr-only">Close</span>
-                      <XMarkIcon aria-hidden="true" className="h-5 w-5 !text-black dark:!text-white" />
-                    </Button>
+                    {!skipClose && (
+                      <Button
+                        outline
+                        type="button"
+                        onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                          e.stopPropagation()
+                          e.preventDefault()
+                          setShow(false)
+                        }}
+                      >
+                        <span className="sr-only">Close</span>
+                        <XMarkIcon aria-hidden="true" className="h-5 w-5 !text-black dark:!text-white" />
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>

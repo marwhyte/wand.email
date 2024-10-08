@@ -1,9 +1,48 @@
-import { applyCommonAttributes } from '@/lib/utils/misc'
-import { Body, Column, Container, Head, Html, Preview, Row } from '@react-email/components'
-import RenderBlock from './render-block'
+import {
+  generateBlockProps,
+  generateBodyProps,
+  generateColumnProps,
+  generateContainerProps,
+  generateRowProps,
+} from '@/lib/utils/attributes'
+
+import {
+  Body,
+  Button,
+  Column,
+  Container,
+  Head,
+  Heading,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Row,
+  Text,
+} from '@react-email/components'
+import parse from 'html-react-parser'
 
 type Props = {
   email: Email
+}
+
+const RenderBlockFinal = ({ block }: { block: EmailBlock }) => {
+  const props = generateBlockProps(block)
+
+  switch (block.type) {
+    case 'text':
+      return <Text {...props}>{parse(block.content)}</Text>
+    case 'heading':
+      return <Heading {...props}>{parse(block.content)}</Heading>
+    case 'image':
+      return <Img {...props} />
+    case 'button':
+      return <Button {...props}>{parse(block.content)}</Button>
+    case 'link':
+      return <Link {...props}>{parse(block.content)}</Link>
+    default:
+      return null
+  }
 }
 
 const EmailRendererFinal = ({ email }: Props) => {
@@ -11,36 +50,16 @@ const EmailRendererFinal = ({ email }: Props) => {
     <Html>
       <Head />
       <Preview>{email.preview}</Preview>
-      <Body style={{ margin: 0, backgroundColor: email.bgColor, color: email.color, fontFamily: email.fontFamily }}>
+      <Body {...generateBodyProps(email)}>
         <Container width={email.width} style={{ maxWidth: email.width }}>
           {email.rows.map((row) => (
-            <Container
-              key={row.id}
-              style={{
-                ...applyCommonAttributes(row.container.attributes),
-                width: email.width,
-                maxWidth: email.width,
-              }}
-            >
-              <Row align={row.attributes.align} style={{ ...applyCommonAttributes(row.attributes) }}>
+            <Container key={row.id} {...generateContainerProps(row, email)}>
+              <Row {...generateRowProps(row)}>
                 {row.columns.map((column) => {
-                  const width = `${(column.gridColumns / 12) * 100}%`
-
                   return (
-                    <Column
-                      key={column.id}
-                      valign={column.attributes.valign}
-                      align={column.attributes.align}
-                      style={{
-                        ...applyCommonAttributes(column.attributes),
-                        width: width,
-                        borderStyle: column.attributes.borderStyle,
-                        borderWidth: column.attributes.borderWidth,
-                        borderColor: column.attributes.borderColor,
-                      }}
-                    >
+                    <Column key={column.id} {...generateColumnProps(column)}>
                       {column.blocks.map((block) => (
-                        <RenderBlock isEditing={false} key={block.id} block={block} />
+                        <RenderBlockFinal key={block.id} block={block} />
                       ))}
                     </Column>
                   )

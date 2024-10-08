@@ -1,8 +1,6 @@
-import { getAdditionalImageStyles } from '@/lib/utils/defaultStyles'
-import { applyCommonAttributes } from '@/lib/utils/misc'
+import { generateBlockProps } from '@/lib/utils/attributes'
 import { Img } from '@react-email/components'
 import Image from 'next/image'
-import { Button } from '../../button'
 
 type Props = {
   block: ImageBlock
@@ -11,18 +9,12 @@ type Props = {
 export default function EmailImage({ block }: Props) {
   if (!block.attributes.src) {
     return (
-      <div className="flex h-full w-full items-center justify-center rounded bg-gray-100">
+      <div className="flex h-full w-full flex-col items-center justify-center rounded bg-gray-100">
         <Image src="/no-image.svg" alt="No image" width={100} height={100} />
-        <Button>Upload Image</Button>
+        {/* <FileUploader /> */}
       </div>
     )
   }
 
-  return (
-    <Img
-      src={block.attributes.src}
-      alt={block.attributes.alt}
-      style={{ ...applyCommonAttributes(block.attributes), ...getAdditionalImageStyles(block.attributes) }}
-    />
-  )
+  return <Img {...generateBlockProps(block)} />
 }

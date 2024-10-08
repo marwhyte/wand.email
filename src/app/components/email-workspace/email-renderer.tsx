@@ -1,6 +1,7 @@
 'use client'
 
 import { createNewBlock } from '@/lib/data/templates'
+import { generateBodyProps } from '@/lib/utils/attributes'
 import { useCallback, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import { v4 as uuidv4 } from 'uuid' // Make sure to import uuid
@@ -286,7 +287,7 @@ const EmailRenderer = ({ mobileView }: Props) => {
 
   return (
     <div className="flex-grow overflow-scroll pt-4">
-      <div style={{ fontFamily: email.fontFamily, margin: 0, color: email.color }}>
+      <div {...generateBodyProps(email, true)}>
         {email.rows.length > 0 ? (
           email.rows.map((row) => (
             <EmailRow
