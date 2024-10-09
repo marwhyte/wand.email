@@ -41,11 +41,11 @@ function AccountDropdownMenu({ anchor }: AccountDropdownMenuProps) {
         <DropdownLabel>My account</DropdownLabel>
       </DropdownItem>
       <DropdownDivider />
-      <DropdownItem href="/tos.html">
+      <DropdownItem href="/tos.html" target="_blank">
         <ShieldCheckIcon />
         <DropdownLabel>Terms of service</DropdownLabel>
       </DropdownItem>
-      <DropdownItem href="/privacy.html">
+      <DropdownItem href="/privacy.html" target="_blank">
         <ShieldCheckIcon />
         <DropdownLabel>Privacy policy</DropdownLabel>
       </DropdownItem>

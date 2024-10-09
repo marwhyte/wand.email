@@ -27,19 +27,22 @@ type Props = {
 }
 
 const RenderBlockFinal = ({ block }: { block: EmailBlock }) => {
-  const props = generateBlockProps(block)
-
   switch (block.type) {
     case 'text':
-      return <Text {...props}>{parse(block.content)}</Text>
+      const textProps = generateBlockProps(block)
+      return <Text {...textProps}>{parse(block.content)}</Text>
     case 'heading':
-      return <Heading {...props}>{parse(block.content)}</Heading>
+      const headingProps = generateBlockProps(block)
+      return <Heading {...headingProps}>{parse(block.content)}</Heading>
     case 'image':
-      return <Img {...props} />
+      const imageProps = generateBlockProps(block)
+      return <Img {...imageProps} />
     case 'button':
-      return <Button {...props}>{parse(block.content)}</Button>
+      const buttonProps = generateBlockProps(block)
+      return <Button {...buttonProps}>{parse(block.content)}</Button>
     case 'link':
-      return <Link {...props}>{parse(block.content)}</Link>
+      const linkProps = generateBlockProps(block)
+      return <Link {...linkProps}>{parse(block.content)}</Link>
     default:
       return null
   }

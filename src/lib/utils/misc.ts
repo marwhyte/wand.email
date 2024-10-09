@@ -25,6 +25,10 @@ export function getPhotoUrl(name: string, template: string) {
   return `https://${process.env.CLOUDFRONT_DOMAIN}/${template}/${name}`
 }
 
+export function getImgFromKey(imageKey: string, thumbnail = false) {
+  return `https://${process.env.CLOUDFRONT_DOMAIN}/photos/${imageKey}`
+}
+
 export function isValidHttpUrl(string: string) {
   let url
 

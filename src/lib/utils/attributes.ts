@@ -1,13 +1,23 @@
-export const getAdditionalTextStyles = (attributes: TextBlockAttributes) => {
+import { Body, Button, Column, Container, Heading, Img, Link, Row, Text } from '@react-email/components'
+
+type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
+
+export const getAdditionalTextStyles = (
+  attributes: TextBlockAttributes
+): React.ComponentProps<typeof Text>['style'] => {
   return {
     margin: 0,
     fontFamily: attributes.fontFamily,
     letterSpacing: attributes.letterSpacing,
     textIndent: attributes.textIndent,
+    overflowWrap: 'break-word',
+    wordBreak: 'break-word',
   }
 }
 
-export const getAdditionalHeadingStyles = (attributes: HeadingBlockAttributes) => {
+export const getAdditionalHeadingStyles = (
+  attributes: HeadingBlockAttributes
+): React.ComponentProps<typeof Heading>['style'] => {
   return {
     fontFamily: attributes.fontFamily,
     letterSpacing: attributes.letterSpacing,
@@ -15,14 +25,18 @@ export const getAdditionalHeadingStyles = (attributes: HeadingBlockAttributes) =
   }
 }
 
-export const getAdditionalImageStyles = (attributes: ImageBlockAttributes) => {
+export const getAdditionalImageStyles = (
+  attributes: ImageBlockAttributes
+): React.ComponentProps<typeof Img>['style'] => {
   return {
     aspectRatio: attributes.aspectRatio,
     objectFit: attributes.objectFit,
   }
 }
 
-export const getAdditionalButtonStyles = (attributes: ButtonBlockAttributes) => {
+export const getAdditionalButtonStyles = (
+  attributes: ButtonBlockAttributes
+): React.ComponentProps<typeof Button>['style'] => {
   return {
     display: 'inline-block',
     backgroundColor: '#3b82f6',
@@ -40,7 +54,7 @@ export const getAdditionalButtonStyles = (attributes: ButtonBlockAttributes) => 
   }
 }
 
-export function applyCommonAttributes(attributes: CommonAttributes) {
+export function applyCommonAttributes(attributes: CommonAttributes): React.CSSProperties {
   const commonProps = [
     'paddingTop',
     'paddingRight',
@@ -70,7 +84,9 @@ export function applyCommonAttributes(attributes: CommonAttributes) {
   )
 }
 
-export const getAdditionalLinkStyles = (attributes: LinkBlockAttributes) => {
+export const getAdditionalLinkStyles = (
+  attributes: LinkBlockAttributes
+): React.ComponentProps<typeof Link>['style'] => {
   return {
     color: '#3b82f6',
     textDecoration: 'underline',
@@ -80,7 +96,10 @@ export const getAdditionalLinkStyles = (attributes: LinkBlockAttributes) => {
   }
 }
 
-export function generateContainerProps(row: RowBlock, email: Email) {
+export function generateContainerProps(
+  row: RowBlock,
+  email: Email
+): OmitChildren<React.ComponentProps<typeof Container>> {
   return {
     style: {
       ...applyCommonAttributes(row.container.attributes),
@@ -90,7 +109,7 @@ export function generateContainerProps(row: RowBlock, email: Email) {
   }
 }
 
-export function generateRowProps(row: RowBlock) {
+export function generateRowProps(row: RowBlock): OmitChildren<React.ComponentProps<typeof Row>> {
   return {
     style: {
       ...applyCommonAttributes(row.attributes),
@@ -99,7 +118,10 @@ export function generateRowProps(row: RowBlock) {
   }
 }
 
-export function generateBodyProps(email: Email, skipBackgroundColor = false) {
+export function generateBodyProps(
+  email: Email,
+  skipBackgroundColor = false
+): OmitChildren<React.ComponentProps<typeof Body>> {
   return {
     style: {
       margin: 0,
@@ -110,7 +132,7 @@ export function generateBodyProps(email: Email, skipBackgroundColor = false) {
   }
 }
 
-export function generateColumnProps(column: ColumnBlock) {
+export function generateColumnProps(column: ColumnBlock): OmitChildren<React.ComponentProps<typeof Column>> {
   const width = `${(column.gridColumns / 12) * 100}%`
 
   return {
@@ -126,56 +148,85 @@ export function generateColumnProps(column: ColumnBlock) {
   }
 }
 
-export function generateBlockProps(block: EmailBlock) {
-  const commonProps = {
+export function generateTextProps(block: TextBlock): OmitChildren<React.ComponentProps<typeof Text>> {
+  return {
     style: {
       ...applyCommonAttributes(block.attributes),
+      ...getAdditionalTextStyles(block.attributes),
     },
   }
+}
 
+export function generateHeadingProps(block: HeadingBlock): OmitChildren<React.ComponentProps<typeof Heading>> {
+  return {
+    as: block.attributes.as,
+    style: {
+      ...applyCommonAttributes(block.attributes),
+      ...getAdditionalHeadingStyles(block.attributes),
+    },
+  }
+}
+
+export function generateImageProps(block: ImageBlock): OmitChildren<React.ComponentProps<typeof Img>> {
+  return {
+    src: block.attributes.src,
+    alt: block.attributes.alt,
+    style: {
+      ...applyCommonAttributes(block.attributes),
+      ...getAdditionalImageStyles(block.attributes),
+    },
+  }
+}
+
+export function generateButtonProps(block: ButtonBlock): OmitChildren<React.ComponentProps<typeof Button>> {
+  return {
+    href: block.attributes.href,
+    target: block.attributes.target,
+    rel: block.attributes.rel,
+    style: {
+      ...applyCommonAttributes(block.attributes),
+      ...getAdditionalButtonStyles(block.attributes),
+    },
+  }
+}
+
+export function generateLinkProps(block: LinkBlock): OmitChildren<React.ComponentProps<typeof Link>> {
+  return {
+    href: block.attributes.href,
+    target: block.attributes.target,
+    rel: block.attributes.rel,
+    style: {
+      ...applyCommonAttributes(block.attributes),
+      ...getAdditionalLinkStyles(block.attributes),
+    },
+  }
+}
+
+export function generateBlockProps<T extends EmailBlock>(
+  block: T
+): T extends TextBlock
+  ? OmitChildren<React.ComponentProps<typeof Text>>
+  : T extends HeadingBlock
+    ? OmitChildren<React.ComponentProps<typeof Heading>>
+    : T extends ImageBlock
+      ? OmitChildren<React.ComponentProps<typeof Img>>
+      : T extends ButtonBlock
+        ? OmitChildren<React.ComponentProps<typeof Button>>
+        : T extends LinkBlock
+          ? OmitChildren<React.ComponentProps<typeof Link>>
+          : never {
   switch (block.type) {
     case 'text':
-      return {
-        ...commonProps,
-        style: {
-          ...commonProps.style,
-          ...getAdditionalTextStyles(block.attributes),
-        },
-      }
+      return generateTextProps(block as TextBlock) as any
     case 'heading':
-      return {
-        ...commonProps,
-        as: block.attributes.as,
-        style: {
-          ...commonProps.style,
-          ...getAdditionalHeadingStyles(block.attributes),
-        },
-      }
+      return generateHeadingProps(block as HeadingBlock) as any
     case 'image':
-      return {
-        ...commonProps,
-        src: block.attributes.src,
-        alt: block.attributes.alt,
-        style: {
-          ...commonProps.style,
-          ...getAdditionalImageStyles(block.attributes),
-        },
-      }
+      return generateImageProps(block as ImageBlock) as any
     case 'button':
+      return generateButtonProps(block as ButtonBlock) as any
     case 'link':
-      return {
-        ...commonProps,
-        href: block.attributes.href,
-        target: block.attributes.target,
-        rel: block.attributes.rel,
-        style: {
-          ...commonProps.style,
-          ...(block.type === 'button'
-            ? getAdditionalButtonStyles(block.attributes)
-            : getAdditionalLinkStyles(block.attributes)),
-        },
-      }
+      return generateLinkProps(block as LinkBlock) as any
     default:
-      return commonProps
+      return {} as never
   }
 }
