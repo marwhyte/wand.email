@@ -9,8 +9,6 @@ export async function middleware(request: any) {
   const session = await auth()
   const { nextUrl } = request
 
-  console.log(nextUrl)
-
   const isAuthenticated = !!session?.user
 
   const isPublicRoute = PUBLIC_ROUTES.find((route) => nextUrl.pathname.startsWith(route)) || nextUrl.pathname === ROOT

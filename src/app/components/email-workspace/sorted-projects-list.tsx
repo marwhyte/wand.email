@@ -53,7 +53,10 @@ export default function SortedProjectsList({ projects }: { projects: Project[] }
           </DropdownButton>
           <DropdownMenu>
             {sortAttributes.map((attr) => (
-              <DropdownItem key={attr.value} onClick={() => setSortKey(attr.value as SortKey)}>
+              <DropdownItem
+                key={attr.value}
+                onClick={() => setSortKey(attr.value as SortKey, attr.value === 'title' ? 'asc' : 'desc')}
+              >
                 {attr.icon}
                 {attr.label}
               </DropdownItem>

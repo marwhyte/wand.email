@@ -46,9 +46,7 @@ export default function EmailColumn({
   const [{ isOver }, drop] = useDrop({
     accept: ['block', 'newBlock'],
     hover(item: { type: 'block' | 'newBlock'; id: string; newBlockType?: EmailBlockType }, monitor) {
-      console.log('asdf')
       if (column.blocks.length === 0) {
-        console.log('heya')
         setDropTarget({ type: 'column', id: column.id, position: 'above' })
       }
     },
@@ -61,8 +59,6 @@ export default function EmailColumn({
       isOver: monitor.isOver(),
     }),
   })
-
-  console.log(isOver)
 
   return (
     <Column

@@ -22,11 +22,11 @@ export function sortByCreatedAt<T extends ObjectWithCreatedAt>(projects: T[]): T
 }
 
 export function getPhotoUrl(name: string, template: string) {
-  return `https://${process.env.CLOUDFRONT_DOMAIN}/${template}/${name}`
+  return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${template}/${name}`
 }
 
 export function getImgFromKey(imageKey: string, thumbnail = false) {
-  return `https://${process.env.CLOUDFRONT_DOMAIN}/photos/${imageKey}`
+  return `${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${imageKey}`
 }
 
 export function isValidHttpUrl(string: string) {

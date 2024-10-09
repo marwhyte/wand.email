@@ -23,10 +23,10 @@ export function useSortPreference<T extends string>(storageKey: string, defaultS
     localStorage.setItem(storageKey, JSON.stringify(sortPreference))
   }, [storageKey, sortPreference])
 
-  const setSortKey = (key: T) => {
+  const setSortKey = (key: T, direction?: SortDirection) => {
     setSortPreference((prev) => ({
       key,
-      direction: prev.key === key ? (prev.direction === 'asc' ? 'desc' : 'asc') : 'asc',
+      direction: direction ?? prev.direction,
     }))
   }
 
@@ -47,6 +47,25 @@ export function sortItems<T>(
     const aValue = a[sortPreference.key as keyof T]
     const bValue = b[sortPreference.key as keyof T]
 
+    // Handle date comparison
+    if (aValue instanceof Date && bValue instanceof Date) {
+      return sortPreference.direction === 'asc'
+        ? aValue.getTime() - bValue.getTime()
+        : bValue.getTime() - aValue.getTime()
+    }
+
+    // Handle string date comparison
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      const aDate = new Date(aValue)
+      const bDate = new Date(bValue)
+      if (!isNaN(aDate.getTime()) && !isNaN(bDate.getTime())) {
+        return sortPreference.direction === 'asc'
+          ? aDate.getTime() - bDate.getTime()
+          : bDate.getTime() - aDate.getTime()
+      }
+    }
+
+    // Default comparison for other types
     if (aValue < bValue) return sortPreference.direction === 'asc' ? -1 : 1
     if (aValue > bValue) return sortPreference.direction === 'asc' ? 1 : -1
     return 0

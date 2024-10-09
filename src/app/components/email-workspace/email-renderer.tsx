@@ -59,8 +59,6 @@ const EmailRenderer = ({ mobileView }: Props) => {
     position: 'above' | 'below',
     newBlockType?: EmailBlockType
   ): void => {
-    console.log('blockType', blockType)
-    console.log('newBlockType', newBlockType)
     if (blockType === 'newBlock' && newBlockType) {
       handleNewBlockDrop(newBlockType, targetType, targetId, position)
     } else {
