@@ -1,11 +1,12 @@
 import { addExport } from '@/lib/database/queries/exports'
 import { ExportType } from '@/lib/database/types'
 import { getReactEmailCode } from '@/lib/utils/code-generation'
-import { ChevronLeftIcon, ChevronRightIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
+import { ChevronLeftIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
 import { CodeBlock, CodeInline, dracula, render } from '@react-email/components'
 import { useCallback, useState } from 'react'
 import AlertBox from '../alert-box'
 import { Button } from '../button'
+import ButtonCard from '../button-card'
 import { Dialog, DialogBody, DialogTitle } from '../dialog'
 import { Heading } from '../heading'
 import Nbsp from '../nbsp'
@@ -185,40 +186,22 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           )}
           {exportType === null && (
             <>
-              <button
-                disabled={monthlyExportCount >= 5 && process.env.NODE_ENV !== 'development'}
-                className="mb-4 flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+              <ButtonCard
+                icon="/react.svg"
+                title="React Code"
+                description="Export as React code using react-email"
                 onClick={() => {
                   handleExport('react')
                 }}
-              >
-                <div className="flex items-center">
-                  <img src="/react.svg" alt="React" className="mr-3 h-12 w-12" />
-                  <div>
-                    <div className="font-semibold">React Code</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      Export as React code using react-email
-                    </div>
-                  </div>
-                </div>
-                <ChevronRightIcon className="h-5 w-5 text-gray-400" />
-              </button>
-              <button
-                disabled={monthlyExportCount >= 5 && process.env.NODE_ENV !== 'development'}
-                className="mb-4 flex w-full items-center justify-between rounded-lg border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:bg-gray-50 disabled:opacity-50 disabled:hover:bg-white dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700"
+              />
+              <ButtonCard
+                icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
+                title="HTML Code"
+                description="Export as HTML code"
                 onClick={() => {
                   handleExport('html')
                 }}
-              >
-                <div className="flex items-center">
-                  <CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />
-                  <div>
-                    <div className="font-semibold">HTML</div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">Download or copy HTML code</div>
-                  </div>
-                </div>
-                <ChevronRightIcon className="h-5 w-5 text-gray-400" />
-              </button>
+              />
             </>
           )}
         </DialogBody>

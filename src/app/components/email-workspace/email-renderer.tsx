@@ -220,7 +220,7 @@ const EmailRenderer = ({ mobileView }: Props) => {
       })),
     }
 
-    if (dropLine === 'end') {
+    if (dropLine === 'end' || dropLine === null) {
       newRows.push(newRow)
     } else {
       const dropIndex = newRows.findIndex((row) => row.id === dropLine)
@@ -290,21 +290,23 @@ const EmailRenderer = ({ mobileView }: Props) => {
       {/* @ts-ignore */}
       <div {...generateBodyProps(email, true)}>
         {email.rows.length > 0 ? (
-          email.rows.map((row) => (
-            <EmailRow
-              key={row.id}
-              row={row}
-              moveRow={moveRow}
-              mobileView={mobileView}
-              dropLine={dropLine}
-              onHover={handleHover}
-              onDragEnd={handleDragEnd}
-              dropTarget={dropTarget}
-              setDropTarget={setDropTarget}
-              onBlockDrop={handleBlockDrop}
-              addRow={addRow}
-            />
-          ))
+          <>
+            {email.rows.map((row) => (
+              <EmailRow
+                key={row.id}
+                row={row}
+                moveRow={moveRow}
+                mobileView={mobileView}
+                dropLine={dropLine}
+                onHover={handleHover}
+                onDragEnd={handleDragEnd}
+                dropTarget={dropTarget}
+                setDropTarget={setDropTarget}
+                onBlockDrop={handleBlockDrop}
+                addRow={addRow}
+              />
+            ))}
+          </>
         ) : (
           <div
             // @ts-ignore

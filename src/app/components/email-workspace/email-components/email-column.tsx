@@ -53,7 +53,7 @@ export default function EmailColumn({
       }
     },
     drop(item: { type: 'block' | 'newBlock'; id: string; newBlockType?: EmailBlockType }) {
-      if (dropTarget) {
+      if (dropTarget && isOver) {
         onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position, item.newBlockType)
       }
     },
@@ -67,14 +67,14 @@ export default function EmailColumn({
   return (
     <Column
       {...generateColumnProps(column)}
-      className={`${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
+      className={`${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
       // @ts-ignore
       ref={drop}
     >
       {column.blocks.length === 0 && (
         <div className="relative flex h-full w-full flex-col items-center justify-center py-2">
-          {isDropTarget ? (
+          {isDropTarget && isOver ? (
             <>
               <ArrowDownCircleIcon className="h-6 w-6 text-green-500" />
               <div className="mt-2 text-center text-sm font-medium text-green-600">Drop content here</div>

@@ -70,7 +70,7 @@ export default function Notification({
                         }}
                       >
                         <span className="sr-only">Close</span>
-                        <XMarkIcon aria-hidden="true" className="h-5 w-5 !text-black dark:!text-white" />
+                        <XMarkIcon aria-hidden="true" className="h-5 w-5" />
                       </Button>
                     )}
                   </div>

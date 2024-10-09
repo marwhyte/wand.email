@@ -15,6 +15,7 @@ export interface UserTable {
   name: string
   email: string
   created_at: Date
+  updated_at: Date
   password?: string
 }
 
@@ -25,6 +26,7 @@ export interface ProjectTable {
   user_id: string
   content: Email
   created_at: Date
+  updated_at: Date
 }
 
 export interface ExportTable {
@@ -33,6 +35,7 @@ export interface ExportTable {
   content: Email
   type: ExportType
   created_at: Date
+  updated_at: Date
 }
 
 export interface FileTable {
@@ -42,4 +45,5 @@ export interface FileTable {
   user_id: string
   created_at: Date
   size_bytes: number
+  updated_at: Date
 }

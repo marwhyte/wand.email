@@ -203,12 +203,12 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
                   {emailStatus === 'loading' ? (
                     <Loading height={24} width={24} />
                   ) : (
-                    <PaperAirplaneIcon className="h-4 w-4 !text-white" />
+                    <PaperAirplaneIcon className="h-4 w-4" />
                   )}
                 </Button>
                 {!project && (
                   <Button color="green" onClick={handleAddToProjects}>
-                    <BookmarkSquareIcon className="h-4 w-4 !text-white" />
+                    <BookmarkSquareIcon className="h-4 w-4" />
                     {session?.user?.email ? 'Add project' : 'Sign up to save'}
                   </Button>
                 )}
@@ -219,7 +219,7 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
                   color="blue"
                   onClick={() => (!session?.user?.email ? handleShow('export') : setShowExportDialog(true))}
                 >
-                  <ArrowDownTrayIcon className="!text-white" />
+                  <ArrowDownTrayIcon />
                   {session?.user?.email ? 'Export' : 'Sign up to export'}
                 </Button>
               </div>

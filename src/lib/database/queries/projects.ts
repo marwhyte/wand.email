@@ -46,6 +46,7 @@ export async function addProject(title: string, content?: Email) {
       user_id: session.user.id,
       title,
       content: (content || defaultContent) as Email,
+      updated_at: new Date(),
     })
     .returningAll()
     .executeTakeFirst()
@@ -77,7 +78,9 @@ export async function updateProject(id: string, updates: { content?: Email; titl
     throw new Error('User not authenticated')
   }
 
-  const updateFields: { content?: Email; title?: string } = {}
+  const updateFields: { content?: Email; title?: string; updated_at?: Date } = {
+    updated_at: new Date(),
+  }
   if (updates.content !== undefined) updateFields.content = updates.content
   if (updates.title !== undefined) updateFields.title = updates.title
 

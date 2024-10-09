@@ -30,6 +30,7 @@ export async function addUser(user: {
       password: user.password,
       google_id: user.googleId,
       created_at: new Date(),
+      updated_at: new Date(),
     })
     .returningAll()
     .executeTakeFirst()

@@ -33,6 +33,7 @@ export async function addFile(userId: string, fileName: string, imageKey: string
       image_key: imageKey,
       size_bytes: sizeBytes,
       created_at: new Date(),
+      updated_at: new Date(),
     })
     .returningAll()
     .executeTakeFirst()

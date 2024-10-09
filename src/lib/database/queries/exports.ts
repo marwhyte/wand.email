@@ -36,6 +36,7 @@ export async function addExport(content: Email, type: ExportType) {
       type,
       user_id: session.user.id,
       created_at: new Date(),
+      updated_at: new Date(),
     })
     .returningAll()
     .executeTakeFirst()

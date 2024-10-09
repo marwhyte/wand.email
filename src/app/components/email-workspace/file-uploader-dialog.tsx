@@ -70,7 +70,7 @@ export default function FileUploaderDialog({ opener, onUpload }: Props) {
           <div className="flex items-center justify-between gap-2">
             Upload File
             <Button color="blue" onClick={handleButtonClick}>
-              <PlusIcon className="h-4 w-4 !text-white" />
+              <PlusIcon />
               Upload
             </Button>
           </div>

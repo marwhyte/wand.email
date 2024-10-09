@@ -84,6 +84,8 @@ export default function EmailRow({
       newBlockType?: EmailBlockType
       gridColumns?: number[]
     }) {
+      if (item.type === 'newBlock' || item.type === 'block') return
+
       if (item.type === 'row' && dropLine !== null && item.id !== row.id) {
         moveRow(item.id, row.id)
       } else if (dropLine !== null && item.type === 'newRow') {
@@ -138,6 +140,7 @@ export default function EmailRow({
       />
 
       {dropLine === row.id && isOverRow && <DragLine direction="above" />}
+      {dropLine === 'end' && row.id === email.rows[email.rows.length - 1].id && <DragLine direction="below" />}
       <DragPreviewImage connect={preview} src="/row.svg" />
 
       <div
