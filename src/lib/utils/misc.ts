@@ -26,7 +26,7 @@ export function getPhotoUrl(name: string, template: string) {
 }
 
 export function getImgFromKey(imageKey: string, thumbnail = false) {
-  return `${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${imageKey}`
+  return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${imageKey}`
 }
 
 export function isValidHttpUrl(string: string) {
