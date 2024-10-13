@@ -65,6 +65,14 @@ export default function Page() {
         >
           Throw error!
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            throw new Error('LALALALALASentry Example Frontend Error')
+          }}
+        >
+          Throw error!
+        </button>
 
         <p>
           Next, look for the error on the{' '}
