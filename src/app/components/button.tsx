@@ -140,7 +140,7 @@ const styles = {
       '[--btn-icon:theme(colors.violet.300)] data-[active]:[--btn-icon:theme(colors.violet.200)] data-[hover]:[--btn-icon:theme(colors.violet.200)]',
     ],
     purple: [
-      'text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.purple.500)] [--btn-border:theme(colors.purple.600/90%)]',
+      'text-white [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.purple.600)] [--btn-border:theme(colors.purple.600/90%)]',
       '[--btn-icon:theme(colors.purple.300)] data-[active]:[--btn-icon:theme(colors.purple.200)] data-[hover]:[--btn-icon:theme(colors.purple.200)]',
     ],
     fuchsia: [
@@ -172,7 +172,8 @@ type ButtonProps = (
   children: React.ReactNode
   tooltip?: string
   tooltipTransform?: string
-  tooltipPosition?: 'top' | 'bottom' // New prop for tooltip position
+  tooltipPosition?: 'top' | 'bottom'
+  disabled?: boolean // Add this line
 } & (Omit<Headless.ButtonProps, 'className'> | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>)
 
 export const Button = forwardRef(function Button(
@@ -185,6 +186,7 @@ export const Button = forwardRef(function Button(
     tooltip,
     tooltipTransform,
     tooltipPosition = 'top',
+    disabled, // Add this line
     ...props
   }: ButtonProps,
   ref: React.ForwardedRef<HTMLElement>
@@ -193,7 +195,8 @@ export const Button = forwardRef(function Button(
     className,
     styles.base,
     outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
-    tooltip && 'group'
+    tooltip && 'group',
+    disabled && 'cursor-not-allowed opacity-50' // Add this line
   )
 
   const content = (
@@ -212,11 +215,11 @@ export const Button = forwardRef(function Button(
   )
 
   return 'href' in props ? (
-    <Link {...props} className={classes} ref={ref as React.ForwardedRef<HTMLAnchorElement>}>
+    <Link {...props} className={classes} ref={ref as React.ForwardedRef<HTMLAnchorElement>} aria-disabled={disabled}>
       {content}
     </Link>
   ) : (
-    <Headless.Button {...props} className={clsx(classes, 'cursor-pointer')} ref={ref}>
+    <Headless.Button {...props} className={clsx(classes, 'cursor-pointer')} ref={ref} disabled={disabled}>
       {content}
     </Headless.Button>
   )

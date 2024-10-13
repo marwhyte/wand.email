@@ -1,15 +1,16 @@
 import NextAuth from 'next-auth'
 import { NextResponse } from 'next/server'
-import { authConfig } from './auth.config'
 
+import { authOptions } from './auth'
 import { PUBLIC_ROUTES, ROOT } from './lib/routes'
 
-const { auth } = NextAuth(authConfig)
+const { auth } = NextAuth(authOptions)
+
 export async function middleware(request: any) {
   const session = await auth()
   const { nextUrl } = request
 
-  const isAuthenticated = !!session?.user
+  const isAuthenticated = !!session?.user?.email
 
   const isPublicRoute = PUBLIC_ROUTES.find((route) => nextUrl.pathname.startsWith(route)) || nextUrl.pathname === ROOT
 

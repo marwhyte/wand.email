@@ -17,7 +17,7 @@ const DragLine = ({ direction }: DragLineProps) => {
         </div>
         <div className="relative flex justify-center">
           <Button
-            color="blue"
+            color="purple"
             type="button"
             className="inline-flex items-center gap-x-1.5 rounded-full px-3 py-1.5 text-sm font-semibold"
           >

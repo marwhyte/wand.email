@@ -11,7 +11,6 @@ export async function uploadFile(formData: FormData) {
   if (!session?.user?.id) {
     return { success: false, error: 'Unauthorized' }
   }
-
   const file = formData.get('file') as File
   if (!file) {
     return { success: false, error: 'No file provided' }
@@ -32,8 +31,6 @@ export async function uploadFile(formData: FormData) {
         'Content-Type': file.type,
       },
     })
-
-    console.log(response)
 
     if (!response.ok) {
       return { success: false, error: 'Failed to upload file' }

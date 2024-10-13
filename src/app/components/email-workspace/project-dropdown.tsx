@@ -74,7 +74,7 @@ const ProjectDropdown = ({ project }: Props) => {
             <Button type="button" onClick={() => setIsEditOpen(false)} color="dark/white">
               Cancel
             </Button>
-            <Button type="submit" color="blue">
+            <Button type="submit" color="purple">
               Save Changes
             </Button>
           </DialogActions>

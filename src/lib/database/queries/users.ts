@@ -1,5 +1,6 @@
 'use server'
 
+import { auth } from '@/auth'
 import { db } from '../db'
 
 export async function getUsers() {
@@ -38,16 +39,41 @@ export async function addUser(user: {
   return result
 }
 
+export async function updateUser(formData: FormData) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+
+  const name = formData.get('name')
+  const email = formData.get('email')
+
+  const updateFields: { name?: string; email?: string } = {}
+  if (name) updateFields.name = name as string
+  if (email) updateFields.email = email as string
+
+  await db.updateTable('users').set(updateFields).where('id', '=', session.user.id).execute()
+}
+
 export async function userExists(email: string): Promise<boolean> {
   const user = await db.selectFrom('users').select('id').where('email', '=', email).executeTakeFirst()
 
   return !!user
 }
 
-export async function deleteUserByEmail(email: string): Promise<boolean> {
+export async function deleteUser(): Promise<boolean> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+
   return await db.transaction().execute(async (trx) => {
     // Get the user ID first
-    const user = await trx.selectFrom('users').select('id').where('email', '=', email).executeTakeFirst()
+    const user = await trx
+      .selectFrom('users')
+      .select('id')
+      .where('id', '=', session.user?.id ?? '')
+      .executeTakeFirst()
 
     if (!user) {
       return false // User not found

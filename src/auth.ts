@@ -10,7 +10,7 @@ interface Credentials {
   password: string
 }
 
-const authOptions: NextAuthConfig = {
+export const authOptions: NextAuthConfig = {
   ...authConfig,
   providers: [
     CredentialProvider({
@@ -93,14 +93,26 @@ const authOptions: NextAuthConfig = {
     async session({ session, token }) {
       const exists = await userExists(session.user.email as string)
       if (!exists) {
-        await signOut({ redirectTo: '/' })
+        // Instead of calling signOut, we'll return a modified session
+        return { ...session, user: undefined }
       }
       if (session.user) {
         session.user.id = token.id as string
       }
       return session
     },
-    async jwt({ token, user, account }) {
+    async jwt({ token, user, account, trigger, session }) {
+      if (trigger === 'update') {
+        console.log('session', session)
+        const dbUser = await getUserByEmail(token.email as string)
+        if (dbUser) {
+          token.name = dbUser.name
+
+          console.log(dbUser)
+        }
+
+        return token
+      }
       if (user) {
         token.id = user.id
       }

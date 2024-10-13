@@ -28,6 +28,9 @@ const config: Config = {
           'logo-yellow': '#fbbc05',
           'logo-red': '#ea4335',
         },
+        purple: {
+          '600': '#784FFC',
+        },
       },
     },
   },

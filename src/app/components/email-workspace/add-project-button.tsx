@@ -81,7 +81,7 @@ export default function AddProjectButton({ color, immediateCreate }: Props) {
         {step === 'create' && (
           <DialogActions>
             <Button onClick={() => (immediateCreate ? setShowDialog(false) : setStep('type'))}>Cancel</Button>
-            <Button color="blue" onClick={handleAddProject} disabled={!projectTitle.trim()}>
+            <Button color="purple" onClick={handleAddProject} disabled={!projectTitle.trim()}>
               Create
             </Button>
           </DialogActions>

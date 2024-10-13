@@ -1,6 +1,6 @@
 'use server'
 
-import { auth } from '@/auth' // Assuming you're using NextAuth or a similar authentication solution
+import { auth } from '@/auth'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { db } from '../db'
 
@@ -40,4 +40,10 @@ export async function addFile(userId: string, fileName: string, imageKey: string
 
   revalidateTag('files')
   return file
+}
+
+export async function removeFile(userId: string, fileKey: string) {
+  await db.deleteFrom('files').where('user_id', '=', userId).where('image_key', '=', fileKey).execute()
+
+  revalidateTag('files')
 }

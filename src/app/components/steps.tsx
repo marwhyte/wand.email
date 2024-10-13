@@ -59,7 +59,7 @@ export const Steps: React.FC<StepsProps> = ({ steps, children, onFinish }) => {
         <Button className="w-full" onClick={handlePrevious} disabled={currentStepIndex === 0} color="grey">
           Previous
         </Button>
-        <Button className="w-full" onClick={handleNext} color="blue">
+        <Button className="w-full" onClick={handleNext} color="purple">
           {currentStepIndex === steps.length - 1 ? 'Finish' : 'Next'}
         </Button>
       </div>

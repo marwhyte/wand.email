@@ -1,4 +1,4 @@
-import parse from 'html-react-parser'
+import { renderToString } from 'react-dom/server'
 import {
   generateBlockProps,
   generateBodyProps,
@@ -6,6 +6,8 @@ import {
   generateContainerProps,
   generateRowProps,
 } from './attributes'
+
+import parse from 'html-react-parser'
 
 const stringifyProps = (props: Record<string, any>) => {
   return Object.entries(props)
@@ -17,17 +19,18 @@ const renderBlock = (block: EmailBlock) => {
   const props = generateBlockProps(block)
   const propsString = stringifyProps(props)
 
+  console.log
+
   switch (block.type) {
     case 'text':
-      return `<Text ${propsString}>${parse(block.content)}</Text>`
     case 'heading':
-      return `<Heading ${propsString}>${parse(block.content)}</Heading>`
+    case 'button':
+    case 'link':
+      const content = renderToString(parse(block.content))
+
+      return `<${block.type.charAt(0).toUpperCase() + block.type.slice(1)} ${propsString}>${content}</${block.type.charAt(0).toUpperCase() + block.type.slice(1)}>`
     case 'image':
       return `<Img ${propsString} />`
-    case 'button':
-      return `<Button ${propsString}>${parse(block.content)}</Button>`
-    case 'link':
-      return `<Link ${propsString}>${parse(block.content)}</Link>`
     default:
       return ''
   }
@@ -42,9 +45,9 @@ export function getReactEmailCode(email: Email) {
       return (
         <Html>
           <Head />
-          <Preview>${email.preview}</Preview>
+          <Preview>${email.preview ? email.preview : email.name}</Preview>
           <Body ${stringifyProps(generateBodyProps(email))}>
-            <Container width={${email.width}} style={{ maxWidth: ${email.width} }}>
+            <Container width={"${email.width}"} style={{ maxWidth: "${email.width}"  }}>
               ${email.rows
                 .map(
                   (row) => `

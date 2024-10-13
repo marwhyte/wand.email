@@ -1,7 +1,9 @@
 import { auth } from '@/auth'
 import type { Metadata } from 'next'
+import { SessionProvider } from 'next-auth/react'
 import { Inter } from 'next/font/google'
 import Content from './content'
+
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -24,14 +26,21 @@ export default async function RootLayout({
   return (
     <html
       suppressHydrationWarning
-      className="text-zinc-950 antialiased lg:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:lg:bg-zinc-950"
+      className="text-zinc-950 antialiased dark:bg-zinc-900 dark:text-white lg:bg-zinc-100 dark:lg:bg-zinc-950"
     >
       <head>
+        <link rel="icon" type="image/png" href="/favicon-48x48.png" sizes="48x48" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="shortcut icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
         <link rel="preconnect" href="https://rsms.me/" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </head>
       <body className={inter.className + ' h-full'}>
-        <Content session={session}>{children}</Content>
+        <SessionProvider session={session}>
+          <Content session={session}>{children}</Content>
+        </SessionProvider>
       </body>
     </html>
   )

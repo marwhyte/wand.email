@@ -216,7 +216,7 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
                 {project && !isSaving && <Badge color="lime">Saved!</Badge>}
 
                 <Button
-                  color="blue"
+                  color="purple"
                   onClick={() => (!session?.user?.email ? handleShow('export') : setShowExportDialog(true))}
                 >
                   <ArrowDownTrayIcon />
@@ -273,7 +273,7 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
         </DialogBody>
         <DialogActions>
           <Button onClick={() => setShowProjectDialog(false)}>Cancel</Button>
-          <Button color="blue" onClick={handleSaveProject} disabled={!projectTitle.trim()}>
+          <Button color="purple" onClick={handleSaveProject} disabled={!projectTitle.trim()}>
             Add
           </Button>
         </DialogActions>

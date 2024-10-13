@@ -13,16 +13,19 @@ import {
   DropdownMenu,
 } from '@components/dropdown'
 import { Logo } from '@components/Logo'
-import { Navbar, NavbarItem, NavbarLabel, NavbarSection } from '@components/navbar'
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import {
   ArrowRightStartOnRectangleIcon,
+  Bars3Icon,
   LightBulbIcon,
   ShieldCheckIcon,
   UserCircleIcon,
+  XMarkIcon,
 } from '@heroicons/react/16/solid'
 import { Session } from 'next-auth'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Text } from './components/text'
 
 type Props = {
   children: React.ReactNode
@@ -31,21 +34,25 @@ type Props = {
 
 type AccountDropdownMenuProps = {
   anchor: 'top start' | 'bottom end'
+  email: string
 }
 
-function AccountDropdownMenu({ anchor }: AccountDropdownMenuProps) {
+function AccountDropdownMenu({ anchor, email }: AccountDropdownMenuProps) {
   return (
     <DropdownMenu className="min-w-64" anchor={anchor}>
       <DropdownItem href="/settings">
         <UserCircleIcon />
-        <DropdownLabel>My account</DropdownLabel>
+        <DropdownLabel>
+          My account
+          <Text className="!text-xs group-data-[focus]:!text-white">{email}</Text>
+        </DropdownLabel>
       </DropdownItem>
       <DropdownDivider />
-      <DropdownItem href="/tos.html" target="_blank">
+      <DropdownItem href="/tos.html">
         <ShieldCheckIcon />
         <DropdownLabel>Terms of service</DropdownLabel>
       </DropdownItem>
-      <DropdownItem href="/privacy.html" target="_blank">
+      <DropdownItem href="/privacy.html">
         <ShieldCheckIcon />
         <DropdownLabel>Privacy policy</DropdownLabel>
       </DropdownItem>
@@ -71,59 +78,93 @@ export default function Content({ children, session }: Props) {
   const navItems = [
     { name: 'Why SentSwiftly', href: '/', current: pathname === '/' },
     { name: 'Templates', href: '/templates', current: pathname.startsWith('/templates') },
-    ...(session ? [{ name: 'My projects', href: '/projects', current: pathname.startsWith('/projects') }] : []),
-    ...(session ? [{ name: 'Settings', href: '/settings', current: pathname.startsWith('/settings') }] : []),
+    ...(session?.user ? [{ name: 'My projects', href: '/projects', current: pathname.startsWith('/projects') }] : []),
+    ...(session?.user ? [{ name: 'Settings', href: '/settings', current: pathname.startsWith('/settings') }] : []),
   ]
 
   return (
     <div className="flex h-screen flex-col">
       {!isTemplatePage && (
-        <header className="border-b border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
-          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-            <Navbar className="h-16">
-              <div className="flex w-full items-center justify-between">
-                <Link href="/" className="-m-1.5 p-1.5">
-                  <Logo />
-                </Link>
-                <NavbarSection>
-                  {navItems.map((item) => (
-                    <NavbarItem key={item.name} href={item.href} current={item.current}>
-                      <NavbarLabel>{item.name}</NavbarLabel>
-                    </NavbarItem>
-                  ))}
-                </NavbarSection>
-                <div className="flex items-center">
-                  {session ? (
-                    <Dropdown>
-                      <DropdownButton as="div" className="ml-4 flex items-center">
-                        <AvatarButton
-                          className="h-8 w-8"
-                          initials={
-                            session.user?.name && !session.user.image
-                              ? getFirstTwoInitials(session.user.name)
-                              : undefined
-                          }
-                          src={session.user?.image}
-                        />
-                      </DropdownButton>
-                      <AccountDropdownMenu anchor="bottom end" />
-                    </Dropdown>
-                  ) : (
-                    <div className="ml-4 flex items-center space-x-4">
-                      {pathname !== '/login' && <Button href="/login">Log in</Button>}
-                      {pathname !== '/signup' && (
-                        <Button color="blue" href="/signup">
-                          Get Started
-                        </Button>
-                      )}
+        <header>
+          <div>
+            <Disclosure as="nav" className="relative bg-white shadow">
+              <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+                <div className="relative flex h-16 justify-between">
+                  <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+                    {/* Mobile menu button */}
+                    <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-100 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-indigo-500">
+                      <span className="absolute -inset-0.5" />
+                      <span className="sr-only">Open main menu</span>
+                      <Bars3Icon aria-hidden="true" className="block h-6 w-6 group-data-[open]:hidden" />
+                      <XMarkIcon aria-hidden="true" className="hidden h-6 w-6 group-data-[open]:block" />
+                    </DisclosureButton>
+                  </div>
+                  <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+                    <div className="flex flex-shrink-0 items-center">
+                      <Link href="/">
+                        <Logo text={false} />
+                      </Link>
                     </div>
-                  )}
+                    <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+                      {navItems.map((item) => (
+                        <a
+                          key={item.name}
+                          href={item.href}
+                          className={`inline-flex items-center border-b-2 px-1 pt-1 text-sm font-medium ${item.current ? 'border-purple-600 text-purple-600' : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'}`}
+                        >
+                          {item.name}
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                    {session?.user ? (
+                      <Dropdown>
+                        <DropdownButton as="div" className="ml-4 flex items-center">
+                          <AvatarButton
+                            className="h-8 w-8"
+                            initials={
+                              session.user?.name && !session.user.image
+                                ? getFirstTwoInitials(session.user.name)
+                                : undefined
+                            }
+                            src={session.user?.image}
+                          />
+                        </DropdownButton>
+                        <AccountDropdownMenu anchor="bottom end" email={session.user?.email ?? ''} />
+                      </Dropdown>
+                    ) : (
+                      <div className="ml-4 flex items-center space-x-4">
+                        {pathname !== '/login' && <Button href="/login">Log in</Button>}
+                        {pathname !== '/signup' && (
+                          <Button color="purple" href="/signup">
+                            Get Started
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </Navbar>
+              <DisclosurePanel className="sm:hidden">
+                <div className="space-y-1 pb-4 pt-2">
+                  {navItems.map((item) => (
+                    <DisclosureButton
+                      key={item.name}
+                      as="a"
+                      href={item.href}
+                      className={`block border-l-4 py-2 pl-3 pr-4 text-base font-medium ${item.current ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-transparent text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700'}`}
+                    >
+                      {item.name}
+                    </DisclosureButton>
+                  ))}
+                </div>
+              </DisclosurePanel>
+            </Disclosure>
           </div>
         </header>
       )}
+
       <main className={`flex-grow overflow-y-auto ${isTemplatePage ? 'h-screen' : ''}`}>
         <div className="h-full">{children}</div>
       </main>

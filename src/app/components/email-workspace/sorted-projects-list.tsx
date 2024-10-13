@@ -63,7 +63,7 @@ export default function SortedProjectsList({ projects }: { projects: Project[] }
             ))}
           </DropdownMenu>
         </Dropdown>
-        <AddProjectButton color="blue" />
+        <AddProjectButton color="purple" />
       </div>
       <h2 className="text-sm font-medium text-gray-500">My Projects</h2>
 

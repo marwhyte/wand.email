@@ -30,10 +30,10 @@ export default async function ProjectsPage() {
           </p>
 
           <div className="flex justify-center gap-2">
-            <Button color="blue" href="/templates">
+            <Button color="purple" href="/templates">
               Browse Templates
             </Button>
-            <AddProjectButton />
+            <AddProjectButton immediateCreate />
           </div>
         </div>
       ) : (

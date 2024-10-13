@@ -29,6 +29,23 @@ export function getImgFromKey(imageKey: string, thumbnail = false) {
   return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${imageKey}`
 }
 
+export function truncate(string: string, length: number) {
+  return string.length > length ? string.substring(0, length) + '...' : string
+}
+
+export function formatFileSize(sizeBytes: number) {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  let size = sizeBytes
+  let unitIndex = 0
+
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024
+    unitIndex++
+  }
+
+  return `${size.toFixed(2)} ${units[unitIndex]}`
+}
+
 export function isValidHttpUrl(string: string) {
   let url
 
