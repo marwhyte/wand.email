@@ -1,7 +1,6 @@
 import { auth } from '@/auth'
 import { Divider } from '../components/divider'
 import { Heading } from '../components/heading'
-import AccountForm from '../forms/account-form'
 import DeleteAccountForm from '../forms/delete-account-form'
 
 const SettingsPage = async () => {
@@ -11,7 +10,7 @@ const SettingsPage = async () => {
       <Heading>Settings</Heading>
       <Divider className="my-10 mt-6" />
 
-      <AccountForm session={session} />
+      {/* <AccountForm session={session} /> */}
 
       <Divider className="my-10" soft />
 
