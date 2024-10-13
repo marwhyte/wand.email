@@ -68,7 +68,7 @@ export default function Page() {
         <button
           type="button"
           onClick={() => {
-            throw new Error('ALALASentry Example Frontend Error')
+            throw new Error('LASentry Example Frontend Error')
           }}
         >
           Throw error!
