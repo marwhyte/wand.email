@@ -2,10 +2,8 @@ import bcrypt from 'bcryptjs'
 import NextAuth, { NextAuthConfig } from 'next-auth'
 import CredentialProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
-import { NextResponse } from 'next/server'
 import { authConfig } from './auth.config'
 import { addUser, getUserByEmail, userExists } from './lib/database/queries/users'
-import { PUBLIC_ROUTES, ROOT } from './lib/routes'
 
 interface Credentials {
   email: string
@@ -102,18 +100,6 @@ export const authOptions: NextAuthConfig = {
         session.user.id = token.id as string
       }
       return session
-    },
-    async authorized({ request, auth }) {
-      const url = request.nextUrl
-      if (url.pathname !== ROOT && !PUBLIC_ROUTES.includes(url.pathname)) {
-        console.log('here', auth)
-        if (auth?.user?.email) {
-          return true
-        } else {
-          return NextResponse.redirect(new URL(ROOT, url))
-        }
-      }
-      return true
     },
     async jwt({ token, user, account, trigger, session }) {
       if (trigger === 'update') {
