@@ -69,8 +69,9 @@ export const getPriceIdByTierAndAnually = (tier: string, anually: boolean) => {
     if (anually) {
       return 'price_1QAYqbFQjmQhGhP2aPnqRYux'
     }
-    // return 'price_1QAYppFQjmQhGhP2vSTaThs7'
-    return 'price_1QAvCuFQjmQhGhP2RHkrtIL2'
+    return 'price_1QAYppFQjmQhGhP2vSTaThs7'
+    // this is free version for testing
+    // return 'price_1QAvCuFQjmQhGhP2RHkrtIL2'
   }
   if (tier === 'pro') {
     if (anually) {
