@@ -84,14 +84,16 @@ export default function Content({ children, session }: Props) {
     { name: 'Why SentSwiftly', href: '/', current: pathname === '/' },
     { name: 'Templates', href: '/templates', current: pathname.startsWith('/templates') },
     ...(session?.user ? [{ name: 'My projects', href: '/projects', current: pathname.startsWith('/projects') }] : []),
-    { name: 'Pricing', href: '/pricing', current: pathname.startsWith('/pricing') },
+    ...(!session?.user || plan === 'free'
+      ? [{ name: 'Pricing', href: '/pricing', current: pathname.startsWith('/pricing') }]
+      : []),
     ...(session?.user ? [{ name: 'Settings', href: '/settings', current: pathname.startsWith('/settings') }] : []),
   ]
 
   const isUpgradeDialogOpen = searchParams.get('upgrade') === 'true'
 
   const openUpgradeDialog = () => {
-    router.push(`${pathname}?upgrade=true`, { scroll: false })
+    router.push(`${pathname}?upgrade=true&plan=starter`, { scroll: false })
   }
 
   const closeUpgradeDialog = () => {

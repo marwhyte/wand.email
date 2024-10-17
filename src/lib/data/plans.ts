@@ -1,6 +1,6 @@
 import { Plan } from '../database/types'
 
-type Tier = {
+export type Tier = {
   name: string
   id: string
   href: string
@@ -14,7 +14,7 @@ export const tiers: Tier[] = [
   {
     name: 'Free',
     id: 'free',
-    href: '#',
+    href: '/sign-up',
     color: 'purple',
     featured: false,
     description: 'For individuals and small projects',
@@ -24,7 +24,7 @@ export const tiers: Tier[] = [
   {
     name: 'Starter',
     id: 'starter',
-    href: '#',
+    href: '/templates?upgrade=true&plan=starter',
     color: 'blue',
     featured: true,
     description: 'Emails on brand with your business',
@@ -41,7 +41,7 @@ export const tiers: Tier[] = [
   {
     name: 'Pro',
     id: 'pro',
-    href: '#',
+    href: '/templates?upgrade=true&plan=pro',
     color: 'green',
     featured: false,
     description: 'Great for larger businesses with complex needs',

@@ -4,8 +4,10 @@ import { tiers } from '@/lib/data/plans'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/20/solid'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { Footer } from '../components/marketing/footer'
+import { usePlan } from '../components/payment/plan-provider'
 
 const frequencies = [
   { value: 'monthly', label: 'Monthly', priceSuffix: '/month' },
@@ -46,6 +48,24 @@ function classNames(...classes: string[]) {
 export default function PricingPage() {
   const [frequency, setFrequency] = useState(frequencies[0])
   const session = useSession()
+  const { plan } = usePlan()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !session.data?.user) {
+      localStorage.setItem('postSignUpRedirectTo', window.location.pathname)
+    }
+  }, [session.data?.user])
+
+  const handlePlanSelection = (href: string) => {
+    if (!session.data?.user) {
+      localStorage.setItem('postSignUpRedirectTo', href)
+      router.push('/signup')
+    } else {
+      console.log(href)
+      router.push(href)
+    }
+  }
 
   return (
     <div className="isolate overflow-hidden">
@@ -149,8 +169,10 @@ export default function PricingPage() {
                         >{`Billed ${frequency.value}`}</p>
                       </div>
                     </div>
-                    <a
-                      href={tier.href}
+
+                    <button
+                      disabled={plan === tier.id}
+                      onClick={() => handlePlanSelection(tier.href)}
                       aria-describedby={tier.id}
                       className={classNames(
                         tier.featured
@@ -159,8 +181,12 @@ export default function PricingPage() {
                         'rounded-md px-3 py-2 text-center text-sm font-semibold leading-6 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2'
                       )}
                     >
-                      {tier.name === 'Free' ? 'Create your account' : 'Buy this plan'}
-                    </a>
+                      {plan === tier.id
+                        ? 'Your current plan'
+                        : tier.name === 'Free'
+                          ? 'Create your account'
+                          : 'Buy this plan'}
+                    </button>
                   </div>
 
                   <div className="mt-8 flow-root sm:mt-10">

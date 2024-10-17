@@ -1,8 +1,21 @@
-import { auth } from '@/auth'
+'use client'
+
+import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
 import TemplateCard from '../components/email-workspace/template-card'
 
-export default async function TemplatesPage() {
-  const session = await auth()
+export default function TemplatesPage() {
+  const session = useSession()
+  const router = useRouter()
+  useEffect(() => {
+    const value = localStorage.getItem('postSignUpRedirectTo')
+
+    if (session.data?.user && value) {
+      localStorage.removeItem('postSignUpRedirectTo')
+      router.push(value)
+    }
+  }, [session, router])
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

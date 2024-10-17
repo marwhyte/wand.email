@@ -1,10 +1,10 @@
 import { createCheckoutSession } from '@/app/actions/checkoutSessions'
 import { notifySlack } from '@/app/actions/notifySlack'
-import { tiers } from '@/lib/data/plans'
+import { Tier, tiers } from '@/lib/data/plans'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import AlertBox from '../alert-box'
 import { Badge } from '../badge'
 import { Button } from '../button'
@@ -18,14 +18,6 @@ import { usePlan } from './plan-provider'
 type Props = {
   open: boolean
   onClose: () => void
-}
-
-type Tier = {
-  name: string
-  id: string
-  color: 'purple' | 'blue' | 'green'
-  price: { monthly: string; annually: string }
-  highlights: string[]
 }
 
 const UpgradeDialog = ({ open, onClose }: Props) => {
@@ -42,25 +34,29 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
     return tiers.find((tier) => tier.id === planParam) || tiers[1]
   })
 
+  console.log(selectedTier)
+
   const [annually, setAnnually] = useState(() => {
     return searchParams.get('annually') === 'true'
   })
 
   const [error, setError] = useState<string | null>(null)
 
-  const updateQueryParams = useCallback(() => {
-    if (open) {
-      const newParams = new URLSearchParams(searchParams.toString())
-      newParams.set('upgrade', 'true')
-      newParams.set('plan', selectedTier.id)
-      newParams.set('annually', annually.toString())
-      router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
-    }
-  }, [open, selectedTier, annually, router, searchParams, pathname])
+  //   const updateQueryParams = useCallback(() => {
+  //     if (open) {
+  //       const newParams = new URLSearchParams(searchParams.toString())
+  //       newParams.set('upgrade', 'true')
+  //       newParams.set('plan', selectedTier.id)
+  //       newParams.set('annually', annually.toString())
+  //       router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
+  //     }
+  //   }, [open, selectedTier, annually, router, searchParams, pathname])
 
   useEffect(() => {
-    updateQueryParams()
-  }, [updateQueryParams])
+    const newParams = new URLSearchParams(searchParams.toString())
+    setSelectedTier(tiers.find((tier) => tier.id === newParams.get('plan')) || tiers[1])
+    setAnnually(newParams.get('annually') === 'true')
+  }, [searchParams])
 
   useEffect(() => {
     const checkSuccess = async () => {
@@ -93,6 +89,20 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
     }
   }
 
+  const handleSelectTier = (tier: Tier) => {
+    setSelectedTier(tier)
+    const newParams = new URLSearchParams(searchParams.toString())
+    newParams.set('plan', tier.id)
+    router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
+  }
+
+  const handleSelectAnnually = (annually: boolean) => {
+    setAnnually(annually)
+    const newParams = new URLSearchParams(searchParams.toString())
+    newParams.set('annually', annually.toString())
+    router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
+  }
+
   return (
     <Dialog background="gray" size="3xl" open={open || step === 'success-loading'} onClose={onClose}>
       {step === 'select-plan' ? (
@@ -114,7 +124,7 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
                     Save 20%
                   </Text>
                 </div>
-                <Switch color={selectedTier.color} checked={annually} onChange={setAnnually} />
+                <Switch color={selectedTier.color} checked={annually} onChange={handleSelectAnnually} />
               </div>
               <Heading level={1} className="text-center">
                 Upgrade Your Plan
@@ -131,7 +141,7 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
               <RadioGroup
                 className="mx-auto grid max-w-xl grid-cols-3 divide-x divide-gray-200 overflow-hidden rounded-lg bg-transparent bg-white px-1 text-center text-xs font-semibold leading-5 text-white shadow"
                 value={selectedTier.id}
-                onChange={(value) => setSelectedTier(tiers.find((tier) => tier.id === value) || tiers[0])}
+                onChange={(value) => handleSelectTier(tiers.find((tier) => tier.id === value) || tiers[0])}
               >
                 {tiers.map((tier) => (
                   <Radio
