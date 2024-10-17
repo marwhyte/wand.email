@@ -50,8 +50,12 @@ export const tiers: Tier[] = [
   },
 ]
 
-export const getPlanNameFromProductId = (productId: string): Plan => {
-  if (productId === 'price_1QAYppFQjmQhGhP2vSTaThs7' || productId === 'price_1QAYsVFQjmQhGhP2h9N1zQuj') {
+export const getPlanNameFromPriceId = (productId: string): Plan => {
+  if (
+    productId === 'price_1QAYppFQjmQhGhP2vSTaThs7' ||
+    productId === 'price_1QAYsVFQjmQhGhP2h9N1zQuj' ||
+    productId === 'price_1QAvCuFQjmQhGhP2RHkrtIL2'
+  ) {
     return 'starter'
   }
   if (productId === 'price_1QAYryFQjmQhGhP2YcUrnPqE' || productId === 'price_1QAYsVFQjmQhGhP2h9N1zQuj') {
@@ -65,7 +69,8 @@ export const getPriceIdByTierAndAnually = (tier: string, anually: boolean) => {
     if (anually) {
       return 'price_1QAYqbFQjmQhGhP2aPnqRYux'
     }
-    return 'price_1QAYppFQjmQhGhP2vSTaThs7'
+    // return 'price_1QAYppFQjmQhGhP2vSTaThs7'
+    return 'price_1QAvCuFQjmQhGhP2RHkrtIL2'
   }
   if (tier === 'pro') {
     if (anually) {

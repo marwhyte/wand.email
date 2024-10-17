@@ -1,4 +1,4 @@
-import { getPlanNameFromProductId } from '@/lib/data/plans'
+import { getPlanNameFromPriceId } from '@/lib/data/plans'
 import { getUserByStripeCustomerId, updateUserPlan } from '@/lib/database/queries/users'
 import { BillingCycle, Plan } from '@/lib/database/types'
 import { NextRequest, NextResponse } from 'next/server'
@@ -70,10 +70,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   console.log('subscription updated', subscription)
   const user = await getUserByStripeCustomerId(subscription.customer as string)
-  const stripeProductId = subscription.items.data[0].price.id
+  const stripePriceId = subscription.items.data[0].price.id
   if (!user) throw new Error(`User not found with stripe customer id ${subscription.customer}`)
 
-  const plan = getPlanNameFromProductId(stripeProductId)
+  const plan = getPlanNameFromPriceId(stripePriceId)
 
   await updateUserPlan(user.id, plan, subscription.customer as string)
 }
