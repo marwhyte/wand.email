@@ -9,6 +9,9 @@ export interface Database {
 
 export type ExportType = 'react' | 'html'
 
+export type Plan = 'free' | 'starter' | 'pro'
+export type BillingCycle = 'monthly' | 'yearly'
+
 export interface UserTable {
   google_id?: string
   id: Generated<string>
@@ -17,6 +20,8 @@ export interface UserTable {
   created_at: Date
   updated_at: Date
   password?: string
+  plan: Plan
+  stripe_customer_id?: string
 }
 
 export interface ProjectTable {

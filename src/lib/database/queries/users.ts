@@ -2,6 +2,7 @@
 
 import { auth } from '@/auth'
 import { db } from '../db'
+import { Plan } from '../types'
 
 export async function getUsers() {
   const users = await db.selectFrom('users').selectAll().execute()
@@ -10,6 +11,15 @@ export async function getUsers() {
 
 export async function getUserByEmail(email: string) {
   const user = await db.selectFrom('users').selectAll().where('email', '=', email).executeTakeFirst()
+  return user
+}
+
+export async function getUserByStripeCustomerId(stripeCustomerId: string) {
+  const user = await db
+    .selectFrom('users')
+    .selectAll()
+    .where('stripe_customer_id', '=', stripeCustomerId)
+    .executeTakeFirst()
   return user
 }
 
@@ -32,11 +42,20 @@ export async function addUser(user: {
       google_id: user.googleId,
       created_at: new Date(),
       updated_at: new Date(),
+      plan: 'free',
     })
     .returningAll()
     .executeTakeFirst()
 
   return result
+}
+
+export async function updateUserPlan(userId: string, plan: Plan, stripeCustomerId: string) {
+  await db
+    .updateTable('users')
+    .set({ plan, stripe_customer_id: stripeCustomerId, updated_at: new Date() })
+    .where('id', '=', userId)
+    .execute()
 }
 
 export async function updateUser(formData: FormData) {
@@ -52,7 +71,11 @@ export async function updateUser(formData: FormData) {
   if (name) updateFields.name = name as string
   if (email) updateFields.email = email as string
 
-  await db.updateTable('users').set(updateFields).where('id', '=', session.user.id).execute()
+  await db
+    .updateTable('users')
+    .set({ ...updateFields, updated_at: new Date() })
+    .where('id', '=', session.user.id)
+    .execute()
 }
 
 export async function userExists(email: string): Promise<boolean> {

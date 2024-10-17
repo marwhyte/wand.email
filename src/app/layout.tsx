@@ -1,9 +1,11 @@
 import { auth } from '@/auth'
+import { getUserByEmail } from '@/lib/database/queries/users'
 import type { Metadata } from 'next'
 import { SessionProvider } from 'next-auth/react'
 import { Inter } from 'next/font/google'
 import Content from './content'
 
+import PlanProvider from './components/payment/plan-provider'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
@@ -23,6 +25,17 @@ export default async function RootLayout({
 }>) {
   const session = await auth()
 
+  const fetchUser = async () => {
+    'use server'
+
+    if (session?.user?.email) {
+      return await getUserByEmail(session.user.email)
+    }
+    return null
+  }
+
+  const initialUser = await fetchUser()
+
   return (
     <html
       suppressHydrationWarning
@@ -39,7 +52,9 @@ export default async function RootLayout({
       </head>
       <body className={inter.className + ' h-full'}>
         <SessionProvider session={session}>
-          <Content session={session}>{children}</Content>
+          <PlanProvider fetchUser={fetchUser} plan={initialUser?.plan}>
+            <Content session={session}>{children}</Content>
+          </PlanProvider>
         </SessionProvider>
       </body>
     </html>

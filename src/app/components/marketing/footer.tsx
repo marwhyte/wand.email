@@ -2,31 +2,82 @@ import Link from 'next/link'
 
 import { Logo } from '@components/Logo'
 import { Container } from '@components/marketing/container'
-import { NavLink } from './nav-link'
 
 export function Footer() {
   return (
-    <footer className="bg-white dark:bg-slate-900">
+    <footer aria-labelledby="footer-heading" className="bg-white dark:bg-slate-900">
+      <h2 id="footer-heading" className="sr-only">
+        Footer
+      </h2>
       <Container>
-        <div className="py-16">
-          <Link href="/" aria-label="Home">
-            <div className="flex justify-center">
-              <Logo />
+        <div className="py-16 sm:py-24 lg:py-32">
+          <div className="xl:grid xl:grid-cols-3 xl:gap-8">
+            <Link href="/" aria-label="Home">
+              <div className="flex">
+                <Logo />
+              </div>
+            </Link>
+            <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
+              <div className="md:grid md:grid-cols-2 md:gap-8">
+                <div>
+                  <h3 className="text-sm font-semibold leading-6 text-gray-900 dark:text-slate-100">Quick Links</h3>
+                  <ul role="list" className="mt-6 space-y-4">
+                    <li>
+                      <a className="text-sm leading-6 text-gray-600 hover:text-gray-900" href="/">
+                        Why SentSwiftly
+                      </a>
+                    </li>
+                    <li>
+                      <a className="text-sm leading-6 text-gray-600 hover:text-gray-900" href="/templates">
+                        Templates
+                      </a>
+                    </li>
+                    <li>
+                      <a className="text-sm leading-6 text-gray-600 hover:text-gray-900" href="/pricing">
+                        Pricing
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div className="mt-10 md:mt-0">
+                  <h3 className="text-sm font-semibold leading-6 text-gray-900 dark:text-slate-100">Legal</h3>
+                  <ul role="list" className="mt-6 space-y-4">
+                    <li>
+                      <a
+                        className="text-sm leading-6 text-gray-600 hover:text-gray-900"
+                        href="/privacy.html"
+                        target="_blank"
+                      >
+                        Privacy policy
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        className="text-sm leading-6 text-gray-600 hover:text-gray-900"
+                        href="/tos.html"
+                        target="_blank"
+                      >
+                        Terms of service
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold leading-6 text-gray-900 dark:text-slate-100">Contact</h3>
+                <ul role="list" className="mt-6 space-y-4">
+                  <li>
+                    <a
+                      className="text-sm leading-6 text-gray-600 hover:text-gray-900"
+                      href="mailto:support@sentswiftly.com"
+                    >
+                      Contact us
+                    </a>
+                  </li>
+                </ul>
+              </div>
             </div>
-          </Link>
-          <nav className="mt-10 text-sm" aria-label="quick links">
-            <div className="-my-1 flex flex-wrap justify-center gap-x-6">
-              <NavLink href="/">Why SentSwiftly</NavLink>
-              <NavLink href="/templates">Templates</NavLink>
-              <NavLink href="/privacy.html" target="_blank">
-                Privacy policy
-              </NavLink>
-              <NavLink href="/tos.html" target="_blank">
-                Terms of service
-              </NavLink>
-              <NavLink href="mailto:support@sentswiftly.com">Contact us</NavLink>
-            </div>
-          </nav>
+          </div>
         </div>
         <div className="flex flex-col items-center border-t border-slate-400/10 py-10 sm:flex-row-reverse sm:justify-between">
           <div className="flex gap-x-6">
@@ -49,7 +100,7 @@ export function Footer() {
               </svg>
             </Link>
           </div>
-          <p className="mt-6 text-sm text-slate-500 sm:mt-0 dark:text-slate-400">
+          <p className="mt-6 text-sm text-slate-500 dark:text-slate-400 sm:mt-0">
             Copyright &copy; {new Date().getFullYear()} SentSwiftly. All rights reserved.
           </p>
         </div>

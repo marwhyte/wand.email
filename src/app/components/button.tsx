@@ -173,7 +173,7 @@ type ButtonProps = (
   tooltip?: string
   tooltipTransform?: string
   tooltipPosition?: 'top' | 'bottom'
-  disabled?: boolean // Add this line
+  disabled?: boolean
 } & (Omit<Headless.ButtonProps, 'className'> | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>)
 
 export const Button = forwardRef(function Button(
@@ -186,7 +186,7 @@ export const Button = forwardRef(function Button(
     tooltip,
     tooltipTransform,
     tooltipPosition = 'top',
-    disabled, // Add this line
+    disabled,
     ...props
   }: ButtonProps,
   ref: React.ForwardedRef<HTMLElement>
@@ -196,7 +196,7 @@ export const Button = forwardRef(function Button(
     styles.base,
     outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
     tooltip && 'group',
-    disabled && 'cursor-not-allowed opacity-50' // Add this line
+    disabled && 'cursor-not-allowed opacity-50'
   )
 
   const content = (

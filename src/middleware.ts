@@ -5,10 +5,14 @@ import NextAuth from 'next-auth'
 const { auth } = NextAuth(authConfig)
 
 export default auth((req) => {
+  // @ts-ignore
   const { nextUrl } = req
 
   const isAuthenticated = !!req.auth
-  const isPublicRoute = PUBLIC_ROUTES.includes(nextUrl.pathname)
+  const isPublicRoute = PUBLIC_ROUTES.some(
+    (route) =>
+      nextUrl.pathname === route || (route.endsWith('/:id') && nextUrl.pathname.startsWith(route.replace('/:id', '/')))
+  )
 
   if (!isAuthenticated && !isPublicRoute) return Response.redirect(new URL(ROOT, nextUrl))
 })

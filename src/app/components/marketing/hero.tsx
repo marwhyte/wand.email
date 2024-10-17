@@ -65,7 +65,7 @@ export function Hero() {
             with ease
           </h1>
           <p className="mt-6 text-lg leading-8 text-gray-600 dark:text-gray-300">
-            SwiftMaker is a easy to plug in email builder. It works well with React, NextJS, and HTML projects.
+            Make emails with drag-n-drop. Export to React, Next.js, HTML and more.
           </p>
           <div className="mt-10 flex items-center gap-x-6">
             <Link

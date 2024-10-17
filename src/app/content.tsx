@@ -17,14 +17,18 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react
 import {
   ArrowRightStartOnRectangleIcon,
   Bars3Icon,
+  BoltIcon,
   LightBulbIcon,
   ShieldCheckIcon,
   UserCircleIcon,
   XMarkIcon,
-} from '@heroicons/react/16/solid'
+} from '@heroicons/react/24/solid'
+
 import { Session } from 'next-auth'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePlan } from './components/payment/plan-provider'
+import UpgradeDialog from './components/payment/upgrade-dialog'
 import { Text } from './components/text'
 
 type Props = {
@@ -71,16 +75,28 @@ function AccountDropdownMenu({ anchor, email }: AccountDropdownMenuProps) {
 
 export default function Content({ children, session }: Props) {
   let pathname = usePathname()
-
-  // Check if the pathname matches /templates/:id or /projects/:id
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const { plan } = usePlan()
   const isTemplatePage = /^\/templates\/[^/]+$/.test(pathname) || /^\/projects\/[^/]+$/.test(pathname)
 
   const navItems = [
     { name: 'Why SentSwiftly', href: '/', current: pathname === '/' },
     { name: 'Templates', href: '/templates', current: pathname.startsWith('/templates') },
     ...(session?.user ? [{ name: 'My projects', href: '/projects', current: pathname.startsWith('/projects') }] : []),
+    { name: 'Pricing', href: '/pricing', current: pathname.startsWith('/pricing') },
     ...(session?.user ? [{ name: 'Settings', href: '/settings', current: pathname.startsWith('/settings') }] : []),
   ]
+
+  const isUpgradeDialogOpen = searchParams.get('upgrade') === 'true'
+
+  const openUpgradeDialog = () => {
+    router.push(`${pathname}?upgrade=true`, { scroll: false })
+  }
+
+  const closeUpgradeDialog = () => {
+    router.push(pathname, { scroll: false })
+  }
 
   return (
     <div className="flex h-screen flex-col">
@@ -118,6 +134,16 @@ export default function Content({ children, session }: Props) {
                     </div>
                   </div>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                    <div className="hidden md:block">
+                      {plan === 'free' && (
+                        <button onClick={openUpgradeDialog}>
+                          <span className="inline-flex items-baseline rounded-full border border-yellow-500 bg-yellow-50 px-2.5 py-0.5 text-sm font-medium leading-7 md:mt-2 lg:mt-0">
+                            <BoltIcon className="-ml-1 mr-0.5 h-5 w-5 flex-shrink-0 self-center text-yellow-400" />
+                            Upgrade
+                          </span>
+                        </button>
+                      )}
+                    </div>
                     {session?.user ? (
                       <Dropdown>
                         <DropdownButton as="div" className="ml-4 flex items-center">
@@ -168,6 +194,7 @@ export default function Content({ children, session }: Props) {
       <main className={`flex-grow overflow-y-auto ${isTemplatePage ? 'h-screen' : ''}`}>
         <div className="h-full">{children}</div>
       </main>
+      <UpgradeDialog open={isUpgradeDialogOpen} onClose={closeUpgradeDialog} />
     </div>
   )
 }
