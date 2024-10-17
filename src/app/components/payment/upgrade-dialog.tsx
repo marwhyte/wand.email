@@ -1,4 +1,5 @@
 import { createCheckoutSession } from '@/app/actions/checkoutSessions'
+import { notifySlack } from '@/app/actions/notifySlack'
 import { tiers } from '@/lib/data/plans'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid'
@@ -69,6 +70,7 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
           const updatedUser = await refetchUser()
           console.log('updatedUser', updatedUser)
           if (updatedUser?.plan !== 'free') {
+            notifySlack(`${updatedUser?.email} upgraded to ${updatedUser?.plan} plan`, 'upgrade')
             setStep('success')
             break
           }

@@ -1,5 +1,3 @@
-type SlackChannelType = 'upgrade' | 'errors'
-
 export function getFirstTwoInitials(name: string) {
   // Split the name by spaces
   const words = name.trim().split(/\s+/)
@@ -13,18 +11,6 @@ export function getFirstTwoInitials(name: string) {
 
 export function capitalizeFirstLetter(string: string) {
   return string.charAt(0).toUpperCase() + string.slice(1)
-}
-
-export async function notifySlack(message: string, channel: SlackChannelType, attachments?: any[]) {
-  if (isLocalDev) {
-    console.log(`Slack message to send to channel ${channel}: `, message)
-    return
-  }
-
-  await window.fetch(urlForChannel(channel), {
-    method: 'POST',
-    body: JSON.stringify({ text: message, attachments }),
-  })
 }
 
 type ObjectWithCreatedAt = {
