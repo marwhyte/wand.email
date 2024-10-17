@@ -73,7 +73,7 @@ export const authOptions: NextAuthConfig = {
     async signIn({ user, account, profile, credentials }) {
       if (account?.provider === 'google') {
         try {
-          let dbUser = await getUserByEmail(credentials?.email as string)
+          let dbUser = await getUserByEmail(profile?.email as string)
           if (!dbUser) {
             addUser({
               googleId: account.providerAccountId,
