@@ -1,10 +1,10 @@
 import { auth } from '@/auth'
-import { getUserByEmail } from '@/lib/database/queries/users'
 import type { Metadata } from 'next'
 import { SessionProvider } from 'next-auth/react'
 import { Inter } from 'next/font/google'
 import Content from './content'
 
+import { fetchUser } from './actions'
 import PlanProvider from './components/payment/plan-provider'
 import './globals.css'
 
@@ -24,15 +24,6 @@ export default async function RootLayout({
   children: React.ReactNode
 }>) {
   const session = await auth()
-
-  const fetchUser = async () => {
-    'use server'
-
-    if (session?.user?.email) {
-      return await getUserByEmail(session.user.email)
-    }
-    return null
-  }
 
   const initialUser = await fetchUser()
 

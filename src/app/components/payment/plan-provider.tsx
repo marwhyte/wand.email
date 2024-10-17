@@ -1,7 +1,7 @@
 'use client'
 
 import { Plan } from '@/lib/database/types'
-import { createContext, ReactNode, useContext, useState } from 'react'
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
 // Create the context
 const PlanContext = createContext<{
@@ -39,6 +39,10 @@ const PlanProvider = ({ children, fetchUser, plan }: PlanProviderProps) => {
     }
     return updatedUser
   }
+
+  useEffect(() => {
+    setUserPlan(plan)
+  }, [plan])
 
   return <PlanContext.Provider value={{ plan: userPlan, refetchUser }}>{children}</PlanContext.Provider>
 }
