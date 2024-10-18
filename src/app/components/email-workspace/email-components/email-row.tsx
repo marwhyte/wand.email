@@ -167,7 +167,6 @@ export default function EmailRow({
           style={{
             backgroundColor: email.bgColor,
             ...applyCommonAttributes(row.container.attributes),
-            maxWidth: mobileView ? '360px' : `${email.width}px`,
             tableLayout: 'fixed',
           }}
         >

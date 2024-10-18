@@ -17,6 +17,8 @@ type Props = {
 export default function Workspace({ session, project, monthlyExportCount }: Props) {
   const [mobileView, setMobileView] = useState(false)
 
+  console.log(mobileView)
+
   return (
     <DndProvider backend={HTML5Backend}>
       <div>
