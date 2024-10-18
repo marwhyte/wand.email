@@ -2,6 +2,7 @@ import { ColorInput } from '@/app/components/color-input'
 import { Field, Label } from '@/app/components/fieldset'
 import { Select } from '@/app/components/select'
 import { useCallback } from 'react'
+import Range from '../range'
 import { useEmail } from './email-provider'
 
 const EmailSettings = () => {
@@ -39,16 +40,13 @@ const EmailSettings = () => {
           Content area width: <span className="font-bold text-blue-500">{email.width}px</span>
         </Label>
 
-        <div className="mt-2">
-          <input
-            className="w-full"
-            type="range"
-            min={480}
-            max={900}
-            value={email.width}
-            onChange={(e) => handleChange({ width: e.target.value })}
-          />
-        </div>
+        <Range
+          className="w-full"
+          min={480}
+          max={900}
+          value={parseInt(email.width)}
+          onChange={(e) => handleChange({ width: e.target.value })}
+        />
       </Field>
       <Field>
         <Label>Default background color</Label>

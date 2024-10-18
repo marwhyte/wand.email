@@ -146,10 +146,8 @@ type HeadingBlockAttributes = CommonAttributes & {
 }
 
 type ImageBlockAttributes = CommonAttributes & {
-  aspectRatio?: string
   src: string
   alt?: string
-  objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
 }
 
 type ButtonBlockAttributes = CommonAttributes & {

@@ -39,7 +39,11 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
 
   switch (baseBlock.type) {
     case 'heading':
-      return { ...baseBlock, type: 'heading', attributes: { as: 'h2' } }
+      return {
+        ...baseBlock,
+        type: 'heading',
+        attributes: { as: 'h2', paddingTop: '10px', paddingBottom: '10px', paddingLeft: '0', paddingRight: '0' },
+      }
     case 'text':
       return {
         ...baseBlock,
@@ -47,11 +51,30 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
         attributes: { paddingTop: '10px', paddingBottom: '10px', paddingLeft: '0', paddingRight: '0' },
       }
     case 'image':
-      return { ...baseBlock, type: 'image', attributes: { src: '' } }
+      return {
+        ...baseBlock,
+        type: 'image',
+        attributes: {
+          src: '',
+          paddingTop: '10px',
+          paddingBottom: '10px',
+          paddingLeft: '0',
+          paddingRight: '0',
+          width: '100%',
+        },
+      }
     case 'button':
-      return { ...baseBlock, type: 'button', attributes: { href: '#' } }
+      return {
+        ...baseBlock,
+        type: 'button',
+        attributes: { href: '#', paddingTop: '10px', paddingBottom: '10px', paddingLeft: '0', paddingRight: '0' },
+      }
     case 'link':
-      return { ...baseBlock, type: 'link', attributes: { href: '#' } }
+      return {
+        ...baseBlock,
+        type: 'link',
+        attributes: { href: '#', paddingTop: '10px', paddingBottom: '10px', paddingLeft: '0', paddingRight: '0' },
+      }
     default:
       throw new Error(`Unsupported block type: ${type}`)
   }

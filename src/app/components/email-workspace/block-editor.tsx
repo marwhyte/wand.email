@@ -17,6 +17,7 @@ import { capitalizeFirstLetter, isValidHttpUrl } from '@/lib/utils/misc'
 import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import 'react-quill/dist/quill.snow.css'
 import { v4 as uuidv4 } from 'uuid' // Add this import for generating new IDs
+import Range from '../range'
 import RowEditor from './row-editor'
 
 enum Options {
@@ -28,7 +29,6 @@ enum Options {
   BACKGROUND_COLOR = 'background-color',
   WIDTH = 'width',
   HREF = 'href',
-  HEIGHT = 'height',
   GRID_COLUMNS = 'grid-columns',
   PADDING = 'padding',
   SRC = 'src',
@@ -50,7 +50,7 @@ const BlockEditor = () => {
           Options.PADDING,
         ]
       case 'image':
-        return [Options.WIDTH, Options.HEIGHT, Options.PADDING, Options.SRC]
+        return [Options.WIDTH, Options.PADDING, Options.SRC]
       case 'button':
         return [Options.TEXT, Options.HREF, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.PADDING]
       case 'heading':
@@ -389,26 +389,21 @@ const BlockEditor = () => {
       )}
       {options.includes(Options.WIDTH) && (
         <Field>
-          <Label>Width</Label>
-          <Input
+          <Label>Width (%)</Label>
+          <Range
             key={`width-${currentBlock?.id}`}
-            type="number"
-            value={currentBlock?.attributes.width?.replace('px', '') || ''}
-            onChange={(e) => handleChange({ width: e.target.value + 'px' })}
+            min={3}
+            max={100}
+            isPercent
+            value={parseInt(currentBlock?.attributes.width?.replace('%', '') || '100')}
+            onChange={(e) => {
+              const value = Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
+              handleChange({ width: `${value}%` })
+            }}
           />
         </Field>
       )}
-      {options.includes(Options.HEIGHT) && (
-        <Field>
-          <Label>Height</Label>
-          <Input
-            key={`height-${currentBlock?.id}`}
-            type="number"
-            value={currentBlock?.attributes.height?.replace('px', '') || ''}
-            onChange={(e) => handleChange({ height: e.target.value + 'px' })}
-          />
-        </Field>
-      )}
+
       {options.includes(Options.PADDING) && (
         <PaddingForm
           padding={{

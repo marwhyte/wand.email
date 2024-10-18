@@ -19,8 +19,6 @@ const renderBlock = (block: EmailBlock) => {
   const props = generateBlockProps(block)
   const propsString = stringifyProps(props)
 
-  console.log
-
   switch (block.type) {
     case 'text':
     case 'heading':

@@ -54,7 +54,7 @@ const EmailRendererFinal = ({ email }: Props) => {
       <Head />
       <Preview>{email.preview}</Preview>
       <Body {...generateBodyProps(email)}>
-        <Container width={email.width} style={{ maxWidth: email.width }}>
+        <Container width={email.width} style={{ maxWidth: `${email.width}px`, width: `${email.width}px` }}>
           {email.rows.map((row) => (
             <Container key={row.id} {...generateContainerProps(row, email)}>
               <Row {...generateRowProps(row)}>

@@ -8,6 +8,7 @@ import TemplateCard from '../components/email-workspace/template-card'
 export default function TemplatesPage() {
   const session = useSession()
   const router = useRouter()
+
   useEffect(() => {
     const value = localStorage.getItem('postSignUpRedirectTo')
 

@@ -29,8 +29,7 @@ export const getAdditionalImageStyles = (
   attributes: ImageBlockAttributes
 ): React.ComponentProps<typeof Img>['style'] => {
   return {
-    aspectRatio: attributes.aspectRatio,
-    objectFit: attributes.objectFit,
+    objectFit: 'contain',
   }
 }
 

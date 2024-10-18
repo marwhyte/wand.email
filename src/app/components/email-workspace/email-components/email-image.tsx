@@ -34,7 +34,10 @@ export default function EmailImage({ block }: Props) {
 
   if (!block.attributes.src) {
     return (
-      <div className="flex h-full w-full flex-col items-center justify-center rounded bg-gray-100 pb-2">
+      <div
+        style={{ marginTop: 10, marginBottom: 10 }}
+        className="flex h-full w-full flex-col items-center justify-center rounded bg-gray-100 pb-2"
+      >
         <Image src="/no-image.svg" alt="No image" width={100} height={100} />
         <FileUploader onUpload={handleUpload} />
       </div>

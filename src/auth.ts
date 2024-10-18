@@ -106,8 +106,6 @@ export const authOptions: NextAuthConfig = {
         const dbUser = await getUserByEmail(token.email as string)
         if (dbUser) {
           token.name = dbUser.name
-
-          console.log(dbUser)
         }
 
         return token

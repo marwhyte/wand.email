@@ -49,7 +49,6 @@ export async function POST(request: NextRequest) {
 
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   if (session.status === 'complete') {
-    console.log('metadata', session.metadata)
     const userId = session.metadata?.userId as string
     const planName = session.metadata?.plan as Plan
     const billingCycle = session.metadata?.billingCycle as BillingCycle
@@ -61,14 +60,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
     // Update the user's plan in the database
     await updateUserPlan(userId, planName, stripeCustomerId)
-
-    // You might want to log or perform additional actions here
-    console.log(`Updated plan for user ${userId} to ${planName}`)
   }
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
-  console.log('subscription updated', subscription)
   const user = await getUserByStripeCustomerId(subscription.customer as string)
   const stripePriceId = subscription.items.data[0].price.id
   if (!user) throw new Error(`User not found with stripe customer id ${subscription.customer}`)

@@ -34,8 +34,6 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
     return tiers.find((tier) => tier.id === planParam) || tiers[1]
   })
 
-  console.log(selectedTier)
-
   const [annually, setAnnually] = useState(() => {
     return searchParams.get('annually') === 'true'
   })
@@ -64,7 +62,7 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
         setStep('success-loading')
         while (true) {
           const updatedUser = await refetchUser()
-          console.log('updatedUser', updatedUser)
+
           if (updatedUser?.plan !== 'free') {
             notifySlack(`${updatedUser?.email} upgraded to ${updatedUser?.plan} plan`, 'upgrade')
             setStep('success')
