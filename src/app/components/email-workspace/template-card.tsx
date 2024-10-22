@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { Subheading } from '../heading'
 
@@ -20,9 +19,8 @@ const TemplateCard = ({ href, image, title, description }: TemplateCardProps) =>
       href={href}
     >
       <li className="col-span-1 flex flex-col divide-y rounded-lg border border-green-200 bg-white text-center outline-green-200 hover:outline">
-        <div className="flex flex-1 flex-col py-8">
-          <Image alt={title} src={image} width={100} height={100} className="mx-auto mb-4" />
-          <img alt="Going demo" src="/going/demo.png" className="full-w" />
+        <div className="flex flex-1 flex-col pb-8">
+          <img alt="Going demo" src={image} className="full-w" />
 
           <Subheading className="mt-6">{description}</Subheading>
           <dl className="mt-1 flex flex-grow flex-col justify-between">

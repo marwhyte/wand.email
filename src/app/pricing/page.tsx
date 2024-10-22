@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { Footer } from '../components/marketing/footer'
+import Nbsp from '../components/nbsp'
 import { usePlan } from '../components/payment/plan-provider'
 
 const frequencies = [
@@ -19,7 +20,7 @@ const faqs = [
     id: 1,
     question: 'What is SentSwiftly?',
     answer:
-      'SwiftMaker is an easy, drag-and-drop email builder that allows you to create beautiful emails in minutes, not hours. It integrates easily into most tech stacks, including html, react, and nextJS',
+      'SentSwiftly is an easy, drag-and-drop email builder that allows you to create beautiful emails in minutes, not hours. It integrates easily into most tech stacks, including html, react, and nextJS',
   },
   {
     id: 2,
@@ -225,13 +226,15 @@ export default function PricingPage() {
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-2xl font-bold leading-10 tracking-tight text-gray-900">Frequently asked questions</h2>
               <p className="mt-6 text-base leading-7 text-gray-600">
-                Have a different question and can’t find the answer you’re looking for? Reach out to our support team by{' '}
+                Have a different question and can’t find the answer you’re looking for? Reach out to our support team by
+                <Nbsp />
                 <a
                   href="mailto:support@sentswiftly.com"
                   className="font-semibold text-indigo-600 hover:text-indigo-500"
                 >
                   sending us an email
                 </a>
+                <Nbsp />
                 and we’ll get back to you as soon as we can.
               </p>
             </div>

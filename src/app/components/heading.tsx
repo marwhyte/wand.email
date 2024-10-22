@@ -7,21 +7,31 @@ type HeadingProps = { level?: 1 | 2 | 3 | 4 | 5 | 6 } & React.ComponentPropsWith
 export function Heading({ className, level = 1, ...props }: HeadingProps) {
   let Element: `h${typeof level}` = `h${level}`
 
-  return (
-    <Element
-      {...props}
-      className={clsx(className, 'text-2xl/8 font-semibold text-zinc-950 sm:text-xl/8 dark:text-white')}
-    />
-  )
+  // Define size classes based on heading level
+  const sizeClasses = {
+    1: 'text-2xl sm:text-3xl',
+    2: 'text-xl sm:text-2xl',
+    3: 'text-lg sm:text-xl',
+    4: 'text-base sm:text-lg',
+    5: 'text-xs sm:text-xs',
+    6: 'text-xs sm:text-xs',
+  }[level]
+
+  return <Element {...props} className={clsx(className, sizeClasses, 'font-semibold text-zinc-950 dark:text-white')} />
 }
 
 export function Subheading({ className, level = 2, ...props }: HeadingProps) {
   let Element: `h${typeof level}` = `h${level}`
 
-  return (
-    <Element
-      {...props}
-      className={clsx(className, 'text-base/7 font-semibold text-zinc-950 sm:text-sm/6 dark:text-white')}
-    />
-  )
+  // Define size classes based on subheading level
+  const sizeClasses = {
+    1: 'text-lg sm:text-base',
+    2: 'text-base sm:text-sm',
+    3: 'text-sm sm:text-xs',
+    4: 'text-xs sm:text-xs',
+    5: 'text-xs sm:text-xs',
+    6: 'text-xs sm:text-xs',
+  }[level]
+
+  return <Element {...props} className={clsx(className, sizeClasses, 'font-semibold text-zinc-950 dark:text-white')} />
 }

@@ -30,7 +30,7 @@ export const tiers: Tier[] = [
     description: 'Emails on brand with your business',
     price: { monthly: '$15', annually: '$144' },
     highlights: [
-      'Everything in starter',
+      'Everything in Free',
       'Unlimited exports',
       'Premium templates',
       'Personalized footer',
@@ -46,7 +46,7 @@ export const tiers: Tier[] = [
     featured: false,
     description: 'Great for larger businesses with complex needs',
     price: { monthly: '$40', annually: '$384' },
-    highlights: ['Everything in starter', 'Premium support', 'Custom code'],
+    highlights: ['Everything in Starter', 'Premium support', 'Custom code'],
   },
 ]
 

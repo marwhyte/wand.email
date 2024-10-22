@@ -10,12 +10,12 @@ import clsx from 'clsx'
 import { ComponentProps } from 'react'
 
 type TabGroupProps = ComponentProps<typeof HeadlessTabGroup> & {
-  value?: string
+  value?: string | null
 }
 
 export function TabGroup({ children, value, ...props }: TabGroupProps) {
   return (
-    <HeadlessTabGroup selectedIndex={value !== undefined ? parseInt(value) : undefined} {...props}>
+    <HeadlessTabGroup selectedIndex={value !== undefined && value !== null ? parseInt(value) : undefined} {...props}>
       {children}
     </HeadlessTabGroup>
   )
