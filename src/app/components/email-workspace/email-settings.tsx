@@ -37,7 +37,10 @@ const EmailSettings = () => {
     <div className="flex w-full flex-col gap-4 p-4">
       <Field>
         <Label>
-          Content area width: <span className="font-bold text-blue-500">{email.width}px</span>
+          Content area width:{' '}
+          <span className="font-bold text-blue-500">
+            {email.width.endsWith('px') ? email.width : `${email.width}px`}
+          </span>
         </Label>
 
         <Range
