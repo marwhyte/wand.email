@@ -182,7 +182,7 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
                 </NavbarItem>
               </div>
               <div className="flex-1 text-center">
-                <Heading level={1}>{project ? project.title : email.name}</Heading>
+                <Heading level={3}>{project ? project.title : email.name}</Heading>
               </div>
               <div className="flex flex-1 items-center justify-end space-x-4">
                 <TabGroup value={selectedDevice} className="flex justify-center" onChange={handleDeviceChange}>

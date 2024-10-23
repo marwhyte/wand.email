@@ -15,6 +15,9 @@ const config: Config = {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
       },
+      fontFamily: {
+        nextsunday: ['NextSunday', 'sans-serif'],
+      },
       colors: {
         google: {
           'text-gray': '#3c4043',
@@ -29,6 +32,7 @@ const config: Config = {
           'logo-red': '#ea4335',
         },
         purple: {
+          '500': '#9979FF',
           '600': '#784FFC',
         },
       },

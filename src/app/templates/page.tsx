@@ -68,12 +68,11 @@ export default function TemplatesPage() {
               Set up your branding.
             </h2>
             <p className="mx-auto mt-6 max-w-xl text-pretty text-lg/8 text-gray-600">
-              By uploading your logo, colors and style, you can browse templates that are consistent with your
-              organization.
+              By uploading your logo, colors and style, you can browse ready made emails for your organization.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <a
-                href="#"
+                href="/onboarding"
                 className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
               >
                 Get started

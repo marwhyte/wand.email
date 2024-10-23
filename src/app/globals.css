@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'NextSunday';
+  src: url('/fonts/NextSunday.ttf');
+  font-weight: normal;
+  font-style: normal;
+}
+
 input {
     padding: .5rem .75rem;
 }

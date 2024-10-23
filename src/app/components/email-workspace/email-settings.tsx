@@ -2,6 +2,7 @@ import { ColorInput } from '@/app/components/color-input'
 import { Field, Label } from '@/app/components/fieldset'
 import { Select } from '@/app/components/select'
 import { useCallback } from 'react'
+import Nbsp from '../nbsp'
 import Range from '../range'
 import { useEmail } from './email-provider'
 
@@ -37,7 +38,8 @@ const EmailSettings = () => {
     <div className="flex w-full flex-col gap-4 p-4">
       <Field>
         <Label>
-          Content area width:{' '}
+          Content area width:
+          <Nbsp />
           <span className="font-bold text-blue-500">
             {email.width.endsWith('px') ? email.width : `${email.width}px`}
           </span>

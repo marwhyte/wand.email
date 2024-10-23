@@ -78,8 +78,9 @@ export default function Content({ children, session }: Props) {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { plan } = usePlan()
+  const isOnboardingPage = pathname === '/onboarding'
   const isTemplatePage = /^\/templates\/[^/]+$/.test(pathname) || /^\/projects\/[^/]+$/.test(pathname)
-
+  const hideHeader = isTemplatePage || isOnboardingPage
   const navItems = [
     { name: 'Why SentSwiftly', href: '/', current: pathname === '/' },
     { name: 'Templates', href: '/templates', current: pathname.startsWith('/templates') },
@@ -101,8 +102,8 @@ export default function Content({ children, session }: Props) {
   }
 
   return (
-    <div className="flex h-screen flex-col">
-      {!isTemplatePage && (
+    <div className="flex flex-col">
+      {!hideHeader && (
         <header>
           <div>
             <Disclosure as="nav" className="relative bg-white shadow">
@@ -193,8 +194,8 @@ export default function Content({ children, session }: Props) {
         </header>
       )}
 
-      <main className={`flex-grow overflow-y-auto ${isTemplatePage ? 'h-screen' : ''}`}>
-        <div className="h-full">{children}</div>
+      <main className={`flex-grow overflow-y-scroll ${hideHeader ? 'h-screen' : ''}`}>
+        <div>{children}</div>
       </main>
       <UpgradeDialog open={isUpgradeDialogOpen} onClose={closeUpgradeDialog} />
     </div>
