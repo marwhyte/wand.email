@@ -2,7 +2,7 @@
 
 import { auth } from '@/auth'
 import { db } from '../db'
-import { Plan } from '../types'
+import { BusinessType, Plan } from '../types'
 
 export async function getUsers() {
   const users = await db.selectFrom('users').selectAll().execute()
@@ -43,6 +43,7 @@ export async function addUser(user: {
       created_at: new Date(),
       updated_at: new Date(),
       plan: 'free',
+      is_onboarded: false,
     })
     .returningAll()
     .executeTakeFirst()
@@ -58,6 +59,48 @@ export async function updateUserPlan(userId: string, plan: Plan, stripeCustomerI
     .execute()
 }
 
+export async function updateOnboardingUser({
+  businessType,
+  logoFileId,
+  primaryColor,
+  secondaryColor,
+  themes,
+  isOnboarded,
+}: {
+  businessType?: BusinessType | null
+  logoFileId?: string | null
+  primaryColor?: string | null
+  secondaryColor?: string | null
+  themes?: string[] | null
+  isOnboarded?: boolean
+}) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+
+  const updateFields: {
+    business_type?: BusinessType
+    logo_file_id?: string
+    primary_color?: string
+    secondary_color?: string
+    themes?: string[]
+    is_onboarded?: boolean
+  } = {}
+
+  if (businessType) updateFields.business_type = businessType
+  if (logoFileId) updateFields.logo_file_id = logoFileId
+  if (primaryColor) updateFields.primary_color = primaryColor
+  if (secondaryColor) updateFields.secondary_color = secondaryColor
+  if (themes) updateFields.themes = JSON.stringify(themes) as unknown as string[]
+  if (isOnboarded) updateFields.is_onboarded = isOnboarded
+  await db
+    .updateTable('users')
+    .set({ ...updateFields, updated_at: new Date() })
+    .where('id', '=', session.user.id)
+    .execute()
+}
+
 export async function updateUser(formData: FormData) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -67,7 +110,14 @@ export async function updateUser(formData: FormData) {
   const name = formData.get('name')
   const email = formData.get('email')
 
-  const updateFields: { name?: string; email?: string } = {}
+  const updateFields: {
+    name?: string
+    email?: string
+    business_type?: BusinessType
+    logo_file_id?: string
+    primary_color?: string
+    secondary_color?: string
+  } = {}
   if (name) updateFields.name = name as string
   if (email) updateFields.email = email as string
 

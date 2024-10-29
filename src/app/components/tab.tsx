@@ -38,7 +38,6 @@ type TabProps = ComponentProps<typeof HeadlessTab> & {
 export function Tab({ children, disabled, selected, ...props }: TabProps) {
   return (
     <HeadlessTab
-      {...props}
       disabled={disabled}
       className={clsx(
         'flex items-center justify-center rounded-lg px-2 py-1.5 text-sm font-medium leading-5',
@@ -46,7 +45,8 @@ export function Tab({ children, disabled, selected, ...props }: TabProps) {
         selected
           ? 'bg-white text-zinc-900 dark:bg-zinc-700 dark:text-white'
           : 'text-zinc-600 hover:bg-zinc-200 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-white',
-        disabled && 'cursor-not-allowed opacity-50'
+        disabled && 'cursor-not-allowed opacity-50',
+        props.className
       )}
     >
       {children}

@@ -36,6 +36,36 @@ const config: Config = {
           '600': '#784FFC',
         },
       },
+      keyframes: {
+        progress: {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
+        },
+        gradient: {
+          '0%, 100%': {
+            backgroundPosition: '0% 50%',
+            backgroundSize: '200% 200%',
+          },
+          '50%': {
+            backgroundPosition: '100% 50%',
+            backgroundSize: '200% 200%',
+          },
+        },
+        'grow-width': {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
+        },
+        'shrink-width': {
+          '0%': { width: '100%' },
+          '100%': { width: '0%' },
+        },
+      },
+      animation: {
+        'animate-gradient': 'gradient 8s ease-in-out infinite',
+        'progress-bar': 'progress 0.3s ease-in-out forwards',
+        'grow-width': 'grow-width 0.3s ease-in-out forwards',
+        'shrink-width': 'shrink-width 0.3s ease-in-out forwards',
+      },
     },
   },
   darkMode: 'class',

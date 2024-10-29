@@ -1,0 +1,66 @@
+import { uploadFile } from '@/app/actions/uploadFile'
+import AlertBox from '@/app/components/alert-box'
+import { Button } from '@/app/components/button'
+import Loading from '@/app/components/loading'
+import { File } from '@/lib/database/types'
+import { useRef, useState } from 'react'
+
+type Props = {
+  onUpload: (file: File) => void
+}
+
+const LogoUploader = ({ onUpload }: Props) => {
+  const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    setError(null)
+    const formData = new FormData()
+    formData.append('file', file)
+
+    try {
+      const result = await uploadFile(formData)
+      if (result.success && result.file) {
+        onUpload(result.file)
+      } else {
+        setError(result.error || 'An error occurred while uploading the file.')
+      }
+    } catch (error) {
+      console.error('Upload error:', error)
+      setError('An error occurred while uploading the file.')
+    } finally {
+      setIsUploading(false)
+    }
+  }
+
+  return (
+    <div>
+      <input
+        className="hidden"
+        id="file"
+        name="file"
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        ref={fileInputRef}
+      />
+      <Button color="purple" onClick={() => fileInputRef.current?.click()}>
+        {isUploading ? <Loading height={16} width={16} /> : 'Upload Logo'}
+      </Button>
+      {error && (
+        <div className="mt-2">
+          <AlertBox action={{ onClick: () => setError(null), text: 'Dismiss' }} status="error">
+            {error}
+          </AlertBox>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default LogoUploader

@@ -36,10 +36,14 @@ export async function uploadFile(formData: FormData) {
       return { success: false, error: 'Failed to upload file' }
     }
 
-    // Add file to database
-    await addFile(session.user.id, file.name, key, file.size)
+    // Add file to database and get the file ID
+    const addedFile = await addFile(session.user.id, file.name, key, file.size)
 
-    return { success: true, message: 'File uploaded successfully' }
+    return {
+      success: true,
+      message: 'File uploaded successfully',
+      file: addedFile,
+    }
   } catch (error) {
     console.error('Error uploading file:', error)
     return { success: false, error: 'Failed to upload file' }

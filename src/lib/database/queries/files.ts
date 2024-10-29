@@ -16,6 +16,20 @@ const getCachedFiles = unstable_cache(
   }
 )
 
+export async function getFile(fileId: string) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+  const file = await db
+    .selectFrom('files')
+    .selectAll()
+    .where('id', '=', fileId)
+    .where('user_id', '=', session.user.id)
+    .executeTakeFirst()
+  return file
+}
+
 export async function getFiles() {
   const session = await auth()
   if (!session?.user?.id) {

@@ -28,10 +28,7 @@ export default async function RootLayout({
   const initialUser = await fetchUser()
 
   return (
-    <html
-      suppressHydrationWarning
-      className="text-zinc-950 antialiased dark:bg-zinc-900 dark:bg-zinc-950 dark:text-white"
-    >
+    <html suppressHydrationWarning className="text-zinc-950 antialiased dark:bg-zinc-950 dark:text-white">
       <head>
         <link rel="icon" type="image/png" href="/favicon-48x48.png" sizes="48x48" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />

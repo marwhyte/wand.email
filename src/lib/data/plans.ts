@@ -20,8 +20,8 @@ export const tiers: Tier[] = [
     description: 'For individuals and small projects',
     price: { monthly: '$0', annually: '$0' },
     highlights: [
-      'Emails automatically generated for your brand and needs',
-      'Access to all templates',
+      'Emails customized for your brand and needs',
+      'A large set of templates',
       'Highly customizable editor',
       '5 exports every month',
     ],

@@ -40,16 +40,6 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
 
   const [error, setError] = useState<string | null>(null)
 
-  //   const updateQueryParams = useCallback(() => {
-  //     if (open) {
-  //       const newParams = new URLSearchParams(searchParams.toString())
-  //       newParams.set('upgrade', 'true')
-  //       newParams.set('plan', selectedTier.id)
-  //       newParams.set('annually', annually.toString())
-  //       router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
-  //     }
-  //   }, [open, selectedTier, annually, router, searchParams, pathname])
-
   useEffect(() => {
     const newParams = new URLSearchParams(searchParams.toString())
     setSelectedTier(tiers.find((tier) => tier.id === newParams.get('plan')) || tiers[1])

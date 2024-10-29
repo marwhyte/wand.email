@@ -59,7 +59,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
 
   return (
     <>
-      <Dialog open={open} onClose={onClose}>
+      <Dialog size="xl" open={open} onClose={onClose}>
         <DialogTitle>
           {exportType ? (
             <Button className="-ml-4" plain onClick={() => setExportType(null)}>
@@ -92,9 +92,9 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           )}
           {exportType === 'react' && (
             <div>
-              <Steps onFinish={onClose} steps={[{ name: 'install' }, { name: 'create' }, { name: 'integrate' }]}>
+              <Steps onFinish={onClose} steps={[{ name: 'Install' }, { name: 'Create' }, { name: 'Integrate' }]}>
                 {(currentStep) => {
-                  if (currentStep.name === 'install') {
+                  if (currentStep.name === 'Install') {
                     return (
                       <div>
                         <Heading className="text-center !text-base" level={3}>
@@ -129,7 +129,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                         />
                       </div>
                     )
-                  } else if (currentStep.name === 'create') {
+                  } else if (currentStep.name === 'Create') {
                     return (
                       <div>
                         <Heading className="text-center !text-base" level={3}>
@@ -159,7 +159,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                         </div>
                       </div>
                     )
-                  } else if (currentStep.name === 'integrate') {
+                  } else if (currentStep.name === 'Integrate') {
                     return (
                       <div>
                         <Heading className="text-center !text-base" level={3}>
