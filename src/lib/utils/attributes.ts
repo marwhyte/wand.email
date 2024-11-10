@@ -142,11 +142,11 @@ export function generateColumnProps(column: ColumnBlock): OmitChildren<React.Com
     valign: column.attributes.valign,
     align: column.attributes.align,
     style: {
-      ...applyCommonAttributes(column.attributes),
       width: width,
       borderStyle: column.attributes.borderStyle,
       borderWidth: column.attributes.borderWidth,
       borderColor: column.attributes.borderColor,
+      borderSpacing: column.attributes.borderSpacing,
     },
   }
 }

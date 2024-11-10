@@ -4,11 +4,9 @@ import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
-import { Bars3Icon, PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
+import { Bars3Icon, PlusIcon } from '@heroicons/react/20/solid'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
-import { Divider } from '../divider'
-import { Text } from '../text'
 
 interface RowEditorProps {
   row: RowBlock
@@ -272,72 +270,6 @@ export default function RowEditor({
               </Fragment>
             ))}
           </div>
-
-          {selectedColumn && (
-            <div className="mt-4 space-y-4">
-              <div className="flex w-full items-center justify-between">
-                <Text>Column {row.columns.indexOf(selectedColumn) + 1}</Text>
-                <Button plain onClick={() => handleDeleteColumn(selectedColumnId)}>
-                  <TrashIcon className="h-4 w-4 cursor-pointer !text-red-500" />
-                </Button>
-              </div>
-              <Divider className="!mt-1" />
-              <PaddingForm
-                padding={{
-                  top: selectedColumn?.attributes.paddingTop ?? selectedColumn?.attributes.padding ?? '0px',
-                  right: selectedColumn?.attributes.paddingRight ?? selectedColumn?.attributes.padding ?? '0px',
-                  bottom: selectedColumn?.attributes.paddingBottom ?? selectedColumn?.attributes.padding ?? '0px',
-                  left: selectedColumn?.attributes.paddingLeft ?? selectedColumn?.attributes.padding ?? '0px',
-                }}
-                onChange={(paddingValues) =>
-                  handlePaddingChange(selectedColumnId, paddingValues as Partial<ColumnBlockAttributes>)
-                }
-              />
-
-              <Field>
-                <Label>Column Border</Label>
-                <div className="flex gap-2">
-                  <Select
-                    value={selectedColumn?.attributes.borderStyle || 'solid'}
-                    onChange={(e) => handleBorderChange(selectedColumnId, 'borderStyle', e.target.value)}
-                  >
-                    <option value="solid">Solid</option>
-                    <option value="dashed">Dashed</option>
-                    <option value="dotted">Dotted</option>
-                  </Select>
-                  <Input
-                    type="number"
-                    value={selectedColumn?.attributes.borderWidth?.replace('px', '') || ''}
-                    onChange={(e) => handleBorderChange(selectedColumnId, 'borderWidth', `${e.target.value}px`)}
-                    placeholder="Width"
-                  />
-                  <Input
-                    type="color"
-                    value={selectedColumn?.attributes.borderColor || ''}
-                    onChange={(e) => handleBorderChange(selectedColumnId, 'borderColor', e.target.value)}
-                  />
-                </div>
-              </Field>
-
-              <Field>
-                <Label>Column Background Color</Label>
-                <Input
-                  type="color"
-                  value={selectedColumn?.attributes.backgroundColor || ''}
-                  onChange={(e) => onColumnAttributeChange(selectedColumnId, { backgroundColor: e.target.value })}
-                />
-              </Field>
-
-              <Field>
-                <Label>Column Align</Label>
-                <div className="flex gap-2">
-                  <Button onClick={() => onColumnAttributeChange(selectedColumnId, { align: 'left' })}>Left</Button>
-                  <Button onClick={() => onColumnAttributeChange(selectedColumnId, { align: 'center' })}>Center</Button>
-                  <Button onClick={() => onColumnAttributeChange(selectedColumnId, { align: 'right' })}>Right</Button>
-                </div>
-              </Field>
-            </div>
-          )}
         </DisclosureBody>
       </Disclosure>
     </div>
