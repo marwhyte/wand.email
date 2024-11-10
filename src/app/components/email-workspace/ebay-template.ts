@@ -1036,7 +1036,9 @@ export const ebayTemplate: Email = {
           id: 'feedback-left-column',
           type: 'column',
           gridColumns: 6,
-          attributes: {},
+          attributes: {
+            align: 'right',
+          },
           blocks: [
             {
               id: 'feedback-yes',
