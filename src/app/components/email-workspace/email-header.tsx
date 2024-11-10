@@ -21,7 +21,7 @@ import {
 import { render } from '@react-email/components'
 import debounce from 'lodash.debounce'
 import { Session } from 'next-auth'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { Badge } from '../badge'
 import { Heading } from '../heading'
@@ -49,6 +49,8 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
   const [signUpAction, setSignUpAction] = useState<'send' | 'save' | 'export'>('send')
   const [showBackWarningDialog, setShowBackWarningDialog] = useState(false)
   const [showExportDialog, setShowExportDialog] = useState(false)
+  const searchParams = useSearchParams()
+  const noSave = searchParams.get('nosave') === 'true'
 
   const deviceOptions: { name: React.ReactNode; value: 'desktop' | 'mobile' }[] = [
     { name: <ComputerDesktopIcon className="h-5 w-5" />, value: 'desktop' },
@@ -134,14 +136,18 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
       const save = debounce((email: Email) => {
         if (project) {
           setEmailCopy(email)
-          updateProject(project.id.toString(), { content: email })
+          if (!noSave) {
+            updateProject(project.id.toString(), { content: email })
+          }
         } else {
-          sessionStorage.setItem('template_email', JSON.stringify(email))
+          if (!noSave) {
+            sessionStorage.setItem('template_email', JSON.stringify(email))
+          }
         }
       }, 1500)
       save(updatedEmail)
     },
-    [project]
+    [project, noSave]
   )
 
   useEffect(() => {
@@ -151,7 +157,7 @@ const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Pr
   }, [debouncedSave, email, emailCopy])
 
   useEffect(() => {
-    if (!project && !sessionStorage.getItem('template_email')) {
+    if (!project && !sessionStorage.getItem('template_email') && !noSave) {
       sessionStorage.setItem('template_email', JSON.stringify(email))
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

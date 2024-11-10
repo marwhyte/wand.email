@@ -19,8 +19,13 @@ import 'react-quill/dist/quill.snow.css'
 import { v4 as uuidv4 } from 'uuid' // Add this import for generating new IDs
 import Range from '../range'
 import RowEditor from './row-editor'
+import SocialsEditor from './socials-editor'
 
 enum Options {
+  BORDER_RADIUS = 'border-radius',
+  BORDER_STYLE = 'border-style',
+  BORDER_WIDTH = 'border-width',
+  BORDER_COLOR = 'border-color',
   TEXT = 'text',
   FONT_SIZE = 'font-size',
   FONT_WEIGHT = 'font-weight',
@@ -39,6 +44,8 @@ const BlockEditor = () => {
 
   const optionsForItem = () => {
     switch (currentBlock?.type) {
+      case 'divider':
+        return [Options.BORDER_STYLE, Options.BORDER_WIDTH, Options.BORDER_COLOR, Options.PADDING]
       case 'text':
         return [
           Options.FONT_SIZE,
@@ -50,9 +57,18 @@ const BlockEditor = () => {
           Options.PADDING,
         ]
       case 'image':
-        return [Options.WIDTH, Options.PADDING, Options.SRC]
+        return [Options.WIDTH, Options.BORDER_RADIUS, Options.PADDING, Options.SRC]
       case 'button':
-        return [Options.TEXT, Options.HREF, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.PADDING]
+        return [
+          Options.TEXT,
+          Options.HREF,
+          Options.TEXT_COLOR,
+          Options.BACKGROUND_COLOR,
+          Options.PADDING,
+          Options.BORDER_STYLE,
+          Options.BORDER_WIDTH,
+          Options.BORDER_COLOR,
+        ]
       case 'heading':
         return [
           Options.TEXT,
@@ -91,7 +107,11 @@ const BlockEditor = () => {
   )
 
   const handleChange = useCallback(
-    (attributes: Partial<CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes>) => {
+    (
+      attributes: Partial<
+        CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes | SocialsBlockAttributes
+      >
+    ) => {
       if (currentBlock) {
         const updatedBlock = {
           ...currentBlock,
@@ -404,6 +424,50 @@ const BlockEditor = () => {
         </Field>
       )}
 
+      {options.includes(Options.BORDER_RADIUS) && (
+        <Field>
+          <Label>Border Radius</Label>
+          <Input
+            value={currentBlock?.attributes.borderRadius || ''}
+            onChange={(e) => handleChange({ borderRadius: e.target.value })}
+          />
+        </Field>
+      )}
+      {options.includes(Options.BORDER_STYLE) && currentBlock && 'borderStyle' in currentBlock.attributes && (
+        <Field>
+          <Label>Border Style</Label>
+          <Select
+            key={`borderStyle-${currentBlock?.id}`}
+            value={currentBlock?.attributes.borderStyle || ''}
+            onChange={(e) => handleChange({ borderStyle: e.target.value as DividerBlockAttributes['borderStyle'] })}
+          >
+            <option value="solid">Solid</option>
+            <option value="dashed">Dashed</option>
+            <option value="dotted">Dotted</option>
+          </Select>
+        </Field>
+      )}
+      {options.includes(Options.BORDER_WIDTH) && currentBlock && 'borderWidth' in currentBlock.attributes && (
+        <Field>
+          <Label>Border Width</Label>
+          <Input
+            key={`borderWidth-${currentBlock?.id}`}
+            type="number"
+            value={currentBlock?.attributes.borderWidth?.replace('px', '') || ''}
+            onChange={(e) => handleChange({ borderWidth: e.target.value + 'px' })}
+          />
+        </Field>
+      )}
+      {options.includes(Options.BORDER_COLOR) && currentBlock && 'borderColor' in currentBlock.attributes && (
+        <Field>
+          <Label>Border Color</Label>
+          <ColorInput
+            key={`borderColor-${currentBlock?.id}`}
+            value={currentBlock?.attributes.borderColor || ''}
+            onChange={(e) => handleChange({ borderColor: e })}
+          />
+        </Field>
+      )}
       {options.includes(Options.PADDING) && (
         <PaddingForm
           padding={{
@@ -429,6 +493,13 @@ const BlockEditor = () => {
           onColumnWidthChange={handleColumnWidthChange}
           onColumnAttributeChange={handleColumnAttributeChange}
           onRowAttributeChange={handleRowAttributeChange}
+        />
+      )}
+      {currentBlock?.type === 'socials' && (
+        <SocialsEditor
+          socialLinks={currentBlock.attributes.socialLinks}
+          iconFolder={currentBlock.attributes.folder}
+          onChange={(updates) => handleChange(updates as Partial<SocialsBlockAttributes>)}
         />
       )}
     </div>

@@ -1,4 +1,4 @@
-import { Body, Button, Column, Container, Heading, Img, Link, Row, Text } from '@react-email/components'
+import { Body, Button, Column, Container, Heading, Hr, Img, Link, Row, Text } from '@react-email/components'
 
 type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
 
@@ -22,6 +22,7 @@ export const getAdditionalHeadingStyles = (
     fontFamily: attributes.fontFamily,
     letterSpacing: attributes.letterSpacing,
     textIndent: attributes.textIndent,
+    lineHeight: '100%',
   }
 }
 
@@ -30,6 +31,12 @@ export const getAdditionalImageStyles = (
 ): React.ComponentProps<typeof Img>['style'] => {
   return {
     objectFit: 'contain',
+    borderRadius: attributes.borderRadius,
+    padding: 0,
+    marginLeft: attributes.paddingLeft,
+    marginRight: attributes.paddingRight,
+    marginTop: attributes.paddingTop,
+    marginBottom: attributes.paddingBottom,
   }
 }
 
@@ -38,17 +45,15 @@ export const getAdditionalButtonStyles = (
 ): React.ComponentProps<typeof Button>['style'] => {
   return {
     display: 'inline-block',
-    backgroundColor: '#3b82f6',
-    color: '#ffffff',
-    paddingTop: '12px',
-    paddingBottom: '12px',
-    paddingLeft: '20px',
-    paddingRight: '20px',
-    fontSize: '16px',
-    fontWeight: 'bold',
-    textDecoration: 'none',
-    borderRadius: '4px',
-    border: 'none',
+    backgroundColor: attributes.backgroundColor,
+    color: attributes.color,
+    fontSize: attributes.fontSize,
+    fontWeight: attributes.fontWeight,
+    textDecoration: attributes.textDecoration,
+    borderRadius: attributes.borderRadius,
+    borderWidth: attributes.borderWidth,
+    borderStyle: attributes.borderStyle,
+    borderColor: attributes.borderColor,
     cursor: 'pointer',
   }
 }
@@ -65,7 +70,6 @@ export function applyCommonAttributes(attributes: CommonAttributes): React.CSSPr
     'height',
     'backgroundColor',
     'borderRadius',
-    'border',
     'textAlign',
     'verticalAlign',
     'fontSize',
@@ -87,10 +91,10 @@ export const getAdditionalLinkStyles = (
   attributes: LinkBlockAttributes
 ): React.ComponentProps<typeof Link>['style'] => {
   return {
-    color: '#3b82f6',
-    textDecoration: 'underline',
-    fontSize: '16px',
-    fontWeight: 'normal',
+    color: attributes.color || '#3b82f6',
+    textDecoration: attributes.textDecoration || 'underline',
+    fontSize: attributes.fontSize || '16px',
+    fontWeight: attributes.fontWeight || 'normal',
     cursor: 'pointer',
   }
 }
@@ -201,6 +205,30 @@ export function generateLinkProps(block: LinkBlock): OmitChildren<React.Componen
   }
 }
 
+export const getAdditionalDividerStyles = (
+  attributes: DividerBlockAttributes
+): React.ComponentProps<typeof Hr>['style'] => {
+  return {
+    borderTopStyle: attributes.borderStyle,
+    borderTopWidth: attributes.borderWidth,
+    borderTopColor: attributes.borderColor,
+    padding: 0,
+    marginLeft: attributes.paddingLeft,
+    marginRight: attributes.paddingRight,
+    marginTop: attributes.paddingTop,
+    marginBottom: attributes.paddingBottom,
+  }
+}
+
+export function generateDividerProps(block: DividerBlock): OmitChildren<React.ComponentProps<typeof Hr>> {
+  return {
+    style: {
+      ...applyCommonAttributes(block.attributes),
+      ...getAdditionalDividerStyles(block.attributes),
+    },
+  }
+}
+
 export function generateBlockProps<T extends EmailBlock>(
   block: T
 ): T extends TextBlock
@@ -213,7 +241,9 @@ export function generateBlockProps<T extends EmailBlock>(
         ? OmitChildren<React.ComponentProps<typeof Button>>
         : T extends LinkBlock
           ? OmitChildren<React.ComponentProps<typeof Link>>
-          : never {
+          : T extends DividerBlock
+            ? OmitChildren<React.ComponentProps<typeof Hr>>
+            : never {
   switch (block.type) {
     case 'text':
       return generateTextProps(block as TextBlock) as any
@@ -225,6 +255,8 @@ export function generateBlockProps<T extends EmailBlock>(
       return generateButtonProps(block as ButtonBlock) as any
     case 'link':
       return generateLinkProps(block as LinkBlock) as any
+    case 'divider':
+      return generateDividerProps(block as DividerBlock) as any
     default:
       return {} as never
   }

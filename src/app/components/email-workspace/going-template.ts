@@ -44,12 +44,16 @@ const generateItems = (): RowBlock[] => {
     attributes: {
       verticalAlign: 'top',
       valign: 'top',
+      paddingTop: '15px',
+      paddingRight: '15px',
+      paddingBottom: '15px',
+      paddingLeft: '15px',
     },
     columns: [
       {
         id: uuidv4(),
         type: 'column' as const,
-        attributes: { paddingBottom: '5px', align: 'center' },
+        attributes: { align: 'center' },
         gridColumns: 4,
         blocks: [
           {
@@ -68,10 +72,6 @@ const generateItems = (): RowBlock[] => {
         type: 'column',
         attributes: {
           valign: 'top',
-          paddingTop: '15px',
-          paddingRight: '15px',
-          paddingBottom: '15px',
-          paddingLeft: '15px',
         },
         gridColumns: 8,
         blocks: [
@@ -124,7 +124,7 @@ const generateItems = (): RowBlock[] => {
 const createSocialIcon = (icon: string, href: string) => ({
   id: uuidv4(),
   type: 'column',
-  attributes: { display: 'inline-block', paddingTop: '0', paddingRight: '8px', paddingBottom: '0', paddingLeft: '8px' },
+  attributes: { display: 'inline-block' },
   gridColumns: 12,
   blocks: [
     {
@@ -170,16 +170,17 @@ export const goingTemplate: Email = {
           backgroundColor: '#D7FFC2',
         },
       },
-      attributes: {},
+      attributes: {
+        paddingTop: '20px',
+        paddingRight: '15px',
+        paddingBottom: '20px',
+        paddingLeft: '15px',
+      },
       columns: [
         {
           id: uuidv4(),
           type: 'column',
           attributes: {
-            paddingTop: '20px',
-            paddingRight: '15px',
-            paddingBottom: '20px',
-            paddingLeft: '15px',
             align: 'center',
           },
           gridColumns: 12,
@@ -206,8 +207,6 @@ export const goingTemplate: Email = {
               attributes: {
                 href: '/',
                 color: '#004449',
-                display: 'inline-block',
-                textDecoration: 'none',
                 paddingTop: '0',
                 paddingRight: '0',
                 paddingBottom: '0',
@@ -223,7 +222,6 @@ export const goingTemplate: Email = {
                 width: '16px',
                 height: '16px',
                 display: 'inline-block',
-                border: 'none',
                 textDecoration: 'none',
                 alt: 'plane logo',
               },
@@ -447,7 +445,7 @@ export const goingTemplate: Email = {
         {
           id: uuidv4(),
           type: 'column',
-          attributes: { maxWidth: '480px', textAlign: 'center' },
+          attributes: {},
           gridColumns: 12,
           blocks: [
             {
@@ -510,22 +508,22 @@ export const goingTemplate: Email = {
           paddingLeft: '0',
         },
       },
-      attributes: {},
+      attributes: {
+        paddingTop: '24px',
+        paddingRight: '0',
+        paddingBottom: '0',
+        paddingLeft: '0',
+        textAlign: 'center',
+        fontSize: '12px',
+        lineHeight: '16px',
+        color: '#004449',
+        fontStyle: 'italic',
+      },
       columns: [
         {
           id: uuidv4(),
           type: 'column',
-          attributes: {
-            paddingTop: '24px',
-            paddingRight: '0',
-            paddingBottom: '0',
-            paddingLeft: '0',
-            textAlign: 'center',
-            fontSize: '12px',
-            lineHeight: '16px',
-            color: '#004449',
-            fontStyle: 'italic',
-          },
+          attributes: {},
           gridColumns: 12,
           blocks: [
             {

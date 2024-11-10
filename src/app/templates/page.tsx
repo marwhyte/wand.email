@@ -13,15 +13,24 @@ export default async function TemplatesPage() {
         <TemplatesList session={session} user={user} />
       </div>
       <div className="bg-zinc-100">
-        <ul
-          role="list"
-          className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 sm:grid-cols-2 sm:px-6 md:grid-cols-3 lg:grid-cols-4 lg:px-8"
-        >
+        <ul role="list" className="mx-auto flex max-w-7xl flex-wrap gap-6 px-4 py-8 sm:px-6 lg:px-8">
           <TemplateCard
             href="/templates/going"
-            image="/going/demo.png"
+            name="going"
             title="Going"
             description="Marketing emails for flight deals"
+          />
+          <TemplateCard
+            href="/templates/ebay"
+            name="ebay"
+            title="Ebay"
+            description="Marketing emails for flight deals"
+          />
+          <TemplateCard
+            href="/templates/nike-verification"
+            name="nike-verification"
+            title="Nike Verification"
+            description="Verification code email"
           />
         </ul>
       </div>

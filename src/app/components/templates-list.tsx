@@ -6,9 +6,87 @@ import { Session } from 'next-auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
+import { convertImageToEmail } from '../actions/generateTemplateFromImage'
 import { useQueryParam } from '../hooks/useQueryParam'
 import { Divider } from './divider'
 import { Heading } from './heading'
+
+import { useState } from 'react'
+
+export const TemplateGeneratorForm = () => {
+  const [result, setResult] = useState<string>('')
+  const [templateName, setTemplateName] = useState<string>('')
+  const [imageNames, setImageNames] = useState<string[]>([])
+  const [loading, setLoading] = useState<boolean>(false)
+
+  return (
+    <form
+      onSubmit={async (e) => {
+        setLoading(true)
+        e.preventDefault()
+        const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement
+        if (!fileInput.files?.length) return
+
+        const file = fileInput.files[0]
+        if (!file.type.startsWith('image/')) {
+          alert('Please upload an image file')
+          return
+        }
+
+        try {
+          const formData = new FormData()
+          formData.append('file', file)
+
+          const response = await convertImageToEmail(formData, templateName, imageNames)
+          setResult(response)
+        } catch (error) {
+          console.error('Error processing image:', error)
+          alert('Failed to process image')
+        } finally {
+          setLoading(false)
+        }
+      }}
+      className="mt-6"
+    >
+      <div className="flex flex-col items-center gap-4">
+        <input
+          type="text"
+          value={templateName}
+          onChange={(e) => setTemplateName(e.target.value)}
+          placeholder="Template Name"
+          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
+          required
+        />
+        <input
+          type="text"
+          value={imageNames.join(', ')}
+          onChange={(e) => setImageNames(e.target.value.split(',').map((name) => name.trim()))}
+          placeholder="Image Names (comma-separated)"
+          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
+        />
+        <input
+          type="file"
+          accept="image/*"
+          className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
+        />
+        <button
+          disabled={loading}
+          type="submit"
+          className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+        >
+          {loading ? 'Generating...' : 'Generate Template'}
+        </button>
+
+        {result && (
+          <div className="mt-4 w-full max-w-2xl">
+            <h3 className="mb-2 text-lg font-semibold">Generated Template:</h3>
+            <pre className="whitespace-pre-wrap rounded-md bg-gray-100 p-4 text-sm">{result}</pre>
+          </div>
+        )}
+      </div>
+    </form>
+  )
+}
 
 enum TemplateTypes {
   personalized = 'personalized',
@@ -143,6 +221,7 @@ const TemplatesList = ({ session, user }: Props) => {
           </TabList>
         </TabGroup>
       </div>
+      {process.env.NODE_ENV === 'development' && <TemplateGeneratorForm />}
     </div>
   )
 }
