@@ -20,12 +20,7 @@ export default async function TemplatesPage() {
             title="Going"
             description="Marketing emails for flight deals"
           />
-          <TemplateCard
-            href="/templates/ebay"
-            name="ebay"
-            title="Ebay"
-            description="Marketing emails for flight deals"
-          />
+          <TemplateCard href="/templates/ebay" name="ebay" title="Ebay" description="Back to school shopping" />
           <TemplateCard
             href="/templates/nike-verification"
             name="nike-verification"
