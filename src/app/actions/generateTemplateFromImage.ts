@@ -17,6 +17,10 @@ An email template must include:
   width: string                // typically "600px"
   color: string                // Base text color (hex)
   bgColor: string              // Base background color (hex)
+  bgImage?: string             // Optional background image (use getPhotoUrl(imageName, templateName))
+  bgPosition?: string          // Optional background position
+  bgSize?: string              // Optional background size
+  bgRepeat?: string            // Optional background repeat
   rows: RowBlock[]             // Array of row blocks
 }
 \`\`\`
@@ -267,13 +271,12 @@ export async function convertImageToEmail(
 
     console.log('result', result)
 
-    // Parse the result to ensure it's valid JSON
+    // Parse the result and evaluate it as a TypeScript object
     try {
       const emailTemplate = JSON.parse(result)
       return emailTemplate
     } catch (error) {
       console.error('Error parsing OpenAI response:', error)
-
       return result
     }
   } catch (error) {

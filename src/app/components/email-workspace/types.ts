@@ -4,6 +4,10 @@ type Email = {
   preview: string
   fontFamily: string
   bgColor: string
+  bgImage?: string
+  bgPosition?: string
+  bgRepeat?: string
+  bgSize?: string
   color: string
   width: string
   rows: RowBlock[]
@@ -98,6 +102,7 @@ type CommonAttributes = {
   width?: string
   maxWidth?: string
   height?: string
+  background?: string
   backgroundColor?: string
   backgroundImage?: string
   backgroundSize?: string

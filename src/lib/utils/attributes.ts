@@ -68,7 +68,12 @@ export function applyCommonAttributes(attributes: CommonAttributes): React.CSSPr
     'width',
     'maxWidth',
     'height',
+    'background',
     'backgroundColor',
+    'backgroundImage',
+    'backgroundPosition',
+    'backgroundSize',
+    'backgroundRepeat',
     'borderRadius',
     'textAlign',
     'verticalAlign',
@@ -116,8 +121,10 @@ export function generateRowProps(row: RowBlock): OmitChildren<React.ComponentPro
   return {
     style: {
       ...applyCommonAttributes(row.attributes),
+      backgroundImage: row.attributes.backgroundImage,
     },
     align: row.attributes.align,
+    bgcolor: row.attributes.backgroundColor ?? 'transparent',
   }
 }
 
@@ -129,6 +136,10 @@ export function generateBodyProps(
     style: {
       margin: 0,
       backgroundColor: skipBackgroundColor ? undefined : email.bgColor,
+      backgroundImage: email.bgImage ? `url(${email.bgImage})` : undefined,
+      backgroundSize: email.bgSize ? email.bgSize : undefined,
+      backgroundPosition: email.bgPosition ? email.bgPosition : undefined,
+      backgroundRepeat: email.bgRepeat ? email.bgRepeat : undefined,
       color: email.color,
       fontFamily: email.fontFamily,
     },

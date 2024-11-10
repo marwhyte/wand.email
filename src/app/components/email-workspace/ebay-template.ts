@@ -13,6 +13,10 @@ export const ebayTemplate: Email = {
       id: '5992c372-682d-412d-a594-3dede81de487',
       type: 'row',
       attributes: {
+        backgroundImage: getPhotoUrl('bg-gradient.png', 'ebay'),
+        backgroundPosition: 'left bottom',
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
         paddingTop: '24px',
         paddingLeft: '16px',
         paddingRight: '16px',

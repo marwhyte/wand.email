@@ -27,6 +27,7 @@ export default async function TemplatesPage() {
             title="Nike Verification"
             description="Verification code email"
           />
+          <TemplateCard href="/templates/stripe" name="stripe" title="Stripe" description="Product updates" />
         </ul>
       </div>
     </div>

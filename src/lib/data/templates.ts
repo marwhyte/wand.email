@@ -1,6 +1,7 @@
 import { ebayTemplate } from '@/app/components/email-workspace/ebay-template'
 import { goingTemplate } from '@/app/components/email-workspace/going-template'
 import { nikeVerificationTemplate } from '@/app/components/email-workspace/nike-verification-template'
+import { stripeTemplate } from '@/app/components/email-workspace/stripe-template'
 import { v4 as uuidv4 } from 'uuid'
 
 export const templates = [
@@ -15,11 +16,13 @@ export const getTemplateName = (id: string) => {
       return 'Going'
     case 'ebay':
       return 'Ebay'
+    case 'stripe':
+      return 'Stripe'
     default:
       break
   }
 }
-export const getTemplate = (id: string) => {
+export const getTemplate = (id: string): Email | null => {
   let template = null
   switch (id) {
     case 'going':
@@ -30,6 +33,9 @@ export const getTemplate = (id: string) => {
       break
     case 'nike-verification':
       template = nikeVerificationTemplate
+      break
+    case 'stripe':
+      template = stripeTemplate
       break
     default:
       break
