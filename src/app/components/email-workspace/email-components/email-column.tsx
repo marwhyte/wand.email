@@ -1,6 +1,7 @@
 import { generateColumnProps } from '@/lib/utils/attributes'
 import { ArrowDownCircleIcon, ArrowUpCircleIcon } from '@heroicons/react/20/solid'
 import { Column } from '@react-email/components'
+import { useSearchParams } from 'next/navigation'
 import React, { useRef } from 'react'
 import { useDrop } from 'react-dnd'
 import EmailBlock from './email-block'
@@ -34,6 +35,8 @@ export default function EmailColumn({
   onBlockDrop,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
+  const searchParams = useSearchParams()
+  const mobileView = searchParams.get('mobileView') === 'true'
 
   const handleColumnClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -62,7 +65,7 @@ export default function EmailColumn({
 
   return (
     <Column
-      {...generateColumnProps(column)}
+      {...generateColumnProps(column, mobileView)}
       className={`${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
       // @ts-ignore

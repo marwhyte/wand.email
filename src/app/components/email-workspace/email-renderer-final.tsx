@@ -80,7 +80,21 @@ export const EmailContent = ({ email }: { email: Email }) => {
 const EmailRendererFinal = ({ email }: Props) => {
   return (
     <Html>
-      <Head />
+      <Head>
+        <style>{`
+          .mobile-full-width {
+            display: inline-block;
+          }
+
+          @media screen and (max-width: 739px) {
+            .mobile-full-width {
+              display: inline-block !important;
+              width: 100% !important;
+              max-width: 100% !important;
+            }
+          }
+        `}</style>
+      </Head>
       <Preview>{email.preview}</Preview>
       <Body {...generateBodyProps(email)}>
         <EmailContent email={email} />

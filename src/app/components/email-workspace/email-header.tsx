@@ -34,14 +34,15 @@ type Props = {
   setMobileView: (mobileView: boolean) => void
   project?: Project
   monthlyExportCount: number | null
+  mobileView: boolean
 }
 
-const EmailHeader = ({ session, project, setMobileView, monthlyExportCount }: Props) => {
+const EmailHeader = ({ session, project, setMobileView, monthlyExportCount, mobileView }: Props) => {
   const { email, setEmail } = useEmail()
   const [emailCopy, setEmailCopy] = useState(email)
   const [stepType, setStepType] = useState<'login' | 'signup'>('signup')
   const router = useRouter()
-  const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>('desktop')
+  const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>(mobileView ? 'mobile' : 'desktop')
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [showSignUpDialog, setShowSignUpDialog] = useState(false)
   const [showProjectDialog, setShowProjectDialog] = useState(false)

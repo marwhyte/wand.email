@@ -1,7 +1,7 @@
 'use client'
 
+import { useQueryParam } from '@/app/hooks/useQueryParam'
 import { Session } from 'next-auth'
-import { useState } from 'react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import EmailEditor from './email-editor'
@@ -15,9 +15,11 @@ type Props = {
 }
 
 export default function Workspace({ session, project, monthlyExportCount }: Props) {
-  const [mobileView, setMobileView] = useState(false)
-
-  console.log(mobileView)
+  const [mobileView, setMobileView] = useQueryParam<boolean>(
+    'mobileView',
+    false,
+    (value) => value === 'true' || value === 'false'
+  )
 
   return (
     <DndProvider backend={HTML5Backend}>
@@ -27,6 +29,7 @@ export default function Workspace({ session, project, monthlyExportCount }: Prop
           session={session}
           setMobileView={setMobileView}
           monthlyExportCount={monthlyExportCount}
+          mobileView={mobileView}
         />
         <div className="flex h-full w-full flex-row overflow-hidden" style={{ height: 'calc(100vh - 65px)' }}>
           <EmailRenderer mobileView={mobileView} />

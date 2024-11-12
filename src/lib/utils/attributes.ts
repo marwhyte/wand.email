@@ -146,14 +146,35 @@ export function generateBodyProps(
   }
 }
 
-export function generateColumnProps(column: ColumnBlock): OmitChildren<React.ComponentProps<typeof Column>> {
-  const width = `${(column.gridColumns / 12) * 100}%`
+export function generateColumnProps(
+  column: ColumnBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Column>> {
+  const desktopWidth = `${(column.gridColumns / 12) * 100}%`
+  const mobileWidth = column.mobileGridColumns ? `${(column.mobileGridColumns / 12) * 100}%` : desktopWidth
+
+  if (mobileView) {
+    return {
+      valign: column.attributes.valign,
+      align: column.attributes.align,
+      style: {
+        display: 'inline-block',
+        width: mobileWidth,
+        maxWidth: mobileWidth,
+        borderStyle: column.attributes.borderStyle,
+        borderWidth: column.attributes.borderWidth,
+        borderColor: column.attributes.borderColor,
+        borderSpacing: column.attributes.borderSpacing,
+      },
+    }
+  }
 
   return {
     valign: column.attributes.valign,
     align: column.attributes.align,
+    className: column.mobileGridColumns === 12 && column.gridColumns !== 12 ? 'mobile-full-width' : undefined,
     style: {
-      width: width,
+      width: desktopWidth,
       borderStyle: column.attributes.borderStyle,
       borderWidth: column.attributes.borderWidth,
       borderColor: column.attributes.borderColor,

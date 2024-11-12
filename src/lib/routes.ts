@@ -7,6 +7,7 @@ export const PUBLIC_ROUTES = [
   ROOT,
   LOGIN,
   SIGNUP,
+  '/onboarding',
   '/api/auth/callback/google',
   '/api/stripe-webhook',
   '/api',

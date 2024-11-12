@@ -6,7 +6,7 @@ export const stripeTemplate: Email = {
   preview: 'Product news from Stripe Tour New York',
   fontFamily: 'Arial, sans-serif',
   width: '100%',
-  color: '#000000',
+  color: '#0a2540',
   bgColor: 'transparent',
   rows: [
     {
@@ -14,8 +14,7 @@ export const stripeTemplate: Email = {
       type: 'row',
       attributes: {
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
         paddingTop: '24px',
         paddingBottom: '32px',
         paddingLeft: '16px',
@@ -44,10 +43,10 @@ export const stripeTemplate: Email = {
               type: 'image',
               content: '',
               attributes: {
-                src: getPhotoUrl('stripe-logo.png', 'stripe'),
+                src: getPhotoUrl('stripe-logo-blue.png', 'stripe'),
                 alt: 'Stripe Logo',
-                width: '80px',
-                paddingBottom: '40px',
+                width: '60px',
+                paddingBottom: '16px',
               },
             },
             {
@@ -56,9 +55,9 @@ export const stripeTemplate: Email = {
               content: 'The Update',
               attributes: {
                 as: 'h1',
-                fontSize: '64px',
+                fontSize: '72px',
                 fontWeight: 'bold',
-                color: '#000000',
+                color: '#0a2540',
                 paddingBottom: '16px',
               },
             },
@@ -67,10 +66,10 @@ export const stripeTemplate: Email = {
               type: 'text',
               content: 'November 2024',
               attributes: {
-                fontSize: '24px',
-                color: '#666666',
+                fontSize: '18px',
+                color: '#2e3a55',
                 paddingTop: '0',
-                paddingBottom: '32px',
+                paddingBottom: '28px',
                 paddingLeft: '0',
                 paddingRight: '0',
                 lineHeight: '1.5',
@@ -96,17 +95,16 @@ export const stripeTemplate: Email = {
       id: 'product-news-header',
       type: 'row',
       attributes: {
-        paddingTop: '40px',
+        paddingTop: '36px',
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -124,8 +122,8 @@ export const stripeTemplate: Email = {
                 as: 'h2',
                 fontSize: '32px',
                 fontWeight: 'bold',
-                color: '#000000',
-                paddingBottom: '16px',
+                color: '#0a2540',
+                paddingBottom: '12px',
               },
             },
             {
@@ -134,10 +132,10 @@ export const stripeTemplate: Email = {
               content:
                 'We announced 45+ new product updates, including new payment methods and partnerships to help you increase your revenue globally and new embedded components for Issuing and Treasury.',
               attributes: {
-                fontSize: '16px',
-                color: '#666666',
+                fontSize: '20px',
+                color: '#425466',
                 paddingTop: '0',
-                paddingBottom: '24px',
+                paddingBottom: '20px',
                 paddingLeft: '0',
                 paddingRight: '0',
                 lineHeight: '1.5',
@@ -152,12 +150,20 @@ export const stripeTemplate: Email = {
                 backgroundColor: '#635BFF',
                 color: '#FFFFFF',
                 borderRadius: '24px',
-                paddingTop: '12px',
-                paddingBottom: '12px',
-                paddingLeft: '24px',
-                paddingRight: '24px',
+                paddingTop: '4px',
+                paddingBottom: '4px',
+                paddingLeft: '16px',
+                paddingRight: '16px',
                 fontSize: '14px',
                 fontWeight: 'bold',
+              },
+            },
+            {
+              id: 'product-news-divider',
+              type: 'divider',
+              attributes: {
+                paddingTop: '48px',
+                paddingBottom: '48px',
               },
             },
             {
@@ -166,10 +172,10 @@ export const stripeTemplate: Email = {
               content: 'Product news',
               attributes: {
                 as: 'h2',
-                fontSize: '48px',
+                fontSize: '32px',
                 fontWeight: 'bold',
-                color: '#1A1F36',
-                paddingBottom: '32px',
+                color: '#0a2540',
+                paddingBottom: '24px',
               },
             },
           ],
@@ -184,13 +190,12 @@ export const stripeTemplate: Email = {
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -198,16 +203,20 @@ export const stripeTemplate: Email = {
           id: 'payment-choices-image-col',
           type: 'column',
           gridColumns: 6,
-          attributes: {},
+          mobileGridColumns: 12,
+          attributes: {
+            valign: 'top',
+          },
           blocks: [
             {
               id: 'payment-choices-image',
               type: 'image',
               content: '',
               attributes: {
+                paddingBottom: '24px',
                 src: getPhotoUrl('payment-choices.png', 'stripe'),
                 alt: 'Instant Bank Payments interface example',
-                width: '100%',
+                width: '1.5',
                 borderRadius: '16px',
               },
             },
@@ -217,7 +226,10 @@ export const stripeTemplate: Email = {
           id: 'payment-choices-content-col',
           type: 'column',
           gridColumns: 6,
-          attributes: {},
+          mobileGridColumns: 12,
+          attributes: {
+            valign: 'top',
+          },
           blocks: [
             {
               id: 'payment-choices-heading',
@@ -225,7 +237,7 @@ export const stripeTemplate: Email = {
               content: 'Offer your customers more payment choices with Instant Bank Payments',
               attributes: {
                 as: 'h3',
-                fontSize: '24px',
+                fontSize: '20px',
                 fontWeight: 'bold',
                 color: '#1A1F36',
                 paddingBottom: '16px',
@@ -255,7 +267,7 @@ export const stripeTemplate: Email = {
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 paddingTop: '8px',
                 paddingBottom: '8px',
@@ -275,13 +287,12 @@ export const stripeTemplate: Email = {
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -289,13 +300,17 @@ export const stripeTemplate: Email = {
           id: 'cubes-image-col',
           type: 'column',
           gridColumns: 6,
-          attributes: {},
+          mobileGridColumns: 12,
+          attributes: {
+            valign: 'top',
+          },
           blocks: [
             {
               id: 'cubes-image',
               type: 'image',
               content: '',
               attributes: {
+                paddingBottom: '24px',
                 src: getPhotoUrl('cubes.png', 'stripe'),
                 alt: 'Isometric cube illustration',
                 width: '100%',
@@ -308,7 +323,10 @@ export const stripeTemplate: Email = {
           id: 'embedded-content-col',
           type: 'column',
           gridColumns: 6,
-          attributes: {},
+          mobileGridColumns: 12,
+          attributes: {
+            valign: 'top',
+          },
           blocks: [
             {
               id: 'embedded-heading',
@@ -346,12 +364,11 @@ export const stripeTemplate: Email = {
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 paddingTop: '8px',
                 paddingBottom: '8px',
-
-                paddingLeft: '0',
+                paddingLeft: '24px',
                 paddingRight: '0',
               },
             },
@@ -363,17 +380,15 @@ export const stripeTemplate: Email = {
       id: 'payment-methods-row',
       type: 'row',
       attributes: {
-        paddingBottom: '48px',
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -381,7 +396,10 @@ export const stripeTemplate: Email = {
           id: 'payments-image-col',
           type: 'column',
           gridColumns: 6,
-          attributes: {},
+          mobileGridColumns: 12,
+          attributes: {
+            valign: 'top',
+          },
           blocks: [
             {
               id: 'payments-image',
@@ -392,6 +410,7 @@ export const stripeTemplate: Email = {
                 alt: 'Stripe Payments logo',
                 width: '100%',
                 borderRadius: '16px',
+                paddingBottom: '24px',
               },
             },
           ],
@@ -400,7 +419,10 @@ export const stripeTemplate: Email = {
           id: 'payments-content-col',
           type: 'column',
           gridColumns: 6,
-          attributes: {},
+          mobileGridColumns: 12,
+          attributes: {
+            valign: 'top',
+          },
           blocks: [
             {
               id: 'payments-heading',
@@ -438,7 +460,7 @@ export const stripeTemplate: Email = {
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 paddingTop: '8px',
                 paddingBottom: '8px',
@@ -454,17 +476,15 @@ export const stripeTemplate: Email = {
       id: 'dont-miss-header',
       type: 'row',
       attributes: {
-        paddingTop: '48px',
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -475,15 +495,23 @@ export const stripeTemplate: Email = {
           attributes: {},
           blocks: [
             {
+              id: 'dont-miss-divider',
+              type: 'divider',
+              attributes: {
+                paddingTop: '48px',
+                paddingBottom: '48px',
+              },
+            },
+            {
               id: 'dont-miss-heading',
               type: 'heading',
               content: "Don't miss",
               attributes: {
                 as: 'h2',
-                fontSize: '48px',
+                fontSize: '32px',
                 fontWeight: 'bold',
-                color: '#1A1F36',
-                paddingBottom: '32px',
+                color: '#0a2540',
+                paddingBottom: '24px',
               },
             },
           ],
@@ -498,13 +526,12 @@ export const stripeTemplate: Email = {
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -520,7 +547,7 @@ export const stripeTemplate: Email = {
               content: 'Launching and scaling: Lessons from 13,000 platforms',
               attributes: {
                 as: 'h3',
-                fontSize: '24px',
+                fontSize: '20px',
                 fontWeight: 'bold',
                 color: '#1A1F36',
                 paddingBottom: '16px',
@@ -549,7 +576,7 @@ export const stripeTemplate: Email = {
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 paddingTop: '8px',
                 paddingBottom: '8px',
@@ -565,17 +592,15 @@ export const stripeTemplate: Email = {
       id: 'cedar-section',
       type: 'row',
       attributes: {
-        paddingBottom: '48px',
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -592,7 +617,7 @@ export const stripeTemplate: Email = {
                 'Cedar creates a powerful financial experience for healthcare patients and providers using Stripe',
               attributes: {
                 as: 'h3',
-                fontSize: '24px',
+                fontSize: '20px',
                 fontWeight: 'bold',
                 color: '#1A1F36',
                 paddingBottom: '16px',
@@ -606,7 +631,7 @@ export const stripeTemplate: Email = {
               attributes: {
                 fontSize: '16px',
                 color: '#425466',
-                lineHeight: '1.5',
+                lineHeight: '100%',
                 paddingBottom: '16px',
                 paddingLeft: '0',
                 paddingRight: '0',
@@ -621,7 +646,7 @@ export const stripeTemplate: Email = {
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 paddingTop: '8px',
                 paddingBottom: '8px',
@@ -637,17 +662,15 @@ export const stripeTemplate: Email = {
       id: 'recommended-reading-header',
       type: 'row',
       attributes: {
-        paddingTop: '48px',
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -658,15 +681,23 @@ export const stripeTemplate: Email = {
           attributes: {},
           blocks: [
             {
+              id: 'recommended-reading-divider',
+              type: 'divider',
+              attributes: {
+                paddingTop: '48px',
+                paddingBottom: '48px',
+              },
+            },
+            {
               id: 'recommended-reading-heading',
               type: 'heading',
               content: 'Recommended reading',
               attributes: {
                 as: 'h2',
-                fontSize: '48px',
+                fontSize: '32px',
                 fontWeight: 'bold',
-                color: '#1A1F36',
-                paddingBottom: '32px',
+                color: '#0a2540',
+                paddingBottom: '24px',
               },
             },
           ],
@@ -681,13 +712,12 @@ export const stripeTemplate: Email = {
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -703,7 +733,7 @@ export const stripeTemplate: Email = {
               content: 'Spotlight on growth: SaaS platforms in 2024',
               attributes: {
                 as: 'h3',
-                fontSize: '24px',
+                fontSize: '20px',
                 fontWeight: 'bold',
                 color: '#1A1F36',
                 paddingBottom: '16px',
@@ -732,7 +762,7 @@ export const stripeTemplate: Email = {
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 paddingTop: '8px',
                 paddingBottom: '8px',
@@ -752,13 +782,12 @@ export const stripeTemplate: Email = {
         paddingLeft: '16px',
         paddingRight: '16px',
         align: 'center',
-        width: '600px',
-        maxWidth: '600px',
+        maxWidth: '650px',
       },
       container: {
         align: 'left',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '650px',
         },
       },
       columns: [
@@ -774,7 +803,7 @@ export const stripeTemplate: Email = {
               content: 'Four payments trends shaping global commerce',
               attributes: {
                 as: 'h3',
-                fontSize: '24px',
+                fontSize: '20px',
                 fontWeight: 'bold',
                 color: '#1A1F36',
                 paddingBottom: '16px',
@@ -803,7 +832,7 @@ export const stripeTemplate: Email = {
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
-                fontSize: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
                 paddingTop: '8px',
                 paddingBottom: '8px',
@@ -818,13 +847,24 @@ export const stripeTemplate: Email = {
     {
       id: 'cta-banner',
       type: 'row',
-      attributes: { paddingTop: '40px', paddingBottom: '40px', paddingLeft: '16px', paddingRight: '16px' },
+      attributes: {
+        align: 'center',
+        paddingTop: '40px',
+        paddingBottom: '40px',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        maxWidth: '650px',
+      },
       container: {
-        align: 'left',
         attributes: {
-          maxWidth: '600px',
-          align: 'center',
-          width: '600px',
+          maxWidth: '100%',
+          backgroundColor: 'transparent',
+          background: `transparent center center/cover no-repeat`,
+          backgroundImage: `url(${getPhotoUrl('divider-gradient.png', 'stripe')})`,
+          backgroundPosition: 'center center',
+          backgroundSize: 'cover',
+          height: '90px',
+          backgroundRepeat: 'no-repeat',
         },
       },
       columns: [
@@ -842,7 +882,7 @@ export const stripeTemplate: Email = {
               content: 'Want to learn more?',
               attributes: {
                 as: 'h2',
-                fontSize: '32px',
+                fontSize: '22px',
                 fontWeight: 'bold',
                 color: '#FFFFFF',
               },
@@ -867,11 +907,11 @@ export const stripeTemplate: Email = {
                 backgroundColor: '#FFFFFF',
                 color: '#1A1F36',
                 borderRadius: '24px',
-                paddingTop: '12px',
-                paddingBottom: '12px',
-                paddingLeft: '24px',
-                paddingRight: '24px',
-                fontSize: '16px',
+                paddingTop: '4px',
+                paddingBottom: '4px',
+                paddingLeft: '16px',
+                paddingRight: '16px',
+                fontSize: '14px',
                 fontWeight: 'bold',
               },
             },
@@ -883,26 +923,24 @@ export const stripeTemplate: Email = {
       id: 'footer',
       type: 'row',
       attributes: {
-        backgroundColor: '#F6F9FC',
+        align: 'center',
+        maxWidth: '650px',
         paddingTop: '48px',
         paddingBottom: '48px',
         paddingLeft: '16px',
         paddingRight: '16px',
-        align: 'center',
-        width: '600px',
-        maxWidth: '600px',
       },
       container: {
-        align: 'center',
         attributes: {
-          maxWidth: '600px',
+          maxWidth: '100%',
+          backgroundColor: '#F6F9FC',
         },
       },
       columns: [
         {
-          id: 'footer-content',
+          id: 'footer-logo-col',
           type: 'column',
-          gridColumns: 12,
+          gridColumns: 6,
           attributes: {},
           blocks: [
             {
@@ -913,14 +951,23 @@ export const stripeTemplate: Email = {
                 src: getPhotoUrl('stripe-logo.png', 'stripe'),
                 alt: 'Stripe',
                 width: '80px',
-                paddingBottom: '32px',
               },
             },
+          ],
+        },
+        {
+          id: 'footer-socials-col',
+          type: 'column',
+          gridColumns: 6,
+          attributes: {
+            align: 'right',
+          },
+          blocks: [
             {
               id: 'footer-socials',
               type: 'socials',
               attributes: {
-                folder: 'socials-dark',
+                folder: 'socials-dark-gray',
                 socialLinks: [
                   {
                     icon: 'x',
@@ -955,20 +1002,61 @@ export const stripeTemplate: Email = {
                 ],
               },
             },
+          ],
+        },
+      ],
+    },
+    {
+      id: 'footer-text',
+      type: 'row',
+      attributes: {
+        align: 'center',
+        maxWidth: '650px',
+        paddingLeft: '16px',
+        paddingRight: '16px',
+        paddingBottom: '48px',
+      },
+      container: {
+        attributes: {
+          maxWidth: '100%',
+          backgroundColor: '#F6F9FC',
+        },
+      },
+      columns: [
+        {
+          id: 'footer-text-col',
+          type: 'column',
+          gridColumns: 12,
+          attributes: {},
+          blocks: [
             {
-              id: 'footer-email-info',
+              id: 'footer-preferences',
               type: 'text',
               content:
-                "This email was sent to marcolwhyte@gmail.com. If you'd rather not receive this kind of email, you can unsubscribe or manage your email preferences.",
+                "This email was sent to <a href='mailto:test@gmail.com' style='color: #635BFF; text-decoration: underline;'>test@gmail.com</a>. If you'd rather not receive this kind of email, you can ",
               attributes: {
-                fontSize: '14px',
+                fontSize: '12px',
                 color: '#425466',
                 lineHeight: '1.5',
-                paddingTop: '32px',
-                paddingBottom: '16px',
+                paddingTop: '0',
+                paddingBottom: '0',
                 paddingLeft: '0',
                 paddingRight: '0',
-                textAlign: 'center',
+              },
+            },
+            {
+              id: 'footer-links',
+              type: 'text',
+              content:
+                '<a href="#" style="color: #635BFF; text-decoration: underline;">unsubscribe</a> or <a href="#" style="color: #635BFF; text-decoration: underline;">manage your email preferences</a>.',
+              attributes: {
+                fontSize: '12px',
+                color: '#425466',
+                lineHeight: '1.5',
+                paddingTop: '0',
+                paddingBottom: '0',
+                paddingLeft: '0',
+                paddingRight: '0',
               },
             },
             {
@@ -976,11 +1064,10 @@ export const stripeTemplate: Email = {
               type: 'text',
               content: 'Stripe, 354 Oyster Point Boulevard, South San Francisco, CA 94080',
               attributes: {
-                fontSize: '14px',
+                fontSize: '12px',
                 color: '#425466',
                 lineHeight: '1.5',
-                textAlign: 'center',
-                paddingTop: '0',
+                paddingTop: '16px',
                 paddingBottom: '0',
                 paddingLeft: '0',
                 paddingRight: '0',

@@ -41,6 +41,7 @@ type ColumnBlock = {
   id: string
   type: 'column'
   gridColumns: number
+  mobileGridColumns?: number
   attributes: ColumnBlockAttributes
   blocks: EmailBlock[]
 }

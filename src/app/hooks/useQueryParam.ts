@@ -1,7 +1,7 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback, useRef, useState } from 'react'
 
-type QueryParamValue = string | null
+type QueryParamValue = string | null | boolean
 
 export function useQueryParam<T extends QueryParamValue>(
   key: string,
@@ -16,7 +16,13 @@ export function useQueryParam<T extends QueryParamValue>(
   if (initialValue.current === null) {
     const paramValue = searchParams.get(key)
     initialValue.current =
-      paramValue !== null && (!validator || validator(paramValue)) ? (paramValue as T) : defaultValue
+      paramValue !== null && (!validator || validator(paramValue))
+        ? paramValue === 'true'
+          ? (true as T)
+          : paramValue === 'false'
+            ? (false as T)
+            : (paramValue as T)
+        : defaultValue
   }
 
   const [value, setValue] = useState<T>(initialValue.current)
@@ -28,7 +34,7 @@ export function useQueryParam<T extends QueryParamValue>(
       if (newValue === null || newValue === '') {
         newSearchParams.delete(key)
       } else {
-        newSearchParams.set(key, newValue)
+        newSearchParams.set(key, String(newValue))
       }
       router.push(`?${newSearchParams.toString()}`, { scroll: false })
     },
