@@ -22,6 +22,16 @@ type Project = {
   created_at: Date
 }
 
+type TemplateTypes = 'personalized' | 'recommended' | 'ecommerce' | 'transactional' | 'welcome-series' | 'newsletter'
+
+type Template = {
+  name: string
+  id: string
+  description: string
+  template: Email
+  types: TemplateTypes[]
+}
+
 type EmailBlockType = EmailBlock['type']
 
 type RowBlock = {
@@ -124,6 +134,7 @@ type CommonAttributes = {
 
 type ContainerBlockAttributes = CommonAttributes & {
   align?: 'left' | 'center' | 'right'
+  minWidth?: string
 }
 
 type RowBlockAttributes = CommonAttributes & {
@@ -131,6 +142,7 @@ type RowBlockAttributes = CommonAttributes & {
   borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
   borderWidth?: string
   borderColor?: string
+  minWidth?: string
 }
 
 type ColumnBlockAttributes = {
@@ -171,10 +183,6 @@ type SocialsBlockAttributes = CommonAttributes & {
 }
 
 type TextBlockAttributes = CommonAttributes & {
-  paddingTop: string
-  paddingBottom: string
-  paddingLeft: string
-  paddingRight: string
   fontFamily?: string
   letterSpacing?: string
   textIndent?: string

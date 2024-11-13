@@ -111,6 +111,7 @@ export function generateContainerProps(
   return {
     style: {
       ...applyCommonAttributes(row.container.attributes),
+      minWidth: row.container.attributes.minWidth,
       maxWidth: email.width,
     },
     width: email.width,
@@ -122,6 +123,10 @@ export function generateRowProps(row: RowBlock): OmitChildren<React.ComponentPro
     style: {
       ...applyCommonAttributes(row.attributes),
       backgroundImage: row.attributes.backgroundImage,
+      borderColor: row.attributes.borderColor,
+      borderWidth: row.attributes.borderWidth,
+      borderStyle: row.attributes.borderStyle,
+      minWidth: row.attributes.minWidth,
     },
     align: row.attributes.align,
     bgcolor: row.attributes.backgroundColor ?? 'transparent',

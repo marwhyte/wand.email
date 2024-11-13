@@ -1,48 +1,64 @@
 import { ebayTemplate } from '@/app/components/email-workspace/ebay-template'
 import { goingTemplate } from '@/app/components/email-workspace/going-template'
 import { nikeVerificationTemplate } from '@/app/components/email-workspace/nike-verification-template'
+import { slackTemplate } from '@/app/components/email-workspace/slack-template'
 import { stripeTemplate } from '@/app/components/email-workspace/stripe-template'
 import { v4 as uuidv4 } from 'uuid'
 
-export const templates = [
+export const templates: Template[] = [
   {
-    name: '',
+    name: 'Going',
+    id: 'going',
+    description: 'Marketing emails for flight deals',
+    template: goingTemplate,
+    types: ['ecommerce', 'recommended'],
+  },
+  {
+    name: 'Ebay',
+    id: 'ebay',
+    description: 'Back to school shopping',
+    template: ebayTemplate,
+    types: ['ecommerce', 'recommended'],
+  },
+  {
+    name: 'Nike Verification',
+    id: 'nike-verification',
+    description: 'Verification code email',
+    template: nikeVerificationTemplate,
+    types: ['transactional', 'recommended'],
+  },
+  {
+    name: 'Stripe',
+    id: 'stripe',
+    description: 'Product updates',
+    template: stripeTemplate,
+    types: ['newsletter', 'recommended'],
+  },
+  {
+    name: 'Slack',
+    id: 'slack',
+    description: 'Membership ended',
+    template: slackTemplate,
+    types: ['transactional', 'recommended'],
   },
 ]
 
+export const templateTypes: TemplateTypes[] = [
+  'personalized',
+  'recommended',
+  'ecommerce',
+  'transactional',
+  'welcome-series',
+  'newsletter',
+]
+
 export const getTemplateName = (id: string) => {
-  switch (id) {
-    case 'going':
-      return 'Going'
-    case 'ebay':
-      return 'Ebay'
-    case 'stripe':
-      return 'Stripe'
-    default:
-      break
-  }
+  const template = templates.find((template) => template.id === id)
+  return template?.name || null
 }
 export const getTemplate = (id: string): Email | null => {
-  let template = null
-  switch (id) {
-    case 'going':
-      template = goingTemplate
-      break
-    case 'ebay':
-      template = ebayTemplate
-      break
-    case 'nike-verification':
-      template = nikeVerificationTemplate
-      break
-    case 'stripe':
-      template = stripeTemplate
-      break
-    default:
-      break
-  }
-  if (!template) return null
-
-  return template
+  const template = templates.find((template) => template.id === id)
+  return template?.template || null
 }
 
 export function createNewBlock(type: EmailBlockType): EmailBlock {

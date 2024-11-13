@@ -37,18 +37,17 @@ export default function RowEditor({
         const bounds = containerRef.current.getBoundingClientRect()
         const x = e.clientX - bounds.left
         const containerWidth = bounds.width
-        const newColumnWidth = Math.round((x / containerWidth) * 12)
+        const newColumnWidth = Math.round((x / containerWidth) * 24) / 2
 
         const newColumns = [...row.columns]
         const totalWidth = newColumns.reduce((sum, col) => sum + col.gridColumns, 0)
-        const leftColumnWidth = Math.max(2, Math.min(10, newColumnWidth))
+        const leftColumnWidth = Math.max(1.5, Math.min(10.5, newColumnWidth))
 
-        // Determine which column to adjust (right if exists, otherwise left)
         const adjustIndex = activeColumnIndex + 1 < newColumns.length ? activeColumnIndex + 1 : activeColumnIndex - 1
 
         if (adjustIndex >= 0 && adjustIndex < newColumns.length) {
           const currentTotal = newColumns[activeColumnIndex].gridColumns + newColumns[adjustIndex].gridColumns
-          const rightColumnWidth = Math.max(2, currentTotal - leftColumnWidth)
+          const rightColumnWidth = Math.max(1.5, currentTotal - leftColumnWidth)
 
           if (leftColumnWidth + rightColumnWidth === currentTotal) {
             newColumns[activeColumnIndex].gridColumns = leftColumnWidth
@@ -79,13 +78,11 @@ export default function RowEditor({
       let newColumns = [...row.columns]
       let spaceFound = false
 
-      // Try to take space from the last column first
       if (newColumns[newColumns.length - 1].gridColumns >= 4) {
         newColumns[newColumns.length - 1].gridColumns -= 2
         spaceFound = true
       }
 
-      // If not possible, look for space in other columns from right to left
       if (!spaceFound) {
         for (let i = newColumns.length - 1; i >= 0; i--) {
           if (newColumns[i].gridColumns >= 4) {
@@ -96,7 +93,6 @@ export default function RowEditor({
         }
       }
 
-      // If space is found, add the new column
       if (spaceFound) {
         newColumns.push(newColumn)
         onColumnWidthChange(newColumns)
@@ -147,7 +143,6 @@ export default function RowEditor({
       const newColumns = row.columns.filter((col) => col.id !== columnId)
       const deletedColumn = row.columns.find((col) => col.id === columnId)
 
-      // Redistribute the width of the deleted column
       if (deletedColumn) {
         const widthToDistribute = deletedColumn.gridColumns
         const columnsToAdjust = newColumns.length

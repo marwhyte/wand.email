@@ -1,11 +1,30 @@
 'use server'
 
 import OpenAI from 'openai'
+import { createApi } from 'unsplash-js'
+
+const unsplash = createApi({
+  accessKey: process.env.UNSPLASH_ACCESS_KEY!,
+})
 
 const openai = new OpenAI()
 
-const EMAIL_TEMPLATE_GENERATOR_PROMPT = `You are an email template generator that converts images into structured email templates. Follow these specifications carefully:
-  
+const TEXT_TO_EMAIL_PROMPT = `You are an email template generator that creates beautiful, on-brand email templates based on text descriptions. Follow these specifications carefully:
+
+INPUT INTERPRETATION:
+You will receive:
+1. Company description
+2. Color scheme preferences
+3. Themes (e.g., ["elegant", "modern", "minimal"])
+4. Logo image URL
+
+Your task is to:
+1. Create a cohesive design that matches the company's brand and requested themes
+2. Select appropriate images from Unsplash that match the theme
+3. Use the provided color scheme or suggest complementary colors if none provided
+4. Create a layout that appropriately showcases the logo
+5. Maintain visual hierarchy and professional email design principles
+
 TEMPLATE ROOT STRUCTURE:
 An email template must include:
 \`\`\`typescript
@@ -101,10 +120,10 @@ b) Text Block:
     textAlign?: 'left' | 'center' | 'right'
     fontSize: string          // e.g., "16px"
     color: string            // hex color
-    paddingTop?: string
-    paddingBottom?: string
-    paddingLeft?: string
-    paddingRight?: string
+    paddingTop: string
+    paddingBottom: string
+    paddingLeft: string
+    paddingRight: string
     lineHeight?: string      // typically "1.5"
   }
 }
@@ -212,37 +231,35 @@ DESIGN GUIDELINES:
    - Use appropriate font sizes for mobile
    - Ensure touch targets are large enough
 
-When analyzing an email image:
-1. Break down the visual hierarchy
-2. Identify repeating patterns
-3. Note spacing and alignment
-4. Pay attention to typography scale
-5. Document all content sections
-6. Generate unique IDs for all elements
-7. Use ONLY images from this list: %IMAGENAMES%
-8. Set the template name to: "%TEMPLATENAME%"
-9. For all images, use getPhotoUrl(imageName, "%TEMPLATENAME%") where imageName must be from the provided list
+When designing the template:
+1. Select images that reflect the company's industry and themes
+2. Create a color palette that aligns with brand colors and themes
+3. Choose typography that matches the requested themes
+4. Structure layout to prioritize the logo and main message
+5. Use the logo dimensions to inform header spacing
+6. For all images, use the provided Unsplash URLs
+7. Set the template name to: "%TEMPLATENAME%"
 
 RESPONSE FORMAT:
-You must respond with a valid JSON object matching the template root structure defined above. Do not include any additional text or explanations - only the JSON object.`
+Respond with a valid JSON object matching the template root structure defined above. Do not include any additional text or explanations - only the JSON object.`
 
-export async function convertImageToEmail(
-  formData: FormData,
-  templateName: string,
-  imageNames: string[]
+export async function generateEmailFromDescription(
+  description: string,
+  colorScheme: string,
+  themes: string[],
+  logoUrl: string,
+  templateName: string
 ): Promise<string> {
   try {
-    // Convert File to base64 or appropriate format for OpenAI
-    const file = formData.get('file') as File
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
-    const base64Image = buffer.toString('base64')
+    // Search for relevant images on Unsplash based on themes and description
+    const searchResults = await unsplash.search.getPhotos({
+      query: themes.join(' ') + ' ' + description.split(' ').slice(0, 3).join(' '),
+      perPage: 5,
+    })
 
-    const prompt = EMAIL_TEMPLATE_GENERATOR_PROMPT.replace('%IMAGENAMES%', JSON.stringify(imageNames)).replace(
-      /%TEMPLATENAME%/g,
-      templateName
-    )
-    console.log('prompt', prompt)
+    const unsplashImages = searchResults.response?.results.map((result) => result.urls.regular) || []
+
+    const prompt = TEXT_TO_EMAIL_PROMPT.replace('%TEMPLATENAME%', templateName)
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -252,13 +269,14 @@ export async function convertImageToEmail(
           content: [
             {
               type: 'text',
-              text: prompt,
-            },
-            {
-              type: 'image_url',
-              image_url: {
-                url: `data:${file.type};base64,${base64Image}`,
-              },
+              text: `Create an email template with the following specifications:
+              Company Description: ${description}
+              Color Scheme: ${colorScheme}
+              Themes: ${themes.join(', ')}
+              Logo URL: ${logoUrl}
+              Available Unsplash Images: ${JSON.stringify(unsplashImages)}
+              
+              ${prompt}`,
             },
           ],
         },
@@ -271,7 +289,6 @@ export async function convertImageToEmail(
 
     console.log('result', result)
 
-    // Parse the result and evaluate it as a TypeScript object
     try {
       const emailTemplate = JSON.parse(result)
       return emailTemplate
@@ -280,7 +297,7 @@ export async function convertImageToEmail(
       return result
     }
   } catch (error) {
-    console.error('Error converting image to email template:', error)
-    throw new Error('Failed to convert image to email template')
+    console.error('Error generating email template from description:', error)
+    throw new Error('Failed to generate email template')
   }
 }

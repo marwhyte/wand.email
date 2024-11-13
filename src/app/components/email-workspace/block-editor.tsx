@@ -10,6 +10,7 @@ import { Button } from '@/app/components/button'
 import { ColorInput } from '@/app/components/color-input'
 import { Divider } from '@/app/components/divider'
 import FileUploader from '@/app/components/file-uploader'
+import { Switch, SwitchField } from '@/app/components/switch'
 import { Text } from '@/app/components/text'
 import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
@@ -409,16 +410,30 @@ const BlockEditor = () => {
       )}
       {options.includes(Options.WIDTH) && (
         <Field>
-          <Label>Width (%)</Label>
+          <div className="flex items-center justify-between">
+            <Label>Width</Label>
+            <SwitchField>
+              <Switch
+                checked={!currentBlock?.attributes.width?.includes('px')}
+                onChange={(checked) => {
+                  const currentValue = parseInt(currentBlock?.attributes.width?.replace(/[%px]/g, '') || '100')
+                  handleChange({ width: `${currentValue}${checked ? '%' : 'px'}` })
+                }}
+              />
+              <Label>{currentBlock?.attributes.width?.includes('px') ? 'px' : '%'}</Label>
+            </SwitchField>
+          </div>
           <Range
             key={`width-${currentBlock?.id}`}
             min={3}
-            max={100}
-            isPercent
-            value={parseInt(currentBlock?.attributes.width?.replace('%', '') || '100')}
+            max={currentBlock?.attributes.width?.includes('px') ? 400 : 100}
+            isPercent={!currentBlock?.attributes.width?.includes('px')}
+            value={parseInt(currentBlock?.attributes.width?.replace(/[%px]/g, '') || '100')}
             onChange={(e) => {
-              const value = Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
-              handleChange({ width: `${value}%` })
+              const value = parseInt(e.target.value) || 0
+              const unit = currentBlock?.attributes.width?.includes('px') ? 'px' : '%'
+              const maxValue = unit === 'px' ? 1000 : 100
+              handleChange({ width: `${Math.min(maxValue, Math.max(0, value))}${unit}` })
             }}
           />
         </Field>

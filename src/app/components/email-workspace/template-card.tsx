@@ -1,29 +1,20 @@
 'use client'
 
-import { getTemplate } from '@/lib/data/templates'
 import Link from 'next/link'
 import { Subheading } from '../heading'
 import { EmailContent } from './email-renderer-final'
 
 type TemplateCardProps = {
-  href: string
-  name: string
-  title: string
-  description: string
+  template: Template
 }
 
-const TemplateCard = ({ href, name, title, description }: TemplateCardProps) => {
-  const email = getTemplate(name)
-  if (!email) {
-    return null
-  }
-
+const TemplateCard = ({ template }: TemplateCardProps) => {
   return (
     <Link
       onClick={() => {
         sessionStorage.removeItem('template_email')
       }}
-      href={href}
+      href={`/templates/${template.id}`}
       className="block overflow-hidden rounded-lg shadow-lg hover:outline hover:outline-blue-500"
     >
       <li className="col-span-1 flex !h-full w-[224px] flex-col divide-y border bg-white text-center">
@@ -37,14 +28,14 @@ const TemplateCard = ({ href, name, title, description }: TemplateCardProps) => 
                   transformOrigin: 'top center',
                 }}
               >
-                <EmailContent email={{ ...email, width: '700px' }} />
+                <EmailContent email={{ ...template.template, width: '700px' }} />
               </div>
             </div>
           </div>
           <div className="px-4">
-            <Subheading className="mt-6">{description}</Subheading>
+            <Subheading className="mt-6">{template.description}</Subheading>
             <dl className="mt-1 flex flex-grow flex-col justify-between">
-              <dt className="sr-only">{title}</dt>
+              <dt className="sr-only">{template.name}</dt>
               <dd className="mt-3">
                 <span className="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">
                   Premium
