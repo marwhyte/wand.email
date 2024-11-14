@@ -191,6 +191,7 @@ export const stripeTemplate: Email = {
         paddingRight: '16px',
         align: 'center',
         maxWidth: '650px',
+        stackOnMobile: true,
       },
       container: {
         align: 'left',
@@ -203,7 +204,6 @@ export const stripeTemplate: Email = {
           id: 'payment-choices-image-col',
           type: 'column',
           gridColumns: 6,
-          mobileGridColumns: 12,
           attributes: {
             valign: 'top',
           },
@@ -216,7 +216,7 @@ export const stripeTemplate: Email = {
                 paddingBottom: '24px',
                 src: getPhotoUrl('payment-choices.png', 'stripe'),
                 alt: 'Instant Bank Payments interface example',
-                width: '1.5',
+                width: '100%',
                 borderRadius: '16px',
               },
             },
@@ -226,7 +226,6 @@ export const stripeTemplate: Email = {
           id: 'payment-choices-content-col',
           type: 'column',
           gridColumns: 6,
-          mobileGridColumns: 12,
           attributes: {
             valign: 'top',
           },
@@ -236,6 +235,7 @@ export const stripeTemplate: Email = {
               type: 'heading',
               content: 'Offer your customers more payment choices with Instant Bank Payments',
               attributes: {
+                noSidePaddingOnMobile: true,
                 as: 'h3',
                 fontSize: '20px',
                 fontWeight: 'bold',
@@ -250,6 +250,7 @@ export const stripeTemplate: Email = {
               content:
                 'Instant Bank Payments, now available with Link, confirm instantly, settle in two business days, protect you from common ACH failures, and convert in a click.',
               attributes: {
+                noSidePaddingOnMobile: true,
                 fontSize: '16px',
                 color: '#425466',
                 lineHeight: '1.5',
@@ -264,6 +265,7 @@ export const stripeTemplate: Email = {
               type: 'button',
               content: 'Learn more',
               attributes: {
+                noSidePaddingOnMobile: true,
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
@@ -288,6 +290,7 @@ export const stripeTemplate: Email = {
         paddingRight: '16px',
         align: 'center',
         maxWidth: '650px',
+        stackOnMobile: true,
       },
       container: {
         align: 'left',
@@ -300,7 +303,6 @@ export const stripeTemplate: Email = {
           id: 'cubes-image-col',
           type: 'column',
           gridColumns: 6,
-          mobileGridColumns: 12,
           attributes: {
             valign: 'top',
           },
@@ -323,7 +325,6 @@ export const stripeTemplate: Email = {
           id: 'embedded-content-col',
           type: 'column',
           gridColumns: 6,
-          mobileGridColumns: 12,
           attributes: {
             valign: 'top',
           },
@@ -333,6 +334,7 @@ export const stripeTemplate: Email = {
               type: 'heading',
               content: 'Launch new revenue lines in weeks',
               attributes: {
+                noSidePaddingOnMobile: true,
                 as: 'h3',
                 fontSize: '24px',
                 fontWeight: 'bold',
@@ -347,6 +349,7 @@ export const stripeTemplate: Email = {
               content:
                 'Embed white-label payments and financial service workflows into your platform with new components for Stripe Issuing, Stripe Treasury, and reporting.',
               attributes: {
+                noSidePaddingOnMobile: true,
                 fontSize: '16px',
                 color: '#425466',
                 lineHeight: '1.5',
@@ -361,6 +364,7 @@ export const stripeTemplate: Email = {
               type: 'button',
               content: 'See all embedded components',
               attributes: {
+                noSidePaddingOnMobile: true,
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',
@@ -384,6 +388,7 @@ export const stripeTemplate: Email = {
         paddingRight: '16px',
         align: 'center',
         maxWidth: '650px',
+        stackOnMobile: true,
       },
       container: {
         align: 'left',
@@ -396,7 +401,6 @@ export const stripeTemplate: Email = {
           id: 'payments-image-col',
           type: 'column',
           gridColumns: 6,
-          mobileGridColumns: 12,
           attributes: {
             valign: 'top',
           },
@@ -419,7 +423,6 @@ export const stripeTemplate: Email = {
           id: 'payments-content-col',
           type: 'column',
           gridColumns: 6,
-          mobileGridColumns: 12,
           attributes: {
             valign: 'top',
           },
@@ -429,6 +432,7 @@ export const stripeTemplate: Email = {
               type: 'heading',
               content: 'New payment methods to reach more buyers globally',
               attributes: {
+                noSidePaddingOnMobile: true,
                 as: 'h3',
                 fontSize: '24px',
                 fontWeight: 'bold',
@@ -443,6 +447,7 @@ export const stripeTemplate: Email = {
               content:
                 "We've added more payment methods to the list of 100+ you can access with Stripe, including Billie, Capchase Pay, Kriya, Mondu, Satispay, seQura, and Sunbit. Your merchants can now enable new payment methods with no code in the Dashboard.",
               attributes: {
+                noSidePaddingOnMobile: true,
                 fontSize: '16px',
                 color: '#425466',
                 lineHeight: '1.5',
@@ -457,6 +462,7 @@ export const stripeTemplate: Email = {
               type: 'button',
               content: 'See all payment methods',
               attributes: {
+                noSidePaddingOnMobile: true,
                 href: '#',
                 backgroundColor: 'transparent',
                 color: '#635BFF',

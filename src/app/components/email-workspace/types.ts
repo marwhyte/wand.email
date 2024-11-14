@@ -51,7 +51,6 @@ type ColumnBlock = {
   id: string
   type: 'column'
   gridColumns: number
-  mobileGridColumns?: number
   attributes: ColumnBlockAttributes
   blocks: EmailBlock[]
 }
@@ -104,6 +103,7 @@ type LinkBlock = {
 }
 
 type CommonAttributes = {
+  noSidePaddingOnMobile?: boolean
   paddingTop?: string
   paddingRight?: string
   paddingBottom?: string
@@ -135,6 +135,7 @@ type CommonAttributes = {
 type ContainerBlockAttributes = CommonAttributes & {
   align?: 'left' | 'center' | 'right'
   minWidth?: string
+  hideOnMobile?: boolean
 }
 
 type RowBlockAttributes = CommonAttributes & {
@@ -143,6 +144,8 @@ type RowBlockAttributes = CommonAttributes & {
   borderWidth?: string
   borderColor?: string
   minWidth?: string
+  stackOnMobile?: boolean
+  reverseStackOnMobile?: boolean
 }
 
 type ColumnBlockAttributes = {

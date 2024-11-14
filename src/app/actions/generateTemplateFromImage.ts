@@ -1,29 +1,54 @@
 'use server'
 
 import OpenAI from 'openai'
+import { ebayTemplate } from '../components/email-workspace/ebay-template'
+import { stripeTemplate } from '../components/email-workspace/stripe-template'
 
 const openai = new OpenAI()
 
 const EMAIL_TEMPLATE_GENERATOR_PROMPT = `You are an email template generator that converts images into structured email templates. Follow these specifications carefully:
-  
+
+DESCRIPTION:
+%DESCRIPTION%
+
 TEMPLATE ROOT STRUCTURE:
-An email template must include:
-\`\`\`typescript
-{
+An email template must be exported as a TypeScript constant with this EXACT format:
+export const %templateName%Template: Email = {
   id: string                    // UUID
   name: string                  // Name of the template
+  description: string           // Description of the template
   preview: string               // Preview text for email clients
-  fontFamily: string           // e.g., "Arial, sans-serif"
-  width: string                // typically "600px"
-  color: string                // Base text color (hex)
-  bgColor: string              // Base background color (hex)
-  bgImage?: string             // Optional background image (use getPhotoUrl(imageName, templateName))
-  bgPosition?: string          // Optional background position
-  bgSize?: string              // Optional background size
-  bgRepeat?: string            // Optional background repeat
-  rows: RowBlock[]             // Array of row blocks
+  fontFamily: string            // e.g., "Arial, sans-serif"
+  width: string                 // typically "600px"
+  color: string                 // Base text color (hex)
+  bgColor: string               // Base background color (hex)
+  bgImage?: string              // Optional background image (use getPhotoUrl(imageName, "%templateName%"))
+  bgPosition?: string           // Optional background position
+  bgSize?: string               // Optional background size
+  bgRepeat?: string             // Optional background repeat
+  rows: RowBlock[]              // Array of row blocks
 }
-\`\`\`
+
+IMAGE USAGE RULES:
+1. You can ONLY use images from this list: %IMAGENAMES%
+2. For each image, you must reference it using getPhotoUrl(imageName, "%templateName%")
+   Example: if the image is "header.png" and templateName is "stripe":
+   getPhotoUrl("header.png", "stripe")
+
+IMPORTANT:
+- Never invent or use image names that aren't in the provided list
+- Every image reference must use getPhotoUrl with the exact filename from the list
+- The second parameter of getPhotoUrl must always be "%templateName%"
+
+When analyzing an email image:
+1. Break down the visual hierarchy
+2. Identify repeating patterns
+3. Note spacing and alignment
+4. Pay attention to typography scale
+5. Document all content sections
+6. Generate unique IDs for all elements
+7. ONLY use images from the provided list: %IMAGENAMES%
+8. For each image, use: getPhotoUrl(imageName, "%templateName%")
 
 LAYOUT HIERARCHY:
 1. Email templates contain rows
@@ -33,159 +58,19 @@ LAYOUT HIERARCHY:
    - an array of columns
 3. Columns contain blocks (content elements)
 4. Grid system uses 12 columns total per row
+5. To center content,
 
 BLOCK TYPES:
-
-1. Row Block (Required structure):
-\`\`\`typescript
-{
-  id: string
-  type: 'row'
-  attributes: {
-    paddingTop?: string
-    paddingBottom?: string
-    paddingLeft?: string        // typically "16px"
-    paddingRight?: string       // typically "16px"
-    backgroundColor?: string
-  }
-  container: {
-    align?: 'left' | 'center' | 'right'
-    attributes: {
-      maxWidth: string          // typically "600px"
-    }
-  }
-  columns: ColumnBlock[]        // Must total 12 gridColumns
-}
-\`\`\`
-
-2. Column Block:
-\`\`\`typescript
-{
-  id: string
-  type: 'column'
-  gridColumns: number          // 1-12, sum of all columns must be 12
-  attributes: {
-    align?: 'left' | 'center' | 'right'
-    valign?: 'top' | 'middle' | 'bottom'
-  }
-  blocks: EmailBlock[]         // Array of content blocks
-}
-\`\`\`
-
-3. Content Blocks:
-
-a) Heading Block:
-\`\`\`typescript
-{
-  id: string
-  type: 'heading'
-  content: string
-  attributes: {
-    textAlign?: 'left' | 'center' | 'right'
-    as: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-    fontSize: string           // e.g., "32px"
-    fontWeight: 'normal' | 'bold' | 'lighter' | 'bolder'
-    color: string             // hex color
-    paddingBottom?: string
-  }
-}
-\`\`\`
-
-b) Text Block:
-\`\`\`typescript
-{
-  id: string
-  type: 'text'
-  content: string
-  attributes: {
-    textAlign?: 'left' | 'center' | 'right'
-    fontSize: string          // e.g., "16px"
-    color: string            // hex color
-    paddingTop?: string
-    paddingBottom?: string
-    paddingLeft?: string
-    paddingRight?: string
-    lineHeight?: string      // typically "1.5"
-  }
-}
-\`\`\`
-
-c) Image Block:
-\`\`\`typescript
-{
-  id: string
-  type: 'image'
-  content: ''               // Always empty string
-  attributes: {
-    src: string            // Use getPhotoUrl(filename, folder)
-    alt: string            // Required for accessibility
-    width?: string
-    height?: string
-    borderRadius?: string
-  }
-}
-\`\`\`
-
-d) Button Block:
-\`\`\`typescript
-{
-  id: string
-  type: 'button'
-  content: string          // Button text
-  attributes: {
-    href: string
-    backgroundColor: string
-    color: string
-    borderRadius?: string
-    paddingTop: string
-    paddingBottom: string
-    paddingLeft: string
-    paddingRight: string
-    fontSize: string
-    fontWeight?: 'normal' | 'bold'
-    borderStyle?: 'solid' | 'none'
-    borderWidth?: string
-    borderColor?: string
-  }
-}
-\`\`\`
-
-e) Divider Block:
-\`\`\`typescript
-{
-  id: string
-  type: 'divider'
-  attributes: {
-    borderWidth: string    // e.g., "1px"
-    borderColor: string    // hex color
-    paddingTop: string
-    paddingBottom: string
-  }
-}
-\`\`\`
-
-f) Socials Block:
-\`\`\`typescript
-{
-  id: string
-  type: 'socials'
-  attributes: {
-    folder: 'socials-blue' | 'socials-color' | 'socials-dark-gray' | 'socials-dark' | 'socials-dark-round' | 'socials-outline-black' | 'socials-outline-color' | 'socials-outline-gray' | 'socials-outline-white' | 'socials-white'
-    socialLinks: Array<{
-      icon: SocialIconName
-      url: string
-      title: string
-      alt: string
-    }>
-  }
-}
-\`\`\`
+- Row Block
+- Column Block
+- Content Blocks (Heading, Text, Image, Button, Divider, Socials)
 
 DESIGN GUIDELINES:
 
 1. Spacing:
    - Use 8px increments for padding (8px, 16px, 24px, 32px, etc.)
    - Maintain 16px padding on outer edges
+   - Use separate padding properties for each direction (e.g., paddingLeft, paddingRight, paddingTop, paddingBottom)
    - Use appropriate vertical spacing between sections
 
 2. Typography:
@@ -212,47 +97,74 @@ DESIGN GUIDELINES:
    - Use appropriate font sizes for mobile
    - Ensure touch targets are large enough
 
-When analyzing an email image:
-1. Break down the visual hierarchy
-2. Identify repeating patterns
-3. Note spacing and alignment
-4. Pay attention to typography scale
-5. Document all content sections
-6. Generate unique IDs for all elements
-7. Use ONLY images from this list: %IMAGENAMES%
-8. Set the template name to: "%TEMPLATENAME%"
-9. For all images, use getPhotoUrl(imageName, "%TEMPLATENAME%") where imageName must be from the provided list
+- Spacing: Use 8px increments for padding
+- Typography: Use web-safe font families
+- Images: Always use getPhotoUrl() for image sources
+- Colors: Use hex codes (#000000 format)
+- Mobile Considerations: Keep content columns under 600px total
 
 RESPONSE FORMAT:
-You must respond with a valid JSON object matching the template root structure defined above. Do not include any additional text or explanations - only the JSON object.`
+You must respond with a valid TypeScript export statement matching the template structure defined above. Include the import statement and type annotation. Do not include any additional text or explanations - only the TypeScript code.`
+
+// Add a new constant for examples
+const TEMPLATE_EXAMPLES = [ebayTemplate, stripeTemplate]
 
 export async function convertImageToEmail(
   formData: FormData,
   templateName: string,
-  imageNames: string[]
+  imageNames: string[],
+  description: string
 ): Promise<string> {
   try {
-    // Convert File to base64 or appropriate format for OpenAI
+    const prompt = EMAIL_TEMPLATE_GENERATOR_PROMPT.replace(/%templateName%/g, templateName)
+      .replace('%IMAGENAMES%', JSON.stringify(imageNames))
+      .replace('%DESCRIPTION%', description)
+
     const file = formData.get('file') as File
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
     const base64Image = buffer.toString('base64')
 
-    const prompt = EMAIL_TEMPLATE_GENERATOR_PROMPT.replace('%IMAGENAMES%', JSON.stringify(imageNames)).replace(
-      /%TEMPLATENAME%/g,
-      templateName
-    )
-    console.log('prompt', prompt)
-
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
+        {
+          role: 'system',
+          content: prompt,
+        },
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: prompt,
+              text: `Generate a complete email template based on this image. Available images: ${JSON.stringify(imageNames)}. 
+
+REQUIRED IMPORTS AND IMAGE USAGE:
+1. Must start with: import { getPhotoUrl } from '@/lib/utils/misc'
+2. For ALL images, use getPhotoUrl(imageName, "${templateName}")
+   Example: getPhotoUrl("intuit.png", "${templateName}")
+
+CRITICAL LAYOUT AND STYLING RULES:
+1. EVERY row block MUST have a backgroundColor specified
+2. Text colors must match the exact colors shown in the design
+3. Button colors (background and text) must match the design exactly
+4. For elements appearing side-by-side:
+   - Use columns within a row
+   - gridColumns of all columns in a row MUST sum to exactly 12
+   Example:
+   - Two equal columns: gridColumns: 6 each
+   - Three equal columns: gridColumns: 4 each
+   - One-third/two-thirds: gridColumns: 4 and gridColumns: 8
+
+IMPORTANT IMAGE PLACEMENT RULES:
+1. Look for logos, product images, and hero images in the design
+2. Match them with the closest available image from the provided list
+3. Use ALL provided images in appropriate sections
+4. For logos: typically use company-related images (e.g., intuit.png, quickbooks.png)
+5. For hero sections: use lifestyle or product-focused images
+6. Place images strategically based on their content and context
+
+Here are example templates for reference: ${JSON.stringify(TEMPLATE_EXAMPLES)}`,
             },
             {
               type: 'image_url',
@@ -269,16 +181,7 @@ export async function convertImageToEmail(
     const result = completion.choices[0].message.content
     if (!result) throw new Error('No response from OpenAI')
 
-    console.log('result', result)
-
-    // Parse the result and evaluate it as a TypeScript object
-    try {
-      const emailTemplate = JSON.parse(result)
-      return emailTemplate
-    } catch (error) {
-      console.error('Error parsing OpenAI response:', error)
-      return result
-    }
+    return result
   } catch (error) {
     console.error('Error converting image to email template:', error)
     throw new Error('Failed to convert image to email template')

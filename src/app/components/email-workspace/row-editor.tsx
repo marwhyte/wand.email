@@ -1,4 +1,5 @@
 import { Button } from '@/app/components/button'
+import { Checkbox } from '@/app/components/checkbox'
 import Disclosure, { DisclosureBody } from '@/app/components/disclosure'
 import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
@@ -166,23 +167,35 @@ export default function RowEditor({
     <div className="space-y-4">
       <Disclosure title="Layout">
         <DisclosureBody>
-          <PaddingForm
-            padding={{
-              top: row.attributes.paddingTop ?? row.attributes.padding ?? '0px',
-              right: row.attributes.paddingRight ?? row.attributes.padding ?? '0px',
-              bottom: row.attributes.paddingBottom ?? row.attributes.padding ?? '0px',
-              left: row.attributes.paddingLeft ?? row.attributes.padding ?? '0px',
-            }}
-            onChange={(values: Partial<PaddingValues>) => {
-              const rowAttributes: Partial<RowBlockAttributes> = {
-                paddingTop: values.top,
-                paddingRight: values.right,
-                paddingBottom: values.bottom,
-                paddingLeft: values.left,
-              }
-              handleRowPaddingChange(rowAttributes)
-            }}
-          />
+          <div className="space-y-4">
+            <Field>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="stackOnMobile"
+                  checked={row.attributes.stackOnMobile ?? false}
+                  onChange={(e) => onRowAttributeChange({ stackOnMobile: e })}
+                />
+                <Label htmlFor="stackOnMobile">Stack columns on mobile</Label>
+              </div>
+            </Field>
+            <PaddingForm
+              padding={{
+                top: row.attributes.paddingTop ?? row.attributes.padding ?? '0px',
+                right: row.attributes.paddingRight ?? row.attributes.padding ?? '0px',
+                bottom: row.attributes.paddingBottom ?? row.attributes.padding ?? '0px',
+                left: row.attributes.paddingLeft ?? row.attributes.padding ?? '0px',
+              }}
+              onChange={(values: Partial<PaddingValues>) => {
+                const rowAttributes: Partial<RowBlockAttributes> = {
+                  paddingTop: values.top,
+                  paddingRight: values.right,
+                  paddingBottom: values.bottom,
+                  paddingLeft: values.left,
+                }
+                handleRowPaddingChange(rowAttributes)
+              }}
+            />
+          </div>
         </DisclosureBody>
       </Disclosure>
       <Disclosure title="Borders">

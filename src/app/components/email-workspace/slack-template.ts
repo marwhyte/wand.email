@@ -266,7 +266,6 @@ export const slackTemplate: Email = {
           id: 'connect-icon-col',
           type: 'column',
           gridColumns: 1.5,
-          mobileGridColumns: 2,
           attributes: {
             valign: 'top',
           },
@@ -287,7 +286,6 @@ export const slackTemplate: Email = {
           id: 'connect-content-col',
           type: 'column',
           gridColumns: 10.5,
-          mobileGridColumns: 10,
           attributes: {
             valign: 'top',
           },
@@ -349,7 +347,6 @@ export const slackTemplate: Email = {
           id: 'huddles-icon-col',
           type: 'column',
           gridColumns: 1.5,
-          mobileGridColumns: 2,
           attributes: {
             valign: 'top',
           },
@@ -370,7 +367,6 @@ export const slackTemplate: Email = {
           id: 'huddles-content-col',
           type: 'column',
           gridColumns: 10.5,
-          mobileGridColumns: 10,
           attributes: {
             valign: 'top',
           },
@@ -432,7 +428,6 @@ export const slackTemplate: Email = {
           id: 'canvases-icon-col',
           type: 'column',
           gridColumns: 1.5,
-          mobileGridColumns: 2,
           attributes: {
             valign: 'top',
           },
@@ -453,7 +448,6 @@ export const slackTemplate: Email = {
           id: 'canvases-content-col',
           type: 'column',
           gridColumns: 10.5,
-          mobileGridColumns: 10,
           attributes: {
             valign: 'top',
           },

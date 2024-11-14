@@ -59,7 +59,7 @@ export function getReactEmailCode(email: Email) {
                         (column) => `
                       <Column
                         key="${column.id}"
-                        ${stringifyProps(generateColumnProps(column))}
+                        ${stringifyProps(generateColumnProps(column, row))}
                       >
                         ${column.blocks
                           .map(

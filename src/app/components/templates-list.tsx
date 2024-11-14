@@ -19,6 +19,8 @@ export const TemplateGeneratorForm = () => {
   const [result, setResult] = useState<string>('')
   const [templateName, setTemplateName] = useState<string>('')
   const [imageNames, setImageNames] = useState<string[]>([])
+  const [description, setDescription] = useState<string>('')
+  const [htmlEmail, setHtmlEmail] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
 
   return (
@@ -38,8 +40,9 @@ export const TemplateGeneratorForm = () => {
         try {
           const formData = new FormData()
           formData.append('file', file)
+          formData.append('htmlEmail', htmlEmail)
 
-          const response = await convertImageToEmail(formData, templateName, imageNames)
+          const response = await convertImageToEmail(formData, templateName, imageNames, description)
           setResult(response)
         } catch (error) {
           console.error('Error processing image:', error)
@@ -67,6 +70,19 @@ export const TemplateGeneratorForm = () => {
           className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
         />
         <input
+          type="text"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Template Description"
+          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
+        />
+        <textarea
+          value={htmlEmail}
+          onChange={(e) => setHtmlEmail(e.target.value)}
+          placeholder="HTML Email"
+          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
+        />
+        <input
           type="file"
           accept="image/*"
           className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
@@ -81,7 +97,20 @@ export const TemplateGeneratorForm = () => {
 
         {result && (
           <div className="mt-4 w-full max-w-2xl">
-            <h3 className="mb-2 text-lg font-semibold">Generated Template:</h3>
+            <div className="mb-2 flex items-center justify-between">
+              <h3 className="text-lg font-semibold">Generated Template:</h3>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(result)
+                  // Optional: Add some visual feedback
+                  alert('Copied to clipboard!')
+                }}
+                type="button"
+                className="rounded-md bg-gray-100 px-3 py-1 text-sm text-gray-600 hover:bg-gray-200"
+              >
+                Copy
+              </button>
+            </div>
             <pre className="whitespace-pre-wrap rounded-md bg-gray-100 p-4 text-sm">{result}</pre>
           </div>
         )}

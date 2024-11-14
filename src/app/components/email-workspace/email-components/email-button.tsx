@@ -1,14 +1,18 @@
-import { generateBlockProps } from '@/lib/utils/attributes'
+import { generateButtonProps } from '@/lib/utils/attributes'
 import { Button } from '@react-email/components'
 import parse from 'html-react-parser'
+import { useSearchParams } from 'next/dist/client/components/navigation'
 
 type Props = {
   block: ButtonBlock
 }
 
 export default function EmailButton({ block }: Props) {
+  const searchParams = useSearchParams()
+  const mobileView = searchParams.get('mobileView') === 'true'
+
   return (
-    <Button {...generateBlockProps(block)} href={undefined}>
+    <Button {...generateButtonProps(block, mobileView)} href={undefined}>
       {parse(block.content)}
     </Button>
   )

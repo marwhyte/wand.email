@@ -164,6 +164,7 @@ export default function EmailRow({
         <Container
           bgcolor={email.bgColor}
           width={mobileView ? '360' : `${email.width}`}
+          className={row.container.attributes.hideOnMobile && mobileView ? 'hidden' : undefined}
           style={{
             backgroundColor: email.bgColor,
             ...applyCommonAttributes(row.container.attributes),
@@ -174,6 +175,7 @@ export default function EmailRow({
             {row.columns.map((column) => (
               <EmailColumn
                 column={column}
+                row={row}
                 key={column.id}
                 onBlockHover={(isHovered) => setIsChildHovered(isHovered)}
                 onBlockSelect={handleBlockSelect}

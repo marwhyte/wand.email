@@ -3,6 +3,7 @@ import { goingTemplate } from '@/app/components/email-workspace/going-template'
 import { nikeVerificationTemplate } from '@/app/components/email-workspace/nike-verification-template'
 import { slackTemplate } from '@/app/components/email-workspace/slack-template'
 import { stripeTemplate } from '@/app/components/email-workspace/stripe-template'
+import { turbotaxTemplate } from '@/app/components/email-workspace/turbotax-template'
 import { v4 as uuidv4 } from 'uuid'
 
 export const templates: Template[] = [
@@ -39,6 +40,13 @@ export const templates: Template[] = [
     id: 'slack',
     description: 'Membership ended',
     template: slackTemplate,
+    types: ['transactional', 'recommended'],
+  },
+  {
+    name: 'TurboTax',
+    id: 'turbotax',
+    description: 'Tax preparation reminder',
+    template: turbotaxTemplate,
     types: ['transactional', 'recommended'],
   },
 ]

@@ -109,6 +109,7 @@ export function generateContainerProps(
   email: Email
 ): OmitChildren<React.ComponentProps<typeof Container>> {
   return {
+    className: row.container.attributes.hideOnMobile ? 'hide-on-mobile' : undefined,
     style: {
       ...applyCommonAttributes(row.container.attributes),
       minWidth: row.container.attributes.minWidth,
@@ -153,31 +154,15 @@ export function generateBodyProps(
 
 export function generateColumnProps(
   column: ColumnBlock,
+  row: RowBlock,
   mobileView = false
 ): OmitChildren<React.ComponentProps<typeof Column>> {
   const desktopWidth = `${(column.gridColumns / 12) * 100}%`
-  const mobileWidth = column.mobileGridColumns ? `${(column.mobileGridColumns / 12) * 100}%` : desktopWidth
-
-  if (mobileView) {
-    return {
-      valign: column.attributes.valign,
-      align: column.attributes.align,
-      style: {
-        display: 'inline-block',
-        width: mobileWidth,
-        maxWidth: mobileWidth,
-        borderStyle: column.attributes.borderStyle,
-        borderWidth: column.attributes.borderWidth,
-        borderColor: column.attributes.borderColor,
-        borderSpacing: column.attributes.borderSpacing,
-      },
-    }
-  }
-
+  console.log(row.attributes.stackOnMobile && mobileView)
   return {
     valign: column.attributes.valign,
     align: column.attributes.align,
-    className: column.mobileGridColumns === 12 && column.gridColumns !== 12 ? 'mobile-full-width' : undefined,
+
     style: {
       width: desktopWidth,
       borderStyle: column.attributes.borderStyle,
@@ -185,25 +170,54 @@ export function generateColumnProps(
       borderColor: column.attributes.borderColor,
       borderSpacing: column.attributes.borderSpacing,
     },
+    className:
+      mobileView && row.attributes.stackOnMobile
+        ? 'mobile-forced-full-width'
+        : row.attributes.stackOnMobile
+          ? 'mobile-full-width'
+          : undefined,
   }
 }
 
-export function generateTextProps(block: TextBlock): OmitChildren<React.ComponentProps<typeof Text>> {
+export function applyCommonClassName(attributes: CommonAttributes, mobileView = false): string | undefined {
+  const classNames: string[] = []
+
+  if (attributes.noSidePaddingOnMobile && mobileView) {
+    classNames.push('no-side-padding-mobile-forced')
+  }
+  if (attributes.noSidePaddingOnMobile) {
+    classNames.push('no-side-padding-mobile')
+  }
+
+  return classNames.length > 0 ? classNames.join(' ') : undefined
+}
+
+export function generateTextProps(
+  block: TextBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Text>> {
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
       ...getAdditionalTextStyles(block.attributes),
     },
+    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
-export function generateHeadingProps(block: HeadingBlock): OmitChildren<React.ComponentProps<typeof Heading>> {
+export function generateHeadingProps(
+  block: HeadingBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Heading>> {
   return {
     as: block.attributes.as,
     style: {
       ...applyCommonAttributes(block.attributes),
       ...getAdditionalHeadingStyles(block.attributes),
+      marginBlockStart: 0,
+      marginBlockEnd: 0,
     },
+    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
@@ -218,7 +232,10 @@ export function generateImageProps(block: ImageBlock): OmitChildren<React.Compon
   }
 }
 
-export function generateButtonProps(block: ButtonBlock): OmitChildren<React.ComponentProps<typeof Button>> {
+export function generateButtonProps(
+  block: ButtonBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Button>> {
   return {
     href: block.attributes.href,
     target: block.attributes.target,
@@ -227,10 +244,14 @@ export function generateButtonProps(block: ButtonBlock): OmitChildren<React.Comp
       ...applyCommonAttributes(block.attributes),
       ...getAdditionalButtonStyles(block.attributes),
     },
+    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
-export function generateLinkProps(block: LinkBlock): OmitChildren<React.ComponentProps<typeof Link>> {
+export function generateLinkProps(
+  block: LinkBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Link>> {
   return {
     href: block.attributes.href,
     target: block.attributes.target,
@@ -239,6 +260,7 @@ export function generateLinkProps(block: LinkBlock): OmitChildren<React.Componen
       ...applyCommonAttributes(block.attributes),
       ...getAdditionalLinkStyles(block.attributes),
     },
+    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
@@ -257,12 +279,16 @@ export const getAdditionalDividerStyles = (
   }
 }
 
-export function generateDividerProps(block: DividerBlock): OmitChildren<React.ComponentProps<typeof Hr>> {
+export function generateDividerProps(
+  block: DividerBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Hr>> {
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
       ...getAdditionalDividerStyles(block.attributes),
     },
+    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 

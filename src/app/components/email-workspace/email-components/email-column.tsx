@@ -8,6 +8,7 @@ import EmailBlock from './email-block'
 
 type Props = {
   column: ColumnBlock
+  row: RowBlock
   onBlockHover: (isHovered: boolean) => void
   onBlockSelect: (block: EmailBlock) => void
   onColumnClick?: () => void
@@ -27,6 +28,7 @@ type Props = {
 
 export default function EmailColumn({
   column,
+  row,
   onBlockHover,
   onBlockSelect,
   onColumnClick,
@@ -65,8 +67,10 @@ export default function EmailColumn({
 
   return (
     <Column
-      {...generateColumnProps(column, mobileView)}
-      className={`${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
+      {...generateColumnProps(column, row, mobileView)}
+      className={`${generateColumnProps(column, row, mobileView).className || ''} ${
+        column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''
+      } ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
       // @ts-ignore
       ref={drop}

@@ -13,6 +13,7 @@ import {
   Container,
   Head,
   Heading,
+  Hr,
   Html,
   Img,
   Link,
@@ -21,7 +22,6 @@ import {
   Text,
 } from '@react-email/components'
 import parse from 'html-react-parser'
-import { Divider } from '../divider'
 import EmailSocials from './email-components/email-socials'
 
 type Props = {
@@ -47,7 +47,7 @@ const RenderBlockFinal = ({ block }: { block: EmailBlock }) => {
       return <Link {...linkProps}>{parse(block.content)}</Link>
     case 'divider':
       const dividerProps = generateBlockProps(block)
-      return <Divider {...dividerProps} />
+      return <Hr {...dividerProps} />
     case 'socials':
       return <EmailSocials isEditing={false} block={block} />
     default:
@@ -63,7 +63,7 @@ export const EmailContent = ({ email }: { email: Email }) => {
           <Row {...generateRowProps(row)}>
             {row.columns.map((column) => {
               return (
-                <Column key={column.id} {...generateColumnProps(column)}>
+                <Column key={column.id} {...generateColumnProps(column, row)}>
                   {column.blocks.map((block) => (
                     <RenderBlockFinal key={block.id} block={block} />
                   ))}
@@ -83,7 +83,10 @@ const EmailRendererFinal = ({ email }: Props) => {
       <Head>
         <style>{`
           .mobile-full-width {
-            display: inline-block;
+            display: inline-block !important;
+          }
+          p, h1, h2, h3, h3, h4, h5 {
+            margin: 0 !important;
           }
 
           @media screen and (max-width: 739px) {
@@ -91,6 +94,15 @@ const EmailRendererFinal = ({ email }: Props) => {
               display: inline-block !important;
               width: 100% !important;
               max-width: 100% !important;
+            }
+
+            .hide-on-mobile {
+              display: none !important;
+            }
+
+            .no-side-padding-mobile {
+              padding-left: 0 !important;
+              padding-right: 0 !important;
             }
           }
         `}</style>

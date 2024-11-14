@@ -38,6 +38,7 @@ enum Options {
   GRID_COLUMNS = 'grid-columns',
   PADDING = 'padding',
   SRC = 'src',
+  NO_PADDING_MOBILE = 'no-padding-mobile',
 }
 
 const BlockEditor = () => {
@@ -46,7 +47,13 @@ const BlockEditor = () => {
   const optionsForItem = () => {
     switch (currentBlock?.type) {
       case 'divider':
-        return [Options.BORDER_STYLE, Options.BORDER_WIDTH, Options.BORDER_COLOR, Options.PADDING]
+        return [
+          Options.BORDER_STYLE,
+          Options.BORDER_WIDTH,
+          Options.BORDER_COLOR,
+          Options.PADDING,
+          Options.NO_PADDING_MOBILE,
+        ]
       case 'text':
         return [
           Options.FONT_SIZE,
@@ -56,6 +63,7 @@ const BlockEditor = () => {
           Options.BACKGROUND_COLOR,
           Options.TEXT,
           Options.PADDING,
+          Options.NO_PADDING_MOBILE,
         ]
       case 'image':
         return [Options.WIDTH, Options.BORDER_RADIUS, Options.PADDING, Options.SRC]
@@ -78,6 +86,7 @@ const BlockEditor = () => {
           Options.TEXT_COLOR,
           Options.TEXT_ALIGN,
           Options.PADDING,
+          Options.NO_PADDING_MOBILE,
         ]
       case 'link':
         return [
@@ -89,6 +98,7 @@ const BlockEditor = () => {
           Options.TEXT_ALIGN,
           Options.TEXT,
           Options.PADDING,
+          Options.NO_PADDING_MOBILE,
         ]
       default:
         return []
@@ -516,6 +526,17 @@ const BlockEditor = () => {
           iconFolder={currentBlock.attributes.folder}
           onChange={(updates) => handleChange(updates as Partial<SocialsBlockAttributes>)}
         />
+      )}
+      {options.includes(Options.NO_PADDING_MOBILE) && (
+        <Field>
+          <SwitchField>
+            <Switch
+              checked={currentBlock?.attributes.noSidePaddingOnMobile || false}
+              onChange={(checked) => handleChange({ noSidePaddingOnMobile: checked })}
+            />
+            <Label>Remove padding on mobile</Label>
+          </SwitchField>
+        </Field>
       )}
     </div>
   )
