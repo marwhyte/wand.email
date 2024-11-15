@@ -135,7 +135,6 @@ type CommonAttributes = {
 type ContainerBlockAttributes = CommonAttributes & {
   align?: 'left' | 'center' | 'right'
   minWidth?: string
-  hideOnMobile?: boolean
 }
 
 type RowBlockAttributes = CommonAttributes & {
@@ -146,6 +145,7 @@ type RowBlockAttributes = CommonAttributes & {
   minWidth?: string
   stackOnMobile?: boolean
   reverseStackOnMobile?: boolean
+  hideOnMobile?: boolean
 }
 
 type ColumnBlockAttributes = {

@@ -109,7 +109,7 @@ export function generateContainerProps(
   email: Email
 ): OmitChildren<React.ComponentProps<typeof Container>> {
   return {
-    className: row.container.attributes.hideOnMobile ? 'hide-on-mobile' : undefined,
+    className: row.attributes.hideOnMobile ? 'hide-on-mobile' : undefined,
     style: {
       ...applyCommonAttributes(row.container.attributes),
       minWidth: row.container.attributes.minWidth,

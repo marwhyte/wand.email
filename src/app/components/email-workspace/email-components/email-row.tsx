@@ -164,7 +164,7 @@ export default function EmailRow({
         <Container
           bgcolor={email.bgColor}
           width={mobileView ? '360' : `${email.width}`}
-          className={row.container.attributes.hideOnMobile && mobileView ? 'hidden' : undefined}
+          className={row.attributes.hideOnMobile && mobileView ? 'hidden' : undefined}
           style={{
             backgroundColor: email.bgColor,
             ...applyCommonAttributes(row.container.attributes),

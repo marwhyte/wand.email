@@ -5,7 +5,7 @@ import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
-import { Bars3Icon, PlusIcon } from '@heroicons/react/20/solid'
+import { Bars3Icon, PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -147,13 +147,18 @@ export default function RowEditor({
       if (deletedColumn) {
         const widthToDistribute = deletedColumn.gridColumns
         const columnsToAdjust = newColumns.length
-        const widthPerColumn = Math.floor(widthToDistribute / columnsToAdjust)
-        const remainder = widthToDistribute % columnsToAdjust
+
+        // Calculate base width and remainder using 0.5 as the smallest unit
+        const baseUnits = widthToDistribute * 2 // Convert to units of 0.5
+        const basePerColumn = Math.floor(baseUnits / columnsToAdjust)
+        const remainderUnits = baseUnits % columnsToAdjust
 
         newColumns.forEach((col, index) => {
-          col.gridColumns += widthPerColumn
-          if (index < remainder) {
-            col.gridColumns += 1
+          // Add base amount to each column
+          col.gridColumns += basePerColumn / 2
+          // Distribute remainder 0.5 units from left to right
+          if (index < remainderUnits) {
+            col.gridColumns += 0.5
           }
         })
       }
@@ -176,6 +181,16 @@ export default function RowEditor({
                   onChange={(e) => onRowAttributeChange({ stackOnMobile: e })}
                 />
                 <Label htmlFor="stackOnMobile">Stack columns on mobile</Label>
+              </div>
+            </Field>
+            <Field>
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="hideOnMobile"
+                  checked={row.attributes.hideOnMobile ?? false}
+                  onChange={(e) => onRowAttributeChange({ hideOnMobile: e })}
+                />
+                <Label htmlFor="hideOnMobile">Hide on mobile</Label>
               </div>
             </Field>
             <PaddingForm
@@ -262,6 +277,17 @@ export default function RowEditor({
                   onClick={(e) => handleColumnClick(e, column.id)}
                 >
                   <div className={`text-xs font-medium ${isDragging ? 'select-none' : ''}`}>{column.gridColumns}</div>
+                  {row.columns.length > 1 && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteColumn(column.id)
+                      }}
+                      className="absolute -right-2 -top-2 rounded-full bg-white p-0.5 text-gray-400 hover:text-red-500"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                    </button>
+                  )}
                 </div>
                 {index < row.columns.length - 1 && (
                   <div

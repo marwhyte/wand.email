@@ -282,7 +282,7 @@ const EmailRenderer = ({ mobileView }: Props) => {
   return (
     <div className="flex-grow overflow-scroll pt-4">
       {/* @ts-ignore */}
-      <div {...generateBodyProps(email, true)}>
+      <div {...generateBodyProps(email, true)} style={{ backgroundColor: email.bgColor }}>
         {email.rows.length > 0 ? (
           <>
             {email.rows.map((row) => (

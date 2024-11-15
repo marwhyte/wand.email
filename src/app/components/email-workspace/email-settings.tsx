@@ -63,9 +63,15 @@ const EmailSettings = () => {
       </Field>
       <Field>
         <Label>Font family</Label>
-        <Select value={email.fontFamily} onChange={(e) => handleChange({ fontFamily: e.target.value })}>
+        <Select
+          value={email.fontFamily?.split(',')[0].replace(/['"]/g, '')}
+          onChange={(e) => {
+            const selectedFont = fontFamilies.find((f) => f.label === e.target.value)
+            handleChange({ fontFamily: selectedFont?.value || e.target.value })
+          }}
+        >
           {fontFamilies.map((fontFamily) => (
-            <option key={fontFamily.value} value={fontFamily.value}>
+            <option key={fontFamily.value} value={fontFamily.label}>
               {fontFamily.label}
             </option>
           ))}

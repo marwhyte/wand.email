@@ -77,6 +77,7 @@ const BlockEditor = () => {
           Options.BORDER_STYLE,
           Options.BORDER_WIDTH,
           Options.BORDER_COLOR,
+          Options.NO_PADDING_MOBILE,
         ]
       case 'heading':
         return [

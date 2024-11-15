@@ -4,10 +4,10 @@ export const turbotaxTemplate: Email = {
   id: 'b72a9f4f-eb7a-48fd-bb63-f5ac5bbf6e9c',
   name: 'TurboTax Filing Preparation',
   preview: 'Marco: Know which documents you’ll need when it’s time to file',
-  fontFamily: 'Arial, sans-serif',
+  fontFamily: 'Lato, Arial, sans-serif',
   width: '600px',
   color: '#333333',
-  bgColor: '#FFFFFF',
+  bgColor: '#dfdfd8',
   rows: [
     {
       id: 'row-1',
@@ -16,11 +16,15 @@ export const turbotaxTemplate: Email = {
         paddingTop: '40px',
         paddingLeft: '16px',
         paddingRight: '16px',
+        paddingBottom: '16px',
+        align: 'center',
       },
       container: {
         align: 'center',
         attributes: {
           maxWidth: '600px',
+          backgroundColor: '#fcfcfc',
+          minWidth: '100%',
         },
       },
       columns: [
@@ -50,15 +54,16 @@ export const turbotaxTemplate: Email = {
       id: 'row-2',
       type: 'row',
       attributes: {
-        paddingTop: '16px',
         paddingLeft: '16px',
         paddingRight: '16px',
         paddingBottom: '30px',
+        hideOnMobile: true,
       },
       container: {
         align: 'center',
         attributes: {
           maxWidth: '600px',
+          backgroundColor: '#fcfcfc',
         },
       },
       columns: [
@@ -171,6 +176,7 @@ export const turbotaxTemplate: Email = {
         attributes: {
           maxWidth: '600px',
           backgroundColor: '#EAEAE3',
+          minWidth: '100%',
         },
       },
       columns: [
@@ -243,6 +249,7 @@ export const turbotaxTemplate: Email = {
         attributes: {
           maxWidth: '600px',
           backgroundColor: '#F4F4EF',
+          minWidth: '100%',
         },
       },
       columns: [
@@ -356,6 +363,7 @@ export const turbotaxTemplate: Email = {
         align: 'center',
         attributes: {
           maxWidth: '600px',
+          backgroundColor: '#fcfcfc',
         },
       },
       columns: [
@@ -468,6 +476,7 @@ export const turbotaxTemplate: Email = {
         align: 'center',
         attributes: {
           maxWidth: '600px',
+          backgroundColor: '#fcfcfc',
         },
       },
       columns: [
