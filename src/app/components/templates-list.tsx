@@ -3,12 +3,10 @@
 import { User } from '@/lib/database/types'
 import { Tab, TabGroup, TabList } from '@components/tab'
 import { Session } from 'next-auth'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { convertImageToEmail } from '../actions/generateTemplateFromImage'
 import { useQueryParam } from '../hooks/useQueryParam'
-import { Divider } from './divider'
 import { Heading } from './heading'
 
 import { templates, templateTypes } from '@/lib/data/templates'
@@ -174,7 +172,7 @@ const TemplatesList = ({ session, user }: Props) => {
   return (
     <div>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {!isOnboarded && (
+        {/* {!isOnboarded && (
           <div>
             <div className="px-6 py-6 sm:px-6 sm:py-12 lg:px-8">
               <div className="mx-auto max-w-3xl text-center">
@@ -206,7 +204,7 @@ const TemplatesList = ({ session, user }: Props) => {
               </div>
             </div>
           </div>
-        )}
+        )} */}
 
         <div className="text-center">
           <Heading
