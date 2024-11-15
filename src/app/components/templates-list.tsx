@@ -162,10 +162,14 @@ const TemplatesList = ({ session, user }: Props) => {
   }, [session, router])
 
   const handleTabChange = (index: number) => {
-    console.log(index)
-    console.log(templateTypes[index])
-    const newTab = templateTypes[index]
+    const availableTypes = templateTypes.filter((type) => {
+      if (type === 'personalized') {
+        return isOnboarded
+      }
+      return true
+    })
 
+    const newTab = availableTypes[index]
     setTemplateType(newTab as TemplateTypes)
   }
 
