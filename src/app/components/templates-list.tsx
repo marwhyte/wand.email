@@ -9,9 +9,13 @@ import { convertImageToEmail } from '../actions/generateTemplateFromImage'
 import { useQueryParam } from '../hooks/useQueryParam'
 import { Heading } from './heading'
 
+import { Input } from '@/app/components/input'
 import { templates, templateTypes } from '@/lib/data/templates'
+import Link from 'next/link'
 import { useState } from 'react'
+import { Divider } from './divider'
 import TemplateCard from './email-workspace/template-card'
+import { Field, Label } from './fieldset'
 
 export const TemplateGeneratorForm = () => {
   const [result, setResult] = useState<string>('')
@@ -124,6 +128,7 @@ type Props = {
 
 const TemplatesList = ({ session, user }: Props) => {
   const router = useRouter()
+  const [personalizedEmail, setPersonalizedEmail] = useState('')
 
   const isOnboarded = user?.is_onboarded || (!user && localStorage.getItem('is_onboarded') === 'true')
 
@@ -166,6 +171,9 @@ const TemplatesList = ({ session, user }: Props) => {
       if (type === 'personalized') {
         return isOnboarded
       }
+      if (type === 'recommended') {
+        return !isOnboarded
+      }
       return true
     })
 
@@ -176,7 +184,7 @@ const TemplatesList = ({ session, user }: Props) => {
   return (
     <div>
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        {/* {!isOnboarded && (
+        {!isOnboarded && (
           <div>
             <div className="px-6 py-6 sm:px-6 sm:py-12 lg:px-8">
               <div className="mx-auto max-w-3xl text-center">
@@ -208,7 +216,7 @@ const TemplatesList = ({ session, user }: Props) => {
               </div>
             </div>
           </div>
-        )} */}
+        )}
 
         <div className="text-center">
           <Heading
@@ -230,6 +238,9 @@ const TemplatesList = ({ session, user }: Props) => {
                   if (type === 'personalized') {
                     return isOnboarded
                   }
+                  if (type === 'recommended') {
+                    return !isOnboarded
+                  }
                   return true
                 })
                 .map((type) => (
@@ -248,15 +259,31 @@ const TemplatesList = ({ session, user }: Props) => {
             </TabList>
           </TabGroup>
         </div>
-        {process.env.NODE_ENV === 'development' && <TemplateGeneratorForm />}
       </div>
-      <div className="bg-zinc-100">
-        <ul role="list" className="mx-auto flex max-w-7xl flex-wrap gap-6 px-4 py-8 sm:px-6 lg:px-8">
-          {currentTemplates.map((template) => (
-            <TemplateCard key={template.id} template={template} />
-          ))}
-        </ul>
+      <div className="min-h-96 bg-zinc-100">
+        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {templateType === 'personalized' && (
+            <div className="mx-auto max-w-2xl">
+              <Field>
+                <Label>In a few words, describe the email you are looking for.</Label>
+                <Input
+                  type="text"
+                  value={personalizedEmail}
+                  onChange={(e) => setPersonalizedEmail(e.target.value)}
+                  placeholder="Onboarding emails for new customers after a clothing purchase..."
+                  required
+                />
+              </Field>
+            </div>
+          )}
+          <ul role="list" className="flex flex-wrap justify-center gap-6 md:justify-start">
+            {currentTemplates.map((template) => (
+              <TemplateCard key={template.id} template={template} />
+            ))}
+          </ul>
+        </div>
       </div>
+      {process.env.NODE_ENV === 'development' && <TemplateGeneratorForm />}
     </div>
   )
 }

@@ -8,6 +8,7 @@ import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
 import { Bars3Icon, PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
+import { ColorInput } from '../color-input'
 
 interface RowEditorProps {
   row: RowBlock
@@ -232,10 +233,9 @@ export default function RowEditor({
                 onChange={(e) => handleRowBorderChange('borderWidth', `${e.target.value}px`)}
                 placeholder="Width"
               />
-              <Input
-                type="color"
+              <ColorInput
                 value={row.attributes.borderColor || ''}
-                onChange={(e) => handleRowBorderChange('borderColor', e.target.value)}
+                onChange={(e) => handleRowBorderChange('borderColor', e)}
               />
             </div>
           </Field>
@@ -246,10 +246,9 @@ export default function RowEditor({
         <DisclosureBody>
           <Field>
             <Label>Row Background Color</Label>
-            <Input
-              type="color"
+            <ColorInput
               value={row.attributes.backgroundColor || ''}
-              onChange={(e) => handleRowBackgroundColorChange(e.target.value)}
+              onChange={(e) => handleRowBackgroundColorChange(e)}
             />
           </Field>
         </DisclosureBody>

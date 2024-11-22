@@ -119,7 +119,7 @@ export default function Content({ children, session }: Props) {
                     </DisclosureButton>
                   </div>
                   <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                    <div className="flex flex-shrink-0 items-center">
+                    <div className="hidden flex-shrink-0 items-center md:flex">
                       <Link href="/">
                         <Logo text={false} />
                       </Link>

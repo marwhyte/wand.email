@@ -25,7 +25,10 @@ type TabListProps = ComponentProps<typeof HeadlessTabList>
 
 export function TabList({ children, ...props }: TabListProps) {
   return (
-    <HeadlessTabList className="inline-flex space-x-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800" {...props}>
+    <HeadlessTabList
+      className="inline-flex flex-wrap justify-center space-x-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800"
+      {...props}
+    >
       {children}
     </HeadlessTabList>
   )

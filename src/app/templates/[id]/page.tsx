@@ -1,3 +1,4 @@
+import DesktopOnly from '@/app/components/desktop-only'
 import { EmailProvider } from '@/app/components/email-workspace/email-provider'
 import { auth } from '@/auth'
 import { getTemplate } from '@/lib/data/templates'
@@ -16,7 +17,10 @@ export default async function TemplatePage({ params }: { params: { id: string } 
 
   return (
     <EmailProvider defaultEmail={defaultEmail}>
-      <Workspace monthlyExportCount={monthlyExportCount} session={session} />
+      <DesktopOnly />
+      <div className="hidden lg:block">
+        <Workspace monthlyExportCount={monthlyExportCount} session={session} />
+      </div>
     </EmailProvider>
   )
 }

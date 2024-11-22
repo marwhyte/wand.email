@@ -1,3 +1,4 @@
+import DesktopOnly from '@/app/components/desktop-only'
 import { EmailProvider } from '@/app/components/email-workspace/email-provider'
 import { auth } from '@/auth'
 import { getMonthlyExportCount } from '@/lib/database/queries/exports'
@@ -17,7 +18,10 @@ export default async function ProjectsPage({ params }: { params: { id: string } 
 
   return (
     <EmailProvider defaultEmail={email}>
-      <Workspace project={project} session={session} monthlyExportCount={monthlyExportCount} />
+      <DesktopOnly />
+      <div className="hidden lg:block">
+        <Workspace project={project} session={session} monthlyExportCount={monthlyExportCount} />
+      </div>
     </EmailProvider>
   )
 }
