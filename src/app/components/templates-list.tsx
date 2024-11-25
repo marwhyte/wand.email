@@ -17,6 +17,8 @@ import { Divider } from './divider'
 import TemplateCard from './email-workspace/template-card'
 import { Field, Label } from './fieldset'
 
+const isCreateMode = process.env.NEXT_PUBLIC_CREATE_MODE === 'true'
+
 export const TemplateGeneratorForm = () => {
   const [result, setResult] = useState<string>('')
   const [templateName, setTemplateName] = useState<string>('')
@@ -283,7 +285,7 @@ const TemplatesList = ({ session, user }: Props) => {
           </ul>
         </div>
       </div>
-      {process.env.NODE_ENV === 'development' && <TemplateGeneratorForm />}
+      {isCreateMode && <TemplateGeneratorForm />}
     </div>
   )
 }
