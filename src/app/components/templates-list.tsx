@@ -11,8 +11,11 @@ import { Heading } from './heading'
 
 import { Input } from '@/app/components/input'
 import { templates, templateTypes } from '@/lib/data/templates'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
+import { generateTemplates } from '../actions/generateTemplates'
+import { Button } from './button'
 import { Divider } from './divider'
 import TemplateCard from './email-workspace/template-card'
 import { Field, Label } from './fieldset'
@@ -131,8 +134,15 @@ type Props = {
 const TemplatesList = ({ session, user }: Props) => {
   const router = useRouter()
   const [personalizedEmail, setPersonalizedEmail] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [currentTemplates, setCurrentTemplates] = useState(templates)
 
   const isOnboarded = user?.is_onboarded || (!user && localStorage.getItem('is_onboarded') === 'true')
+  const logo = user?.logo_file_id || localStorage.getItem('logoFileId')
+  const themes = user?.themes || (localStorage.getItem('themes') ? JSON.parse(localStorage.getItem('themes')!) : [])
+  const primaryColor = user?.primary_color || localStorage.getItem('primaryColor')
+  const secondaryColor = user?.secondary_color || localStorage.getItem('secondaryColor')
+  const businessType = user?.business_type || localStorage.getItem('businessType')
 
   const getNameForTemplateType = (type: TemplateTypes) => {
     switch (type) {
@@ -157,7 +167,9 @@ const TemplatesList = ({ session, user }: Props) => {
     (value) => templateTypes.includes(value as TemplateTypes)
   )
 
-  const currentTemplates = templates.filter((template) => template.types.includes(templateType))
+  useEffect(() => {
+    setCurrentTemplates(templates.filter((template) => template.types.includes(templateType)))
+  }, [templateType])
 
   useEffect(() => {
     const value = localStorage.getItem('postSignUpRedirectTo')
@@ -265,17 +277,61 @@ const TemplatesList = ({ session, user }: Props) => {
       <div className="min-h-96 bg-zinc-100">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           {templateType === 'personalized' && (
-            <div className="mx-auto max-w-2xl">
-              <Field>
-                <Label>In a few words, describe the email you are looking for.</Label>
-                <Input
-                  type="text"
-                  value={personalizedEmail}
-                  onChange={(e) => setPersonalizedEmail(e.target.value)}
-                  placeholder="Onboarding emails for new customers after a clothing purchase..."
-                  required
-                />
+            <div className="mx-auto flex max-w-2xl flex-col items-center gap-4">
+              <Field className="flex flex-col items-center gap-2">
+                <Label className="mx-auto">In a few words, describe the email you are looking for.</Label>
+                <div className="w-[490px]">
+                  <Input
+                    type="text"
+                    value={personalizedEmail}
+                    onChange={(e) => setPersonalizedEmail(e.target.value)}
+                    placeholder="Onboarding emails for new customers after a clothing purchase..."
+                    required
+                  />
+                </div>
               </Field>
+              <Button
+                onClick={async () => {
+                  setIsGenerating(true)
+                  try {
+                    const generatedTemplates = await generateTemplates(
+                      personalizedEmail,
+                      logo,
+                      themes,
+                      primaryColor,
+                      secondaryColor,
+                      businessType
+                    )
+                    setCurrentTemplates(generatedTemplates)
+                  } catch (error) {
+                    console.error('Failed to generate template:', error)
+                  } finally {
+                    setIsGenerating(false)
+                  }
+                }}
+                disabled={isGenerating || !personalizedEmail.trim()}
+              >
+                {isGenerating ? (
+                  <div className="flex items-center gap-2">
+                    <video className="h-5 w-5" autoPlay muted playsInline loop>
+                      <source src="/email-animation.webm" type="video/webm" />
+                    </video>
+                    Analyzing...
+                  </div>
+                ) : (
+                  'Generate Templates'
+                )}
+              </Button>
+
+              {!isGenerating && !currentTemplates.length && (
+                <Image
+                  width={256}
+                  height={256}
+                  src="/empty-projects.svg"
+                  alt="Start a new project"
+                  className="mx-auto mb-2"
+                />
+              )}
             </div>
           )}
           <ul role="list" className="flex flex-wrap justify-center gap-6 md:justify-start">

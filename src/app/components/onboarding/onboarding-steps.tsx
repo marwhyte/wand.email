@@ -35,8 +35,6 @@ export const OnboardingSteps = ({ logo, user }: Props) => {
 
   const businessTypeOptions = getBusinessTypeOptions()
 
-  console.log(user?.themes)
-
   useEffect(() => {
     // Load businessType from localStorage if user is null
     if (!user) {
