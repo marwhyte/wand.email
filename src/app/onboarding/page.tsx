@@ -1,17 +1,14 @@
 import { tiers } from '@/lib/data/plans'
-import { getFile } from '@/lib/database/queries/files'
 import { ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { CheckIcon } from '@heroicons/react/24/solid'
 import { fetchUser } from '../actions'
 import { Heading } from '../components/heading'
 import { Link } from '../components/link'
 import { Logo } from '../components/Logo'
-import { OnboardingSteps } from '../components/onboarding/onboarding-steps'
+import { LogoProvider } from '../components/onboarding/logo-provider'
 
 const OnboardingPage = async () => {
   const user = await fetchUser()
-
-  const logo = user?.logo_file_id ? await getFile(user.logo_file_id) : null
 
   return (
     <div className="flex min-h-screen">
@@ -40,7 +37,7 @@ const OnboardingPage = async () => {
       </div>
       <div className="flex min-h-screen flex-1 items-center justify-center rounded-lg">
         <div className="w-[480px]">
-          <OnboardingSteps user={user ?? null} logo={logo ?? null} />
+          <LogoProvider user={user ?? null} />
         </div>
       </div>
     </div>

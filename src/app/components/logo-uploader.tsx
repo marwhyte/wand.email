@@ -24,7 +24,7 @@ const LogoUploader = ({ onUpload }: Props) => {
     formData.append('file', file)
 
     try {
-      const result = await uploadFile(formData)
+      const result = await uploadFile(formData, true)
       if (result.success && result.file) {
         onUpload(result.file)
       } else {

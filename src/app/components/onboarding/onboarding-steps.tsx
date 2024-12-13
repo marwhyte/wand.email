@@ -31,6 +31,14 @@ export const OnboardingSteps = ({ logo, user }: Props) => {
 
   const [logoFile, setLogoFile] = useState<File | null>(logo ?? null)
 
+  useEffect(() => {
+    if (logo) {
+      setLogoFile(logo)
+    }
+  }, [logo])
+
+  console.log(logoFile)
+
   console.log(businessType, user?.business_type, localStorage.getItem('businessType'))
 
   const businessTypeOptions = getBusinessTypeOptions()
@@ -138,7 +146,10 @@ export const OnboardingSteps = ({ logo, user }: Props) => {
                   <Text className="!text-xl font-bold">Logo</Text>
                   <LogoUploader
                     onUpload={(file) => {
-                      updateOnboardingUser({ logoFileId: file.id })
+                      localStorage.setItem('logoFileId', file.id)
+                      if (user) {
+                        updateOnboardingUser({ logoFileId: file.id })
+                      }
                       setLogoFile(file)
                     }}
                   />

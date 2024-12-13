@@ -86,7 +86,7 @@ export interface FileTable {
   id: Generated<string>
   file_name: string
   image_key: string
-  user_id: string
+  user_id: string | null
   created_at: Date
   size_bytes: number
   updated_at: Date

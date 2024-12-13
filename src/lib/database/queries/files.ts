@@ -18,15 +18,20 @@ const getCachedFiles = unstable_cache(
 
 export async function getFile(fileId: string) {
   const session = await auth()
-  if (!session?.user?.id) {
-    throw new Error('User not authenticated')
-  }
+
   const file = await db
     .selectFrom('files')
     .selectAll()
     .where('id', '=', fileId)
-    .where('user_id', '=', session.user.id)
+    .where((eb) =>
+      eb.or([
+        eb('user_id', 'is', null),
+        // Only check user_id match if user is authenticated
+        session?.user?.id ? eb('user_id', '=', session.user.id) : eb.val(false),
+      ])
+    )
     .executeTakeFirst()
+  console.log('file', file, fileId)
   return file
 }
 
@@ -38,7 +43,7 @@ export async function getFiles() {
   return getCachedFiles(session.user.id)
 }
 
-export async function addFile(userId: string, fileName: string, imageKey: string, sizeBytes: number) {
+export async function addFile(userId: string | null, fileName: string, imageKey: string, sizeBytes: number) {
   const file = await db
     .insertInto('files')
     .values({

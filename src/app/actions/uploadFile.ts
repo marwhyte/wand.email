@@ -6,9 +6,9 @@ import { generatePresignedUrl } from './generatePresignedUrl'
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024 // 15MB
 
-export async function uploadFile(formData: FormData) {
+export async function uploadFile(formData: FormData, allowUnauthorized = false) {
   const session = await auth()
-  if (!session?.user?.id) {
+  if (!session?.user?.id && !allowUnauthorized) {
     return { success: false, error: 'Unauthorized' }
   }
   const file = formData.get('file') as File
@@ -37,7 +37,7 @@ export async function uploadFile(formData: FormData) {
     }
 
     // Add file to database and get the file ID
-    const addedFile = await addFile(session.user.id, file.name, key, file.size)
+    const addedFile = await addFile(session?.user?.id ?? null, file.name, key, file.size)
 
     return {
       success: true,
