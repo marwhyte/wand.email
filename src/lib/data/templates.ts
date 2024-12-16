@@ -4,14 +4,16 @@ import { nikeVerificationTemplate } from '@/app/components/email-workspace/nike-
 import { slackTemplate } from '@/app/components/email-workspace/slack-template'
 import { stripeTemplate } from '@/app/components/email-workspace/stripe-template'
 import { turbotaxTemplate } from '@/app/components/email-workspace/turbotax-template'
+import { getImgFromKey } from '@/lib/utils/misc'
 import { v4 as uuidv4 } from 'uuid'
+import { getFile } from '../database/queries/files'
 
 export const templates: Template[] = [
   {
     name: 'Going',
     id: 'going',
     description: 'Marketing emails for flight deals',
-    template: goingTemplate,
+    template: goingTemplate(),
     types: ['ecommerce', 'recommended'],
   },
   {
@@ -64,9 +66,20 @@ export const getTemplateName = (id: string) => {
   const template = templates.find((template) => template.id === id)
   return template?.name || null
 }
-export const getTemplate = (id: string): Email | null => {
+export const getTemplate = (id: string, config?: Partial<TemplateConfig>): Email | null => {
   const template = templates.find((template) => template.id === id)
-  return template?.template || null
+  if (!template) return null
+
+  if (config) {
+    switch (template.id) {
+      case 'going':
+        return goingTemplate(config)
+      default:
+        return template.template
+    }
+  }
+
+  return template.template
 }
 
 export function createNewBlock(type: EmailBlockType): EmailBlock {
@@ -170,5 +183,35 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
       }
     default:
       throw new Error(`Unsupported block type: ${type}`)
+  }
+}
+
+export async function getTemplateConfig(params: {
+  user?: {
+    primary_color?: string | null
+    secondary_color?: string | null
+    logo_file_id?: string | null
+  } | null
+  useLocalStorage?: boolean
+}): Promise<TemplateConfig> {
+  const { user, useLocalStorage = true } = params
+
+  const logoFileId = user?.logo_file_id || (useLocalStorage ? localStorage.getItem('logoFileId') : null) || null
+
+  console.log(logoFileId, 'here')
+
+  let logoFile = undefined
+
+  if (logoFileId) {
+    logoFile = await getFile(logoFileId)
+  }
+
+  return {
+    colors: {
+      primary: user?.primary_color || (useLocalStorage ? localStorage.getItem('primaryColor') : null) || null,
+      secondary: user?.secondary_color || (useLocalStorage ? localStorage.getItem('secondaryColor') : null) || null,
+    },
+    companyName: null,
+    logoUrl: getImgFromKey(logoFile?.image_key ?? ''),
   }
 }

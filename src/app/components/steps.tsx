@@ -1,6 +1,7 @@
 import { CheckCircleIcon } from '@heroicons/react/24/solid'
 import React, { ReactNode, useState } from 'react'
 import { Button } from './button'
+import Loading from './loading'
 import { Text } from './text'
 
 interface Step {
@@ -8,7 +9,7 @@ interface Step {
 }
 
 interface StepsProps {
-  onFinish: () => void
+  onFinish: () => void | Promise<void>
   steps: Step[]
   height?: '500px' | '450px'
   children: (currentStep: Step) => ReactNode
@@ -16,15 +17,21 @@ interface StepsProps {
 
 export const Steps: React.FC<StepsProps> = ({ steps, children, height = '500px', onFinish }) => {
   const [currentStepIndex, setCurrentStepIndex] = useState(0)
+  const [isFinishing, setIsFinishing] = useState(false)
   const currentStep = steps[currentStepIndex]
 
   const handlePrevious = () => {
     setCurrentStepIndex((prevIndex) => Math.max(0, prevIndex - 1))
   }
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentStepIndex === steps.length - 1) {
-      onFinish()
+      setIsFinishing(true)
+      try {
+        await onFinish()
+      } finally {
+        setIsFinishing(false)
+      }
     } else {
       setCurrentStepIndex((prevIndex) => Math.min(steps.length - 1, prevIndex + 1))
     }
@@ -43,7 +50,7 @@ export const Steps: React.FC<StepsProps> = ({ steps, children, height = '500px',
                   <div className="relative mx-4 h-0.5 w-24 bg-gray-300">
                     <div
                       className={`absolute left-0 top-0 h-full transition-all duration-300 ease-in-out ${
-                        isCompleted ? 'w-full bg-green-500' : isCurrent ? 'animate-grow-width w-0 bg-purple-500' : 'w-0'
+                        isCompleted ? 'w-full bg-green-500' : isCurrent ? 'w-0 animate-grow-width bg-purple-500' : 'w-0'
                       }`}
                     />
                   </div>
@@ -70,12 +77,24 @@ export const Steps: React.FC<StepsProps> = ({ steps, children, height = '500px',
 
       <div className="flex justify-center gap-4">
         {currentStepIndex > 0 && (
-          <Button className="w-full" onClick={handlePrevious} disabled={currentStepIndex === 0} color="grey">
+          <Button
+            className="w-full"
+            onClick={handlePrevious}
+            disabled={currentStepIndex === 0 || isFinishing}
+            color="grey"
+          >
             Previous: {steps[currentStepIndex - 1].name}
           </Button>
         )}
-        <Button type="submit" className="w-full" onClick={handleNext} color="purple">
-          {currentStepIndex === steps.length - 1 ? 'Finish' : `Next: ${steps[currentStepIndex + 1].name}`}
+        <Button type="submit" className="w-full" onClick={handleNext} disabled={isFinishing} color="purple">
+          {currentStepIndex === steps.length - 1 ? (
+            <div className="flex items-center justify-center gap-2">
+              {isFinishing && <Loading height={24} width={24} />}
+              <span>Finish</span>
+            </div>
+          ) : (
+            `Next: ${steps[currentStepIndex + 1].name}`
+          )}
         </Button>
       </div>
     </div>

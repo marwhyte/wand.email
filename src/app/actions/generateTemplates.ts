@@ -1,16 +1,9 @@
 'use server'
 
-import { templates, templateTypes } from '@/lib/data/templates'
+import { getTemplate, templates, templateTypes } from '@/lib/data/templates'
 import OpenAI from 'openai'
 
-export async function generateTemplates(
-  description: string,
-  logoFileId: string | null,
-  themes: string[] | null,
-  primaryColor: string | null,
-  secondaryColor: string | null,
-  businessType: string | null
-) {
+export async function generateTemplates(description: string, config?: Partial<TemplateConfig>) {
   const openai = new OpenAI()
 
   const prompt = `Based on the following email campaign description, which of these template types would be most appropriate? 
@@ -33,7 +26,14 @@ export async function generateTemplates(
     suggestedTemplate = 'recommended'
   }
 
-  const currentTemplates = templates.filter((template) => template.types.includes(suggestedTemplate as any)).slice(0, 3)
+  // Get filtered templates and apply config to each one
+  const currentTemplates: Template[] = templates
+    .filter((template) => template.types.includes(suggestedTemplate as any))
+    .slice(0, 3)
+    .map((template) => ({
+      ...template,
+      template: getTemplate(template.id, config) as Email,
+    }))
 
   return currentTemplates
 }

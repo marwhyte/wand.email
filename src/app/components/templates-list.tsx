@@ -9,16 +9,12 @@ import { convertImageToEmail } from '../actions/generateTemplateFromImage'
 import { useQueryParam } from '../hooks/useQueryParam'
 import { Heading } from './heading'
 
-import { Input } from '@/app/components/input'
-import { templates, templateTypes } from '@/lib/data/templates'
-import Image from 'next/image'
+import { getTemplateConfig, templates, templateTypes } from '@/lib/data/templates'
 import Link from 'next/link'
 import { useState } from 'react'
-import { generateTemplates } from '../actions/generateTemplates'
-import { Button } from './button'
 import { Divider } from './divider'
+import { goingTemplate } from './email-workspace/going-template'
 import TemplateCard from './email-workspace/template-card'
-import { Field, Label } from './fieldset'
 
 const isCreateMode = process.env.NEXT_PUBLIC_CREATE_MODE === 'true'
 
@@ -135,7 +131,8 @@ const TemplatesList = ({ session, user }: Props) => {
   const router = useRouter()
   const [personalizedEmail, setPersonalizedEmail] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
-  const [currentTemplates, setCurrentTemplates] = useState(templates)
+  const [currentTemplates, setCurrentTemplates] = useState<Template[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   const isOnboarded = user?.is_onboarded || (!user && localStorage.getItem('is_onboarded') === 'true')
   const logo = user?.logo_file_id || localStorage.getItem('logoFileId')
@@ -168,8 +165,56 @@ const TemplatesList = ({ session, user }: Props) => {
   )
 
   useEffect(() => {
-    setCurrentTemplates(templates.filter((template) => template.types.includes(templateType)))
-  }, [templateType])
+    const initializeTemplates = async () => {
+      if (templateType === 'personalized') {
+        try {
+          const config = await getTemplateConfig({ user })
+          setCurrentTemplates([
+            {
+              ...templates[0], // Using going template as base
+              template: goingTemplate(config),
+            },
+          ])
+        } catch (error) {
+          console.error('Error initializing templates:', error)
+          setCurrentTemplates([])
+        }
+      } else {
+        setCurrentTemplates(templates)
+      }
+      setIsLoading(false)
+    }
+
+    initializeTemplates()
+  }, [templateType, user])
+
+  useEffect(() => {
+    const loadTemplates = async () => {
+      if (templateType !== 'personalized') {
+        setCurrentTemplates(templates.filter((template) => template.types.includes(templateType)))
+        return
+      }
+
+      // Only reset to default personalized template if there are no current templates
+      if (currentTemplates.length === 0) {
+        try {
+          const config = await getTemplateConfig({ user })
+          setCurrentTemplates([
+            {
+              ...templates[0],
+              template: goingTemplate(config),
+            },
+          ])
+        } catch (error) {
+          console.error('Error loading templates:', error)
+        }
+      }
+    }
+
+    loadTemplates()
+  }, [templateType, currentTemplates.length, user])
+
+  console.log(localStorage.getItem('logoFileId'))
 
   useEffect(() => {
     const value = localStorage.getItem('postSignUpRedirectTo')
@@ -276,69 +321,15 @@ const TemplatesList = ({ session, user }: Props) => {
       </div>
       <div className="min-h-96 bg-zinc-100">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-          {templateType === 'personalized' && (
-            <div className="mx-auto flex max-w-2xl flex-col items-center gap-4">
-              <Field className="flex flex-col items-center gap-2">
-                <Label className="mx-auto">In a few words, describe the email you are looking for.</Label>
-                <div className="w-[490px]">
-                  <Input
-                    type="text"
-                    value={personalizedEmail}
-                    onChange={(e) => setPersonalizedEmail(e.target.value)}
-                    placeholder="Onboarding emails for new customers after a clothing purchase..."
-                    required
-                  />
-                </div>
-              </Field>
-              <Button
-                onClick={async () => {
-                  setIsGenerating(true)
-                  try {
-                    const generatedTemplates = await generateTemplates(
-                      personalizedEmail,
-                      logo,
-                      themes,
-                      primaryColor,
-                      secondaryColor,
-                      businessType
-                    )
-                    setCurrentTemplates(generatedTemplates)
-                  } catch (error) {
-                    console.error('Failed to generate template:', error)
-                  } finally {
-                    setIsGenerating(false)
-                  }
-                }}
-                disabled={isGenerating || !personalizedEmail.trim()}
-              >
-                {isGenerating ? (
-                  <div className="flex items-center gap-2">
-                    <video className="h-5 w-5" autoPlay muted playsInline loop>
-                      <source src="/email-animation.webm" type="video/webm" />
-                    </video>
-                    Analyzing...
-                  </div>
-                ) : (
-                  'Generate Templates'
-                )}
-              </Button>
-
-              {!isGenerating && !currentTemplates.length && (
-                <Image
-                  width={256}
-                  height={256}
-                  src="/empty-projects.svg"
-                  alt="Start a new project"
-                  className="mx-auto mb-2"
-                />
-              )}
-            </div>
+          {isLoading ? (
+            <div>Loading...</div>
+          ) : (
+            <ul role="list" className="flex flex-wrap justify-center gap-6 md:justify-start">
+              {currentTemplates.map((template) => (
+                <TemplateCard key={template.id} template={template} />
+              ))}
+            </ul>
           )}
-          <ul role="list" className="flex flex-wrap justify-center gap-6 md:justify-start">
-            {currentTemplates.map((template) => (
-              <TemplateCard key={template.id} template={template} />
-            ))}
-          </ul>
         </div>
       </div>
       {isCreateMode && <TemplateGeneratorForm />}

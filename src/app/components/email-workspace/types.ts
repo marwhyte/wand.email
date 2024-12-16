@@ -24,6 +24,21 @@ type Project = {
 
 type TemplateTypes = 'personalized' | 'recommended' | 'ecommerce' | 'transactional' | 'welcome-series' | 'newsletter'
 
+interface TemplateConfig {
+  logoUrl: string | null
+  colors: {
+    primary: string | null
+    secondary: string | null
+  }
+  companyName: string | null
+}
+
+type RequiredTemplateConfig = {
+  [K in keyof TemplateConfig]: TemplateConfig[K] extends { [key: string]: string | null }
+    ? { [P in keyof TemplateConfig[K]]: NonNullable<TemplateConfig[K][P]> }
+    : NonNullable<TemplateConfig[K]>
+}
+
 type Template = {
   name: string
   id: string

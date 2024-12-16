@@ -103,11 +103,10 @@ export const OnboardingSteps = ({ logo, user }: Props) => {
     <form action={handleSubmit}>
       <Steps
         height="500px"
-        onFinish={() => {
+        onFinish={async () => {
           if (user) {
-            updateOnboardingUser({ isOnboarded: true }).then(() => {
-              router.push('/templates?onboarding-complete=true')
-            })
+            await updateOnboardingUser({ isOnboarded: true })
+            router.push('/templates?onboarding-complete=true')
           } else {
             localStorage.setItem('is_onboarded', 'true')
             router.push('/templates?onboarding-complete=true')
