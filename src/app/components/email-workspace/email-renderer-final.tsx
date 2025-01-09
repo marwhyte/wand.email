@@ -25,10 +25,10 @@ import parse from 'html-react-parser'
 import EmailSocials from './email-components/email-socials'
 
 type Props = {
-  email: Email
+  email?: Email
 }
 
-const RenderBlockFinal = ({ block }: { block: EmailBlock }) => {
+const RenderBlockFinal = ({ block, email }: { block: EmailBlock; email?: Email }) => {
   switch (block.type) {
     case 'text':
       const textProps = generateBlockProps(block)
@@ -43,7 +43,7 @@ const RenderBlockFinal = ({ block }: { block: EmailBlock }) => {
       const buttonProps = generateBlockProps(block)
       return <Button {...buttonProps}>{parse(block.content)}</Button>
     case 'link':
-      const linkProps = generateBlockProps(block)
+      const linkProps = generateBlockProps(block, email?.linkColor)
       return <Link {...linkProps}>{parse(block.content)}</Link>
     case 'divider':
       const dividerProps = generateBlockProps(block)
@@ -57,7 +57,15 @@ const RenderBlockFinal = ({ block }: { block: EmailBlock }) => {
 
 export const EmailContent = ({ email }: { email: Email }) => {
   return (
-    <Container width={email.width} style={{ maxWidth: `${email.width}px`, width: `${email.width}px` }}>
+    <Container
+      width={email.width}
+      style={{
+        backgroundColor: email.bgColor,
+        color: email.color,
+        maxWidth: `${email.width}px`,
+        width: `${email.width}px`,
+      }}
+    >
       {email.rows.map((row) => (
         <Container key={row.id} {...generateContainerProps(row, email)}>
           <Row {...generateRowProps(row)}>
@@ -65,7 +73,7 @@ export const EmailContent = ({ email }: { email: Email }) => {
               return (
                 <Column key={column.id} {...generateColumnProps(column, row)}>
                   {column.blocks.map((block) => (
-                    <RenderBlockFinal key={block.id} block={block} />
+                    <RenderBlockFinal key={block.id} block={block} email={email} />
                   ))}
                 </Column>
               )
@@ -78,6 +86,8 @@ export const EmailContent = ({ email }: { email: Email }) => {
 }
 
 const EmailRendererFinal = ({ email }: Props) => {
+  if (!email) return <></>
+
   return (
     <Html>
       <Head>

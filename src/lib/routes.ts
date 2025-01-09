@@ -9,11 +9,17 @@ export const PUBLIC_ROUTES = [
   SIGNUP,
   '/onboarding',
   '/api/auth/callback/google',
+  '/api/auth/signin/google',
+  '/api/auth/session',
+  '/monitoring',
+  '/api/auth/providers',
+  '/api/auth/error',
   '/api/stripe-webhook',
   '/api',
   '/home',
   '/templates',
   '/templates/:id',
   '/pricing',
+  '/google-signin',
 ]
 export const DEFAULT_REDIRECT = ROOT

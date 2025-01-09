@@ -6,12 +6,17 @@ export const getAdditionalTextStyles = (
   attributes: TextBlockAttributes
 ): React.ComponentProps<typeof Text>['style'] => {
   return {
+    paddingTop: attributes.paddingTop ?? '0',
+    paddingRight: attributes.paddingRight ?? '0',
+    paddingBottom: attributes.paddingBottom ?? '0',
+    paddingLeft: attributes.paddingLeft ?? '0',
     margin: 0,
     fontFamily: attributes.fontFamily,
     letterSpacing: attributes.letterSpacing,
     textIndent: attributes.textIndent,
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
+    fontSize: attributes.fontSize ?? '16px',
   }
 }
 
@@ -19,6 +24,10 @@ export const getAdditionalHeadingStyles = (
   attributes: HeadingBlockAttributes
 ): React.ComponentProps<typeof Heading>['style'] => {
   return {
+    paddingTop: attributes.paddingTop ?? '0',
+    paddingRight: attributes.paddingRight ?? '0',
+    paddingBottom: attributes.paddingBottom ?? '0',
+    paddingLeft: attributes.paddingLeft ?? '0',
     fontFamily: attributes.fontFamily,
     letterSpacing: attributes.letterSpacing,
     textIndent: attributes.textIndent,
@@ -46,7 +55,7 @@ export const getAdditionalButtonStyles = (
   return {
     display: 'inline-block',
     backgroundColor: attributes.backgroundColor,
-    color: attributes.color,
+    color: attributes.color ?? '#ffffff',
     fontSize: attributes.fontSize,
     fontWeight: attributes.fontWeight,
     textDecoration: attributes.textDecoration,
@@ -158,7 +167,6 @@ export function generateColumnProps(
   mobileView = false
 ): OmitChildren<React.ComponentProps<typeof Column>> {
   const desktopWidth = `${(column.gridColumns / 12) * 100}%`
-  console.log(row.attributes.stackOnMobile && mobileView)
   return {
     valign: column.attributes.valign,
     align: column.attributes.align,
@@ -250,7 +258,8 @@ export function generateButtonProps(
 
 export function generateLinkProps(
   block: LinkBlock,
-  mobileView = false
+  mobileView = false,
+  defaultLinkColor?: string
 ): OmitChildren<React.ComponentProps<typeof Link>> {
   return {
     href: block.attributes.href,
@@ -258,7 +267,10 @@ export function generateLinkProps(
     rel: block.attributes.rel,
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalLinkStyles(block.attributes),
+      ...getAdditionalLinkStyles({
+        ...block.attributes,
+        color: block.attributes.color || defaultLinkColor || '#3b82f6',
+      }),
     },
     className: applyCommonClassName(block.attributes, mobileView),
   }
@@ -269,8 +281,8 @@ export const getAdditionalDividerStyles = (
 ): React.ComponentProps<typeof Hr>['style'] => {
   return {
     borderTopStyle: attributes.borderStyle,
-    borderTopWidth: attributes.borderWidth,
-    borderTopColor: attributes.borderColor,
+    borderTopWidth: attributes.borderWidth ?? '1px',
+    borderTopColor: attributes.borderColor ?? '#E0E0E0',
     padding: 0,
     marginLeft: attributes.paddingLeft,
     marginRight: attributes.paddingRight,
@@ -293,7 +305,8 @@ export function generateDividerProps(
 }
 
 export function generateBlockProps<T extends EmailBlock>(
-  block: T
+  block: T,
+  defaultLinkColor?: string
 ): T extends TextBlock
   ? OmitChildren<React.ComponentProps<typeof Text>>
   : T extends HeadingBlock
@@ -317,7 +330,7 @@ export function generateBlockProps<T extends EmailBlock>(
     case 'button':
       return generateButtonProps(block as ButtonBlock) as any
     case 'link':
-      return generateLinkProps(block as LinkBlock) as any
+      return generateLinkProps(block as LinkBlock, false, defaultLinkColor) as any
     case 'divider':
       return generateDividerProps(block as DividerBlock) as any
     default:

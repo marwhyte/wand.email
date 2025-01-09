@@ -5,7 +5,8 @@ import { revalidateTag, unstable_cache } from 'next/cache'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db'
 
-export const getProjects = unstable_cache(
+// Internal helpers that take userId as parameter for caching
+const getProjectsInternal = unstable_cache(
   async (sessionUserId: string) => {
     const projects = await db
       .selectFrom('projects')
@@ -21,6 +22,40 @@ export const getProjects = unstable_cache(
     revalidate: 60 * 60 * 24,
   }
 )
+
+const getProjectInternal = unstable_cache(
+  async (id: string, sessionUserId: string): Promise<Project | undefined> => {
+    const project = await db
+      .selectFrom('projects')
+      .selectAll()
+      .where('id', '=', id)
+      .where('user_id', '=', sessionUserId)
+      .executeTakeFirst()
+    return project
+  },
+  ['project'],
+  {
+    tags: ['project'],
+    revalidate: 60 * 60,
+  }
+)
+
+// Public functions that handle auth internally
+export async function getProjects() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+  return getProjectsInternal(session.user.id)
+}
+
+export async function getProject(id: string) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+  return getProjectInternal(id, session.user.id)
+}
 
 export async function addProject(title: string, content?: Email) {
   const session = await auth()
@@ -55,23 +90,6 @@ export async function addProject(title: string, content?: Email) {
   return project
 }
 
-export const getProject = unstable_cache(
-  async (id: string, sessionUserId: string): Promise<Project | undefined> => {
-    const project = await db
-      .selectFrom('projects')
-      .selectAll()
-      .where('id', '=', id)
-      .where('user_id', '=', sessionUserId)
-      .executeTakeFirst()
-    return project
-  },
-  ['project'],
-  {
-    tags: ['project'],
-    revalidate: 60 * 60,
-  }
-)
-
 export async function updateProject(id: string, updates: { content?: Email; title?: string }) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -95,7 +113,6 @@ export async function updateProject(id: string, updates: { content?: Email; titl
     .where('user_id', '=', session.user.id)
     .execute()
 
-  // Revalidate cache
   revalidateTag('projects')
 }
 
@@ -111,6 +128,5 @@ export async function deleteProject(id: string) {
     .where('user_id', '=', session.user.id)
     .execute()
 
-  // Revalidate cache
   revalidateTag('projects')
 }

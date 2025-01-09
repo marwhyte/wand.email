@@ -3,19 +3,17 @@
 import { signIn, signOut } from '@/auth'
 
 export async function doGoogleLogin() {
-  await signIn('google', { redirectTo: '/templates' })
+  return signIn('google', { callbackUrl: 'false' })
 }
 
 export async function doCredentialsLogin(formData: FormData) {
   try {
-    const response = await signIn('credentials', {
+    await signIn('credentials', {
       email: formData.get('email'),
       password: formData.get('password'),
+      redirect: false,
     })
-
-    return response
   } catch (e) {
-    console.error('hi', e)
     throw e
   }
 }
@@ -25,5 +23,5 @@ export async function doLogout() {
 }
 
 export async function doGoogleLoginWithInitialProject() {
-  await signIn('google', { redirectTo: '/add-initial-project' })
+  return signIn('google', { callbackUrl: 'false' })
 }

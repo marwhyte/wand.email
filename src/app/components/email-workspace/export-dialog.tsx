@@ -1,5 +1,6 @@
 import { addExport } from '@/lib/database/queries/exports'
 import { ExportType } from '@/lib/database/types'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { getReactEmailCode } from '@/lib/utils/code-generation'
 import { ChevronLeftIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
 import { CodeBlock, CodeInline, dracula, render } from '@react-email/components'
@@ -13,9 +14,7 @@ import Nbsp from '../nbsp'
 import Notification from '../notification'
 import { Steps } from '../steps'
 import { Strong, Text, TextLink } from '../text'
-import { useEmail } from './email-provider'
 import EmailRendererFinal from './email-renderer-final'
-
 type Props = {
   open: boolean
   onClose: () => void
@@ -23,12 +22,13 @@ type Props = {
 }
 
 const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
-  const { email } = useEmail()
+  const { email } = useEmailStore()
   const [exportType, setExportType] = useState<ExportType | null>(null)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
 
   const handleExport = (type: ExportType) => {
+    if (!email) return
     addExport(email, type)
     setExportType(type)
   }
@@ -38,6 +38,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
 
   const handleCopyReact = useCallback(async () => {
     try {
+      if (!reactEmailCode) return
       await navigator.clipboard.writeText(reactEmailCode)
       setNotificationMessage('Code copied to clipboard')
       setNotificationStatus('success')
@@ -154,7 +155,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                             theme={dracula}
                             lineNumbers
                             language="typescript"
-                            code={reactEmailCode}
+                            code={reactEmailCode ?? ''}
                           />
                         </div>
                       </div>

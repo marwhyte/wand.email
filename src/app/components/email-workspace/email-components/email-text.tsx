@@ -1,3 +1,4 @@
+import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateTextProps } from '@/lib/utils/attributes'
 import { Text } from '@react-email/components'
 import parse from 'html-react-parser'
@@ -9,7 +10,7 @@ type Props = {
 
 export default function EmailText({ block }: Props) {
   const searchParams = useSearchParams()
-  const mobileView = searchParams.get('mobileView') === 'true'
+  const { mobileView } = useMobileViewStore()
 
   return <Text {...generateTextProps(block, mobileView)}>{parse(block.content)}</Text>
 }

@@ -37,10 +37,6 @@ export const OnboardingSteps = ({ logo, user }: Props) => {
     }
   }, [logo])
 
-  console.log(logoFile)
-
-  console.log(businessType, user?.business_type, localStorage.getItem('businessType'))
-
   const businessTypeOptions = getBusinessTypeOptions()
 
   useEffect(() => {

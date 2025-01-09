@@ -92,6 +92,7 @@ export const authOptions: NextAuthConfig = {
     },
     async session({ session, token }) {
       const exists = await userExists(session.user.email as string)
+
       if (!exists) {
         // Instead of calling signOut, we'll return a modified session
         return { ...session, user: undefined }

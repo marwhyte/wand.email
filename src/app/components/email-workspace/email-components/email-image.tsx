@@ -1,17 +1,19 @@
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { generateBlockProps } from '@/lib/utils/attributes'
 import { Img } from '@react-email/components'
 import Image from 'next/image'
 import FileUploader from '../../file-uploader'
-import { useEmail } from '../email-provider'
 
 type Props = {
   block: ImageBlock
 }
 
 export default function EmailImage({ block }: Props) {
-  const { setEmail, email, setCurrentBlock } = useEmail()
+  const { setEmail, email, setCurrentBlock } = useEmailStore()
 
   const handleUpload = (src: string) => {
+    if (!email) return
+
     const updatedBlock = {
       ...block,
       attributes: { ...block.attributes, src },

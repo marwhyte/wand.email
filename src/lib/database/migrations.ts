@@ -22,7 +22,6 @@ async function executeMigration(down = false) {
 
   const { error, results } = result
 
-  console.log(results)
   results?.forEach((it) => {
     if (it.status === 'Success') {
       console.log(`migration "${it.migrationName}" was ${down ? 'reverted' : 'executed'} successfully`)

@@ -5,6 +5,8 @@ export interface Database {
   projects: ProjectTable
   exports: ExportTable
   files: FileTable
+  chats: ChatTable
+  messages: MessageTable
 }
 
 export type ExportType = 'react' | 'html'
@@ -93,3 +95,26 @@ export interface FileTable {
 }
 
 export type File = Omit<FileTable, 'id'> & { id: string }
+
+export interface ChatTable {
+  id: Generated<string>
+  user_id: string
+  title: string
+  email: Email | null
+  created_at: Date
+  updated_at: Date
+  deleted_at: Date | null
+}
+
+export type Chat = Omit<ChatTable, 'id'> & { id: string }
+
+export interface MessageTable {
+  id: Generated<string>
+  chat_id: string
+  role: 'user' | 'assistant' | 'system' | 'data'
+  content: string
+  created_at: Date
+  sequence: number
+}
+
+export type Message = Omit<MessageTable, 'id'> & { id: string }

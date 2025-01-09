@@ -1,9 +1,9 @@
-import { ebayTemplate } from '@/app/components/email-workspace/ebay-template'
-import { goingTemplate } from '@/app/components/email-workspace/going-template'
-import { nikeVerificationTemplate } from '@/app/components/email-workspace/nike-verification-template'
-import { slackTemplate } from '@/app/components/email-workspace/slack-template'
-import { stripeTemplate } from '@/app/components/email-workspace/stripe-template'
-import { turbotaxTemplate } from '@/app/components/email-workspace/turbotax-template'
+import { ebayTemplate } from '@/app/components/email-workspace/templates/ebay-template'
+import { goingTemplate } from '@/app/components/email-workspace/templates/going-template'
+import { nikeVerificationTemplate } from '@/app/components/email-workspace/templates/nike-verification-template'
+import { slackTemplate } from '@/app/components/email-workspace/templates/slack-template'
+import { stripeTemplate } from '@/app/components/email-workspace/templates/stripe-template'
+import { turbotaxTemplate } from '@/app/components/email-workspace/templates/turbotax-template'
 import { getImgFromKey } from '@/lib/utils/misc'
 import { v4 as uuidv4 } from 'uuid'
 import { getFile } from '../database/queries/files'
@@ -27,28 +27,28 @@ export const templates: Template[] = [
     name: 'Nike Verification',
     id: 'nike-verification',
     description: 'Verification code email',
-    template: nikeVerificationTemplate,
+    template: nikeVerificationTemplate(),
     types: ['transactional', 'recommended'],
   },
   {
     name: 'Stripe',
     id: 'stripe',
     description: 'Product updates',
-    template: stripeTemplate,
+    template: stripeTemplate(),
     types: ['newsletter', 'recommended'],
   },
   {
     name: 'Slack',
     id: 'slack',
     description: 'Membership ended',
-    template: slackTemplate,
+    template: slackTemplate(),
     types: ['transactional', 'recommended'],
   },
   {
     name: 'TurboTax',
     id: 'turbotax',
     description: 'Tax preparation reminder',
-    template: turbotaxTemplate,
+    template: turbotaxTemplate(),
     types: ['transactional', 'recommended'],
   },
 ]
@@ -73,7 +73,7 @@ export const getTemplate = (id: string, config?: Partial<TemplateConfig>): Email
   if (config) {
     switch (template.id) {
       case 'going':
-        return goingTemplate(config)
+        return goingTemplate()
       default:
         return template.template
     }
@@ -127,7 +127,7 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
         attributes: {
           borderStyle: 'solid',
           borderWidth: '1px',
-          borderColor: '#d1d5db',
+          borderColor: '#E0E0E0',
           paddingTop: '10px',
           paddingBottom: '10px',
         },
@@ -197,8 +197,6 @@ export async function getTemplateConfig(params: {
   const { user, useLocalStorage = true } = params
 
   const logoFileId = user?.logo_file_id || (useLocalStorage ? localStorage.getItem('logoFileId') : null) || null
-
-  console.log(logoFileId, 'here')
 
   let logoFile = undefined
 

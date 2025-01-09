@@ -4,7 +4,6 @@ import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import { useCallback } from 'react'
-import { useEmail } from './email-provider'
 
 import { Button } from '@/app/components/button'
 import { ColorInput } from '@/app/components/color-input'
@@ -14,6 +13,7 @@ import { Switch, SwitchField } from '@/app/components/switch'
 import { Text } from '@/app/components/text'
 import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { capitalizeFirstLetter, isValidHttpUrl } from '@/lib/utils/misc'
 import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import 'react-quill/dist/quill.snow.css'
@@ -41,8 +41,12 @@ enum Options {
   NO_PADDING_MOBILE = 'no-padding-mobile',
 }
 
-const BlockEditor = () => {
-  const { currentBlock, setCurrentBlock, email, setEmail } = useEmail()
+type BlockEditorProps = {
+  email: Email
+}
+
+const BlockEditor = ({ email }: BlockEditorProps) => {
+  const { currentBlock, setCurrentBlock, setEmail } = useEmailStore()
 
   const optionsForItem = () => {
     switch (currentBlock?.type) {

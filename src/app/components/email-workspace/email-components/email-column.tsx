@@ -1,3 +1,4 @@
+import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateColumnProps } from '@/lib/utils/attributes'
 import { ArrowDownCircleIcon, ArrowUpCircleIcon } from '@heroicons/react/20/solid'
 import { Column } from '@react-email/components'
@@ -38,7 +39,7 @@ export default function EmailColumn({
 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
   const searchParams = useSearchParams()
-  const mobileView = searchParams.get('mobileView') === 'true'
+  const { mobileView } = useMobileViewStore()
 
   const handleColumnClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {

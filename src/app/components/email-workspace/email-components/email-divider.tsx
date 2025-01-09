@@ -1,3 +1,4 @@
+import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateDividerProps } from '@/lib/utils/attributes'
 import { Hr } from '@react-email/components'
 import { useSearchParams } from 'next/navigation'
@@ -8,7 +9,7 @@ type Props = {
 
 const EmailDivider = ({ block }: Props) => {
   const searchParams = useSearchParams()
-  const mobileView = searchParams.get('mobileView') === 'true'
+  const { mobileView } = useMobileViewStore()
 
   return <Hr {...generateDividerProps(block, mobileView)} />
 }

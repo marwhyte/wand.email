@@ -53,7 +53,7 @@ function DraggableComponent({ type, icon }: { type: EmailBlockType; icon: React.
     <button
       // @ts-ignore
       ref={drag}
-      className="flex flex-col items-center gap-2 rounded-md bg-zinc-100 px-2 py-8 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
+      className="flex flex-col items-center gap-2 rounded-md bg-zinc-100 px-2 py-4 hover:bg-zinc-200 dark:bg-zinc-800 dark:hover:bg-zinc-700"
     >
       {icon}
       <Heading level={2} className="!text-lg">

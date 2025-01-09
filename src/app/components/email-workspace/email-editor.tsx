@@ -1,7 +1,7 @@
 'use client'
 
 import { useQueryParam } from '@/app/hooks/useQueryParam'
-import { useEmail } from './email-provider'
+import { useEmailStore } from '@/lib/stores/emailStore'
 
 import { Tab, TabGroup, TabList } from '@/app/components/tab'
 import { Text } from '@/app/components/text'
@@ -26,8 +26,8 @@ const tabIcons = {
   [Tabs.SETTINGS]: Cog6ToothIcon,
 }
 
-export default function EmailEditor() {
-  const { currentBlock, setCurrentBlock } = useEmail()
+export default function EmailEditor({ email }: { email: Email }) {
+  const { currentBlock, setCurrentBlock } = useEmailStore()
 
   const [tab, setTab] = useQueryParam<Tabs>('tab', Tabs.CONTENT, (value) => Object.values(Tabs).includes(value as Tabs))
 
@@ -54,9 +54,9 @@ export default function EmailEditor() {
       return null
     }
     if (tab === Tabs.CONTENT) {
-      return 'Drag a piece of content into the email to add it'
+      return 'Drag a piece of content into the email'
     } else if (tab === Tabs.ROWS) {
-      return 'Drag a row into the email to add it'
+      return 'Drag a row into the email'
     } else if (tab === Tabs.SETTINGS) {
       return 'Email settings'
     }
@@ -67,14 +67,14 @@ export default function EmailEditor() {
   const description = getTabDescription()
 
   return (
-    <div className="flex h-full w-full min-w-[380px] max-w-[400px] flex-col overflow-y-scroll border-l-[0.5px] border-r-[0.5px] border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900 lg:min-w-[410px] lg:max-w-[430px]">
+    <div className="flex h-full w-full min-w-[320px] max-w-[340px] flex-col overflow-y-scroll border-l-[0.5px] border-r-[0.5px] border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
       <TabGroup value={tab} className="mx-auto mt-4" onChange={handleTabChange}>
         <TabList>
           {Object.values(Tabs).map((tabValue) => {
             const Icon = tabIcons[tabValue]
             return (
               <Tab selected={tab === tabValue} key={tabValue} className="flex items-center gap-2">
-                <Icon className="mr-1 h-5 w-5" />
+                <Icon className="h-5 w-5" />
                 {capitalizeFirstLetter(tabValue)}
               </Tab>
             )
@@ -86,10 +86,10 @@ export default function EmailEditor() {
           <Text>{description}</Text>
         </div>
       )}
-      {currentBlock && <BlockEditor />}
+      {currentBlock && email && <BlockEditor email={email} />}
       {tab === Tabs.CONTENT && !currentBlock && <EmailComponents />}
       {tab === Tabs.ROWS && !currentBlock && <EmailRows />}
-      {tab === Tabs.SETTINGS && <EmailSettings />}
+      {tab === Tabs.SETTINGS && email && <EmailSettings email={email} />}
     </div>
   )
 }

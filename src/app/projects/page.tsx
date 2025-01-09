@@ -8,7 +8,7 @@ import SortedProjectsList from '../components/email-workspace/sorted-projects-li
 
 export default async function ProjectsPage() {
   const session = await auth()
-  const projectsData = session?.user?.id ? await getProjects(session.user.id) : []
+  const projectsData = session?.user?.id ? await getProjects() : []
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">

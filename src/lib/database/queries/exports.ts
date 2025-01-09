@@ -5,7 +5,8 @@ import { revalidateTag, unstable_cache } from 'next/cache'
 import { db } from '../db'
 import { ExportType } from '../types'
 
-export const getMonthlyExportCount = unstable_cache(
+// Internal helper that takes userId as parameter for caching
+const getMonthlyExportCountInternal = unstable_cache(
   async (sessionUserId: string): Promise<number> => {
     const now = new Date()
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
@@ -22,6 +23,15 @@ export const getMonthlyExportCount = unstable_cache(
   [],
   { tags: ['exports'], revalidate: 60 * 60 }
 )
+
+// Public function that handles auth internally
+export async function getMonthlyExportCount() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+  return getMonthlyExportCountInternal(session.user.id)
+}
 
 export async function addExport(content: Email, type: ExportType) {
   const session = await auth()

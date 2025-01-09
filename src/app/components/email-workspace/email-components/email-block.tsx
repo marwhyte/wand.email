@@ -1,10 +1,10 @@
 import DragLine from '@/app/components/drag-line'
-import { joinClassNames } from '@/lib/utils/misc'
+import { useEmailStore } from '@/lib/stores/emailStore'
+import { classNames } from '@/lib/utils/misc'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
 import { createPortal } from 'react-dom'
-import { useEmail } from '../email-provider'
 import RenderBlock from '../render-block'
 
 type Props = {
@@ -18,7 +18,7 @@ type Props = {
 }
 
 export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDropTarget }: Props) {
-  const { currentBlock } = useEmail()
+  const { currentBlock } = useEmailStore()
   const [isHovered, setIsHovered] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -92,14 +92,14 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className={joinClassNames(
+        className={classNames(
           'group relative inline-block w-full',
           currentBlock?.id === block.id || isHovered ? 'outline outline-2 outline-blue-500' : ''
         )}
         style={{ opacity: isDraggingBlock ? 0.4 : 1 }}
       >
         <div
-          className={joinClassNames(
+          className={classNames(
             'pointer-events-none absolute inset-0 transition-opacity duration-200',
             currentBlock?.id === block.id || !isHovered ? 'opacity-0' : 'opacity-0 group-hover:opacity-20'
           )}
@@ -108,7 +108,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
         <div
           // @ts-ignore
           ref={drag}
-          className={joinClassNames(
+          className={classNames(
             'absolute -right-5 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-move items-center justify-center rounded-full bg-blue-500',
             currentBlock?.id === block.id || isHovered ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
           )}

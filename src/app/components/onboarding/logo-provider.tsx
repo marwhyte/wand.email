@@ -15,18 +15,14 @@ export function LogoProvider({ user }: { user: User | null }) {
         setLogo(logoFile ?? null)
       } else {
         const storedLogoId = localStorage.getItem('logoFileId')
-        console.log('storedLogoId', storedLogoId)
         if (storedLogoId) {
           const logoFile = await getFile(storedLogoId)
-          console.log('logoFile', logoFile)
           setLogo(logoFile ?? null)
         }
       }
     }
     fetchLogo()
   }, [user])
-
-  console.log('logo', logo)
 
   return <OnboardingSteps user={user} logo={logo} />
 }

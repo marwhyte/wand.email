@@ -5,91 +5,73 @@ import { Tab, TabGroup, TabList } from '@components/tab'
 import { Session } from 'next-auth'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
-import { convertImageToEmail } from '../actions/generateTemplateFromImage'
 import { useQueryParam } from '../hooks/useQueryParam'
 import { Heading } from './heading'
 
 import { getTemplateConfig, templates, templateTypes } from '@/lib/data/templates'
 import Link from 'next/link'
 import { useState } from 'react'
+import { generateEmailFromDescription } from '../actions/generateTemplateFromOnboarding'
 import { Divider } from './divider'
-import { goingTemplate } from './email-workspace/going-template'
 import TemplateCard from './email-workspace/template-card'
+import { goingTemplate } from './email-workspace/templates/going-template'
+import { Input } from './input'
 
-const isCreateMode = process.env.NEXT_PUBLIC_CREATE_MODE === 'true'
-
-export const TemplateGeneratorForm = () => {
-  const [result, setResult] = useState<string>('')
-  const [templateName, setTemplateName] = useState<string>('')
-  const [imageNames, setImageNames] = useState<string[]>([])
+export const TemplateGeneratorForm = ({
+  primaryColor,
+  secondaryColor,
+  themes,
+  logo,
+  businessType,
+}: {
+  primaryColor: string | null
+  secondaryColor: string | null
+  themes: string[]
+  logo: string | null
+  businessType: string | null
+}) => {
   const [description, setDescription] = useState<string>('')
-  const [htmlEmail, setHtmlEmail] = useState<string>('')
   const [loading, setLoading] = useState<boolean>(false)
+  const [generatedTemplate, setGeneratedTemplate] = useState<Template | null>(null)
 
   return (
     <form
       onSubmit={async (e) => {
-        setLoading(true)
         e.preventDefault()
-        const fileInput = e.currentTarget.querySelector('input[type="file"]') as HTMLInputElement
-        if (!fileInput.files?.length) return
-
-        const file = fileInput.files[0]
-        if (!file.type.startsWith('image/')) {
-          alert('Please upload an image file')
-          return
-        }
-
+        setLoading(true)
         try {
-          const formData = new FormData()
-          formData.append('file', file)
-          formData.append('htmlEmail', htmlEmail)
-
-          const response = await convertImageToEmail(formData, templateName, imageNames, description)
-          setResult(response)
+          const colorScheme = [primaryColor, secondaryColor].filter(Boolean).join(', ')
+          const response = await generateEmailFromDescription(
+            description,
+            colorScheme,
+            themes,
+            logo || '',
+            businessType || ''
+          )
+          setGeneratedTemplate({
+            id: 'generated',
+            name: 'Generated Template',
+            description: description,
+            types: ['personalized'],
+            template: response,
+          })
         } catch (error) {
-          console.error('Error processing image:', error)
-          alert('Failed to process image')
+          console.error('Error generating template:', error)
+          alert('Failed to generate template')
         } finally {
           setLoading(false)
         }
       }}
-      className="mt-6"
+      className="mx-auto mt-6 max-w-2xl"
     >
       <div className="flex flex-col items-center gap-4">
-        <input
-          type="text"
-          value={templateName}
-          onChange={(e) => setTemplateName(e.target.value)}
-          placeholder="Template Name"
-          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
-          required
-        />
-        <input
-          type="text"
-          value={imageNames.join(', ')}
-          onChange={(e) => setImageNames(e.target.value.split(',').map((name) => name.trim()))}
-          placeholder="Image Names (comma-separated)"
-          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
-        />
-        <input
-          type="text"
+        <Input
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Template Description"
-          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
+          placeholder="Add a short description of the email you want"
+          required
         />
-        <textarea
-          value={htmlEmail}
-          onChange={(e) => setHtmlEmail(e.target.value)}
-          placeholder="HTML Email"
-          className="w-full rounded-md border border-gray-300 px-4 py-2 text-sm"
-        />
-        <input
-          type="file"
-          accept="image/*"
-          className="block w-full text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-indigo-50 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-indigo-700 hover:file:bg-indigo-100"
-        />
+
         <button
           disabled={loading}
           type="submit"
@@ -98,23 +80,10 @@ export const TemplateGeneratorForm = () => {
           {loading ? 'Generating...' : 'Generate Template'}
         </button>
 
-        {result && (
-          <div className="mt-4 w-full max-w-2xl">
-            <div className="mb-2 flex items-center justify-between">
-              <h3 className="text-lg font-semibold">Generated Template:</h3>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(result)
-                  // Optional: Add some visual feedback
-                  alert('Copied to clipboard!')
-                }}
-                type="button"
-                className="rounded-md bg-gray-100 px-3 py-1 text-sm text-gray-600 hover:bg-gray-200"
-              >
-                Copy
-              </button>
-            </div>
-            <pre className="whitespace-pre-wrap rounded-md bg-gray-100 p-4 text-sm">{result}</pre>
+        {generatedTemplate && (
+          <div className="mt-4">
+            <h3 className="mb-4 text-lg font-semibold">Generated Template:</h3>
+            <TemplateCard template={generatedTemplate} />
           </div>
         )}
       </div>
@@ -133,9 +102,9 @@ const TemplatesList = ({ session, user }: Props) => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [currentTemplates, setCurrentTemplates] = useState<Template[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [config, setConfig] = useState<any>(null)
 
   const isOnboarded = user?.is_onboarded || (!user && localStorage.getItem('is_onboarded') === 'true')
-  const logo = user?.logo_file_id || localStorage.getItem('logoFileId')
   const themes = user?.themes || (localStorage.getItem('themes') ? JSON.parse(localStorage.getItem('themes')!) : [])
   const primaryColor = user?.primary_color || localStorage.getItem('primaryColor')
   const secondaryColor = user?.secondary_color || localStorage.getItem('secondaryColor')
@@ -168,11 +137,12 @@ const TemplatesList = ({ session, user }: Props) => {
     const initializeTemplates = async () => {
       if (templateType === 'personalized') {
         try {
-          const config = await getTemplateConfig({ user })
+          const templateConfig = await getTemplateConfig({ user })
+          setConfig(templateConfig)
           setCurrentTemplates([
             {
               ...templates[0], // Using going template as base
-              template: goingTemplate(config),
+              template: goingTemplate(),
             },
           ])
         } catch (error) {
@@ -202,7 +172,7 @@ const TemplatesList = ({ session, user }: Props) => {
           setCurrentTemplates([
             {
               ...templates[0],
-              template: goingTemplate(config),
+              template: goingTemplate(),
             },
           ])
         } catch (error) {
@@ -213,8 +183,6 @@ const TemplatesList = ({ session, user }: Props) => {
 
     loadTemplates()
   }, [templateType, currentTemplates.length, user])
-
-  console.log(localStorage.getItem('logoFileId'))
 
   useEffect(() => {
     const value = localStorage.getItem('postSignUpRedirectTo')
@@ -321,6 +289,15 @@ const TemplatesList = ({ session, user }: Props) => {
       </div>
       <div className="min-h-96 bg-zinc-100">
         <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+          {isOnboarded && config && !process.env.NEXT_PUBLIC_CREATE_MODE && (
+            <TemplateGeneratorForm
+              primaryColor={primaryColor}
+              secondaryColor={secondaryColor}
+              themes={themes}
+              logo={config.logoUrl}
+              businessType={businessType}
+            />
+          )}
           {isLoading ? (
             <div>Loading...</div>
           ) : (
@@ -332,7 +309,6 @@ const TemplatesList = ({ session, user }: Props) => {
           )}
         </div>
       </div>
-      {isCreateMode && <TemplateGeneratorForm />}
     </div>
   )
 }

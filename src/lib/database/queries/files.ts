@@ -4,7 +4,8 @@ import { auth } from '@/auth'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { db } from '../db'
 
-const getCachedFiles = unstable_cache(
+// Internal helper that takes userId as parameter for caching
+const getFilesInternal = unstable_cache(
   async (userId: string) => {
     const files = await db.selectFrom('files').selectAll().where('user_id', '=', userId).execute()
     return files
@@ -15,6 +16,15 @@ const getCachedFiles = unstable_cache(
     revalidate: 60 * 60 * 24,
   }
 )
+
+// Public functions that handle auth internally
+export async function getFiles() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+  return getFilesInternal(session.user.id)
+}
 
 export async function getFile(fileId: string) {
   const session = await auth()
@@ -31,16 +41,7 @@ export async function getFile(fileId: string) {
       ])
     )
     .executeTakeFirst()
-  console.log('file', file, fileId)
   return file
-}
-
-export async function getFiles() {
-  const session = await auth()
-  if (!session?.user?.id) {
-    throw new Error('User not authenticated')
-  }
-  return getCachedFiles(session.user.id)
 }
 
 export async function addFile(userId: string | null, fileName: string, imageKey: string, sizeBytes: number) {
@@ -61,8 +62,12 @@ export async function addFile(userId: string | null, fileName: string, imageKey:
   return file
 }
 
-export async function removeFile(userId: string, fileKey: string) {
-  await db.deleteFrom('files').where('user_id', '=', userId).where('image_key', '=', fileKey).execute()
+export async function removeFile(fileKey: string) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+  await db.deleteFrom('files').where('user_id', '=', session.user.id).where('image_key', '=', fileKey).execute()
 
   revalidateTag('files')
 }

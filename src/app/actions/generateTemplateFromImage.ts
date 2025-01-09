@@ -1,8 +1,8 @@
 'use server'
 
 import OpenAI from 'openai'
-import { ebayTemplate } from '../components/email-workspace/ebay-template'
-import { stripeTemplate } from '../components/email-workspace/stripe-template'
+import { ebayTemplate } from '../components/email-workspace/templates/ebay-template'
+import { stripeTemplate } from '../components/email-workspace/templates/stripe-template'
 
 const openai = new OpenAI()
 

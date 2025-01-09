@@ -1,3 +1,4 @@
+import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateButtonProps } from '@/lib/utils/attributes'
 import { Button } from '@react-email/components'
 import parse from 'html-react-parser'
@@ -9,7 +10,7 @@ type Props = {
 
 export default function EmailButton({ block }: Props) {
   const searchParams = useSearchParams()
-  const mobileView = searchParams.get('mobileView') === 'true'
+  const { mobileView } = useMobileViewStore()
 
   return (
     <Button {...generateButtonProps(block, mobileView)} href={undefined}>

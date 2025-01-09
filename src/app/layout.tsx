@@ -2,7 +2,6 @@ import { auth } from '@/auth'
 import type { Metadata } from 'next'
 import { SessionProvider } from 'next-auth/react'
 import { Inter } from 'next/font/google'
-import Content from './content'
 
 import { fetchUser } from './actions'
 import PlanProvider from './components/payment/plan-provider'
@@ -39,11 +38,13 @@ export default async function RootLayout({
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </head>
       <body className={inter.className + ' h-full'}>
-        <SessionProvider session={session}>
-          <PlanProvider fetchUser={fetchUser} plan={initialUser?.plan}>
-            <Content session={session}>{children}</Content>
-          </PlanProvider>
-        </SessionProvider>
+        <main>
+          <SessionProvider session={session}>
+            <PlanProvider fetchUser={fetchUser} plan={initialUser?.plan}>
+              {children}
+            </PlanProvider>
+          </SessionProvider>
+        </main>
       </body>
     </html>
   )

@@ -34,7 +34,9 @@ const renderBlock = (block: EmailBlock) => {
   }
 }
 
-export function getReactEmailCode(email: Email) {
+export function getReactEmailCode(email?: Email) {
+  if (!email) return
+
   return `
     import React from 'react'
     import { Body, Column, Container, Head, Html, Preview, Row, Text, Link, Button, Img, Heading } from '@react-email/components'

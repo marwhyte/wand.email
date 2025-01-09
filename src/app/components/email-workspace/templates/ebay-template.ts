@@ -6,6 +6,7 @@ export const ebayTemplate: Email = {
   preview: 'Ace back-to-school season with these deals!',
   fontFamily: 'Arial, sans-serif',
   width: '600px',
+  linkColor: '#000000',
   color: '#000000',
   bgColor: '#FFFFFF',
   rows: [

@@ -1,13 +1,12 @@
 import DragLine from '@/app/components/drag-line'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { applyCommonAttributes, generateRowProps } from '@/lib/utils/attributes'
-import { joinClassNames } from '@/lib/utils/misc'
+import { classNames } from '@/lib/utils/misc'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { Container, Row } from '@react-email/components'
 import { useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
-import { useEmail } from '../email-provider'
 import EmailColumn from './email-column'
-
 type Props = {
   row: RowBlock
   moveRow: (dragId: string, hoverId: string) => void
@@ -43,7 +42,7 @@ export default function EmailRow({
   onBlockDrop,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null)
-  const { currentBlock, setCurrentBlock, email } = useEmail()
+  const { currentBlock, setCurrentBlock, email } = useEmailStore()
   const [isChildHovered, setIsChildHovered] = useState(false)
 
   const [{ isDraggingRow }, drag, preview] = useDrag({
@@ -112,10 +111,10 @@ export default function EmailRow({
   }
 
   return (
-    <div onClick={handleRowOrColumnClick} ref={ref} className="group relative mx-4" style={{ opacity }}>
+    <div onClick={handleRowOrColumnClick} ref={ref} className="group relative mx-4 w-full" style={{ opacity }}>
       {/* Outline pseudo-element */}
       <div
-        className={joinClassNames(
+        className={classNames(
           'pointer-events-none absolute bottom-0 left-0 right-0 top-0 transition-opacity duration-200',
           currentBlock?.id === row.id
             ? 'opacity-100'
@@ -132,21 +131,21 @@ export default function EmailRow({
 
       {/* Blue overlay pseudo-element */}
       <div
-        className={joinClassNames(
-          'pointer-events-none absolute inset-0 transition-opacity duration-200',
+        className={classNames(
+          'pointer-events-none absolute inset-0 w-full transition-opacity duration-200',
           currentBlock?.id === row.id || isChildHovered ? 'opacity-0' : 'opacity-0 group-hover:opacity-20'
         )}
         style={{ backgroundColor: 'rgb(59, 130, 246)', zIndex: 5 }}
       />
 
       {dropLine === row.id && isOverRow && <DragLine direction="above" />}
-      {dropLine === 'end' && row.id === email.rows[email.rows.length - 1].id && <DragLine direction="below" />}
+      {dropLine === 'end' && row.id === email?.rows[email.rows.length - 1].id && <DragLine direction="below" />}
       <DragPreviewImage connect={preview} src="/row.svg" />
 
       <div
         // @ts-ignore
         ref={drag}
-        className={joinClassNames(
+        className={classNames(
           'absolute left-0 top-1/2 flex h-8 w-10 -translate-y-1/2 cursor-move items-center justify-center rounded-r-full bg-blue-500',
           currentBlock?.id === row.id
             ? 'opacity-100'
@@ -162,11 +161,11 @@ export default function EmailRow({
       {/* Wrap the content in a relative div */}
       <div className="relative" style={{ zIndex: 2 }}>
         <Container
-          bgcolor={email.bgColor}
-          width={mobileView ? '360' : `${email.width}`}
+          bgcolor={email?.bgColor}
+          width={mobileView ? '360' : `${email?.width}`}
           className={row.attributes.hideOnMobile && mobileView ? 'hidden' : undefined}
           style={{
-            backgroundColor: email.bgColor,
+            backgroundColor: email?.bgColor,
             ...applyCommonAttributes(row.container.attributes),
             tableLayout: 'fixed',
           }}
@@ -188,9 +187,8 @@ export default function EmailRow({
           </Row>
         </Container>
 
-        {/* Purple "Row" box */}
         <div
-          className={`absolute -bottom-7 right-1 bg-blue-500 px-2 py-1 text-sm font-semibold text-white transition-opacity duration-200 ${
+          className={`absolute bottom-0 right-1 translate-y-full bg-blue-500 px-2 py-1 text-sm font-semibold text-white transition-opacity duration-200 ${
             currentBlock?.id !== row.id && !isChildHovered ? 'opacity-0 group-hover:opacity-100' : 'opacity-0'
           }`}
           style={{ zIndex: 12 }}

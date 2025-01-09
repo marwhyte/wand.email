@@ -63,7 +63,6 @@ export default function PricingPage() {
       localStorage.setItem('postSignUpRedirectTo', href)
       router.push('/signup')
     } else {
-      console.log(href)
       router.push(href)
     }
   }

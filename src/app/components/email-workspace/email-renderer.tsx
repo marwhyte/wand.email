@@ -1,19 +1,21 @@
 'use client'
 
 import { createNewBlock } from '@/lib/data/templates'
+import { useEmailStore } from '@/lib/stores/emailStore'
+import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateBodyProps } from '@/lib/utils/attributes'
 import { useCallback, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import { v4 as uuidv4 } from 'uuid' // Make sure to import uuid
 import EmailRow from './email-components/email-row'
-import { useEmail } from './email-provider'
 
 type Props = {
-  mobileView: boolean
+  email: Email
 }
 
-const EmailRenderer = ({ mobileView }: Props) => {
-  const { email, setEmail } = useEmail()
+const EmailRenderer = ({ email }: Props) => {
+  const { setEmail } = useEmailStore()
+  const { mobileView } = useMobileViewStore()
   const [dropLine, setDropLine] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<{
     type: 'block' | 'column'
@@ -280,9 +282,16 @@ const EmailRenderer = ({ mobileView }: Props) => {
   })
 
   return (
-    <div className="flex-grow overflow-scroll pt-4">
+    <div className="w-full min-w-0 overflow-auto px-2 pt-4">
       {/* @ts-ignore */}
-      <div {...generateBodyProps(email, true)} style={{ backgroundColor: email.bgColor }}>
+      <div
+        {...generateBodyProps(email, true)}
+        className="mx-auto"
+        style={{
+          backgroundColor: email.bgColor,
+          color: email.color,
+        }}
+      >
         {email.rows.length > 0 ? (
           <>
             {email.rows.map((row) => (
@@ -308,7 +317,7 @@ const EmailRenderer = ({ mobileView }: Props) => {
             className={`flex h-64 items-center justify-center rounded-lg border-2 border-dashed transition-colors duration-200 ${
               isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
             }`}
-            style={{ width: '600px', maxWidth: '100%', margin: '0 auto' }}
+            style={{ maxWidth: '600px', margin: '0 auto' }}
           >
             <p className={`text-lg ${isOver ? 'text-blue-500' : 'text-gray-500'}`}>
               {isOver ? 'Drop here' : 'Drag your first row or block here'}

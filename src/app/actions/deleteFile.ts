@@ -12,7 +12,7 @@ export async function deleteFile(fileKey: string) {
 
   try {
     await deleteS3Object(fileKey)
-    await removeFile(session.user.id, fileKey)
+    await removeFile(fileKey)
 
     return { success: true }
   } catch (error) {

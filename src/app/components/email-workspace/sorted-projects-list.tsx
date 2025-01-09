@@ -1,7 +1,7 @@
 'use client'
 
 import { SortFunction, sortItems, useSortPreference } from '@/app/hooks/useSortPreference'
-import { joinClassNames } from '@/lib/utils/misc'
+import { classNames } from '@/lib/utils/misc'
 import { ArrowsUpDownIcon } from '@heroicons/react/16/solid'
 import { CalendarIcon, DocumentTextIcon, PencilIcon, TableCellsIcon } from '@heroicons/react/24/outline'
 import { Dropdown, DropdownButton, DropdownItem, DropdownMenu } from '../dropdown'
@@ -75,7 +75,7 @@ export default function SortedProjectsList({ projects }: { projects: Project[] }
               className="col-span-1 flex rounded-md shadow-sm transition-shadow duration-200 ease-in-out hover:shadow-md"
             >
               <div
-                className={joinClassNames(
+                className={classNames(
                   [
                     'bg-red-500',
                     'bg-blue-500',

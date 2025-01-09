@@ -5,8 +5,6 @@ import { addUser, getUserByEmail } from '@/lib/database/queries/users'
 import bcrypt from 'bcryptjs'
 
 export const POST = async (request: NextRequest) => {
-  console.log('heyo')
-
   const { name, email, password } = await request.json()
 
   const hashedPassword = await bcrypt.hash(password, 5)
@@ -26,7 +24,6 @@ export const POST = async (request: NextRequest) => {
     }
     await addUser(newUser)
   } catch (e) {
-    console.log(e)
     return new NextResponse('Something went wrong', {
       status: 500,
     })

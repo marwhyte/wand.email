@@ -238,7 +238,6 @@ When designing the template:
 4. Structure layout to prioritize the logo and main message
 5. Use the logo dimensions to inform header spacing
 6. For all images, use the provided Unsplash URLs
-7. Set the template name to: "%TEMPLATENAME%"
 
 RESPONSE FORMAT:
 Respond with a valid JSON object matching the template root structure defined above. Do not include any additional text or explanations - only the JSON object.`
@@ -248,18 +247,18 @@ export async function generateEmailFromDescription(
   colorScheme: string,
   themes: string[],
   logoUrl: string,
-  templateName: string
-): Promise<string> {
+  businessType: string
+): Promise<Email> {
   try {
     // Search for relevant images on Unsplash based on themes and description
     const searchResults = await unsplash.search.getPhotos({
-      query: themes.join(' ') + ' ' + description.split(' ').slice(0, 3).join(' '),
+      query: `${businessType} ${themes.join(' ')} ${description.split(' ').slice(0, 3).join(' ')}`,
       perPage: 5,
     })
 
     const unsplashImages = searchResults.response?.results.map((result) => result.urls.regular) || []
 
-    const prompt = TEXT_TO_EMAIL_PROMPT.replace('%TEMPLATENAME%', templateName)
+    const prompt = TEXT_TO_EMAIL_PROMPT
 
     const completion = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -271,6 +270,7 @@ export async function generateEmailFromDescription(
               type: 'text',
               text: `Create an email template with the following specifications:
               Company Description: ${description}
+              Business Type: ${businessType}
               Color Scheme: ${colorScheme}
               Themes: ${themes.join(', ')}
               Logo URL: ${logoUrl}
@@ -287,14 +287,14 @@ export async function generateEmailFromDescription(
     const result = completion.choices[0].message.content
     if (!result) throw new Error('No response from OpenAI')
 
-    console.log('result', result)
-
     try {
-      const emailTemplate = JSON.parse(result)
+      // Clean the response by removing markdown code block formatting if present
+      const cleanedResult = result.replace(/```json\n|\n```/g, '').trim()
+      const emailTemplate = JSON.parse(cleanedResult) as Email
       return emailTemplate
     } catch (error) {
       console.error('Error parsing OpenAI response:', error)
-      return result
+      throw new Error('Invalid template format returned from OpenAI')
     }
   } catch (error) {
     console.error('Error generating email template from description:', error)

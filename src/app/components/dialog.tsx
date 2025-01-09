@@ -1,6 +1,8 @@
 import * as Headless from '@headlessui/react'
 import clsx from 'clsx'
 import type React from 'react'
+import { memo } from 'react'
+import { Button } from './button'
 import { Text } from './text'
 
 const sizes = {
@@ -60,6 +62,22 @@ export function Dialog({
     </Headless.Dialog>
   )
 }
+
+interface DialogButtonProps {
+  type: 'primary' | 'secondary' | 'danger'
+  children: React.ReactNode
+  onClick?: (event: React.UIEvent) => void
+}
+
+export const DialogButton = memo(({ type, children, onClick }: DialogButtonProps) => {
+  return (
+    <Button color={type === 'primary' ? 'purple' : type === 'secondary' ? 'light' : 'red'} onClick={onClick}>
+      {children}
+    </Button>
+  )
+})
+
+DialogButton.displayName = 'DialogButton'
 
 export function DialogTitle({
   className,

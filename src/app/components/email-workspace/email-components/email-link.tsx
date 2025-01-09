@@ -1,18 +1,19 @@
+import { useEmailStore } from '@/lib/stores/emailStore'
+import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateLinkProps } from '@/lib/utils/attributes'
 import { Link } from '@react-email/components'
 import parse from 'html-react-parser'
-import { useSearchParams } from 'next/navigation'
 
 type Props = {
   block: LinkBlock
 }
 
 export default function EmailLink({ block }: Props) {
-  const searchParams = useSearchParams()
-  const mobileView = searchParams.get('mobileView') === 'true'
+  const { email } = useEmailStore()
+  const { mobileView } = useMobileViewStore()
 
   return (
-    <Link {...generateLinkProps(block, mobileView)} href={undefined}>
+    <Link {...generateLinkProps(block, mobileView, email?.linkColor)} href={undefined}>
       {parse(block.content)}
     </Link>
   )

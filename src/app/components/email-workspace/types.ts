@@ -9,6 +9,7 @@ type Email = {
   bgRepeat?: string
   bgSize?: string
   color: string
+  linkColor: string
   width: string
   rows: RowBlock[]
 }
@@ -117,6 +118,7 @@ type LinkBlock = {
   attributes: LinkBlockAttributes
 }
 
+// NOTE WHEN CHANGING THIS ALSO UPDATE LIST IN EMAIL-HELPERS.TS
 type CommonAttributes = {
   noSidePaddingOnMobile?: boolean
   paddingTop?: string
@@ -147,9 +149,17 @@ type CommonAttributes = {
   fontStyle?: 'normal' | 'italic' | 'oblique'
 }
 
-type ContainerBlockAttributes = CommonAttributes & {
+type ContainerBlockAttributes = {
   align?: 'left' | 'center' | 'right'
+  maxWidth?: string
   minWidth?: string
+  background?: string
+  backgroundColor?: string
+  backgroundImage?: string
+  backgroundSize?: string
+  backgroundPosition?: string
+  backgroundRepeat?: string
+  height?: string
 }
 
 type RowBlockAttributes = CommonAttributes & {

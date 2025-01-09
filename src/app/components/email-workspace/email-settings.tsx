@@ -1,13 +1,17 @@
 import { ColorInput } from '@/app/components/color-input'
 import { Field, Label } from '@/app/components/fieldset'
 import { Select } from '@/app/components/select'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { useCallback } from 'react'
 import Nbsp from '../nbsp'
 import Range from '../range'
-import { useEmail } from './email-provider'
 
-const EmailSettings = () => {
-  const { email, setEmail } = useEmail()
+type EmailSettingsProps = {
+  email: Email
+}
+
+const EmailSettings = ({ email }: EmailSettingsProps) => {
+  const { setEmail } = useEmailStore()
 
   const handleChange = useCallback(
     (attributes: Partial<Email>) => {
