@@ -46,7 +46,7 @@ export function Header({ chatStarted }: Props) {
     <header>
       <div
         className={classNames(
-          'absolute z-100 flex w-full items-center justify-between bg-white px-4 py-4',
+          'z-100 flex w-full items-center justify-between bg-white px-4 py-4',
           chatStarted ? 'border-b border-gray-200' : ''
         )}
       >

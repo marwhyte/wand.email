@@ -40,7 +40,7 @@ export function Chat() {
   return (
     <div className="mx-auto w-full">
       <Header chatStarted={chatStarted} />
-      <div className={`flex flex-1 ${chatStarted ? 'h-full' : ''}`}>
+      <div className="flex flex-1">
         {ready && (
           <ChatImpl
             initialMessages={initialMessages}

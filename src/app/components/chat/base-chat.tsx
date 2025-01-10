@@ -80,13 +80,13 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
     const [textareaHeight, setTextareaHeight] = useState(TEXTAREA_MIN_HEIGHT)
 
     return (
-      <div
-        ref={ref}
-        className="relative mx-auto mt-16 flex w-full items-center overflow-hidden"
-        data-chat-visible={showChat}
-      >
+      <div ref={ref} className="relative mx-auto flex w-full items-center overflow-hidden" data-chat-visible={showChat}>
         {session.data?.user?.id && <Menu />}
-        <div className="flex w-full justify-center">
+        <div
+          className={classNames(`flex w-full justify-center`, {
+            '-mb-2': chatStarted,
+          })}
+        >
           <div
             className={classNames('flex min-w-[400px] shrink-[2] flex-col', {
               'max-w-[600px]': chatStarted,

@@ -9,6 +9,7 @@ import { Chat } from '@/lib/database/types'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { SparklesIcon } from '@heroicons/react/24/solid'
 import { signOut, useSession } from 'next-auth/react'
+import Loading from '../loading'
 import { binDates } from './date-binning'
 import { HistoryItem } from './history-item'
 
@@ -38,6 +39,7 @@ type DialogContent = { type: 'delete'; item: Chat } | null
 export function Menu() {
   const menuRef = useRef<HTMLDivElement>(null)
   const [list, setList] = useState<Chat[]>([])
+  const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [dialogContent, setDialogContent] = useState<DialogContent>(null)
   const session = useSession()
@@ -46,7 +48,11 @@ export function Menu() {
   }
 
   const loadEntries = useCallback(async () => {
+    if (list.length === 0) {
+      setLoading(true)
+    }
     const entries = await getChats()
+    setLoading(false)
     setList(entries)
   }, [session.data?.user?.id])
 
@@ -100,7 +106,12 @@ export function Menu() {
         </div>
         <div className="my-2 pl-6 pr-5 font-medium">Your Chats</div>
         <div className="flex-1 overflow-scroll pb-5 pl-4 pr-5">
-          {list.length === 0 && <div className="pl-2 text-gray-500">No previous conversations</div>}
+          {loading && (
+            <div className="mt-10 flex justify-center">
+              <Loading />
+            </div>
+          )}
+          {list.length === 0 && !loading && <div className="pl-2 text-gray-500">No previous conversations</div>}
           {binDates(list).map(({ category, items }) => (
             <div key={category} className="mt-4 space-y-1 first:mt-0">
               <div className="z-1 sticky top-0 pb-1 pl-2 pt-2 text-gray-500">{category}</div>
