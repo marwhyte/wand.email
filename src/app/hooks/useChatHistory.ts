@@ -6,7 +6,6 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { blankTemplate } from '../components/email-workspace/templates/blank-template'
-import { stripeTemplate } from '../components/email-workspace/templates/stripe-template'
 
 export function useChatHistory() {
   const router = useRouter()
@@ -24,6 +23,9 @@ export function useChatHistory() {
     if (!chatId) {
       setReady(true)
       setInitialMessages([])
+      setEmail(undefined)
+      setChatId(undefined)
+      setTitle(undefined)
       return
     }
 
@@ -33,7 +35,7 @@ export function useChatHistory() {
         if (chat) {
           setInitialMessages(chat.messages)
           setTitle(chat.title)
-          setEmail(stripeTemplate() ?? undefined)
+          setEmail(chat.email ?? undefined)
           setChatId(chat.id)
           setReady(true)
         } else {

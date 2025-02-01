@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 
-interface EmailStore {
+export interface EmailStore {
   currentBlock: EmailBlock | RowBlock | null
   setCurrentBlock: (block: EmailBlock | RowBlock | null) => void
   email: Email | undefined

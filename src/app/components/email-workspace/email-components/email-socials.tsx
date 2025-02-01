@@ -11,7 +11,7 @@ const EmailSocials = ({ block, isEditing = true }: Props) => {
       {block.attributes.socialLinks.map((social) => (
         <a
           href={isEditing ? undefined : social.url}
-          key={social.url}
+          key={social.url === '#' ? Math.random() : social.url}
           style={{ display: 'inline-block', padding: '0 2px' }}
         >
           <img

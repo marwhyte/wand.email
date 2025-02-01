@@ -31,6 +31,7 @@ interface BaseChatProps {
   input?: string
   handleStop?: () => void
   sendMessage?: (event: React.UIEvent, messageInput?: string) => void
+  processingStates?: { [key: number]: { isProcessing: boolean; isDone: boolean } }
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void
   enhancePrompt?: () => void
   selectedTemplate?: Template
@@ -63,6 +64,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
       showChat = true,
       chatStarted = false,
       isStreaming = false,
+      processingStates = {},
       enhancingPrompt = false,
       promptEnhanced = false,
       messages,
@@ -122,6 +124,7 @@ export const BaseChat = React.forwardRef<HTMLDivElement, BaseChatProps>(
                     className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col px-4 pb-6"
                     messages={messages}
                     isStreaming={isStreaming}
+                    processingStates={processingStates}
                   />
                 </StickToBottom.Content>
                 <ScrollToBottom textareaHeight={textareaHeight} />

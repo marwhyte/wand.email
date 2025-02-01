@@ -2,8 +2,8 @@ import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
 
-export const goingTemplate = (): Email => {
-  const aiScript = `
+export const goingTemplateScript = `
+<EMAIL name="Going Template" backgroundColor=#D7FFC2 linkColor=#004449>
   ROW padding=20,15,20,15 backgroundColor=#D7FFC2 {
     COLUMN align=center {
       TEXT text=<p>Clock's ticking on your limited time offer</p> fontWeight=bold
@@ -80,7 +80,8 @@ export const goingTemplate = (): Email => {
     COLUMN {
       TEXT text=<p>Offer not combinable with other discounts or previous subscriptions. Redeemable only at <a href='www.going.com'>www.going.com</a></p> fontSize=12
     }
-  }`
+  }
+</EMAIL>
+`
 
-  return createEmail('Going Template', parseEmailScript(aiScript), '#004449', '#004449')
-}
+export const goingTemplate = createEmail('Going Template', parseEmailScript(goingTemplateScript), '#004449', '#004449')

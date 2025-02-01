@@ -53,8 +53,6 @@ const getChatWithMessagesInternal = unstable_cache(
       .where('deleted_at', 'is', null)
       .executeTakeFirst()
 
-    console.log('chat', chat)
-
     if (!chat) return undefined
 
     const messages = await db
@@ -64,7 +62,9 @@ const getChatWithMessagesInternal = unstable_cache(
       .orderBy('sequence', 'asc')
       .execute()
 
-    return {
+    console.log(chat)
+
+    const response = {
       ...chat,
       messages: messages.map((msg) => ({
         id: msg.id,
@@ -72,6 +72,8 @@ const getChatWithMessagesInternal = unstable_cache(
         content: msg.content,
       })),
     }
+
+    return response
   },
   ['chat'],
   {

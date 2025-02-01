@@ -4,7 +4,9 @@ import LoginForm from '@/app/forms/login-form'
 import RegistrationForm from '@/app/forms/registration-form'
 import { usePromptEnhancer, useSnapScroll } from '@/app/hooks'
 import { useChatHistory } from '@/app/hooks/useChatHistory'
+import { useMessageParser } from '@/app/hooks/useMessageParser'
 import { chatStore } from '@/lib/stores/chat'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid'
@@ -90,6 +92,7 @@ interface ChatProps {
 
 export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, setChatStarted }: ChatProps) {
   const session = useSession()
+  const { setEmail } = useEmailStore()
 
   const [showSignUpDialog, setShowSignUpDialog] = useState(false)
   const [stepType, setStepType] = useState<'login' | 'signup'>('signup')
@@ -110,6 +113,9 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
 
   const { messages, isLoading, input, handleInputChange, setInput, stop, append } = useChat({
     api: '/api/chat',
+    body: {
+      template: initialMessages.length === 0 ? JSON.stringify(selectedTemplate?.template) : undefined,
+    },
     onError: (error) => {
       logger.error('Request failed\n\n', error)
       toast.error('There was an error processing your request')
@@ -119,6 +125,12 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
     },
     initialMessages,
   })
+
+  const { parsedMessages, parseMessages, processingStates } = useMessageParser(messages)
+
+  useEffect(() => {
+    parseMessages(messages, isLoading)
+  }, [messages, isLoading, parseMessages])
 
   const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
 
@@ -193,6 +205,10 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
 
     append({ role: 'user', content: _input })
 
+    if (selectedTemplate) {
+      setEmail(selectedTemplate.template)
+    }
+
     setInput('')
 
     resetEnhancer()
@@ -211,6 +227,7 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
         showChat={showChat}
         chatStarted={chatStarted}
         isStreaming={isLoading}
+        processingStates={processingStates}
         enhancingPrompt={enhancingPrompt}
         promptEnhanced={promptEnhanced}
         sendMessage={sendMessage}
@@ -218,7 +235,10 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
         scrollRef={scrollRef}
         handleInputChange={handleInputChange}
         handleStop={abort}
-        messages={messages}
+        messages={messages.map((message, index) => ({
+          ...message,
+          content: message.role === 'assistant' ? parsedMessages[index] || message.content : message.content,
+        }))}
         enhancePrompt={() => {
           enhancePrompt(input, (input) => {
             setInput(input)

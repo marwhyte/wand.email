@@ -21,10 +21,14 @@ export type Messages = Message[]
 
 export type StreamingOptions = Omit<Parameters<typeof _streamText>[0], 'model'>
 
-export function streamText(messages: Messages, options?: StreamingOptions) {
+export async function streamText(messages: Messages, options?: StreamingOptions, template?: string) {
+  const systemPrompt = getSystemPrompt(template)
+
+  console.log('prompt', systemPrompt)
+
   return _streamText({
     model: anthropic('claude-3-5-sonnet-20240620'),
-    system: getSystemPrompt(),
+    system: systemPrompt,
     maxTokens: MAX_TOKENS,
     headers: {
       'anthropic-beta': 'max-tokens-3-5-sonnet-2024-07-15',

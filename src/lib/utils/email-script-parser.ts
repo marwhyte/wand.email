@@ -175,7 +175,6 @@ function ensurePx(value: string): string {
     return value
   }
 
-  console.log('value', value)
   // Otherwise, append px∂
   return `${value}px`
 }
@@ -341,7 +340,6 @@ function isSocialIconName(value: string | undefined): value is SocialIconName {
 }
 
 const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) => {
-  console.log('Parsing socials with raw data:', raw) // Debug
   const common = parseCommonAttributes(raw)
 
   // Parse social links from raw attributes
@@ -349,7 +347,6 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
 
   try {
     const jsonStr = raw.socialLinks?.trim() || '[]'
-    console.log('Attempting to parse JSON string:', jsonStr) // Debug
 
     // Validate JSON string format
     if (!jsonStr.startsWith('[') || !jsonStr.endsWith(']')) {
@@ -358,7 +355,6 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
     }
 
     const rawLinks = JSON.parse(jsonStr)
-    console.log('Successfully parsed JSON:', rawLinks) // Debug
 
     if (Array.isArray(rawLinks)) {
       for (const link of rawLinks) {
@@ -390,14 +386,12 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
 // Update the parseAttributes function to be more specific
 function parseAttributes(attrString: string): RawAttributes {
   const attrs: RawAttributes = {}
-  console.log('Parsing attributes from:', attrString) // Debug
 
   // Special handling for JSON attributes (like socialLinks)
   // Using a more precise regex to capture the entire JSON array
   const jsonMatch = attrString.match(/(\w+)=(\[[\s\S]*\])/)
   if (jsonMatch) {
     const [fullMatch, key, jsonValue] = jsonMatch
-    console.log('Found JSON match:', { key, jsonValue }) // Debug
     attrs[key] = jsonValue
     attrString = attrString.replace(fullMatch, '')
   }
@@ -428,7 +422,6 @@ function parseAttributes(attrString: string): RawAttributes {
     }
   })
 
-  console.log('Final parsed attributes:', attrs) // Debug
   return attrs
 }
 
@@ -575,7 +568,6 @@ export function parseEmailScript(script: string): RowBlock[] {
           createBlock('button', attrs.text || '', blockParsers.button(attrs), currentColumn)
           break
         case 'image':
-          console.log('image', blockParsers.image(attrs))
           createBlock('image', '', blockParsers.image(attrs), currentColumn)
           break
         case 'link':

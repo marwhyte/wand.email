@@ -142,7 +142,7 @@ const TemplatesList = ({ session, user }: Props) => {
           setCurrentTemplates([
             {
               ...templates[0], // Using going template as base
-              template: goingTemplate(),
+              template: goingTemplate,
             },
           ])
         } catch (error) {
@@ -172,7 +172,7 @@ const TemplatesList = ({ session, user }: Props) => {
           setCurrentTemplates([
             {
               ...templates[0],
-              template: goingTemplate(),
+              template: goingTemplate,
             },
           ])
         } catch (error) {

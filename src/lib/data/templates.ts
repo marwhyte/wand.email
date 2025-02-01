@@ -13,7 +13,7 @@ export const templates: Template[] = [
     name: 'Going',
     id: 'going',
     description: 'Marketing emails for flight deals',
-    template: goingTemplate(),
+    template: goingTemplate,
     types: ['ecommerce', 'recommended'],
   },
   {
@@ -73,7 +73,7 @@ export const getTemplate = (id: string, config?: Partial<TemplateConfig>): Email
   if (config) {
     switch (template.id) {
       case 'going':
-        return goingTemplate()
+        return goingTemplate
       default:
         return template.template
     }

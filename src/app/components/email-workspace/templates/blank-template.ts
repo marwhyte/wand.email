@@ -1,5 +1,10 @@
 import { v4 as uuidv4 } from 'uuid'
 
+export const blankTemplateScript = `
+<EMAIL backgroundColor=#FFFFFF linkColor=#000000>
+</EMAIL>
+`
+
 export const blankTemplate = (): Email => {
   return {
     id: uuidv4(),

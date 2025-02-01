@@ -107,7 +107,7 @@ export function Menu() {
         <div className="my-2 pl-6 pr-5 font-medium">Your Chats</div>
         <div className="flex-1 overflow-scroll pb-5 pl-4 pr-5">
           {loading && (
-            <div className="mt-10 flex justify-center">
+            <div className="mt-5 flex justify-center">
               <Loading />
             </div>
           )}

@@ -43,7 +43,6 @@ export function HistoryItem({ item, onDelete }: HistoryItemProps) {
     >
       <a href={`?id=${item.id}`} className="relative flex w-full truncate">
         {item.title}
-        asdfadsf
         <div className="absolute bottom-0 right-0 top-0 flex w-10 justify-end to-transparent group-hover:w-[60px] group-hover:from-gray-100 group-hover:from-45%">
           {hovering && (
             <div className="flex items-center p-1 text-gray-600 hover:text-red-600">

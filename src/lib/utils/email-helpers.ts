@@ -75,7 +75,11 @@ export const createEmail = (
   linkColor: string,
   fontFamily = 'Arial',
   bgColor = '#ffffff',
-  width = '600'
+  width = '600',
+  bgImage: string | undefined = undefined,
+  bgPosition: string | undefined = undefined,
+  bgRepeat: string | undefined = undefined,
+  bgSize: string | undefined = undefined
 ): Email => ({
   id: uuidv4(),
   name,
@@ -86,6 +90,10 @@ export const createEmail = (
   preview: name,
   fontFamily,
   bgColor,
+  bgImage,
+  bgPosition,
+  bgRepeat,
+  bgSize,
 })
 
 // New helper functions

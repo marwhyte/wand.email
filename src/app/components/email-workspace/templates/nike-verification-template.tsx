@@ -4,6 +4,7 @@ import { getPhotoUrl } from '@/lib/utils/misc'
 
 export const nikeVerificationTemplate = (): Email => {
   const aiScript = `
+<EMAIL name="Nike Verification Code" backgroundColor=#000000 linkColor=#000000>
   ROW padding=32,32 align=center {
     COLUMN align=center {
       IMAGE src=${getPhotoUrl('nike-logo.png', 'nike-verification')} alt="Nike logo"
@@ -39,7 +40,9 @@ export const nikeVerificationTemplate = (): Email => {
       TEXT text=<p>© 2024 <strong>Nike</strong>, Inc. All Rights Reserved<br>One Bowerman Drive, Beaverton, Oregon 97005</p> fontSize=12 color=#ababab padding=8,0,8,0
       TEXT text=<p>Privacy Policy  &nbsp;&nbsp; Get Help</p> fontSize=12 color=#ababab padding=8,0,0,0
     }
-  }`
+  }
+</EMAIL>
+`
 
   return createEmail(
     'nike verification code',
