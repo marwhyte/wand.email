@@ -1,4 +1,4 @@
-export const maxDuration = 30
+export const maxDuration = 120
 
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
 import { CONTINUE_PROMPT } from '@/lib/llm/prompts'
