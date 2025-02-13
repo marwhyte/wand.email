@@ -1,3 +1,5 @@
+export const maxDuration = 30
+
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
 import { CONTINUE_PROMPT } from '@/lib/llm/prompts'
 import { StreamingOptions, streamText, type Messages } from '@/lib/llm/stream-text'

@@ -116,8 +116,6 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
     initialMessages,
   })
 
-  console.log(messages, 'messages at chat')
-
   // Get the latest assistant message
   const latestAssistantMessage = messages.findLast((m) => m.role === 'assistant')
 
