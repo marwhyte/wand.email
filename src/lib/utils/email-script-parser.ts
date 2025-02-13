@@ -1,4 +1,5 @@
 import { createBlock, createColumn, createRow } from './email-helpers'
+import { resolveImageSrc } from './image-service'
 
 type BlockAttributes = Record<string, string | number>
 
@@ -55,12 +56,7 @@ function parsePadding(padding: string | undefined): Record<string, string> {
 }
 
 function parseEscapeSequences(text: string): string {
-  return text
-    .replace(/\\n/g, '\n')
-    .replace(/\\t/g, '\t')
-    .replace(/\\"/g, '"')
-    .replace(/\\'/g, "'")
-    .replace(/\\\\/g, '\\')
+  return text.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\')
 }
 
 // First, let's improve our base types for parsing
@@ -84,10 +80,7 @@ function isTarget(value: string | undefined): value is ButtonBlockAttributes['ta
 
 // Type guard for border style
 function isBorderStyle(value: string | undefined): value is NonNullable<RowBlockAttributes['borderStyle']> {
-  return (
-    typeof value === 'string' &&
-    ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'].includes(value)
-  )
+  return typeof value === 'string' && ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'].includes(value)
 }
 
 // Helper for ensuring string values
@@ -272,21 +265,7 @@ const parseDividerAttributes: AttributeParser<DividerBlockAttributes> = (raw) =>
 
 // Type guard for social icon folders
 function isSocialIconFolder(value: string | undefined): value is SocialIconFolders {
-  return (
-    typeof value === 'string' &&
-    [
-      'socials-blue',
-      'socials-color',
-      'socials-dark-gray',
-      'socials-dark-round',
-      'socials-dark',
-      'socials-outline-black',
-      'socials-outline-color',
-      'socials-outline-gray',
-      'socials-outline-white',
-      'socials-white',
-    ].includes(value)
-  )
+  return typeof value === 'string' && ['socials-blue', 'socials-color', 'socials-dark-gray', 'socials-dark-round', 'socials-dark', 'socials-outline-black', 'socials-outline-color', 'socials-outline-gray', 'socials-outline-white', 'socials-white'].includes(value)
 }
 
 // Type guard for social icon names
@@ -507,18 +486,7 @@ export function parseEmailScript(script: string): RowBlock[] {
 
       // Extract container-specific attributes
       const containerAttrs: Record<string, any> = {}
-      const containerProps = [
-        'align',
-        'maxWidth',
-        'minWidth',
-        'background',
-        'backgroundColor',
-        'backgroundImage',
-        'backgroundSize',
-        'backgroundPosition',
-        'backgroundRepeat',
-        'height',
-      ]
+      const containerProps = ['align', 'maxWidth', 'minWidth', 'background', 'backgroundColor', 'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat', 'height']
 
       containerProps.forEach((prop) => {
         if (rowAttrs[prop] !== undefined) {
@@ -594,4 +562,52 @@ export function parseEmailScript(script: string): RowBlock[] {
   }
 
   return rows
+}
+
+// Helper function to process blocks recursively and update image sources
+async function processBlocks(blocks: any[]): Promise<any[]> {
+  return Promise.all(
+    blocks.map(async (block) => {
+      if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
+        // Resolve the image source
+        const resolvedSrc = await resolveImageSrc(block.attributes.src)
+        return {
+          ...block,
+          attributes: {
+            ...block.attributes,
+            src: resolvedSrc,
+          },
+        }
+      }
+      return block
+    })
+  )
+}
+
+// Helper function to process columns recursively
+async function processColumns(columns: any[]): Promise<any[]> {
+  return Promise.all(
+    columns.map(async (column) => ({
+      ...column,
+      blocks: column.blocks ? await processBlocks(column.blocks) : [],
+    }))
+  )
+}
+
+// Helper function to process rows recursively
+async function processRows(rows: any[]): Promise<any[]> {
+  return Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      columns: row.columns ? await processColumns(row.columns) : [],
+    }))
+  )
+}
+
+// Main function to process the entire email object
+export async function processEmailImages(email: Email): Promise<Email> {
+  return {
+    ...email,
+    rows: await processRows(email.rows),
+  }
 }

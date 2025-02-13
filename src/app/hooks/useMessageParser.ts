@@ -1,168 +1,82 @@
-import { createChat, updateChat } from '@/lib/database/queries/chats'
-import { EmailScriptParser } from '@/lib/runtime/message-parser'
+import { updateChat } from '@/lib/database/queries/chats'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
+import { parseEmailScript, processEmailImages } from '@/lib/utils/email-script-parser'
 import { createScopedLogger } from '@/lib/utils/logger'
-import type { Message } from 'ai'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useRef, useState } from 'react'
-import { blankTemplate } from '../components/email-workspace/templates/blank-template'
+import { Message } from 'ai'
+import { useEffect, useState } from 'react'
 
-const logger = createScopedLogger('useMessageParser')
+const logger = createScopedLogger('MessageParser')
 
-interface MessageProcessingState {
-  isProcessing: boolean
-  isDone: boolean
+// Helper to validate UUID format
+const isValidUUID = (id: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  return uuidRegex.test(id)
 }
 
-export function useMessageParser(messages: Message[]) {
+export function useMessageParser(message: Message) {
   const { setEmail, email } = useEmailStore()
-  const { chatId, setChatId } = useChatStore()
-  const [parsedMessages, setParsedMessages] = useState<{ [key: number]: string }>({})
-  const [processingStates, setProcessingStates] = useState<{ [key: number]: MessageProcessingState }>({})
-  const lastParsedLengths = useRef<{ [key: string]: number }>({})
-  const processedContent = useRef<{ [key: string]: string }>({})
+  const { chatId, setTitle } = useChatStore()
+  const [emailStates, setEmailStates] = useState<Record<string, 'idle' | 'open' | 'closed' | 'done'>>({})
+  const emailState = emailStates[message.id] ?? 'idle'
+  const setEmailState = (state: 'idle' | 'open' | 'closed' | 'done') => setEmailStates((prev) => ({ ...prev, [message.id]: state }))
 
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
+  useEffect(() => {
+    const processMessage = async () => {
+      const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+(?:[^>]*\s+)?name=["'][^"']*["']/)
 
-  // Initialize processing states from existing messages
-  const initializeProcessingStates = useCallback((messages: Message[]) => {
-    const newStates: { [key: number]: MessageProcessingState } = {}
-
-    messages.forEach((message, index) => {
-      if (message.role === 'assistant') {
-        const hasEmailOpen = message.content.includes('<EMAIL')
-        const hasEmailClose = message.content.includes('</EMAIL>')
-
-        if (hasEmailOpen || hasEmailClose) {
-          newStates[index] = {
-            isProcessing: hasEmailOpen && !hasEmailClose,
-            isDone: hasEmailClose,
-          }
-        }
+      if (isValidUUID(message.id)) {
+        setEmailState('done')
+      } else if (message.content.includes('</EMAIL>') && emailState === 'open') {
+        setEmailState('closed')
+      } else if (hasOpenTag && emailState === 'idle') {
+        setEmailState('open')
       }
+    }
+
+    processMessage()
+  }, [message.content, message.id, emailState])
+
+  useEffect(() => {
+    console.log('State change effect triggered:', {
+      emailState,
+      messageId: message.id,
+      content: message.content,
     })
 
-    setProcessingStates(newStates)
-  }, [])
-
-  console.log('this part of email', email)
-
-  const emailParser = useCallback(
-    () =>
-      new EmailScriptParser({
-        callbacks: {
-          onEmailOpen: async (data) => {
-            setProcessingStates((prev) => ({
-              ...prev,
-              [messages.length - 1]: { isProcessing: true, isDone: false },
-            }))
-            logger.trace('onEmailOpen', data)
-            if (!chatId) {
-              const newEmail = email ?? blankTemplate()
-              // Create new chat
-              const chat = await createChat(messages, data.name, newEmail)
-              if (chat) {
-                setChatId(chat.id)
-                // Update URL without page navigation
-                const params = new URLSearchParams(searchParams)
-                params.set('id', chat.id)
-                router.replace(`${pathname}?${params.toString()}`, { scroll: false })
-              }
-              return
-            }
-
-            if (!email) {
-              console.error('There is no email')
-              return
-            }
-
-            const newEmail: Email = {
-              ...email,
-              name: data.name,
-            }
-
-            console.log('newEmail open', newEmail)
-
-            setEmail(newEmail)
-            updateChat(chatId, {
-              title: newEmail.name,
-            })
-          },
-          onEmailClose: (data) => {
-            setProcessingStates((prev) => ({
-              ...prev,
-              [messages.length - 1]: { isProcessing: false, isDone: true },
-            }))
-            logger.trace('onEmailClose', data)
-            if (!email || !chatId) {
-              console.log(`Email or chatId is not set. Email: ${email}, ChatId: ${chatId}`)
-              return
-            }
-            const newEmail: Email = {
-              ...email,
-              rows: data.rows,
-            }
-            console.log('newEmail close', newEmail)
-            setEmail(newEmail)
-            updateChat(chatId, {
-              email: newEmail,
-            })
-          },
-        },
-      }),
-    [setEmail]
-  )
-
-  const parseMessages = useCallback(
-    async (messages: Message[], isLoading: boolean) => {
-      const parser = emailParser()
-      const newParsedMessages: { [key: number]: string } = {}
-      const newProcessingStates: { [key: number]: MessageProcessingState } = {}
-
-      if (!isLoading) {
-        parser.reset()
-        lastParsedLengths.current = {}
-        processedContent.current = {}
-        initializeProcessingStates(messages)
+    if (emailState === 'open') {
+      const nameMatch = message.content.match(/<EMAIL\s+(?:[^>]*\s+)?name=["']([^"']*)["']/)
+      console.log(nameMatch, 'nameMatch')
+      if (nameMatch && chatId) {
+        setTitle(nameMatch[1])
+        updateChat(chatId, { title: nameMatch[1] })
       }
+    } else if (emailState === 'closed') {
+      const emailRegex = /<EMAIL\s+name=["'][^"']*["']\s*>([\s\S]*?)<\/EMAIL>/i
+      const emailMatch = message.content.match(emailRegex)
+      const nameMatch = message.content.match(/<EMAIL\s+(?:[^>]*\s+)?name=["']([^"']*)["']/)
 
-      for (let i = 0; i < messages.length; i++) {
-        const message = messages[i]
-        if (message.role === 'assistant') {
-          const lastLength = lastParsedLengths.current[message.id] || 0
-          const newContent = message.content.slice(lastLength)
+      if (emailMatch && chatId && email && nameMatch) {
+        const emailString = emailMatch[1]
+        const emailObject: Email = { ...email, name: nameMatch[1], rows: parseEmailScript(emailString) }
 
-          if (newContent.length > 0) {
-            // Parse the entire message content through the parser
-            const parsedContent = await parser.parse(message.id, message.content)
-            processedContent.current[message.id] = parsedContent
-
-            // Update processing states based on current content
-            const hasEmailOpen = message.content.includes('<EMAIL')
-            const hasEmailClose = message.content.includes('</EMAIL>')
-
-            if (hasEmailOpen || hasEmailClose) {
-              newProcessingStates[i] = {
-                isProcessing: hasEmailOpen && !hasEmailClose,
-                isDone: hasEmailClose,
-              }
-            }
-
-            lastParsedLengths.current[message.id] = message.content.length
-            newParsedMessages[i] = processedContent.current[message.id]
-          }
-        }
+        // Process images before updating the email
+        processEmailImages(emailObject)
+          .then((processedEmail) => {
+            console.log('Processed email with resolved images:', processedEmail)
+            setEmail(processedEmail)
+            updateChat(chatId, { email: processedEmail, title: nameMatch[1] })
+            logger.debug('Found email:', emailMatch[1])
+            setEmailState('done')
+          })
+          .catch((error) => {
+            console.error('Error processing email images:', error)
+            // Still update with original email if image processing fails
+            setEmail(emailObject)
+            updateChat(chatId, { email: emailObject, title: nameMatch[1] })
+            setEmailState('done')
+          })
       }
-
-      // Batch state updates
-      setParsedMessages((prev) => ({ ...prev, ...newParsedMessages }))
-      setProcessingStates((prev) => ({ ...prev, ...newProcessingStates }))
-    },
-    [emailParser]
-  )
-
-  return { parsedMessages, parseMessages, processingStates }
+    }
+  }, [emailState])
 }

@@ -43,14 +43,7 @@ export function Chat() {
     <div className="mx-auto w-full">
       <Header chatStarted={chatStarted} />
       <div className="flex flex-1">
-        {ready && (
-          <ChatImpl
-            initialMessages={initialMessages}
-            storeMessageHistory={storeMessageHistory}
-            chatStarted={chatStarted}
-            setChatStarted={setChatStarted}
-          />
-        )}
+        {ready && <ChatImpl initialMessages={initialMessages} storeMessageHistory={storeMessageHistory} chatStarted={chatStarted} setChatStarted={setChatStarted} />}
         <ToastContainer
           closeButton={({ closeToast }) => {
             return (
@@ -102,6 +95,7 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
     if (session.data?.user) {
       setShowSignUpDialog(false)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.status])
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -116,21 +110,19 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
     body: {
       template: initialMessages.length === 0 ? JSON.stringify(selectedTemplate?.template) : undefined,
     },
-    onError: (error) => {
-      logger.error('Request failed\n\n', error)
-      toast.error('There was an error processing your request')
-    },
     onFinish: () => {
       logger.debug('Finished streaming')
     },
     initialMessages,
   })
 
-  const { parsedMessages, parseMessages, processingStates } = useMessageParser(messages)
+  console.log(messages, 'messages at chat')
 
-  useEffect(() => {
-    parseMessages(messages, isLoading)
-  }, [messages, isLoading, parseMessages])
+  // Get the latest assistant message
+  const latestAssistantMessage = messages.findLast((m) => m.role === 'assistant')
+
+  // Add message parser hook with empty content if no message exists
+  useMessageParser(latestAssistantMessage ?? { role: 'assistant', content: '', id: '' })
 
   const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
 
@@ -144,7 +136,7 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
     if (!isLoading && messages.length > initialMessages.length) {
       storeMessageHistory(messages, selectedTemplate?.template).catch((error) => toast.error(error.message))
     }
-  }, [messages, isLoading])
+  }, [messages.length, initialMessages.length, isLoading])
 
   const scrollTextArea = () => {
     const textarea = textareaRef.current
@@ -170,17 +162,14 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
       textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`
       textarea.style.overflowY = scrollHeight > TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden'
     }
-  }, [input, textareaRef])
+  }, [TEXTAREA_MAX_HEIGHT, input, textareaRef])
 
   const runAnimation = async () => {
     if (chatStarted) {
       return
     }
 
-    await Promise.all([
-      animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }),
-      animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
-    ])
+    await Promise.all([animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }), animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn })])
 
     setKey('started', true)
 
@@ -203,11 +192,13 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
 
     runAnimation()
 
-    append({ role: 'user', content: _input })
+    console.log(messages, 'messages')
 
-    if (selectedTemplate) {
-      setEmail(selectedTemplate.template)
+    if (messages.length === 0) {
+      await storeMessageHistory(messages, selectedTemplate?.template).catch((error) => toast.error(error.message))
     }
+
+    append({ role: 'user', content: _input })
 
     setInput('')
 
@@ -227,7 +218,6 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
         showChat={showChat}
         chatStarted={chatStarted}
         isStreaming={isLoading}
-        processingStates={processingStates}
         enhancingPrompt={enhancingPrompt}
         promptEnhanced={promptEnhanced}
         sendMessage={sendMessage}
@@ -235,9 +225,9 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
         scrollRef={scrollRef}
         handleInputChange={handleInputChange}
         handleStop={abort}
-        messages={messages.map((message, index) => ({
+        messages={messages.map((message) => ({
           ...message,
-          content: message.role === 'assistant' ? parsedMessages[index] || message.content : message.content,
+          content: message === latestAssistantMessage ? message.content : message.content,
         }))}
         enhancePrompt={() => {
           enhancePrompt(input, (input) => {
@@ -253,9 +243,7 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
         <DialogBody className="!mt-2">
           <DialogDescription className="mb-4">Access and edit your saved emails anytime, anywhere.</DialogDescription>
           {stepType === 'login' && <LoginForm redirectToInitialProject onSwitchType={() => setStepType('signup')} />}
-          {stepType === 'signup' && (
-            <RegistrationForm redirectToInitialProject onSwitchType={() => setStepType('login')} />
-          )}
+          {stepType === 'signup' && <RegistrationForm redirectToInitialProject onSwitchType={() => setStepType('login')} />}
         </DialogBody>
       </Dialog>
     </>

@@ -32,6 +32,9 @@ export function useChatHistory() {
     const loadChat = async () => {
       try {
         const chat = await getChatWithMessages(chatId)
+
+        console.log(chat, 'chat at useChatHistory')
+
         if (chat) {
           setInitialMessages(chat.messages)
           setTitle(chat.title)
@@ -55,8 +58,6 @@ export function useChatHistory() {
     initialMessages,
     storeMessageHistory: async (messages: Message[], email?: Email) => {
       try {
-        if (messages.length === 0) return
-
         if (!chatId) {
           const newEmail = email ?? blankTemplate()
           // Create new chat
@@ -70,6 +71,7 @@ export function useChatHistory() {
           }
         } else {
           // Update existing chat
+          console.log('updating chat', chatId, messages)
           await updateChat(chatId, { messages })
         }
       } catch (error) {

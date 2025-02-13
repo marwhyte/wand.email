@@ -2,85 +2,44 @@
 
 import { auth } from '@/auth'
 import type { Message } from 'ai'
-import { revalidateTag, unstable_cache } from 'next/cache'
+import { revalidateTag } from 'next/cache'
 import { db } from '../db'
 
-// Internal helper functions (not exported)
-const getChatsInternal = unstable_cache(
-  async (sessionUserId: string) => {
-    const chats = await db
-      .selectFrom('chats')
-      .selectAll()
-      .where('user_id', '=', sessionUserId)
-      .where('deleted_at', 'is', null)
-      .orderBy('updated_at', 'desc')
-      .execute()
+// Modified internal functions without caching
+const getChatsInternal = async (sessionUserId: string) => {
+  const chats = await db.selectFrom('chats').selectAll().where('user_id', '=', sessionUserId).where('deleted_at', 'is', null).orderBy('updated_at', 'desc').execute()
 
-    return chats
-  },
-  ['chats'],
-  {
-    tags: ['chats'],
-    revalidate: 60 * 60,
+  return chats
+}
+
+const getMessageInternal = async (id: string, sessionUserId: string) => {
+  const message = await db.selectFrom('messages').selectAll().where('id', '=', id).executeTakeFirst()
+  return message
+}
+
+const getChatInternal = async (id: string, sessionUserId: string) => {
+  const chat = await db.selectFrom('chats').selectAll().where('id', '=', id).where('user_id', '=', sessionUserId).where('deleted_at', 'is', null).executeTakeFirst()
+  return chat
+}
+
+const getChatWithMessagesInternal = async (id: string, sessionUserId: string) => {
+  const chat = await db.selectFrom('chats').selectAll().where('id', '=', id).where('user_id', '=', sessionUserId).where('deleted_at', 'is', null).executeTakeFirst()
+
+  if (!chat) return undefined
+
+  const messages = await db.selectFrom('messages').selectAll().where('chat_id', '=', id).orderBy('sequence', 'asc').execute()
+
+  const response = {
+    ...chat,
+    messages: messages.map((msg) => ({
+      id: msg.id,
+      role: msg.role,
+      content: msg.content,
+    })),
   }
-)
 
-const getChatInternal = unstable_cache(
-  async (id: string, sessionUserId: string) => {
-    const chat = await db
-      .selectFrom('chats')
-      .selectAll()
-      .where('id', '=', id)
-      .where('user_id', '=', sessionUserId)
-      .where('deleted_at', 'is', null)
-      .executeTakeFirst()
-    return chat
-  },
-  ['chat'],
-  {
-    tags: ['chat'],
-    revalidate: 60 * 60,
-  }
-)
-
-const getChatWithMessagesInternal = unstable_cache(
-  async (id: string, sessionUserId: string) => {
-    const chat = await db
-      .selectFrom('chats')
-      .selectAll()
-      .where('id', '=', id)
-      .where('user_id', '=', sessionUserId)
-      .where('deleted_at', 'is', null)
-      .executeTakeFirst()
-
-    if (!chat) return undefined
-
-    const messages = await db
-      .selectFrom('messages')
-      .selectAll()
-      .where('chat_id', '=', id)
-      .orderBy('sequence', 'asc')
-      .execute()
-
-    console.log(chat)
-
-    const response = {
-      ...chat,
-      messages: messages.map((msg) => ({
-        id: msg.id,
-        role: msg.role,
-        content: msg.content,
-      })),
-    }
-
-    return response
-  },
-  ['chat'],
-  {
-    tags: ['chat'],
-    revalidate: 60 * 60,
-  }
-)
+  return response
+}
 
 export async function createChat(messages: Message[], title?: string, email?: Email) {
   const session = await auth()
@@ -125,60 +84,87 @@ export async function createChat(messages: Message[], title?: string, email?: Em
   })
 }
 
+export async function updateMessage(id: string, chatId: string, updates: { content?: string }) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+
+  if (updates.content !== undefined) {
+    await db.updateTable('messages').set({ content: updates.content }).where('id', '=', id).where('chat_id', '=', chatId).execute()
+  }
+
+  revalidateTag('chats')
+}
+
 export async function updateChat(id: string, updates: { messages?: Message[]; title?: string; email?: Email }) {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
   }
 
-  return await db.transaction().execute(async (trx) => {
-    // Update chat
-    if (updates.title !== undefined) {
-      await trx
-        .updateTable('chats')
-        .set({
-          title: updates.title,
-          updated_at: new Date(),
+  try {
+    return await db.transaction().execute(async (trx) => {
+      // Update chat
+      if (updates.title !== undefined) {
+        await trx
+          .updateTable('chats')
+          .set({
+            title: updates.title,
+            updated_at: new Date(),
+          })
+          .where('id', '=', id)
+          .where('user_id', '=', session.user?.id ?? '')
+          .execute()
+      }
+
+      if (updates.email) {
+        await trx
+          .updateTable('chats')
+          .set({
+            email: updates.email,
+            updated_at: new Date(),
+          })
+          .where('id', '=', id)
+          .where('user_id', '=', session.user?.id ?? '')
+          .execute()
+      }
+
+      // Update messages
+      if (updates.messages) {
+        // Delete existing messages
+        await trx.deleteFrom('messages').where('chat_id', '=', id).execute()
+
+        // Sort messages by creation time
+        const sortedMessages = [...updates.messages].sort((a, b) => {
+          const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0
+          const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0
+          return timeA - timeB
         })
-        .where('id', '=', id)
-        .where('user_id', '=', session.user?.id ?? '')
-        .execute()
-    }
 
-    if (updates.email) {
-      await trx
-        .updateTable('chats')
-        .set({
-          email: updates.email,
-          updated_at: new Date(),
-        })
-        .where('id', '=', id)
-        .where('user_id', '=', session.user?.id ?? '')
-        .execute()
-    }
+        // Prepare message values with sequential ordering
+        const messageValues = sortedMessages.map((msg, index) => ({
+          chat_id: id,
+          role: msg.role,
+          content: msg.content,
+          sequence: index,
+          created_at: msg.createdAt || new Date(),
+        }))
 
-    // Update messages
-    if (updates.messages) {
-      // Delete existing messages
-      await trx.deleteFrom('messages').where('chat_id', '=', id).execute()
+        console.log('Inserting messages with sequential ordering:', messageValues)
 
-      // Insert new messages
-      await trx
-        .insertInto('messages')
-        .values(
-          updates.messages.map((msg, index) => ({
-            chat_id: id,
-            role: msg.role,
-            content: msg.content,
-            sequence: index,
-            created_at: new Date(),
-          }))
-        )
-        .execute()
-    }
+        // Insert new messages
+        const result = await trx.insertInto('messages').values(messageValues).returningAll().execute()
 
-    revalidateTag('chats')
-  })
+        console.log('Inserted messages:', result)
+      }
+
+      revalidateTag('chats')
+    })
+  } catch (error) {
+    console.error('Error updating chat:', error)
+    throw error
+  }
 }
 
 export async function deleteChat(id: string) {
@@ -187,12 +173,7 @@ export async function deleteChat(id: string) {
     throw new Error('User not authenticated')
   }
 
-  await db
-    .updateTable('chats')
-    .set({ deleted_at: new Date() })
-    .where('id', '=', id)
-    .where('user_id', '=', session.user.id)
-    .execute()
+  await db.updateTable('chats').set({ deleted_at: new Date() }).where('id', '=', id).where('user_id', '=', session.user.id).execute()
 
   revalidateTag('chats')
 }
@@ -204,6 +185,14 @@ export async function getChats() {
     throw new Error('User not authenticated')
   }
   return getChatsInternal(session.user.id)
+}
+
+export async function getMessage(id: string) {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+  return getMessageInternal(id, session.user.id)
 }
 
 export async function getChat(id: string) {

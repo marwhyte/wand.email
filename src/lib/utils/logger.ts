@@ -11,7 +11,7 @@ interface Logger {
   setLevel: (level: DebugLevel) => void
 }
 
-let currentLevel: DebugLevel = (process.env.VITE_LOG_LEVEL ?? process.env.DEV) ? 'debug' : 'info'
+let currentLevel: DebugLevel = (process.env.VITE_LOG_LEVEL ?? process.env.NODE_ENV === 'development') ? 'debug' : 'info'
 
 const isWorker = 'HTMLRewriter' in globalThis
 const supportsColor = !isWorker
@@ -51,7 +51,15 @@ function log(level: DebugLevel, scope: string | undefined, messages: any[]) {
     return
   }
 
-  const allMessages = messages.reduce((acc, current) => {
+  // Format objects and arrays properly
+  const formattedMessages = messages.map((msg) => {
+    if (typeof msg === 'object' && msg !== null) {
+      return JSON.stringify(msg, null, 2)
+    }
+    return msg
+  })
+
+  const allMessages = formattedMessages.reduce((acc, current) => {
     if (acc.endsWith('\n')) {
       return acc + current
     }
@@ -65,7 +73,6 @@ function log(level: DebugLevel, scope: string | undefined, messages: any[]) {
 
   if (!supportsColor) {
     console.log(`[${level.toUpperCase()}]`, allMessages)
-
     return
   }
 
