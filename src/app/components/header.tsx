@@ -3,14 +3,8 @@
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { classNames } from '@/lib/utils/misc'
-import {
-  ArrowDownTrayIcon,
-  ComputerDesktopIcon,
-  DevicePhoneMobileIcon,
-  PaperAirplaneIcon,
-} from '@heroicons/react/20/solid'
+import { ArrowDownTrayIcon, ComputerDesktopIcon, DevicePhoneMobileIcon, PaperAirplaneIcon } from '@heroicons/react/20/solid'
 import { useSession } from 'next-auth/react'
-import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { Logo } from './Logo'
@@ -44,16 +38,11 @@ export function Header({ chatStarted }: Props) {
 
   return (
     <header>
-      <div
-        className={classNames(
-          'z-100 flex w-full items-center justify-between bg-white px-4 py-4',
-          chatStarted ? 'border-b border-gray-200' : ''
-        )}
-      >
-        <Link href="/" className="-m-1.5 p-1.5">
+      <div className={classNames('z-100 flex w-full items-center justify-between bg-white px-4 py-4', chatStarted ? 'border-b border-gray-200' : '')}>
+        <a href="/" className="-m-1.5 p-1.5">
           <span className="sr-only">SentSwiftly</span>
           <Logo className="z-100" text={false} />
-        </Link>
+        </a>
 
         {title && <div className="absolute left-1/2 -translate-x-1/2 truncate font-medium">{title}</div>}
 
