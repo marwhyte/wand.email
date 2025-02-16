@@ -1,27 +1,38 @@
 'use client'
 
 import { useChatStore } from '@/lib/stores/chatStore'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { classNames } from '@/lib/utils/misc'
 import { ArrowDownTrayIcon, ComputerDesktopIcon, DevicePhoneMobileIcon, PaperAirplaneIcon } from '@heroicons/react/20/solid'
+import { render } from '@react-email/components'
 import { useSession } from 'next-auth/react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { useOpener } from '../hooks'
 import { Logo } from './Logo'
 import { Button } from './button'
+import EmailRendererFinal from './email-workspace/email-renderer-final'
+import ExportDialog from './email-workspace/export-dialog'
+import Loading from './loading'
+import Notification from './notification'
 import { Tab, TabGroup, TabList } from './tab'
 
 type Props = {
   chatStarted: boolean
+  monthlyExportCount: number | null
 }
 
-export function Header({ chatStarted }: Props) {
+export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()
+  const { email } = useEmailStore()
   const pathname = usePathname()
   const searchParams = useSearchParams()
+  const exportOpener = useOpener()
   const id = searchParams.get('id')
   const { title } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
+  const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
   const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>(mobileView ? 'mobile' : 'desktop')
 
@@ -36,6 +47,34 @@ export function Header({ chatStarted }: Props) {
     setSelectedDevice(newValue)
   }
 
+  const sendTestEmail = async () => {
+    if (!session?.data?.user?.email || !email) return
+
+    setEmailStatus('loading')
+
+    try {
+      const response = await fetch('/api/send', {
+        method: 'POST',
+        body: JSON.stringify({
+          html: render(EmailRendererFinal({ email: email })),
+          email: session.data.user.email,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      if (response.ok) {
+        setEmailStatus('success')
+      } else {
+        setEmailStatus('error')
+      }
+    } catch (error) {
+      setEmailStatus('error')
+      console.error('Error sending email:', error)
+    }
+  }
+
   return (
     <header>
       <div className={classNames('z-100 flex w-full items-center justify-between bg-white px-4 py-4', chatStarted ? 'border-b border-gray-200' : '')}>
@@ -46,7 +85,7 @@ export function Header({ chatStarted }: Props) {
 
         {title && <div className="absolute left-1/2 -translate-x-1/2 truncate font-medium">{title}</div>}
 
-        {id && (
+        {id && session?.data?.user && (
           <div className="flex items-center space-x-4">
             <TabGroup value={selectedDevice} className="flex justify-center" onChange={handleDeviceChange}>
               <TabList>
@@ -58,11 +97,11 @@ export function Header({ chatStarted }: Props) {
               </TabList>
             </TabGroup>
 
-            <Button tooltipPosition="bottom" tooltip="Send test email">
-              <PaperAirplaneIcon className="h-4 w-4" />
+            <Button disabled={emailStatus === 'loading'} onClick={sendTestEmail} tooltipPosition="left" tooltip="Send test email">
+              {emailStatus === 'loading' ? <Loading height={24} width={24} /> : <PaperAirplaneIcon className="h-4 w-4" />}
             </Button>
 
-            <Button color="purple">
+            <Button onClick={exportOpener.open} color="purple">
               <ArrowDownTrayIcon className="h-4 w-4" />
               {session?.data?.user ? 'Export' : 'Sign up to export'}
             </Button>
@@ -86,6 +125,9 @@ export function Header({ chatStarted }: Props) {
           </div>
         )}
       </div>
+      {emailStatus === 'success' && <Notification title="Test email sent successfully!" status="success" />}
+      {emailStatus === 'error' && <Notification title="Failed to send test email" status="failure" />}
+      <ExportDialog open={exportOpener.isOpen} onClose={exportOpener.close} monthlyExportCount={monthlyExportCount} />
     </header>
   )
 }

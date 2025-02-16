@@ -1,3 +1,4 @@
+import { isLocalDev } from '@/constants'
 import { addExport } from '@/lib/database/queries/exports'
 import { ExportType } from '@/lib/database/types'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -15,6 +16,7 @@ import Notification from '../notification'
 import { Steps } from '../steps'
 import { Strong, Text, TextLink } from '../text'
 import EmailRendererFinal from './email-renderer-final'
+
 type Props = {
   open: boolean
   onClose: () => void
@@ -27,8 +29,11 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
 
+  const canExport = (monthlyExportCount !== null && monthlyExportCount < 5) || isLocalDev
+
   const handleExport = (type: ExportType) => {
     if (!email) return
+    if (!canExport) return
     addExport(email, type)
     setExportType(type)
   }
@@ -72,8 +77,13 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           )}
           <div className="mt-4">
             <AlertBox
-              action={{ onClick: () => {}, text: 'Upgrade' }}
-              status={monthlyExportCount === 5 ? 'error' : 'info'}
+              action={{
+                onClick: () => {
+                  window.location.search = '?upgrade=true'
+                },
+                text: 'Upgrade',
+              }}
+              status={!canExport ? 'error' : 'info'}
             >
               You have made {monthlyExportCount} out of 5 monthly exports.
             </AlertBox>
@@ -108,26 +118,11 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                           to your react project
                         </Heading>
                         <Text className="mt-4">npm</Text>
-                        <CodeBlock
-                          theme={dracula}
-                          lineNumbers
-                          language="bash"
-                          code={`npm install @react-email/components`}
-                        />
+                        <CodeBlock theme={dracula} lineNumbers language="bash" code={`npm install @react-email/components`} />
                         <Text>pnpm</Text>
-                        <CodeBlock
-                          theme={dracula}
-                          lineNumbers
-                          language="bash"
-                          code={`pnpm install @react-email/components`}
-                        />
+                        <CodeBlock theme={dracula} lineNumbers language="bash" code={`pnpm install @react-email/components`} />
                         <Text>yarn</Text>
-                        <CodeBlock
-                          theme={dracula}
-                          lineNumbers
-                          language="bash"
-                          code={`yarn add @react-email/components`}
-                        />
+                        <CodeBlock theme={dracula} lineNumbers language="bash" code={`yarn add @react-email/components`} />
                       </div>
                     )
                   } else if (currentStep.name === 'Create') {
@@ -137,9 +132,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                           Create Email Component
                         </Heading>
                         <Text className="mt-4">
-                          Create a new email component, for example <CodeInline>Email.tsx</CodeInline> in your project
-                          and copy and paste the code below. A common practice is to create a new email folder in your
-                          project.
+                          Create a new email component, for example <CodeInline>Email.tsx</CodeInline> in your project and copy and paste the code below. A common practice is to create a new email folder in your project.
                         </Text>
                         <div className="relative">
                           <div className="absolute bottom-2 right-2 mt-4 text-end">
@@ -194,6 +187,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                 onClick={() => {
                   handleExport('react')
                 }}
+                disabled={!canExport}
               />
               <ButtonCard
                 icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
@@ -202,20 +196,13 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                 onClick={() => {
                   handleExport('html')
                 }}
+                disabled={!canExport}
               />
             </>
           )}
         </DialogBody>
       </Dialog>
-      {notificationMessage && (
-        <Notification
-          onClose={() => setNotificationMessage(null)}
-          title={notificationMessage}
-          status={notificationStatus}
-          duration={4000}
-          skipClose
-        />
-      )}
+      {notificationMessage && <Notification onClose={() => setNotificationMessage(null)} title={notificationMessage} status={notificationStatus} duration={4000} skipClose />}
     </>
   )
 }

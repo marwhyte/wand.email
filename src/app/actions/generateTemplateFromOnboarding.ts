@@ -9,7 +9,7 @@ const unsplash = createApi({
 
 const openai = new OpenAI()
 
-const TEXT_TO_EMAIL_PROMPT = `You are an email template generator that creates beautiful, on-brand email templates based on text descriptions. Follow these specifications carefully:
+const TEXT_TO_EMAIL_PROMPT = `You are an email template generator that creates beautiful, on-brand emails based on text descriptions. Follow these specifications carefully:
 
 INPUT INTERPRETATION:
 You will receive:
@@ -242,13 +242,7 @@ When designing the template:
 RESPONSE FORMAT:
 Respond with a valid JSON object matching the template root structure defined above. Do not include any additional text or explanations - only the JSON object.`
 
-export async function generateEmailFromDescription(
-  description: string,
-  colorScheme: string,
-  themes: string[],
-  logoUrl: string,
-  businessType: string
-): Promise<Email> {
+export async function generateEmailFromDescription(description: string, colorScheme: string, themes: string[], logoUrl: string, businessType: string): Promise<Email> {
   try {
     // Search for relevant images on Unsplash based on themes and description
     const searchResults = await unsplash.search.getPhotos({

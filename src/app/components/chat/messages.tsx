@@ -1,10 +1,9 @@
 'use client'
 
+import { classNames } from '@/lib/utils/misc'
 import type { Message } from 'ai'
 import { motion } from 'framer-motion'
 import React from 'react'
-
-import { classNames } from '@/lib/utils/misc'
 import { AssistantMessage } from './assistant-message'
 import { UserMessage } from './user-message'
 
@@ -19,7 +18,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const { id, isStreaming = false, messages = [] } = props
 
   return (
-    <div id={id} ref={ref} className={props.className}>
+    <div id={id} ref={ref} className={props.className + ' w-full'}>
       {messages.length > 0
         ? messages.map((message, index) => {
             const { role, content } = message
@@ -51,7 +50,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                       <div className="i-ph:user-fill text-xl"></div>
                     </div>
                   )}
-                  <div className="grid-col-1 grid w-full">{isUserMessage ? <UserMessage content={content} /> : <AssistantMessage content={content} />}</div>
+                  <div className="grid-col-1 grid">{isUserMessage ? <UserMessage content={content} /> : <AssistantMessage content={content} />}</div>
                 </div>
               </motion.div>
             )

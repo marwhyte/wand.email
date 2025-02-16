@@ -14,10 +14,12 @@ import type { Message } from 'ai'
 import { useChat } from 'ai/react'
 import { useAnimate } from 'framer-motion'
 import { useSession } from 'next-auth/react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { cssTransition, toast, ToastContainer } from 'react-toastify'
 import { Dialog, DialogBody, DialogDescription, DialogTitle } from '../dialog'
 import { Header } from '../header'
+import UpgradeDialog from '../payment/upgrade-dialog'
 import { BaseChat } from './base-chat'
 
 const toastAnimation = cssTransition({
@@ -27,7 +29,11 @@ const toastAnimation = cssTransition({
 
 const logger = createScopedLogger('Chat')
 
-export function Chat() {
+type Props = {
+  monthlyExportCount: number | null
+}
+
+export function Chat({ monthlyExportCount }: Props) {
   renderLogger.trace('Chat')
 
   const { ready, initialMessages, storeMessageHistory } = useChatHistory()
@@ -41,7 +47,7 @@ export function Chat() {
 
   return (
     <div className="mx-auto w-full">
-      <Header chatStarted={chatStarted} />
+      <Header monthlyExportCount={monthlyExportCount} chatStarted={chatStarted} />
       <div className="flex flex-1">
         {ready && <ChatImpl initialMessages={initialMessages} storeMessageHistory={storeMessageHistory} chatStarted={chatStarted} setChatStarted={setChatStarted} />}
         <ToastContainer
@@ -86,6 +92,19 @@ interface ChatProps {
 export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, setChatStarted }: ChatProps) {
   const session = useSession()
   const { setEmail } = useEmailStore()
+
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const isUpgradeDialogOpen = searchParams.get('upgrade') === 'true'
+
+  const openUpgradeDialog = () => {
+    router.push(`${pathname}?upgrade=true&plan=starter`, { scroll: false })
+  }
+
+  const closeUpgradeDialog = () => {
+    router.push(pathname, { scroll: false })
+  }
 
   const [showSignUpDialog, setShowSignUpDialog] = useState(false)
   const [stepType, setStepType] = useState<'login' | 'signup'>('signup')
@@ -244,6 +263,7 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
           {stepType === 'signup' && <RegistrationForm redirectToInitialProject onSwitchType={() => setStepType('login')} />}
         </DialogBody>
       </Dialog>
+      <UpgradeDialog open={isUpgradeDialogOpen} onClose={closeUpgradeDialog} />
     </>
   )
 }
