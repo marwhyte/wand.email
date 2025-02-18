@@ -19,11 +19,11 @@ export function Footer() {
         Help Center
       </a>
       <span>•</span>
-      <a href="/terms" className="hover:text-gray-900">
+      <a href="/tos.html" className="hover:text-gray-900">
         Terms
       </a>
       <span>•</span>
-      <a href="/privacy" className="hover:text-gray-900">
+      <a href="/privacy.html" className="hover:text-gray-900">
         Privacy
       </a>
     </footer>
