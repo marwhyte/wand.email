@@ -1,3 +1,5 @@
+'use client'
+
 import { doLogout } from '@/app/actions/authentication'
 import { useEffect } from 'react'
 
