@@ -33,7 +33,7 @@ export const goingTemplateScript = `
   }
 
   ROW padding=60,15,30,15 {
-    COLUMN align=center valign=top {
+    COLUMN align=center verticalAlign=top {
       TEXT text=<p>Tips to get the most bang for your buck with Going</p> textAlign=center padding=0,0,24,0 fontSize=24 lineHeight=32px fontWeight=bold
     }
   }
@@ -42,7 +42,7 @@ export const goingTemplateScript = `
     COLUMN align=center width=33% {
       IMAGE src=${getPhotoUrl('going-gif-1.gif', 'going')} width=70%
     }
-    COLUMN valign=top width=66% {
+    COLUMN verticalAlign=top width=66% {
       HEADING text=<p>Get the Going app.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 lineHeight=24px fontWeight=bold color=#004449 margin=0,0,16,0
       TEXT text=<p>Never miss a deal with real-time flight alerts. <a href='/' style='color: #483cff; text-decoration: underline'>Download on iOS and Android.</a></p> padding=10,0 display=inline-block verticalAlign=middle color=#004449
     }
@@ -52,7 +52,7 @@ export const goingTemplateScript = `
     COLUMN align=center width=33% {
       IMAGE src=${getPhotoUrl('going-gif-2.gif', 'going')} width=70%
     }
-    COLUMN valign=top width=66% {
+    COLUMN verticalAlign=top width=66% {
       HEADING text=<p>Set up your airports.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 lineHeight=24px fontWeight=bold color=#004449 margin=0,0,16,0
       TEXT text=<p>You'll only receive deals from departure airports you follow. <a href='/' style='color: #483cff; text-decoration: underline'>Choose airports</a></p> padding=10,0 display=inline-block verticalAlign=middle color=#004449
     }
@@ -62,7 +62,7 @@ export const goingTemplateScript = `
     COLUMN align=center width=33% {
       IMAGE src=${getPhotoUrl('going-gif-3.gif', 'going')} width=70%
     }
-    COLUMN valign=top width=66% {
+    COLUMN verticalAlign=top width=66% {
       HEADING text=<p>Check out your deals.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 lineHeight=24 fontWeight=bold color=#004449 margin=0,0,16,0
       TEXT text=<p>Access to Going's best domestic flights. <a href='/' style='color: #483cff; text-decoration: underline'>your deals</a></p> padding=10,0 display=inline-block verticalAlign=middle color=#004449
     }

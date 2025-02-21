@@ -1,3 +1,4 @@
+import { ColumnBlock, Email, EmailBlock, EmailBlockType, RowBlock } from '@/app/components/email-workspace/types'
 import { v4 as uuidv4 } from 'uuid'
 
 const defaultStyles = {
@@ -22,10 +23,10 @@ export const createBlock = (type: EmailBlockType, content: string, attrs = {}, c
 }
 
 // Creates a column with a given number of grid columns and attributes. Accepts block array.
-export const createColumn = (blocks: any[], gridCols = 12, attrs = {}) => ({
+export const createColumn = (blocks: any[], width = '100%', attrs = {}) => ({
   id: uuidv4(),
   type: 'column' as const,
-  gridColumns: gridCols,
+  width,
   attributes: attrs,
   blocks,
 })
@@ -34,16 +35,11 @@ type RowWithColumnConfig = {
   containerAttrs?: Record<string, any>
   rowAttrs?: Record<string, any>
   columnAttrs?: Record<string, any>
-  gridColumns?: number
+  width?: string
 }
 
-export const createRowWithColumn = ({
-  containerAttrs = {},
-  rowAttrs = {},
-  columnAttrs = {},
-  gridColumns = 12,
-}: RowWithColumnConfig = {}) => {
-  const column = createColumn([], gridColumns, columnAttrs)
+export const createRowWithColumn = ({ containerAttrs = {}, rowAttrs = {}, columnAttrs = {}, width = '100%' }: RowWithColumnConfig = {}) => {
+  const column = createColumn([], width, columnAttrs)
   const row = {
     id: uuidv4(),
     type: 'row' as const,
@@ -68,19 +64,7 @@ export const createRow = (containerAttrs = {}, attrs = {}) => ({
   columns: [],
 })
 
-export const createEmail = (
-  name: string,
-  rows: RowBlock[],
-  color: string,
-  linkColor: string,
-  fontFamily = 'Arial',
-  bgColor = '#ffffff',
-  width = '600',
-  bgImage: string | undefined = undefined,
-  bgPosition: string | undefined = undefined,
-  bgRepeat: string | undefined = undefined,
-  bgSize: string | undefined = undefined
-): Email => ({
+export const createEmail = (name: string, rows: RowBlock[], color: string, linkColor: string, fontFamily = 'Arial', bgColor = '#ffffff', width = '600', bgImage: string | undefined = undefined, bgPosition: string | undefined = undefined, bgRepeat: string | undefined = undefined, bgSize: string | undefined = undefined): Email => ({
   id: uuidv4(),
   name,
   rows,
@@ -181,18 +165,11 @@ type TwoColumnConfig = {
   rowAttrs?: Record<string, any>
   leftColumnAttrs?: Record<string, any>
   rightColumnAttrs?: Record<string, any>
-  leftColumnWidth?: number
-  rightColumnWidth?: number
+  leftColumnWidth?: string
+  rightColumnWidth?: string
 }
 
-export const createRowWithTwoColumns = ({
-  containerAttrs = {},
-  rowAttrs = {},
-  leftColumnAttrs = {},
-  rightColumnAttrs = {},
-  leftColumnWidth = 6,
-  rightColumnWidth = 6,
-}: TwoColumnConfig = {}) => {
+export const createRowWithTwoColumns = ({ containerAttrs = {}, rowAttrs = {}, leftColumnAttrs = {}, rightColumnAttrs = {}, leftColumnWidth = '50%', rightColumnWidth = '50%' }: TwoColumnConfig = {}) => {
   const leftColumn = createColumn([], leftColumnWidth, leftColumnAttrs)
   const rightColumn = createColumn([], rightColumnWidth, rightColumnAttrs)
 

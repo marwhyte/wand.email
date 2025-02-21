@@ -1,6 +1,7 @@
 'use client'
 
 import { EmailContent } from './email-renderer-final'
+import { Template } from './types'
 
 type TemplateCardProps = {
   template: Template
@@ -17,9 +18,7 @@ const TemplateCard = ({ template, isSelected, onSelect }: TemplateCardProps) => 
           onSelect(template)
         }
       }}
-      className={`my-2 block cursor-pointer overflow-hidden rounded-lg border hover:outline hover:outline-blue-500 ${
-        isSelected ? 'outline-3 scale-[1.02] outline outline-blue-500 ring-4 ring-blue-200 transition-transform' : ''
-      }`}
+      className={`my-2 block cursor-pointer overflow-hidden rounded-lg border hover:outline hover:outline-blue-500 ${isSelected ? 'outline-3 scale-[1.02] outline outline-blue-500 ring-4 ring-blue-200 transition-transform' : ''}`}
     >
       <li className="col-span-1 flex w-[200px] flex-col divide-y bg-white text-center">
         <div className="flex flex-1 flex-col">

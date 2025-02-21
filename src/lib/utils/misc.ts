@@ -17,6 +17,8 @@ type ObjectWithCreatedAt = {
   created_at: Date
 }
 
+export const chunk = <T>(arr: T[], size: number): T[][] => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size))
+
 export function sortByCreatedAt<T extends ObjectWithCreatedAt>(projects: T[]): T[] {
   return projects.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 }

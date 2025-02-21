@@ -1,3 +1,4 @@
+import { Email } from '@/app/components/email-workspace/types'
 import { Generated } from 'kysely'
 
 export interface Database {

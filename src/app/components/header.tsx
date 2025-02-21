@@ -4,7 +4,7 @@ import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { classNames } from '@/lib/utils/misc'
-import { ArrowDownTrayIcon, ComputerDesktopIcon, DevicePhoneMobileIcon, PaperAirplaneIcon } from '@heroicons/react/20/solid'
+import { ArrowDownTrayIcon, ComputerDesktopIcon, DevicePhoneMobileIcon, EyeIcon, PaperAirplaneIcon } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
 import { useSession } from 'next-auth/react'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -14,6 +14,7 @@ import { Logo } from './Logo'
 import { Button } from './button'
 import EmailRendererFinal from './email-workspace/email-renderer-final'
 import ExportDialog from './email-workspace/export-dialog'
+import PreviewDialog from './email-workspace/preview-dialog'
 import Loading from './loading'
 import Notification from './notification'
 import { Tab, TabGroup, TabList } from './tab'
@@ -29,6 +30,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const exportOpener = useOpener()
+  const previewOpener = useOpener()
   const id = searchParams.get('id')
   const { title } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
@@ -97,6 +99,10 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
               </TabList>
             </TabGroup>
 
+            <Button onClick={previewOpener.open} tooltipPosition="left" tooltip="Preview email">
+              <EyeIcon className="h-4 w-4" />
+            </Button>
+
             <Button disabled={emailStatus === 'loading'} onClick={sendTestEmail} tooltipPosition="left" tooltip="Send test email">
               {emailStatus === 'loading' ? <Loading height={24} width={24} /> : <PaperAirplaneIcon className="h-4 w-4" />}
             </Button>
@@ -128,6 +134,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
       {emailStatus === 'success' && <Notification title="Test email sent successfully!" status="success" />}
       {emailStatus === 'error' && <Notification title="Failed to send test email" status="failure" />}
       <ExportDialog open={exportOpener.isOpen} onClose={exportOpener.close} monthlyExportCount={monthlyExportCount} />
+      <PreviewDialog open={previewOpener.isOpen} onClose={previewOpener.close} />
     </header>
   )
 }

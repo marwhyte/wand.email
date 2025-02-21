@@ -1,6 +1,7 @@
 import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
+import { Email } from '../types'
 
 export const nikeVerificationTemplate = (): Email => {
   const aiScript = `
@@ -44,13 +45,5 @@ export const nikeVerificationTemplate = (): Email => {
 </EMAIL>
 `
 
-  return createEmail(
-    'nike verification code',
-    parseEmailScript(aiScript),
-    '#000000',
-    '#000000',
-    'Helvetica Neue, Arial, sans-serif',
-    '#FFFFFF',
-    '400'
-  )
+  return createEmail('nike verification code', parseEmailScript(aiScript), '#000000', '#000000', 'Helvetica Neue, Arial, sans-serif', '#FFFFFF', '400')
 }

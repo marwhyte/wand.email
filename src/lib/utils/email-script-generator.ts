@@ -1,3 +1,5 @@
+import { ColumnBlock, Email, EmailBlock, RowBlock } from '@/app/components/email-workspace/types'
+
 function stringifyAttributes(attributes: Record<string, any>): string {
   const result: string[] = []
 
@@ -80,7 +82,7 @@ function generateColumn(column: ColumnBlock, indent: number = 1): string {
   const spaces = ' '.repeat(indent * 2)
   const attrs = stringifyAttributes({
     ...column.attributes,
-    width: `${(column.gridColumns / 12) * 100}%`,
+    width: column.width,
   })
 
   const blocks = column.blocks.map((block: EmailBlock) => generateBlock(block, indent + 1)).join('\n')

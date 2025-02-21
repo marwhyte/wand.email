@@ -1,5 +1,6 @@
 'use server'
 
+import { Email } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import type { Message } from 'ai'
 import { revalidateTag } from 'next/cache'

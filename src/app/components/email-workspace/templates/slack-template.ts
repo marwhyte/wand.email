@@ -1,6 +1,7 @@
 import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
+import { Email } from '../types'
 
 export const slackTemplateScript = `
 <EMAIL name="Slack Template" backgroundColor=#f8f4f0 linkColor=#611f69>
@@ -22,39 +23,39 @@ export const slackTemplateScript = `
   }
 
   ROW padding=40,40,0,40 backgroundColor=#f8f4f0 width=100% minWidth=100% {
-    COLUMN width=25 valign=middle {
+    COLUMN width=25 verticalAlign=middle {
       TEXT text=<p>PRO</p> backgroundColor=#611f69 color=#ffffff textAlign=center borderRadius=4 fontSize=12 fontWeight=bold padding=2,3,2,3
     }
-    COLUMN width=75 valign=middle {
+    COLUMN width=75 verticalAlign=middle {
       TEXT text=<p>Also locked...</p> textAlign=left fontSize=20 fontWeight=bold color=#1d1c1d padding=0,0,0,26
     }
   }
 
   ROW backgroundColor=#f8f4f0 padding=40,40,20,40 {
-    COLUMN width=12.5 valign=top {
+    COLUMN width=12.5 verticalAlign=top {
       IMAGE src="${getPhotoUrl('rehashtag.png', 'slack')}" width=100%
     }
-    COLUMN width=87.5 valign=top {
+    COLUMN width=87.5 verticalAlign=top {
       TEXT text=<p>Slack Connect channels</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26 lineHeight=24px
       TEXT text=<p>Seamlessly collaborate with external connections</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26 lineHeight=24px
     }
   }
 
   ROW backgroundColor=#f8f4f0 padding=0,40,20,40 {
-    COLUMN width=12.5 valign=top {
+    COLUMN width=12.5 verticalAlign=top {
       IMAGE src="${getPhotoUrl('headphones.png', 'slack')}" width=100%
     }
-    COLUMN width=87.5 valign=top {
+    COLUMN width=87.5 verticalAlign=top {
       TEXT text=<p>Group huddles</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26 lineHeight=24px
       TEXT text=<p>Streamline conversations with multi-person video calls</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26 lineHeight=24px
     }
   }
 
   ROW backgroundColor=#f8f4f0 padding=0,40,40,40 {
-    COLUMN width=12.5 valign=top {
+    COLUMN width=12.5 verticalAlign=top {
       IMAGE src="${getPhotoUrl('papers.png', 'slack')}" width=100%
     }
-    COLUMN width=87.5 valign=top {
+    COLUMN width=87.5 verticalAlign=top {
       TEXT text=<p>Unlimited canvases</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26 lineHeight=24px
       TEXT text=<p>Organize, curate, collaborate, and share information right in your Slack workspace</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26 lineHeight=24px
     }

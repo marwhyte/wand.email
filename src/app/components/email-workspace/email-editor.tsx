@@ -13,6 +13,7 @@ import BlockEditor from './block-editor'
 import EmailComponents from './email-components'
 import EmailRows from './email-rows'
 import EmailSettings from './email-settings'
+import { Email } from './types'
 
 enum Tabs {
   CONTENT = 'content',

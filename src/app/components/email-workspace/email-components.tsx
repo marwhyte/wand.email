@@ -1,19 +1,13 @@
 import { Heading } from '@/app/components/heading'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
-import {
-  ArrowRightCircleIcon,
-  ArrowTopRightOnSquareIcon,
-  DocumentTextIcon,
-  H1Icon,
-  LinkIcon,
-  PhotoIcon,
-} from '@heroicons/react/20/solid'
+import { ArrowRightCircleIcon, ArrowTopRightOnSquareIcon, DocumentTextIcon, H1Icon, LinkIcon, PhotoIcon, QuestionMarkCircleIcon } from '@heroicons/react/20/solid'
 import { QueueListIcon } from '@heroicons/react/24/solid'
 import { useDrag } from 'react-dnd'
 import { v4 as uuidv4 } from 'uuid'
+import { EmailBlockType } from './types'
 
 export default function EmailComponents() {
-  const editableTypes: EmailBlockType[] = ['text', 'button', 'image', 'link', 'heading', 'divider', 'socials']
+  const editableTypes: EmailBlockType[] = ['text', 'button', 'image', 'link', 'heading', 'divider', 'socials', 'survey']
 
   const iconForType = (type: EmailBlockType) => {
     switch (type) {
@@ -31,6 +25,8 @@ export default function EmailComponents() {
         return <QueueListIcon className="h-10 w-10" />
       case 'socials':
         return <ArrowRightCircleIcon className="h-10 w-10" />
+      case 'survey':
+        return <QuestionMarkCircleIcon className="h-10 w-10" />
     }
   }
 

@@ -8,6 +8,7 @@ import { useCallback, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import { v4 as uuidv4 } from 'uuid' // Make sure to import uuid
 import EmailRow from './email-components/email-row'
+import { ColumnBlock, Email, EmailBlockType, RowBlock } from './types'
 
 type Props = {
   email: Email
@@ -53,14 +54,7 @@ const EmailRenderer = ({ email }: Props) => {
     setDropLine(null)
   }
 
-  const handleBlockDrop = (
-    blockType: 'block' | 'newBlock',
-    blockId: string,
-    targetType: 'block' | 'column',
-    targetId: string,
-    position: 'above' | 'below',
-    newBlockType?: EmailBlockType
-  ): void => {
+  const handleBlockDrop = (blockType: 'block' | 'newBlock', blockId: string, targetType: 'block' | 'column', targetId: string, position: 'above' | 'below', newBlockType?: EmailBlockType): void => {
     if (blockType === 'newBlock' && newBlockType) {
       handleNewBlockDrop(newBlockType, targetType, targetId, position)
     } else {
@@ -140,12 +134,7 @@ const EmailRenderer = ({ email }: Props) => {
     }
   }
 
-  const handleNewBlockDrop = (
-    blockType: EmailBlockType,
-    targetType: 'block' | 'column',
-    targetId: string,
-    position: 'above' | 'below'
-  ) => {
+  const handleNewBlockDrop = (blockType: EmailBlockType, targetType: 'block' | 'column', targetId: string, position: 'above' | 'below') => {
     const newEmail: Email = JSON.parse(JSON.stringify(email))
     const newBlock = createNewBlock(blockType)
 
@@ -196,7 +185,7 @@ const EmailRenderer = ({ email }: Props) => {
     setDropTarget(null)
   }
 
-  const addRow = (gridColumns: number[]) => {
+  const addRow = (width: string) => {
     const newRows = [...email.rows]
     const newRow: RowBlock = {
       id: uuidv4(),
@@ -205,19 +194,21 @@ const EmailRenderer = ({ email }: Props) => {
       container: {
         attributes: {},
       },
-      columns: gridColumns.map((gridColumn) => ({
-        id: uuidv4(),
-        type: 'column',
-        gridColumns: gridColumn,
-        attributes: {
-          align: 'center',
-          paddingTop: '10px',
-          paddingBottom: '10px',
-          paddingLeft: '10px',
-          paddingRight: '10px',
+      columns: [
+        {
+          id: uuidv4(),
+          type: 'column',
+          width,
+          attributes: {
+            align: 'center',
+            paddingTop: '10px',
+            paddingBottom: '10px',
+            paddingLeft: '10px',
+            paddingRight: '10px',
+          },
+          blocks: [],
         },
-        blocks: [],
-      })),
+      ],
     }
 
     if (dropLine === 'end' || dropLine === null) {
@@ -238,14 +229,9 @@ const EmailRenderer = ({ email }: Props) => {
     setDropLine(null)
   }
 
-  const handleEmptyStateDrop = (item: {
-    type: 'newBlock' | 'newRow'
-    id: string
-    newBlockType?: EmailBlockType
-    gridColumns?: number[]
-  }) => {
+  const handleEmptyStateDrop = (item: { type: 'newBlock' | 'newRow'; id: string; newBlockType?: EmailBlockType; width?: string }) => {
     if (item.type === 'newRow') {
-      addRow(item.gridColumns ?? [12])
+      addRow(item.width ?? '100%')
     } else if (item.type === 'newBlock' && item.newBlockType) {
       const newRow: RowBlock = {
         id: uuidv4(),
@@ -258,7 +244,7 @@ const EmailRenderer = ({ email }: Props) => {
           {
             id: uuidv4(),
             type: 'column',
-            gridColumns: 12,
+            width: item.width ?? '100%',
             attributes: {
               align: 'center',
             },
@@ -295,33 +281,17 @@ const EmailRenderer = ({ email }: Props) => {
         {email.rows.length > 0 ? (
           <>
             {email.rows.map((row) => (
-              <EmailRow
-                key={row.id}
-                row={row}
-                moveRow={moveRow}
-                mobileView={mobileView}
-                dropLine={dropLine}
-                onHover={handleHover}
-                onDragEnd={handleDragEnd}
-                dropTarget={dropTarget}
-                setDropTarget={setDropTarget}
-                onBlockDrop={handleBlockDrop}
-                addRow={addRow}
-              />
+              <EmailRow key={row.id} row={row} moveRow={moveRow} mobileView={mobileView} dropLine={dropLine} onHover={handleHover} onDragEnd={handleDragEnd} dropTarget={dropTarget} setDropTarget={setDropTarget} onBlockDrop={handleBlockDrop} addRow={addRow} />
             ))}
           </>
         ) : (
           <div
             // @ts-ignore
             ref={drop}
-            className={`flex h-64 items-center justify-center rounded-lg border-2 border-dashed transition-colors duration-200 ${
-              isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
-            }`}
+            className={`flex h-64 items-center justify-center rounded-lg border-2 border-dashed transition-colors duration-200 ${isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
             style={{ maxWidth: '600px', margin: '0 auto' }}
           >
-            <p className={`text-lg ${isOver ? 'text-blue-500' : 'text-gray-500'}`}>
-              {isOver ? 'Drop here' : 'Drag your first row or block here'}
-            </p>
+            <p className={`text-lg ${isOver ? 'text-blue-500' : 'text-gray-500'}`}>{isOver ? 'Drop here' : 'Drag your first row or block here'}</p>
           </div>
         )}
       </div>

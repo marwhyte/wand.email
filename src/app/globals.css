@@ -60,8 +60,10 @@ table {
 
 .mobile-forced-full-width {
   display: inline-block !important;
-  width: 100% !important;
-  max-width: 100% !important;
+}
+
+.mobile-forced-half-width {
+  display: inline-block !important;
 }
 
 .no-side-padding-mobile-forced {
@@ -89,3 +91,4 @@ table {
     box-shadow: inset 0px 0px 0px 30px #7ac142;
   }
 }
+

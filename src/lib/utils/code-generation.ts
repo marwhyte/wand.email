@@ -1,12 +1,7 @@
 import { renderToString } from 'react-dom/server'
-import {
-  generateBlockProps,
-  generateBodyProps,
-  generateColumnProps,
-  generateContainerProps,
-  generateRowProps,
-} from './attributes'
+import { generateBlockProps, generateBodyProps, generateColumnProps, generateContainerProps, generateRowProps } from './attributes'
 
+import { Email, EmailBlock, RowBlock } from '@/app/components/email-workspace/types'
 import parse from 'html-react-parser'
 
 const stringifyProps = (props: Record<string, any>) => {
@@ -15,8 +10,8 @@ const stringifyProps = (props: Record<string, any>) => {
     .join(' ')
 }
 
-const renderBlock = (block: EmailBlock) => {
-  const props = generateBlockProps(block)
+const renderBlock = (block: EmailBlock, parentRow: RowBlock) => {
+  const props = generateBlockProps(block, parentRow)
   const propsString = stringifyProps(props)
 
   switch (block.type) {
@@ -66,7 +61,7 @@ export function getReactEmailCode(email?: Email) {
                         ${column.blocks
                           .map(
                             (block) => `
-                          ${renderBlock(block)}
+                          ${renderBlock(block, row)}
                         `
                           )
                           .join('')}

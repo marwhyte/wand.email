@@ -5,6 +5,7 @@ import { parseEmailScript, processEmailImages } from '@/lib/utils/email-script-p
 import { createScopedLogger } from '@/lib/utils/logger'
 import { Message } from 'ai'
 import { useEffect, useState } from 'react'
+import { Email } from '../components/email-workspace/types'
 
 const logger = createScopedLogger('MessageParser')
 
@@ -38,12 +39,6 @@ export function useMessageParser(message: Message) {
   }, [message.content, message.id, emailState])
 
   useEffect(() => {
-    console.log('State change effect triggered:', {
-      emailState,
-      messageId: message.id,
-      content: message.content,
-    })
-
     if (emailState === 'open') {
       const nameMatch = message.content.match(/<EMAIL\s+(?:[^>]*\s+)?name=["']([^"']*)["']/)
       console.log(nameMatch, 'nameMatch')

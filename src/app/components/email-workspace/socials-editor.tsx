@@ -6,6 +6,7 @@ import { Select } from '@/app/components/select'
 import { Switch, SwitchField } from '@/app/components/switch'
 import { getPhotoUrl } from '@/lib/utils/misc'
 import { useState } from 'react'
+import { SocialIconFolders } from './types'
 
 interface SocialIconsEditorProps {
   socialLinks: Array<{
@@ -73,31 +74,18 @@ const SocialIconsEditor = ({ socialLinks, iconFolder, onChange }: SocialIconsEdi
             <>
               <Field>
                 <Label>Title</Label>
-                <Input
-                  value={link.title}
-                  onChange={(e) => handleSocialLinkChange(index, 'title', e.target.value)}
-                  placeholder="Facebook"
-                />
+                <Input value={link.title} onChange={(e) => handleSocialLinkChange(index, 'title', e.target.value)} placeholder="Facebook" />
               </Field>
               <Field>
                 <Label>Alt Text</Label>
-                <Input
-                  value={link.alt}
-                  onChange={(e) => handleSocialLinkChange(index, 'alt', e.target.value)}
-                  placeholder="Follow us on Facebook"
-                />
+                <Input value={link.alt} onChange={(e) => handleSocialLinkChange(index, 'alt', e.target.value)} placeholder="Follow us on Facebook" />
               </Field>
             </>
           )}
 
           <Field>
             <Label>URL</Label>
-            <Input
-              type="url"
-              value={link.url}
-              onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)}
-              placeholder="https://facebook.com/"
-            />
+            <Input type="url" value={link.url} onChange={(e) => handleSocialLinkChange(index, 'url', e.target.value)} placeholder="https://facebook.com/" />
           </Field>
         </div>
       ))}

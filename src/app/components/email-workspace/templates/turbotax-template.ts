@@ -1,6 +1,7 @@
 import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
+import { Email } from '../types'
 
 export const turbotaxTemplateScript = `
 <EMAIL name="TurboTax Filing Preparation" backgroundColor=#dfdfd8 linkColor=#205ea3 color=#333333 fontFamily="Lato, Arial, sans-serif">
@@ -26,10 +27,10 @@ export const turbotaxTemplateScript = `
   }
 
   ROW padding=14,16,14,16 maxWidth=420 align=center backgroundColor=#EAEAE3 {
-    COLUMN width=16.67% valign=middle {
+    COLUMN width=16.67% verticalAlign=middle {
       IMAGE src="${getPhotoUrl('flag.png', 'turbotax')}" alt="Status Flag" width=100%
     }
-    COLUMN width=83.33% valign=middle {
+    COLUMN width=83.33% verticalAlign=middle {
       TEXT text=<p>STATUS: Tax Hero</p> fontSize=18 color=#21262a fontWeight=bold paddingLeft=8
       TEXT text=<p>You're one of the most savvy tax planners out there. Keep it up!</p> fontSize=18 color=#21262a paddingLeft=8
     }
@@ -77,13 +78,5 @@ export const turbotaxTemplateScript = `
 
 export const turbotaxTemplate = (): Email => {
   const rows = parseEmailScript(turbotaxTemplateScript)
-  return createEmail(
-    'TurboTax Filing Preparation',
-    rows,
-    '#333333',
-    '#205ea3',
-    'Lato, Arial, sans-serif',
-    '#dfdfd8',
-    '600px'
-  )
+  return createEmail('TurboTax Filing Preparation', rows, '#333333', '#205ea3', 'Lato, Arial, sans-serif', '#dfdfd8', '600px')
 }

@@ -1,3 +1,4 @@
+import { ButtonBlockAttributes, ColumnBlock, ColumnBlockAttributes, COMMON_SOCIAL_ICONS, CommonAttributes, DividerBlockAttributes, Email, FOLDER_SPECIFIC_ICONS, HeadingBlockAttributes, ImageBlockAttributes, LinkBlockAttributes, RowBlock, RowBlockAttributes, SocialIconFolders, SocialIconName, SocialsBlockAttributes, SurveyBlockAttributes, TextBlockAttributes } from '@/app/components/email-workspace/types'
 import { createBlock, createColumn, createRow } from './email-helpers'
 import { resolveImageSrc } from './image-service'
 
@@ -270,52 +271,9 @@ function isSocialIconFolder(value: string | undefined): value is SocialIconFolde
 
 // Type guard for social icon names
 function isSocialIconName(value: string | undefined): value is SocialIconName {
-  const validIcons = new Set([
-    'amazon-music',
-    'apple',
-    'behance',
-    'box',
-    'calendly',
-    'clubhouse',
-    'discord',
-    'dribbble',
-    'etsy',
-    'facebook',
-    'figma',
-    'github',
-    'google',
-    'imo',
-    'instagram',
-    'itunes',
-    'linkedin',
-    'medium',
-    'messenger',
-    'notion',
-    'paypal',
-    'pinterest',
-    'reddit',
-    'signal',
-    'skype',
-    'snapchat',
-    'soundcloud',
-    'spotify',
-    'square',
-    'streeteasy',
-    'telegram',
-    'threads',
-    'tiktok',
-    'tumblr',
-    'twitch',
-    'venmo',
-    'wechat',
-    'whatsapp',
-    'x',
-    'yelp',
-    'youtube-music',
-    'youtube',
-    'zillow',
-  ])
-  return typeof value === 'string' && validIcons.has(value)
+  // Get all possible values by combining common icons and folder-specific icons
+  const validIcons = new Set([...Object.keys(COMMON_SOCIAL_ICONS), ...Object.values(FOLDER_SPECIFIC_ICONS).flatMap((icons) => Object.keys(icons))])
+  return typeof value === 'string' && validIcons.has(value as SocialIconName)
 }
 
 const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) => {
@@ -357,6 +315,18 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
     ...common,
     folder: isSocialIconFolder(raw.folder) ? raw.folder : 'socials-color',
     socialLinks,
+  }
+
+  return attrs
+}
+
+// Add survey block parser
+const parseSurveyAttributes: AttributeParser<SurveyBlockAttributes> = (raw) => {
+  const common = parseCommonAttributes(raw)
+  const attrs: SurveyBlockAttributes = {
+    ...common,
+    kind: raw.kind as SurveyBlockAttributes['kind'],
+    question: raw.question || '',
   }
 
   return attrs
@@ -413,6 +383,7 @@ const blockParsers = {
   link: parseLinkAttributes,
   divider: parseDividerAttributes,
   socials: parseSocialsAttributes,
+  survey: parseSurveyAttributes,
 } as const
 
 // Type-safe block creation mapping
@@ -432,6 +403,8 @@ const parseRowAttributes: AttributeParser<RowBlockAttributes> = (raw) => {
   if (raw.borderWidth) attrs.borderWidth = ensurePx(raw.borderWidth)
   if (raw.borderColor) attrs.borderColor = raw.borderColor
   if (raw.minWidth) attrs.minWidth = ensurePx(raw.minWidth)
+  if (raw.type) attrs.type = raw.type as RowBlockAttributes['type']
+  if (raw.variant) attrs.variant = raw.variant as RowBlockAttributes['variant']
 
   // Boolean attributes
   if (raw.stackOnMobile) attrs.stackOnMobile = raw.stackOnMobile === 'true'
@@ -446,18 +419,12 @@ function isColumnAlign(value: string | undefined): value is ColumnBlockAttribute
   return typeof value === 'string' && ['left', 'center', 'right'].includes(value)
 }
 
-// Type guard for column vertical alignment
-function isColumnValign(value: string | undefined): value is ColumnBlockAttributes['valign'] {
-  return typeof value === 'string' && ['top', 'middle', 'bottom'].includes(value)
-}
-
 // Parser for column attributes
 const parseColumnAttributes: AttributeParser<ColumnBlockAttributes> = (raw) => {
   const attrs: ColumnBlockAttributes = {}
 
   // Parse column-specific attributes
   if (isColumnAlign(raw.align)) attrs.align = raw.align
-  if (isColumnValign(raw.valign)) attrs.valign = raw.valign
   if (raw.borderSpacing) attrs.borderSpacing = ensurePx(raw.borderSpacing)
   if (isBorderStyle(raw.borderStyle)) attrs.borderStyle = raw.borderStyle
   if (raw.borderWidth) attrs.borderWidth = ensurePx(raw.borderWidth)
@@ -509,20 +476,34 @@ export function parseEmailScript(script: string): RowBlock[] {
       if (!columnMatch) continue
 
       const columnAttrs = parseAttributes(columnMatch[1])
-      // Convert width percentage to grid columns (e.g., "33%" -> 4 columns)
-      const widthStr = columnAttrs.width?.replace('%', '') || '100'
-      const gridColumns = Math.round((parseInt(widthStr) / 100) * 12)
 
-      currentColumn = createColumn([], gridColumns, parseColumnAttributes(columnAttrs))
+      // If width is not specified, count existing columns to determine even distribution
+      let width: string
+      if (!columnAttrs.width) {
+        const currentColumnCount = currentRow.columns.length
+        // Calculate even distribution based on total columns (including this new one)
+        const evenWidth = Math.floor(100 / (currentColumnCount + 1))
+        width = `${evenWidth}%`
+
+        // Update existing columns to have even width
+        currentRow.columns.forEach((col) => {
+          col.width = `${evenWidth}%`
+        })
+      } else {
+        // Use provided width
+        width = columnAttrs.width.endsWith('%') ? columnAttrs.width : `${columnAttrs.width}%`
+      }
+
+      currentColumn = createColumn([], width, parseColumnAttributes(columnAttrs))
       currentRow.columns.push(currentColumn)
       depth++
       continue
     }
 
     // Handle block definitions
-    const match = line.match(/(\w+)\s+(.+)/)
+    const match = line.match(/(\w+)(?:\s+(.+))?/) // Made the attributes part optional
     if (match && currentColumn) {
-      const [, blockType, blockDef] = match
+      const [, blockType, blockDef = ''] = match // Provide default empty string for blockDef
       const attrs = parseAttributes(blockDef)
 
       switch (blockType.toLowerCase() as BlockType) {
@@ -546,6 +527,9 @@ export function parseEmailScript(script: string): RowBlock[] {
           break
         case 'socials':
           createBlock('socials', '', blockParsers.socials(attrs), currentColumn)
+          break
+        case 'survey':
+          createBlock('survey', '', blockParsers.survey(attrs), currentColumn)
           break
       }
     }

@@ -6,18 +6,18 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
 import { createPortal } from 'react-dom'
 import RenderBlock from '../render-block'
+import { EmailBlock as EmailBlockType, RowBlock } from '../types'
 
 type Props = {
-  block: EmailBlock
+  block: EmailBlockType
   onHover: (isHovered: boolean) => void
-  onSelect?: (block: EmailBlock) => void
+  onSelect?: (block: EmailBlockType) => void
   dropTarget: { type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null
-  setDropTarget: React.Dispatch<
-    React.SetStateAction<{ type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null>
-  >
+  setDropTarget: React.Dispatch<React.SetStateAction<{ type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null>>
+  parentRow: RowBlock
 }
 
-export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDropTarget }: Props) {
+export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDropTarget, parentRow }: Props) {
   const { currentBlock } = useEmailStore()
   const [isHovered, setIsHovered] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
@@ -87,31 +87,12 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
 
   return (
     <>
-      <div
-        ref={ref}
-        onClick={handleClick}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        className={classNames(
-          'group relative inline-block w-full',
-          currentBlock?.id === block.id || isHovered ? 'outline outline-2 outline-blue-500' : ''
-        )}
-        style={{ opacity: isDraggingBlock ? 0.4 : 1 }}
-      >
-        <div
-          className={classNames(
-            'pointer-events-none absolute inset-0 transition-opacity duration-200',
-            currentBlock?.id === block.id || !isHovered ? 'opacity-0' : 'opacity-0 group-hover:opacity-20'
-          )}
-          style={{ backgroundColor: 'rgb(59, 130, 246)', zIndex: 5 }}
-        />
+      <div ref={ref} onClick={handleClick} onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave} className={classNames('group relative inline-block w-full', currentBlock?.id === block.id || isHovered ? 'outline outline-2 outline-blue-500' : '')} style={{ opacity: isDraggingBlock ? 0.4 : 1 }}>
+        <div className={classNames('pointer-events-none absolute inset-0 transition-opacity duration-200', currentBlock?.id === block.id || !isHovered ? 'opacity-0' : 'opacity-0 group-hover:opacity-20')} style={{ backgroundColor: 'rgb(59, 130, 246)', zIndex: 5 }} />
         <div
           // @ts-ignore
           ref={drag}
-          className={classNames(
-            'absolute -right-5 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-move items-center justify-center rounded-full bg-blue-500',
-            currentBlock?.id === block.id || isHovered ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
-          )}
+          className={classNames('absolute -right-5 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-move items-center justify-center rounded-full bg-blue-500', currentBlock?.id === block.id || isHovered ? 'opacity-100' : 'opacity-0 transition-opacity duration-200')}
           style={{ zIndex: 11 }}
         >
           <ArrowsPointingOutIcon className="h-5 w-5 text-white" />
@@ -119,7 +100,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
 
         <DragPreviewImage connect={preview} src="/block.svg" />
 
-        <RenderBlock block={block} />
+        <RenderBlock block={block} parentRow={parentRow} />
 
         {dropTarget && isOver && dropTarget.id === block.id && <DragLine direction={dropTarget.position} />}
       </div>

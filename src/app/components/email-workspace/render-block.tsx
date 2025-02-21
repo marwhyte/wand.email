@@ -4,34 +4,42 @@ import EmailHeading from './email-components/email-heading'
 import EmailImage from './email-components/email-image'
 import EmailLink from './email-components/email-link'
 import EmailSocials from './email-components/email-socials'
+import EmailSurvey from './email-components/email-survey'
 import EmailText from './email-components/email-text'
+import { EmailBlock, RowBlock } from './types'
 
 type Props = {
   block: EmailBlock
+  parentRow: RowBlock
 }
 
-const RenderBlock = ({ block }: Props) => {
+const RenderBlock = ({ block, parentRow }: Props) => {
   if (block.type === 'text') {
-    return <EmailText block={block} />
+    return <EmailText block={block} parentRow={parentRow} />
   }
   if (block.type === 'heading') {
-    return <EmailHeading block={block} />
+    return <EmailHeading block={block} parentRow={parentRow} />
   }
   if (block.type === 'image') {
-    return <EmailImage block={block} />
+    return <EmailImage block={block} parentRow={parentRow} />
   }
   if (block.type === 'button') {
-    return <EmailButton block={block} />
+    return <EmailButton block={block} parentRow={parentRow} />
   }
   if (block.type === 'link') {
-    return <EmailLink block={block} />
+    return <EmailLink block={block} parentRow={parentRow} />
   }
   if (block.type === 'divider') {
-    return <EmailDivider block={block} />
+    return <EmailDivider block={block} parentRow={parentRow} />
   }
   if (block.type === 'socials') {
-    return <EmailSocials block={block} />
+    return <EmailSocials block={block} parentRow={parentRow} />
   }
+  if (block.type === 'survey') {
+    return <EmailSurvey block={block} parentRow={parentRow} />
+  }
+
+  return null
 }
 
 export default RenderBlock

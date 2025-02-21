@@ -1,3 +1,4 @@
+import { Email, EmailBlock, RowBlock } from '@/app/components/email-workspace/types'
 import { create } from 'zustand'
 
 export interface EmailStore {

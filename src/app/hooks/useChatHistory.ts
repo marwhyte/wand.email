@@ -6,6 +6,8 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'react-hot-toast'
 import { blankTemplate } from '../components/email-workspace/templates/blank-template'
+import { ebayTemplate } from '../components/email-workspace/templates/ebay-template'
+import { Email } from '../components/email-workspace/types'
 
 export function useChatHistory() {
   const router = useRouter()
@@ -33,12 +35,10 @@ export function useChatHistory() {
       try {
         const chat = await getChatWithMessages(chatId)
 
-        console.log(chat, 'chat at useChatHistory')
-
         if (chat) {
           setInitialMessages(chat.messages)
           setTitle(chat.title)
-          setEmail(chat.email ?? undefined)
+          setEmail(ebayTemplate ?? undefined)
           setChatId(chat.id)
           setReady(true)
         } else {

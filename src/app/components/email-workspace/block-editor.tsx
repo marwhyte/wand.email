@@ -21,6 +21,8 @@ import { v4 as uuidv4 } from 'uuid' // Add this import for generating new IDs
 import Range from '../range'
 import RowEditor from './row-editor'
 import SocialsEditor from './socials-editor'
+import SurveyEditor from './survey-editor'
+import { ButtonBlockAttributes, ColumnBlock, ColumnBlockAttributes, CommonAttributes, DividerBlockAttributes, Email, EmailBlock, ImageBlockAttributes, RowBlock, RowBlockAttributes, SocialsBlockAttributes, SurveyBlockAttributes, TextBlock } from './types'
 
 enum Options {
   BORDER_RADIUS = 'border-radius',
@@ -51,60 +53,17 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
   const optionsForItem = () => {
     switch (currentBlock?.type) {
       case 'divider':
-        return [
-          Options.BORDER_STYLE,
-          Options.BORDER_WIDTH,
-          Options.BORDER_COLOR,
-          Options.PADDING,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.BORDER_STYLE, Options.BORDER_WIDTH, Options.BORDER_COLOR, Options.PADDING, Options.NO_PADDING_MOBILE]
       case 'text':
-        return [
-          Options.FONT_SIZE,
-          Options.FONT_WEIGHT,
-          Options.TEXT_ALIGN,
-          Options.TEXT_COLOR,
-          Options.BACKGROUND_COLOR,
-          Options.TEXT,
-          Options.PADDING,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.FONT_SIZE, Options.FONT_WEIGHT, Options.TEXT_ALIGN, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.TEXT, Options.PADDING, Options.NO_PADDING_MOBILE]
       case 'image':
         return [Options.WIDTH, Options.BORDER_RADIUS, Options.PADDING, Options.SRC]
       case 'button':
-        return [
-          Options.TEXT,
-          Options.HREF,
-          Options.TEXT_COLOR,
-          Options.BACKGROUND_COLOR,
-          Options.PADDING,
-          Options.BORDER_STYLE,
-          Options.BORDER_WIDTH,
-          Options.BORDER_COLOR,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.TEXT, Options.HREF, Options.TEXT_COLOR, Options.BACKGROUND_COLOR, Options.PADDING, Options.BORDER_STYLE, Options.BORDER_WIDTH, Options.BORDER_COLOR, Options.NO_PADDING_MOBILE]
       case 'heading':
-        return [
-          Options.TEXT,
-          Options.FONT_SIZE,
-          Options.FONT_WEIGHT,
-          Options.TEXT_COLOR,
-          Options.TEXT_ALIGN,
-          Options.PADDING,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.TEXT, Options.FONT_SIZE, Options.FONT_WEIGHT, Options.TEXT_COLOR, Options.TEXT_ALIGN, Options.PADDING, Options.NO_PADDING_MOBILE]
       case 'link':
-        return [
-          Options.TEXT_COLOR,
-          Options.HREF,
-          Options.BACKGROUND_COLOR,
-          Options.FONT_SIZE,
-          Options.FONT_WEIGHT,
-          Options.TEXT_ALIGN,
-          Options.TEXT,
-          Options.PADDING,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.TEXT_COLOR, Options.HREF, Options.BACKGROUND_COLOR, Options.FONT_SIZE, Options.FONT_WEIGHT, Options.TEXT_ALIGN, Options.TEXT, Options.PADDING, Options.NO_PADDING_MOBILE]
       default:
         return []
     }
@@ -123,11 +82,7 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
   )
 
   const handleChange = useCallback(
-    (
-      attributes: Partial<
-        CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes | SocialsBlockAttributes
-      >
-    ) => {
+    (attributes: Partial<CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes | SocialsBlockAttributes>) => {
       if (currentBlock) {
         const updatedBlock = {
           ...currentBlock,
@@ -137,8 +92,8 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           updatedBlock.content = attributes.content as string
         }
 
-        if ('gridColumns' in updatedBlock && 'gridColumns' in attributes) {
-          updatedBlock.gridColumns = attributes.gridColumns as string
+        if ('width' in updatedBlock && 'width' in attributes) {
+          updatedBlock.width = attributes.width as string
         }
 
         // Check if there's an actual change
@@ -171,6 +126,8 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           columns: newColumns,
         } as RowBlock
 
+        console.log('newColumns', newColumns)
+
         setCurrentBlock(updatedBlock)
 
         const updatedEmail = {
@@ -189,9 +146,7 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       if (currentBlock && currentBlock.type === 'row') {
         const updatedBlock = {
           ...currentBlock,
-          columns: currentBlock.columns.map((column) =>
-            column.id === columnId ? { ...column, attributes: { ...column.attributes, ...attributes } } : column
-          ),
+          columns: currentBlock.columns.map((column) => (column.id === columnId ? { ...column, attributes: { ...column.attributes, ...attributes } } : column)),
         } as RowBlock
 
         setCurrentBlock(updatedBlock)
@@ -302,19 +257,10 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           <Button onClick={deleteBlock} outline tooltip={currentBlock.type === 'row' ? 'Delete Row' : 'Delete Block'}>
             <TrashIcon className="!h-4 !w-4" />
           </Button>
-          <Button
-            onClick={duplicateBlock}
-            outline
-            tooltip={currentBlock.type === 'row' ? 'Duplicate Row' : 'Duplicate Block'}
-          >
+          <Button onClick={duplicateBlock} outline tooltip={currentBlock.type === 'row' ? 'Duplicate Row' : 'Duplicate Block'}>
             <Square2StackIcon className="!h-4 !w-4" />
           </Button>
-          <Button
-            tooltipTransform="-translate-x-3/4"
-            onClick={() => setCurrentBlock(null)}
-            outline
-            tooltip="Close Editor"
-          >
+          <Button tooltipTransform="-translate-x-3/4" onClick={() => setCurrentBlock(null)} outline tooltip="Close Editor">
             <XMarkIcon className="!h-4 !w-4" />
           </Button>
         </div>
@@ -358,11 +304,7 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
             onChange={(e) => {
               handleChange({ href: e.target.value })
             }}
-            error={
-              !isValidHttpUrl(currentBlock?.attributes.href || '')
-                ? 'Please enter a valid URL (e.g., https://example.com)'
-                : undefined
-            }
+            error={!isValidHttpUrl(currentBlock?.attributes.href || '') ? 'Please enter a valid URL (e.g., https://example.com)' : undefined}
             placeholder="https://example.com"
             pattern="https?://.*"
             title="Please enter a valid URL (e.g., https://example.com)"
@@ -372,22 +314,13 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       {options.includes(Options.FONT_SIZE) && (
         <Field>
           <Label>Font Size</Label>
-          <Input
-            key={`fontSize-${currentBlock?.id}`}
-            type="number"
-            value={currentBlock?.attributes.fontSize?.replace('px', '') || ''}
-            onChange={(e) => handleChange({ fontSize: e.target.value + 'px' })}
-          />
+          <Input key={`fontSize-${currentBlock?.id}`} type="number" value={currentBlock?.attributes.fontSize?.replace('px', '') || ''} onChange={(e) => handleChange({ fontSize: e.target.value + 'px' })} />
         </Field>
       )}
       {options.includes(Options.FONT_WEIGHT) && (
         <Field>
           <Label>Font Weight</Label>
-          <Select
-            key={`fontWeight-${currentBlock?.id}`}
-            value={currentBlock?.attributes.fontWeight || ''}
-            onChange={(e) => handleChange({ fontWeight: e.target.value as CommonAttributes['fontWeight'] })}
-          >
+          <Select key={`fontWeight-${currentBlock?.id}`} value={currentBlock?.attributes.fontWeight || ''} onChange={(e) => handleChange({ fontWeight: e.target.value as CommonAttributes['fontWeight'] })}>
             <option value="normal">Normal</option>
             <option value="bold">Bold</option>
           </Select>
@@ -406,21 +339,13 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       {options.includes(Options.TEXT_COLOR) && (
         <Field>
           <Label>Text Color</Label>
-          <ColorInput
-            key={`color-${currentBlock?.id}`}
-            value={currentBlock?.attributes.color || ''}
-            onChange={(e) => handleChange({ color: e })}
-          />
+          <ColorInput key={`color-${currentBlock?.id}`} value={currentBlock?.attributes.color || ''} onChange={(e) => handleChange({ color: e })} />
         </Field>
       )}
       {options.includes(Options.BACKGROUND_COLOR) && (
         <Field>
           <Label>Background Color</Label>
-          <ColorInput
-            key={`backgroundColor-${currentBlock?.id}`}
-            value={currentBlock?.attributes.backgroundColor || ''}
-            onChange={(e) => handleChange({ backgroundColor: e })}
-          />
+          <ColorInput key={`backgroundColor-${currentBlock?.id}`} value={currentBlock?.attributes.backgroundColor || ''} onChange={(e) => handleChange({ backgroundColor: e })} />
         </Field>
       )}
       {options.includes(Options.WIDTH) && (
@@ -457,20 +382,13 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       {options.includes(Options.BORDER_RADIUS) && (
         <Field>
           <Label>Border Radius</Label>
-          <Input
-            value={currentBlock?.attributes.borderRadius || ''}
-            onChange={(e) => handleChange({ borderRadius: e.target.value })}
-          />
+          <Input value={currentBlock?.attributes.borderRadius || ''} onChange={(e) => handleChange({ borderRadius: e.target.value })} />
         </Field>
       )}
       {options.includes(Options.BORDER_STYLE) && currentBlock && 'borderStyle' in currentBlock.attributes && (
         <Field>
           <Label>Border Style</Label>
-          <Select
-            key={`borderStyle-${currentBlock?.id}`}
-            value={currentBlock?.attributes.borderStyle || ''}
-            onChange={(e) => handleChange({ borderStyle: e.target.value as DividerBlockAttributes['borderStyle'] })}
-          >
+          <Select key={`borderStyle-${currentBlock?.id}`} value={currentBlock?.attributes.borderStyle || ''} onChange={(e) => handleChange({ borderStyle: e.target.value as DividerBlockAttributes['borderStyle'] })}>
             <option value="solid">Solid</option>
             <option value="dashed">Dashed</option>
             <option value="dotted">Dotted</option>
@@ -480,22 +398,13 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       {options.includes(Options.BORDER_WIDTH) && currentBlock && 'borderWidth' in currentBlock.attributes && (
         <Field>
           <Label>Border Width</Label>
-          <Input
-            key={`borderWidth-${currentBlock?.id}`}
-            type="number"
-            value={currentBlock?.attributes.borderWidth?.replace('px', '') || ''}
-            onChange={(e) => handleChange({ borderWidth: e.target.value + 'px' })}
-          />
+          <Input key={`borderWidth-${currentBlock?.id}`} type="number" value={currentBlock?.attributes.borderWidth?.replace('px', '') || ''} onChange={(e) => handleChange({ borderWidth: e.target.value + 'px' })} />
         </Field>
       )}
       {options.includes(Options.BORDER_COLOR) && currentBlock && 'borderColor' in currentBlock.attributes && (
         <Field>
           <Label>Border Color</Label>
-          <ColorInput
-            key={`borderColor-${currentBlock?.id}`}
-            value={currentBlock?.attributes.borderColor || ''}
-            onChange={(e) => handleChange({ borderColor: e })}
-          />
+          <ColorInput key={`borderColor-${currentBlock?.id}`} value={currentBlock?.attributes.borderColor || ''} onChange={(e) => handleChange({ borderColor: e })} />
         </Field>
       )}
       {options.includes(Options.PADDING) && (
@@ -517,28 +426,13 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           }}
         />
       )}
-      {currentBlock?.type === 'row' && (
-        <RowEditor
-          row={currentBlock}
-          onColumnWidthChange={handleColumnWidthChange}
-          onColumnAttributeChange={handleColumnAttributeChange}
-          onRowAttributeChange={handleRowAttributeChange}
-        />
-      )}
-      {currentBlock?.type === 'socials' && (
-        <SocialsEditor
-          socialLinks={currentBlock.attributes.socialLinks}
-          iconFolder={currentBlock.attributes.folder}
-          onChange={(updates) => handleChange(updates as Partial<SocialsBlockAttributes>)}
-        />
-      )}
+      {currentBlock?.type === 'row' && <RowEditor row={currentBlock} onColumnWidthChange={handleColumnWidthChange} onColumnAttributeChange={handleColumnAttributeChange} onRowAttributeChange={handleRowAttributeChange} />}
+      {currentBlock?.type === 'socials' && <SocialsEditor socialLinks={currentBlock.attributes.socialLinks} iconFolder={currentBlock.attributes.folder} onChange={(updates) => handleChange(updates as Partial<SocialsBlockAttributes>)} />}
+      {currentBlock?.type === 'survey' && <SurveyEditor survey={currentBlock.attributes} onChange={(updates) => handleChange(updates as Partial<SurveyBlockAttributes>)} />}
       {options.includes(Options.NO_PADDING_MOBILE) && (
         <Field>
           <SwitchField>
-            <Switch
-              checked={currentBlock?.attributes.noSidePaddingOnMobile || false}
-              onChange={(checked) => handleChange({ noSidePaddingOnMobile: checked })}
-            />
+            <Switch checked={currentBlock?.attributes.noSidePaddingOnMobile || false} onChange={(checked) => handleChange({ noSidePaddingOnMobile: checked })} />
             <Label>Remove padding on mobile</Label>
           </SwitchField>
         </Field>

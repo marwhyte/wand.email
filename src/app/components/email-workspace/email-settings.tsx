@@ -5,6 +5,7 @@ import { useEmailStore } from '@/lib/stores/emailStore'
 import { useCallback } from 'react'
 import Nbsp from '../nbsp'
 import Range from '../range'
+import { Email } from './types'
 
 type EmailSettingsProps = {
   email: Email
@@ -32,8 +33,7 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
     { label: 'Merriweather', value: "'Merriweather', 'Georgia', serif" },
     {
       label: 'ヒラギノ角ゴ Pro W3',
-      value:
-        'ヒラギノ角ゴ Pro W3, Hiragino Kaku Gothic Pro, Osaka, メイリオ, Meiryo, ＭＳ Ｐゴシック, MS PGothic, sans-serif',
+      value: 'ヒラギノ角ゴ Pro W3, Hiragino Kaku Gothic Pro, Osaka, メイリオ, Meiryo, ＭＳ Ｐゴシック, MS PGothic, sans-serif',
     },
     { label: 'Inter', value: "'Inter', sans-serif" },
   ]
@@ -44,18 +44,10 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
         <Label>
           Content area width:
           <Nbsp />
-          <span className="font-bold text-blue-500">
-            {email.width.endsWith('px') ? email.width : `${email.width}px`}
-          </span>
+          <span className="font-bold text-blue-500">{email.width.endsWith('px') ? email.width : `${email.width}px`}</span>
         </Label>
 
-        <Range
-          className="w-full"
-          min={480}
-          max={900}
-          value={parseInt(email.width)}
-          onChange={(e) => handleChange({ width: e.target.value })}
-        />
+        <Range className="w-full" min={480} max={900} value={parseInt(email.width)} onChange={(e) => handleChange({ width: e.target.value })} />
       </Field>
       <Field>
         <Label>Default background color</Label>

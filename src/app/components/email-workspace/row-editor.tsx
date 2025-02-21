@@ -5,10 +5,12 @@ import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
+import { getRowAttributes } from '@/lib/utils/attributes'
 import { Bars3Icon, PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
 import { ColorInput } from '../color-input'
+import { ColumnBlock, ColumnBlockAttributes, RowBlock, RowBlockAttributes } from './types'
 
 interface RowEditorProps {
   row: RowBlock
@@ -17,12 +19,7 @@ interface RowEditorProps {
   onRowAttributeChange: (attributes: Partial<RowBlockAttributes>) => void
 }
 
-export default function RowEditor({
-  row,
-  onColumnWidthChange,
-  onColumnAttributeChange,
-  onRowAttributeChange,
-}: RowEditorProps) {
+export default function RowEditor({ row, onColumnWidthChange, onColumnAttributeChange, onRowAttributeChange }: RowEditorProps) {
   const [isDragging, setIsDragging] = useState(false)
   const [activeColumnIndex, setActiveColumnIndex] = useState(-1)
   const [selectedColumnId, setSelectedColumnId] = useState<string>(row.columns[0].id)
@@ -39,21 +36,23 @@ export default function RowEditor({
         const bounds = containerRef.current.getBoundingClientRect()
         const x = e.clientX - bounds.left
         const containerWidth = bounds.width
-        const newColumnWidth = Math.round((x / containerWidth) * 24) / 2
+        const newWidthPercent = Math.round((x / containerWidth) * 100) // Round to nearest whole number
 
         const newColumns = [...row.columns]
-        const totalWidth = newColumns.reduce((sum, col) => sum + col.gridColumns, 0)
-        const leftColumnWidth = Math.max(1.5, Math.min(10.5, newColumnWidth))
-
         const adjustIndex = activeColumnIndex + 1 < newColumns.length ? activeColumnIndex + 1 : activeColumnIndex - 1
 
         if (adjustIndex >= 0 && adjustIndex < newColumns.length) {
-          const currentTotal = newColumns[activeColumnIndex].gridColumns + newColumns[adjustIndex].gridColumns
-          const rightColumnWidth = Math.max(1.5, currentTotal - leftColumnWidth)
+          // Calculate total width of the two columns being adjusted
+          const totalWidth = Math.round(parseFloat(newColumns[activeColumnIndex].width || '100')) + Math.round(parseFloat(newColumns[adjustIndex].width || '100'))
 
-          if (leftColumnWidth + rightColumnWidth === currentTotal) {
-            newColumns[activeColumnIndex].gridColumns = leftColumnWidth
-            newColumns[adjustIndex].gridColumns = rightColumnWidth
+          // Ensure minimum width of 10% for each column
+          const leftColumnWidth = Math.max(10, Math.min(90, newWidthPercent))
+          const rightColumnWidth = totalWidth - leftColumnWidth
+
+          // Only update if both columns maintain minimum width
+          if (rightColumnWidth >= 10 && rightColumnWidth <= 90) {
+            newColumns[activeColumnIndex].width = `${leftColumnWidth}%`
+            newColumns[adjustIndex].width = `${rightColumnWidth}%`
             onColumnWidthChange(newColumns)
           }
         }
@@ -72,7 +71,7 @@ export default function RowEditor({
       const newColumn: ColumnBlock = {
         id: uuidv4(),
         type: 'column',
-        gridColumns: 2,
+        width: '16.67%', // 2/12 in percentage
         attributes: {},
         blocks: [],
       }
@@ -80,15 +79,18 @@ export default function RowEditor({
       let newColumns = [...row.columns]
       let spaceFound = false
 
-      if (newColumns[newColumns.length - 1].gridColumns >= 4) {
-        newColumns[newColumns.length - 1].gridColumns -= 2
+      // Check for space in grid units (4/12 = 33.33%)
+      if ((parseFloat(newColumns[newColumns.length - 1].width || '100') / 100) * 12 >= 4) {
+        const currentWidth = parseFloat(newColumns[newColumns.length - 1].width || '100')
+        newColumns[newColumns.length - 1].width = `${(currentWidth - 16.67).toFixed(2)}%`
         spaceFound = true
       }
 
       if (!spaceFound) {
         for (let i = newColumns.length - 1; i >= 0; i--) {
-          if (newColumns[i].gridColumns >= 4) {
-            newColumns[i].gridColumns -= 2
+          if ((parseFloat(newColumns[i].width || '100') / 100) * 12 >= 4) {
+            const currentWidth = parseFloat(newColumns[i].width || '100')
+            newColumns[i].width = `${(currentWidth - 16.67).toFixed(2)}%`
             spaceFound = true
             break
           }
@@ -146,21 +148,19 @@ export default function RowEditor({
       const deletedColumn = row.columns.find((col) => col.id === columnId)
 
       if (deletedColumn) {
-        const widthToDistribute = deletedColumn.gridColumns
+        const widthToDistribute = parseFloat(deletedColumn.width || '100')
         const columnsToAdjust = newColumns.length
 
-        // Calculate base width and remainder using 0.5 as the smallest unit
-        const baseUnits = widthToDistribute * 2 // Convert to units of 0.5
-        const basePerColumn = Math.floor(baseUnits / columnsToAdjust)
-        const remainderUnits = baseUnits % columnsToAdjust
+        const baseWidth = widthToDistribute / columnsToAdjust
+        const remainderWidth = widthToDistribute % columnsToAdjust
 
         newColumns.forEach((col, index) => {
-          // Add base amount to each column
-          col.gridColumns += basePerColumn / 2
-          // Distribute remainder 0.5 units from left to right
-          if (index < remainderUnits) {
-            col.gridColumns += 0.5
+          const currentWidth = parseFloat(col.width || '100')
+          let newWidth = currentWidth + baseWidth
+          if (index === 0) {
+            newWidth += remainderWidth
           }
+          col.width = `${newWidth.toFixed(2)}%`
         })
       }
 
@@ -169,6 +169,8 @@ export default function RowEditor({
     }
   }
 
+  const rowAttributes = getRowAttributes(row)
+
   return (
     <div className="space-y-4">
       <Disclosure title="Layout">
@@ -176,30 +178,28 @@ export default function RowEditor({
           <div className="space-y-4">
             <Field>
               <div className="flex items-center gap-2">
-                <Checkbox
-                  id="stackOnMobile"
-                  checked={row.attributes.stackOnMobile ?? false}
-                  onChange={(e) => onRowAttributeChange({ stackOnMobile: e })}
-                />
+                <Checkbox id="stackOnMobile" checked={rowAttributes.stackOnMobile ?? false} onChange={(e) => onRowAttributeChange({ stackOnMobile: e })} />
                 <Label htmlFor="stackOnMobile">Stack columns on mobile</Label>
               </div>
             </Field>
             <Field>
               <div className="flex items-center gap-2">
-                <Checkbox
-                  id="hideOnMobile"
-                  checked={row.attributes.hideOnMobile ?? false}
-                  onChange={(e) => onRowAttributeChange({ hideOnMobile: e })}
-                />
+                <Checkbox id="hideOnMobile" checked={rowAttributes.hideOnMobile ?? false} onChange={(e) => onRowAttributeChange({ hideOnMobile: e })} />
                 <Label htmlFor="hideOnMobile">Hide on mobile</Label>
+              </div>
+            </Field>
+            <Field>
+              <div className="flex items-center gap-2">
+                <Checkbox id="twoColumnsOnMobile" checked={rowAttributes.twoColumnsOnMobile ?? false} onChange={(e) => onRowAttributeChange({ twoColumnsOnMobile: e })} />
+                <Label htmlFor="twoColumnsOnMobile">Two columns on mobile</Label>
               </div>
             </Field>
             <PaddingForm
               padding={{
-                top: row.attributes.paddingTop ?? row.attributes.padding ?? '0px',
-                right: row.attributes.paddingRight ?? row.attributes.padding ?? '0px',
-                bottom: row.attributes.paddingBottom ?? row.attributes.padding ?? '0px',
-                left: row.attributes.paddingLeft ?? row.attributes.padding ?? '0px',
+                top: rowAttributes.paddingTop ?? rowAttributes.padding ?? '0px',
+                right: rowAttributes.paddingRight ?? rowAttributes.padding ?? '0px',
+                bottom: rowAttributes.paddingBottom ?? rowAttributes.padding ?? '0px',
+                left: rowAttributes.paddingLeft ?? rowAttributes.padding ?? '0px',
               }}
               onChange={(values: Partial<PaddingValues>) => {
                 const rowAttributes: Partial<RowBlockAttributes> = {
@@ -219,24 +219,13 @@ export default function RowEditor({
           <Field>
             <Label>Row Border</Label>
             <div className="flex gap-2">
-              <Select
-                value={row.attributes.borderStyle || 'solid'}
-                onChange={(e) => handleRowBorderChange('borderStyle', e.target.value)}
-              >
+              <Select value={rowAttributes.borderStyle || 'solid'} onChange={(e) => handleRowBorderChange('borderStyle', e.target.value)}>
                 <option value="solid">Solid</option>
                 <option value="dashed">Dashed</option>
                 <option value="dotted">Dotted</option>
               </Select>
-              <Input
-                type="number"
-                value={row.attributes.borderWidth?.replace('px', '') || ''}
-                onChange={(e) => handleRowBorderChange('borderWidth', `${e.target.value}px`)}
-                placeholder="Width"
-              />
-              <ColorInput
-                value={row.attributes.borderColor || ''}
-                onChange={(e) => handleRowBorderChange('borderColor', e)}
-              />
+              <Input type="number" value={rowAttributes.borderWidth?.replace('px', '') || ''} onChange={(e) => handleRowBorderChange('borderWidth', `${e.target.value}px`)} placeholder="Width" />
+              <ColorInput value={rowAttributes.borderColor || ''} onChange={(e) => handleRowBorderChange('borderColor', e)} />
             </div>
           </Field>
         </DisclosureBody>
@@ -246,10 +235,7 @@ export default function RowEditor({
         <DisclosureBody>
           <Field>
             <Label>Row Background Color</Label>
-            <ColorInput
-              value={row.attributes.backgroundColor || ''}
-              onChange={(e) => handleRowBackgroundColorChange(e)}
-            />
+            <ColorInput value={rowAttributes.backgroundColor || ''} onChange={(e) => handleRowBackgroundColorChange(e)} />
           </Field>
         </DisclosureBody>
       </Disclosure>
@@ -266,16 +252,14 @@ export default function RowEditor({
             {row.columns.map((column, index) => (
               <Fragment key={column.id}>
                 <div
-                  className={`relative z-10 flex flex-col items-center justify-center rounded-md border border-gray-300 ${
-                    selectedColumnId === column.id ? 'bg-blue-100 ring-2 ring-blue-500' : ''
-                  }`}
+                  className={`relative z-10 flex flex-col items-center justify-center rounded-md border border-gray-300 ${selectedColumnId === column.id ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`}
                   style={{
-                    width: `${(column.gridColumns / 12) * 100}%`,
+                    width: column.width,
                     margin: '0 2px',
                   }}
                   onClick={(e) => handleColumnClick(e, column.id)}
                 >
-                  <div className={`text-xs font-medium ${isDragging ? 'select-none' : ''}`}>{column.gridColumns}</div>
+                  <div className={`text-xs font-medium ${isDragging ? 'select-none' : ''}`}>{`${parseFloat(column.width || '100')}%`}</div>
                   {row.columns.length > 1 && (
                     <button
                       onClick={(e) => {
@@ -289,15 +273,8 @@ export default function RowEditor({
                   )}
                 </div>
                 {index < row.columns.length - 1 && (
-                  <div
-                    className="relative z-20 mr-[2px] flex h-full w-3 cursor-col-resize items-center justify-center"
-                    onMouseDown={(e) => handleDragStart(e, index)}
-                  >
-                    <Bars3Icon
-                      className={`h-10 w-10 text-gray-400 hover:text-blue-500 ${
-                        isDragging && activeColumnIndex === index ? 'text-blue-500' : ''
-                      }`}
-                    />
+                  <div className="relative z-20 mr-[2px] flex h-full w-3 cursor-col-resize items-center justify-center" onMouseDown={(e) => handleDragStart(e, index)}>
+                    <Bars3Icon className={`h-10 w-10 text-gray-400 hover:text-blue-500 ${isDragging && activeColumnIndex === index ? 'text-blue-500' : ''}`} />
                   </div>
                 )}
               </Fragment>

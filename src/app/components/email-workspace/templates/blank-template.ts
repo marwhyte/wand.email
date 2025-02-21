@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid'
+import { Email } from '../types'
 
 export const blankTemplateScript = `
 <EMAIL backgroundColor=#FFFFFF linkColor=#000000>

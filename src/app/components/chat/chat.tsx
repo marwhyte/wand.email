@@ -9,15 +9,16 @@ import { chatStore } from '@/lib/stores/chat'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
+import { useChat } from '@ai-sdk/react'
 import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid'
 import type { Message } from 'ai'
-import { useChat } from 'ai/react'
 import { useAnimate } from 'framer-motion'
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { cssTransition, toast, ToastContainer } from 'react-toastify'
 import { Dialog, DialogBody, DialogDescription, DialogTitle } from '../dialog'
+import { Email, Template } from '../email-workspace/types'
 import { Header } from '../header'
 import UpgradeDialog from '../payment/upgrade-dialog'
 import { BaseChat } from './base-chat'
@@ -124,11 +125,11 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
 
   const [animationScope, animate] = useAnimate()
 
-  const { messages, isLoading, input, handleInputChange, setInput, stop, append } = useChat({
+  const { messages, status, input, handleInputChange, setInput, stop, append } = useChat({
     api: '/api/chat',
-    body: {
-      template: initialMessages.length === 0 ? JSON.stringify(selectedTemplate?.template) : undefined,
-    },
+    // body: {
+    //   template: initialMessages.length === 0 ? JSON.stringify(selectedTemplate?.template) : undefined,
+    // },
     onFinish: () => {
       logger.debug('Finished streaming')
     },
@@ -144,6 +145,8 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
   const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
 
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200
+
+  const isLoading = status === 'streaming'
 
   useEffect(() => {
     setKey('started', initialMessages.length > 0)
@@ -208,8 +211,6 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
     setKey('aborted', false)
 
     runAnimation()
-
-    console.log(messages, 'messages')
 
     if (messages.length === 0) {
       await storeMessageHistory(messages, selectedTemplate?.template).catch((error) => toast.error(error.message))
