@@ -41,7 +41,6 @@ export function useMessageParser(message: Message) {
   useEffect(() => {
     if (emailState === 'open') {
       const nameMatch = message.content.match(/<EMAIL\s+(?:[^>]*\s+)?name=["']([^"']*)["']/)
-      console.log(nameMatch, 'nameMatch')
       if (nameMatch && chatId) {
         setTitle(nameMatch[1])
         updateChat(chatId, { title: nameMatch[1] })
@@ -58,7 +57,6 @@ export function useMessageParser(message: Message) {
         // Process images before updating the email
         processEmailImages(emailObject)
           .then((processedEmail) => {
-            console.log('Processed email with resolved images:', processedEmail)
             setEmail(processedEmail)
             updateChat(chatId, { email: processedEmail, title: nameMatch[1] })
             logger.debug('Found email:', emailMatch[1])

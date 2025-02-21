@@ -18,7 +18,7 @@ export const ebayTemplateScript = `
     }
   }
 
-  ROW padding=12, 0 {
+  ROW type=gallery {
     COLUMN {
       IMAGE src=${getPhotoUrl('onlaptop.jpg', 'ebay')} alt="Student Sitting"
       DIVIDER
@@ -107,31 +107,20 @@ export const ebayTemplateScript = `
     }
   }
 
-  ROW backgroundColor=#F8F8F8 padding=40,16 {
-    COLUMN width=50% align=right {
+  ROW type=footer  {
+    COLUMN {
       IMAGE src=${getPhotoUrl('ebaylogo.png', 'ebay')} alt="eBay Logo" height=40 textAlign=right
     }
-    COLUMN width=50% {
-      SOCIALS folder="socials-color" textAlign=right socialLinks=[
-        { icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" },
-        { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" },
-        { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }
-      ]
+    COLUMN {
+      SOCIALS folder=socials-color socialLinks=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
     }
   }
 
-  ROW backgroundColor=#F8F8F8 padding=0,16,20,16 {
-    COLUMN width=50% align=right {
-      IMAGE src=${getPhotoUrl('appstore.png', 'ebay')} alt="App Store" height=40 paddingRight=10 display=inline textAlign=right
-    }
-    COLUMN width=50% {
-      IMAGE src=${getPhotoUrl('googleplay.png', 'ebay')} alt="Google Play" height=40 paddingLeft=10 display=inline
-    }
-  }
-
-  ROW backgroundColor=#F8F8F8 padding=0,16,40,16 {
+  ROW type=footer {
     COLUMN align=center {
-      TEXT text=<p>© 1995-2024 eBay Inc. or its affiliates</p> fontSize=12 color=#666666 textAlign=center
+      TEXT text=<p><a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.</p>
+      TEXT text=<p>If you have a question, <a href="/">contact us</a>. eBay I‌nc., 2‌025 H‌amilton A‌venue, S‌an J‌ose, C‌A 9‌5125, U‌nited S‌tates</p>
+      TEXT text=<p>© 1995-2024 eBay Inc. or its affiliates</p>
     }
   }
 </EMAIL>

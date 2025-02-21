@@ -336,12 +336,13 @@ const parseSurveyAttributes: AttributeParser<SurveyBlockAttributes> = (raw) => {
 function parseAttributes(attrString: string): RawAttributes {
   const attrs: RawAttributes = {}
 
-  // Special handling for JSON attributes (like socialLinks)
-  // Using a more precise regex to capture the entire JSON array
-  const jsonMatch = attrString.match(/(\w+)=(\[[\s\S]*\])/)
+  // Special handling for socialLinks - match both quoted and unquoted keys
+  const jsonMatch = attrString.match(/(\w+)=(\[[\s\S]*?\])/)
   if (jsonMatch) {
     const [fullMatch, key, jsonValue] = jsonMatch
-    attrs[key] = jsonValue
+    // Convert unquoted keys to quoted keys before parsing
+    const normalizedJson = jsonValue.replace(/(\{|,)\s*(\w+):/g, '$1"$2":')
+    attrs[key] = normalizedJson
     attrString = attrString.replace(fullMatch, '')
   }
 

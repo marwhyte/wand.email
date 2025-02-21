@@ -54,5 +54,17 @@ export function getRowTypeBlockDefaults(block: EmailBlock | ColumnBlock, parentR
     }
   }
 
+  // Handle header row with 2 columns
+  if (parentRow.attributes.type === 'header' && parentRow.columns.length === 2) {
+    if (block.type === 'column') {
+      const columnIndex = parentRow.columns.findIndex((col) => col.id === block.id)
+      return {
+        ...baseDefaults,
+        verticalAlign: 'middle',
+        textAlign: columnIndex === 1 ? 'right' : 'left',
+      }
+    }
+  }
+
   return baseDefaults
 }

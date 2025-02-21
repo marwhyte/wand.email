@@ -70,8 +70,6 @@ export function useChatHistory() {
             router.replace(`${pathname}?${params.toString()}`, { scroll: false })
           }
         } else {
-          // Update existing chat
-          console.log('updating chat', chatId, messages)
           await updateChat(chatId, { messages })
         }
       } catch (error) {

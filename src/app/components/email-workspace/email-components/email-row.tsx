@@ -163,10 +163,6 @@ export default function EmailRow({ row, moveRow, addRow, dropLine, onHover, onDr
                   adjustedWidth = `${(originalWidth / totalColumnsWidth) * (100 - totalSpacerWidthPercent)}%`
                 }
 
-                if (row.attributes.type === 'gallery') {
-                  console.log(column.width, adjustedWidth)
-                }
-
                 return (
                   <React.Fragment key={column.id}>
                     <EmailColumn column={{ ...column, width: adjustedWidth }} row={row} onBlockHover={(isHovered) => setIsChildHovered(isHovered)} onBlockSelect={handleBlockSelect} onColumnClick={handleRowOrColumnClick} dropTarget={dropTarget} setDropTarget={setDropTarget} onBlockDrop={onBlockDrop} />

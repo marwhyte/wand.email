@@ -152,12 +152,8 @@ export async function updateChat(id: string, updates: { messages?: Message[]; ti
           created_at: msg.createdAt || new Date(),
         }))
 
-        console.log('Inserting messages with sequential ordering:', messageValues)
-
         // Insert new messages
-        const result = await trx.insertInto('messages').values(messageValues).returningAll().execute()
-
-        console.log('Inserted messages:', result)
+        await trx.insertInto('messages').values(messageValues).returningAll().execute()
       }
 
       revalidateTag('chats')

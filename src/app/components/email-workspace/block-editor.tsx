@@ -126,8 +126,6 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           columns: newColumns,
         } as RowBlock
 
-        console.log('newColumns', newColumns)
-
         setCurrentBlock(updatedBlock)
 
         const updatedEmail = {
