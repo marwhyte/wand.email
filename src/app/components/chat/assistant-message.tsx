@@ -8,7 +8,7 @@ interface AssistantMessageProps {
 
 export const AssistantMessage = memo(({ content }: AssistantMessageProps) => {
   // Split content at first EMAIL tag
-  const [beforeEmail, afterEmail] = content.split(/<EMAIL\s+name=["'][^"']*["']\s*>/)
+  const [beforeEmail, afterEmail] = content.split(/<EMAIL\s+[^>]*name=["'][^"']*["'][^>]*>/)
 
   // If no EMAIL tag found, show full content
   if (!afterEmail) {
@@ -24,14 +24,27 @@ export const AssistantMessage = memo(({ content }: AssistantMessageProps) => {
   return (
     <div className="w-full overflow-hidden">
       {beforeEmail}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="my-2 rounded-lg bg-blue-50 p-4">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="my-2 rounded-lg bg-blue-50 p-4"
+      >
         <div className="flex flex-col items-center justify-center gap-2">
           {hasEmailEnd ? (
             <>
-              <motion.div initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', duration: 0.5 }}>
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ type: 'spring', duration: 0.5 }}
+              >
                 <CheckCircleIcon className="h-6 w-6 text-green-500" />
               </motion.div>
-              <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-sm font-medium text-blue-600">
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.2 }}
+                className="text-sm font-medium text-blue-600"
+              >
                 Email changes applied successfully
               </motion.span>
             </>

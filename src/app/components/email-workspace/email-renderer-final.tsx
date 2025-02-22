@@ -1,4 +1,4 @@
-import { generateBlockProps, generateBodyProps, generateColumnProps, generateContainerProps, generateRowProps, getRowAttributes } from '@/lib/utils/attributes'
+import { generateBodyProps, generateColumnProps, generateContainerProps, generateRowProps, getBlockAttributes, getRowAttributes } from '@/lib/utils/attributes'
 import { chunk } from '@/lib/utils/misc'
 import { Body, Button, Column, Container, Head, Heading, Hr, Html, Img, Link, Preview, Row, Text } from '@react-email/components'
 import parse from 'html-react-parser'
@@ -14,22 +14,22 @@ type Props = {
 const RenderBlockFinal = ({ block, parentRow, email }: { block: EmailBlock; parentRow: RowBlock; email?: Email }) => {
   switch (block.type) {
     case 'text':
-      const textProps = generateBlockProps(block, parentRow)
+      const textProps = getBlockAttributes(block, parentRow)
       return <Text {...textProps}>{parse(block.content)}</Text>
     case 'heading':
-      const headingProps = generateBlockProps(block, parentRow)
+      const headingProps = getBlockAttributes(block, parentRow)
       return <Heading {...headingProps}>{parse(block.content)}</Heading>
     case 'image':
-      const imageProps = generateBlockProps(block, parentRow)
+      const imageProps = getBlockAttributes(block, parentRow)
       return <Img {...imageProps} />
     case 'button':
-      const buttonProps = generateBlockProps(block, parentRow)
+      const buttonProps = getBlockAttributes(block, parentRow)
       return <Button {...buttonProps}>{parse(block.content)}</Button>
     case 'link':
-      const linkProps = generateBlockProps(block, parentRow, email?.linkColor)
+      const linkProps = getBlockAttributes(block, parentRow, false, email?.linkColor)
       return <Link {...linkProps}>{parse(block.content)}</Link>
     case 'divider':
-      const dividerProps = generateBlockProps(block, parentRow)
+      const dividerProps = getBlockAttributes(block, parentRow)
       return <Hr {...dividerProps} />
     case 'socials':
       return <EmailSocials isEditing={false} block={block} parentRow={parentRow} />
@@ -134,6 +134,10 @@ const EmailRendererFinal = ({ email }: Props) => {
         <style>{`
           p, h1, h2, h3, h3, h4, h5 {
             margin: 0 !important;
+          }
+
+          p a {
+            text-decoration: underline !important;
           }
 
           .show-on-mobile {

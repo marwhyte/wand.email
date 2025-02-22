@@ -46,6 +46,8 @@ export default function EmailEditor({ email }: { email: Email }) {
       setCurrentBlock?.(null)
     } else if (newTab === Tabs.ROWS && currentBlock && currentBlock?.type !== 'row') {
       setCurrentBlock?.(null)
+    } else if (newTab === Tabs.SETTINGS && currentBlock) {
+      setCurrentBlock?.(null)
     }
     setTab(newTab)
   }

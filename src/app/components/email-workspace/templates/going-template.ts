@@ -20,7 +20,7 @@ export const goingTemplateScript = `
 
   ROW padding=30 backgroundColor=#004449 {
     COLUMN align=center {
-      HEADING text=<p><span style='color: #d7ffc2;'>Deals</span><strong> coming<span><br></span> your way</strong></p> as=h1 textAlign=center padding=0,0,30,0 fontSize=50 lineHeight=56 color=#fffef0
+      HEADING text=<p><span style='color: #d7ffc2;'>Deals</span><strong> coming<span><br></span> your way</strong></p> as=h1 textAlign=center padding=0,0,30,0 fontSize=50 color=#fffef0
       TEXT text=<p>We are thrilled to help you never overpay for travel again. Keep your eyes peeled for deals from LAX and other departure airports you follow.</p> padding=0,0,30,0 color=#fffef0 fontSize=16
       BUTTON text=<p>VIEW MY CURRENT DEALS</p> href="/" borderRadius=30 backgroundColor=#483CFF fontWeight=bold padding=20,40,20,40
     }
@@ -34,7 +34,7 @@ export const goingTemplateScript = `
 
   ROW padding=60,15,30,15 {
     COLUMN align=center verticalAlign=top {
-      TEXT text=<p>Tips to get the most bang for your buck with Going</p> textAlign=center padding=0,0,24,0 fontSize=24 lineHeight=32px fontWeight=bold
+      TEXT text=<p>Tips to get the most bang for your buck with Going</p> textAlign=center padding=0,0,24,0 fontSize=24 fontWeight=bold
     }
   }
 
@@ -43,7 +43,7 @@ export const goingTemplateScript = `
       IMAGE src=${getPhotoUrl('going-gif-1.gif', 'going')} width=70%
     }
     COLUMN verticalAlign=top width=66% {
-      HEADING text=<p>Get the Going app.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 lineHeight=24px fontWeight=bold color=#004449 margin=0,0,16,0
+      HEADING text=<p>Get the Going app.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 fontWeight=bold color=#004449 margin=0,0,16,0
       TEXT text=<p>Never miss a deal with real-time flight alerts. <a href='/' style='color: #483cff; text-decoration: underline'>Download on iOS and Android.</a></p> padding=10,0 display=inline-block verticalAlign=middle color=#004449
     }
   }
@@ -53,7 +53,7 @@ export const goingTemplateScript = `
       IMAGE src=${getPhotoUrl('going-gif-2.gif', 'going')} width=70%
     }
     COLUMN verticalAlign=top width=66% {
-      HEADING text=<p>Set up your airports.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 lineHeight=24px fontWeight=bold color=#004449 margin=0,0,16,0
+      HEADING text=<p>Set up your airports.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 fontWeight=bold color=#004449 margin=0,0,16,0
       TEXT text=<p>You'll only receive deals from departure airports you follow. <a href='/' style='color: #483cff; text-decoration: underline'>Choose airports</a></p> padding=10,0 display=inline-block verticalAlign=middle color=#004449
     }
   }
@@ -63,7 +63,7 @@ export const goingTemplateScript = `
       IMAGE src=${getPhotoUrl('going-gif-3.gif', 'going')} width=70%
     }
     COLUMN verticalAlign=top width=66% {
-      HEADING text=<p>Check out your deals.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 lineHeight=24 fontWeight=bold color=#004449 margin=0,0,16,0
+      HEADING text=<p>Check out your deals.</p> as=h2 maxWidth=360 display=inline-block verticalAlign=middle textAlign=left fontSize=18 fontWeight=bold color=#004449 margin=0,0,16,0
       TEXT text=<p>Access to Going's best domestic flights. <a href='/' style='color: #483cff; text-decoration: underline'>your deals</a></p> padding=10,0 display=inline-block verticalAlign=middle color=#004449
     }
   }

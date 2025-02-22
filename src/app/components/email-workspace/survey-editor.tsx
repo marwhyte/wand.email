@@ -1,17 +1,17 @@
-import { useEmailStore } from '@/lib/stores/emailStore'
 import { Checkbox, CheckboxField, CheckboxGroup } from '../checkbox'
 import { ColorInput } from '../color-input'
 import { Field, Label } from '../fieldset'
 import { Input } from '../input'
-import { SurveyBlockAttributes } from './types'
+import { SurveyBlock, SurveyBlockAttributes } from './types'
 
 interface Props {
-  survey: SurveyBlockAttributes
+  block: SurveyBlock
   onChange: (survey: SurveyBlockAttributes) => void
 }
 
-const SurveyEditor = ({ survey, onChange }: Props) => {
-  const { email } = useEmailStore()
+const SurveyEditor = ({ block, onChange }: Props) => {
+  const survey = block.attributes
+
   const handleChange = (field: keyof SurveyBlockAttributes, value: any) => {
     onChange({
       ...survey,

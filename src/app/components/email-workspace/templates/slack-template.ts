@@ -8,7 +8,7 @@ export const slackTemplateScript = `
   ROW padding=36,8,0,8 {
     COLUMN align=center {
       IMAGE src="${getPhotoUrl('slack-logo.png', 'slack')}" alt="Slack Logo" width=120 padding=0,0,32,0
-     HEADING text=<p>Your free trial has ended</p> as=h1 textAlign=left fontSize=36 fontWeight=bold padding=0,0,28,0 lineHeight=42px color=#1d1c1d
+     HEADING text=<p>Your free trial has ended</p> as=h1 textAlign=left fontSize=36 fontWeight=bold padding=0,0,28,0 color=#1d1c1d
       TEXT text=<p>SentSwiftly has now been downgraded to the free plan. Your team no longer has access to historical conversations & files, along with other Slack premium features.</p> textAlign=left fontSize=20 color=#434245 padding=0,0,20,0 lineHeight=28px
     }
   }
@@ -17,7 +17,7 @@ export const slackTemplateScript = `
     COLUMN align=center padding=0,8,36,8 {
       IMAGE src="${getPhotoUrl('message-file-locked.png', 'slack')}" alt="Message & File History Locked" width=100%
       HEADING text=<p>Message & file history locked</p> as=h2 textAlign=center padding=24,8,0,8 fontSize=24 fontWeight=bold
-      TEXT text=<p>Regain access to your historical messages & files.</p> textAlign=center fontSize=16 padding=8,8,24,8 lineHeight=1.5
+      TEXT text=<p>Regain access to your historical messages & files.</p> textAlign=center fontSize=16 padding=8,8,24,8
       BUTTON text=<p>LEARN MORE</p> href=# backgroundColor=#611f69 color=#ffffff borderRadius=8 padding=12,24,12,24 fontSize=14 fontWeight=bold textAlign=center
     }
   }
@@ -36,8 +36,8 @@ export const slackTemplateScript = `
       IMAGE src="${getPhotoUrl('rehashtag.png', 'slack')}" width=100%
     }
     COLUMN width=87.5 verticalAlign=top {
-      TEXT text=<p>Slack Connect channels</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26 lineHeight=24px
-      TEXT text=<p>Seamlessly collaborate with external connections</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26 lineHeight=24px
+      TEXT text=<p>Slack Connect channels</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26
+      TEXT text=<p>Seamlessly collaborate with external connections</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26
     }
   }
 
@@ -46,8 +46,8 @@ export const slackTemplateScript = `
       IMAGE src="${getPhotoUrl('headphones.png', 'slack')}" width=100%
     }
     COLUMN width=87.5 verticalAlign=top {
-      TEXT text=<p>Group huddles</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26 lineHeight=24px
-      TEXT text=<p>Streamline conversations with multi-person video calls</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26 lineHeight=24px
+      TEXT text=<p>Group huddles</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26
+      TEXT text=<p>Streamline conversations with multi-person video calls</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26
     }
   }
 
@@ -56,15 +56,15 @@ export const slackTemplateScript = `
       IMAGE src="${getPhotoUrl('papers.png', 'slack')}" width=100%
     }
     COLUMN width=87.5 verticalAlign=top {
-      TEXT text=<p>Unlimited canvases</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26 lineHeight=24px
-      TEXT text=<p>Organize, curate, collaborate, and share information right in your Slack workspace</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26 lineHeight=24px
+      TEXT text=<p>Unlimited canvases</p> textAlign=left fontSize=18 fontWeight=bold color=#1d1c1d padding=0,0,0,26
+      TEXT text=<p>Organize, curate, collaborate, and share information right in your Slack workspace</p> textAlign=left fontSize=16 color=#434245 padding=0,0,0,26
     }
   }
 
   ROW padding=32,8,32,8 {
     COLUMN align=center {
-      TEXT text=<p><strong>🧠 Did you know?</strong><br/>"Slack" stands for Searchable Log of All Conversation & Knowledge – being able to keep track of history, decisions & important details is the building block of what makes Slack so powerful for your team.</p> textAlign=left fontSize=14 padding=8,0,16,26 lineHeight=1.5
-      TEXT text=<p><strong>Questions?</strong>&nbsp;<a href="https://support.slack.com" rel="noopener noreferrer" target="_blank" style="color: rgb(0, 68, 73);"><strong><u>Contact our support team</u></strong></a> or <a href="https://slack.com/pro" rel="noopener noreferrer" target="_blank" style="color: rgb(0, 68, 73);"><strong><u>learn more</u></strong></a> about Slack Pro</p> textAlign=left fontSize=14 padding=16,0,24,26 lineHeight=1.5
+      TEXT text=<p><strong>🧠 Did you know?</strong><br/>"Slack" stands for Searchable Log of All Conversation & Knowledge – being able to keep track of history, decisions & important details is the building block of what makes Slack so powerful for your team.</p> textAlign=left fontSize=14 padding=8,0,16,26
+      TEXT text=<p><strong>Questions?</strong>&nbsp;<a href="https://support.slack.com" rel="noopener noreferrer" target="_blank" style="color: rgb(0, 68, 73);"><strong><u>Contact our support team</u></strong></a> or <a href="https://slack.com/pro" rel="noopener noreferrer" target="_blank" style="color: rgb(0, 68, 73);"><strong><u>learn more</u></strong></a> about Slack Pro</p> textAlign=left fontSize=14 padding=16,0,24,26
     }
   }
 

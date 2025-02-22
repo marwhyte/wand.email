@@ -50,7 +50,9 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                       <div className="i-ph:user-fill text-xl"></div>
                     </div>
                   )}
-                  <div className="grid-col-1 grid">{isUserMessage ? <UserMessage content={content} /> : <AssistantMessage content={content} />}</div>
+                  <div className="grid-col-1 grid">
+                    {isUserMessage ? <UserMessage content={content} /> : <AssistantMessage content={content} />}
+                  </div>
                 </div>
               </motion.div>
             )

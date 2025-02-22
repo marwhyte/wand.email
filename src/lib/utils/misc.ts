@@ -107,3 +107,23 @@ function parseValue(arg: ClassNamesArg) {
 
   return classes
 }
+
+/**
+ * Safely parses a value to an integer, handling undefined, null, and existing numbers.
+ * Returns the default value if parsing fails.
+ *
+ * @param value - The value to parse
+ * @param defaultValue - The value to return if parsing fails (defaults to 0)
+ * @returns The parsed integer or default value
+ */
+export function safeParseInt(value: string | number | undefined | null, defaultValue = 0): number {
+  // Return default for null/undefined
+  if (value == null) return defaultValue
+
+  // Already a number, just round it
+  if (typeof value === 'number') return Math.round(value)
+
+  // Try to parse string
+  const parsed = parseInt(value, 10)
+  return isNaN(parsed) ? defaultValue : parsed
+}

@@ -9,7 +9,7 @@ export function generateTextProps(block: TextBlock, parentRow: RowBlock, mobileV
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalTextStyles(block.attributes),
+      ...getAdditionalTextStyles(block, parentRow),
     },
     className: applyCommonClassName(block.attributes, mobileView),
   }
@@ -20,7 +20,7 @@ export function generateHeadingProps(block: HeadingBlock, parentRow: RowBlock, m
     as: block.attributes.as,
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalHeadingStyles(block.attributes),
+      ...getAdditionalHeadingStyles(block, parentRow),
       marginBlockStart: 0,
       marginBlockEnd: 0,
     },
@@ -34,7 +34,7 @@ export function generateImageProps(block: ImageBlock, parentRow: RowBlock): Omit
     alt: block.attributes.alt,
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalImageStyles(block.attributes, parentRow),
+      ...getAdditionalImageStyles(block, parentRow),
     },
   }
 }
@@ -46,7 +46,7 @@ export function generateButtonProps(block: ButtonBlock, parentRow: RowBlock, mob
     rel: block.attributes.rel,
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalButtonStyles(block.attributes),
+      ...getAdditionalButtonStyles(block, parentRow),
     },
     className: applyCommonClassName(block.attributes, mobileView),
   }
@@ -59,10 +59,7 @@ export function generateLinkProps(block: LinkBlock, parentRow: RowBlock, mobileV
     rel: block.attributes.rel,
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalLinkStyles({
-        ...block.attributes,
-        color: block.attributes.color || defaultLinkColor || '#3b82f6',
-      }),
+      ...getAdditionalLinkStyles(block, parentRow),
     },
     className: applyCommonClassName(block.attributes, mobileView),
   }
@@ -72,7 +69,7 @@ export function generateDividerProps(block: DividerBlock, parentRow: RowBlock, m
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalDividerStyles(block.attributes),
+      ...getAdditionalDividerStyles(block, parentRow),
     },
     className: applyCommonClassName(block.attributes, mobileView),
   }
@@ -82,46 +79,33 @@ export function generateSurveyProps(block: SurveyBlock, parentRow: RowBlock, mob
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalSurveyStyles(block.attributes),
+      ...getAdditionalSurveyStyles(block, parentRow),
     },
     className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
-export function generateBlockProps<T extends EmailBlock>(
+export function getBlockAttributes<T extends EmailBlock>(
   block: T,
   parentRow: RowBlock,
+  mobileView = false,
   defaultLinkColor?: string
-): T extends TextBlock
-  ? OmitChildren<React.ComponentProps<typeof Text>>
-  : T extends HeadingBlock
-    ? OmitChildren<React.ComponentProps<typeof Heading>>
-    : T extends ImageBlock
-      ? OmitChildren<React.ComponentProps<typeof Img>>
-      : T extends ButtonBlock
-        ? OmitChildren<React.ComponentProps<typeof Button>>
-        : T extends LinkBlock
-          ? OmitChildren<React.ComponentProps<typeof Link>>
-          : T extends DividerBlock
-            ? OmitChildren<React.ComponentProps<typeof Hr>>
-            : T extends SurveyBlock
-              ? OmitChildren<React.ComponentProps<typeof Section>>
-              : never {
+): T extends TextBlock ? ReturnType<typeof generateTextProps> : T extends HeadingBlock ? ReturnType<typeof generateHeadingProps> : T extends ImageBlock ? ReturnType<typeof generateImageProps> : T extends ButtonBlock ? ReturnType<typeof generateButtonProps> : T extends LinkBlock ? ReturnType<typeof generateLinkProps> : T extends DividerBlock ? ReturnType<typeof generateDividerProps> : T extends SurveyBlock ? ReturnType<typeof generateSurveyProps> : never {
   switch (block.type) {
     case 'text':
-      return generateTextProps(block as TextBlock, parentRow) as any
+      return generateTextProps(block as TextBlock, parentRow, mobileView) as any
     case 'heading':
-      return generateHeadingProps(block as HeadingBlock, parentRow) as any
+      return generateHeadingProps(block as HeadingBlock, parentRow, mobileView) as any
     case 'image':
       return generateImageProps(block as ImageBlock, parentRow) as any
     case 'button':
-      return generateButtonProps(block as ButtonBlock, parentRow) as any
+      return generateButtonProps(block as ButtonBlock, parentRow, mobileView) as any
     case 'link':
-      return generateLinkProps(block as LinkBlock, parentRow, false, defaultLinkColor) as any
+      return generateLinkProps(block as LinkBlock, parentRow, mobileView, defaultLinkColor) as any
     case 'divider':
-      return generateDividerProps(block as DividerBlock, parentRow) as any
+      return generateDividerProps(block as DividerBlock, parentRow, mobileView) as any
     case 'survey':
-      return generateSurveyProps(block as SurveyBlock, parentRow) as any
+      return generateSurveyProps(block as SurveyBlock, parentRow, mobileView) as any
     default:
       return {} as never
   }

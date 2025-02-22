@@ -18,7 +18,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { cssTransition, toast, ToastContainer } from 'react-toastify'
 import { Dialog, DialogBody, DialogDescription, DialogTitle } from '../dialog'
-import { Email, Template } from '../email-workspace/types'
+import { Email } from '../email-workspace/types'
 import { Header } from '../header'
 import UpgradeDialog from '../payment/upgrade-dialog'
 import { BaseChat } from './base-chat'
@@ -50,7 +50,14 @@ export function Chat({ monthlyExportCount }: Props) {
     <div className="mx-auto w-full">
       <Header monthlyExportCount={monthlyExportCount} chatStarted={chatStarted} />
       <div className="flex flex-1">
-        {ready && <ChatImpl initialMessages={initialMessages} storeMessageHistory={storeMessageHistory} chatStarted={chatStarted} setChatStarted={setChatStarted} />}
+        {ready && (
+          <ChatImpl
+            initialMessages={initialMessages}
+            storeMessageHistory={storeMessageHistory}
+            chatStarted={chatStarted}
+            setChatStarted={setChatStarted}
+          />
+        )}
         <ToastContainer
           closeButton={({ closeToast }) => {
             return (
@@ -109,7 +116,6 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
 
   const [showSignUpDialog, setShowSignUpDialog] = useState(false)
   const [stepType, setStepType] = useState<'login' | 'signup'>('signup')
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | undefined>()
 
   useEffect(() => {
     if (session.data?.user) {
@@ -154,7 +160,7 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
 
   useEffect(() => {
     if (!isLoading && messages.length > initialMessages.length) {
-      storeMessageHistory(messages, selectedTemplate?.template).catch((error) => toast.error(error.message))
+      storeMessageHistory(messages).catch((error) => toast.error(error.message))
     }
   }, [messages.length, initialMessages.length, isLoading])
 
@@ -189,7 +195,10 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
       return
     }
 
-    await Promise.all([animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }), animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn })])
+    await Promise.all([
+      animate('#examples', { opacity: 0, display: 'none' }, { duration: 0.1 }),
+      animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
+    ])
 
     setKey('started', true)
 
@@ -213,7 +222,7 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
     runAnimation()
 
     if (messages.length === 0) {
-      await storeMessageHistory(messages, selectedTemplate?.template).catch((error) => toast.error(error.message))
+      await storeMessageHistory(messages).catch((error) => toast.error(error.message))
     }
 
     append({ role: 'user', content: _input })
@@ -253,15 +262,15 @@ export function ChatImpl({ initialMessages, storeMessageHistory, chatStarted, se
             scrollTextArea()
           })
         }}
-        selectedTemplate={selectedTemplate}
-        onTemplateSelect={setSelectedTemplate}
       />
       <Dialog open={showSignUpDialog} onClose={() => setShowSignUpDialog(false)} className="z-50">
         <DialogTitle>{`${stepType === 'login' ? 'Log in' : 'Sign up'} to start creating emails`}</DialogTitle>
         <DialogBody className="!mt-2">
           <DialogDescription className="mb-4">Access and edit your saved emails anytime, anywhere.</DialogDescription>
           {stepType === 'login' && <LoginForm redirectToInitialProject onSwitchType={() => setStepType('signup')} />}
-          {stepType === 'signup' && <RegistrationForm redirectToInitialProject onSwitchType={() => setStepType('login')} />}
+          {stepType === 'signup' && (
+            <RegistrationForm redirectToInitialProject onSwitchType={() => setStepType('login')} />
+          )}
         </DialogBody>
       </Dialog>
       <UpgradeDialog open={isUpgradeDialogOpen} onClose={closeUpgradeDialog} />

@@ -5,7 +5,10 @@ import { createClient } from 'pexels'
 // Initialize the Pexels client
 const pexels = createClient(process.env.PEXELS_API_KEY || '')
 
-export async function resolveImageSrc(src: string): Promise<string> {
+export async function resolveImageSrc(
+  src: string,
+  orientation: 'landscape' | 'portrait' | 'square' = 'landscape'
+): Promise<string> {
   // Check if this is a service-based image request
   const match = src.match(/^(\w+):(.+)$/)
   if (!match) return src // Return as-is if not a service request
@@ -18,6 +21,7 @@ export async function resolveImageSrc(src: string): Promise<string> {
         const result = await pexels.photos.search({
           query: keyword,
           per_page: 1,
+          orientation: orientation,
         })
 
         if ('error' in result) {

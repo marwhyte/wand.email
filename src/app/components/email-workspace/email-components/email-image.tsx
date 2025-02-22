@@ -1,5 +1,5 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { generateBlockProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes'
 import { Img } from '@react-email/components'
 import Image from 'next/image'
 import FileUploader from '../../file-uploader'
@@ -45,5 +45,5 @@ export default function EmailImage({ block, parentRow }: Props) {
     )
   }
 
-  return <Img {...generateBlockProps(block, parentRow)} />
+  return <Img {...getBlockAttributes(block, parentRow)} />
 }

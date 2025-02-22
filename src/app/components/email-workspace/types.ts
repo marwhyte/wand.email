@@ -50,7 +50,13 @@ export type Email = {
   rows: RowBlock[]
 }
 
-export type TemplateTypes = 'personalized' | 'recommended' | 'ecommerce' | 'transactional' | 'welcome-series' | 'newsletter'
+export type TemplateTypes =
+  | 'personalized'
+  | 'recommended'
+  | 'ecommerce'
+  | 'transactional'
+  | 'welcome-series'
+  | 'newsletter'
 
 interface TemplateConfig {
   logoUrl: string | null
@@ -62,7 +68,9 @@ interface TemplateConfig {
 }
 
 export type RequiredTemplateConfig = {
-  [K in keyof TemplateConfig]: TemplateConfig[K] extends { [key: string]: string | null } ? { [P in keyof TemplateConfig[K]]: NonNullable<TemplateConfig[K][P]> } : NonNullable<TemplateConfig[K]>
+  [K in keyof TemplateConfig]: TemplateConfig[K] extends { [key: string]: string | null }
+    ? { [P in keyof TemplateConfig[K]]: NonNullable<TemplateConfig[K][P]> }
+    : NonNullable<TemplateConfig[K]>
 }
 
 export type Template = {
@@ -86,7 +94,15 @@ export type RowBlock = {
   columns: ColumnBlock[]
 }
 
-export type EmailBlock = TextBlock | ImageBlock | ButtonBlock | LinkBlock | HeadingBlock | DividerBlock | SocialsBlock | SurveyBlock
+export type EmailBlock =
+  | TextBlock
+  | ImageBlock
+  | ButtonBlock
+  | LinkBlock
+  | HeadingBlock
+  | DividerBlock
+  | SocialsBlock
+  | SurveyBlock
 
 export type ColumnBlock = {
   id: string
@@ -246,7 +262,17 @@ export type SurveyBlockAttributes = CommonAttributes & {
   }
 }
 
-export type SocialIconFolders = 'socials-blue' | 'socials-color' | 'socials-dark-gray' | 'socials-dark-round' | 'socials-dark' | 'socials-outline-black' | 'socials-outline-color' | 'socials-outline-gray' | 'socials-outline-white' | 'socials-white'
+export type SocialIconFolders =
+  | 'socials-blue'
+  | 'socials-color'
+  | 'socials-dark-gray'
+  | 'socials-dark-round'
+  | 'socials-dark'
+  | 'socials-outline-black'
+  | 'socials-outline-color'
+  | 'socials-outline-gray'
+  | 'socials-outline-white'
+  | 'socials-white'
 
 export type SocialsBlockAttributes = CommonAttributes & {
   folder: SocialIconFolders
@@ -256,6 +282,8 @@ export type SocialsBlockAttributes = CommonAttributes & {
     title: string
     alt: string
   }[]
+  marginLeft?: string
+  marginRight?: string
 }
 
 export type TextBlockAttributes = CommonAttributes & {
@@ -274,7 +302,9 @@ export type HeadingBlockAttributes = CommonAttributes & {
 export type ImageBlockAttributes = CommonAttributes & {
   src: string
   borderRadius?: string
-  alt?: string
+  alt: string
+  marginLeft?: string
+  marginRight?: string
 }
 
 export type ButtonBlockAttributes = CommonAttributes & {
@@ -513,4 +543,9 @@ export const FOLDER_SPECIFIC_ICONS = {
 } as const
 
 // Combine common and specific icons for each folder
-export const SOCIAL_ICONS: Record<SocialIconFolders, Partial<Record<SocialIconName, string>>> = Object.fromEntries(Object.entries(FOLDER_SPECIFIC_ICONS).map(([folder, specificIcons]) => [folder, { ...COMMON_SOCIAL_ICONS, ...specificIcons }])) as Record<SocialIconFolders, Partial<Record<SocialIconName, string>>>
+export const SOCIAL_ICONS: Record<SocialIconFolders, Partial<Record<SocialIconName, string>>> = Object.fromEntries(
+  Object.entries(FOLDER_SPECIFIC_ICONS).map(([folder, specificIcons]) => [
+    folder,
+    { ...COMMON_SOCIAL_ICONS, ...specificIcons },
+  ])
+) as Record<SocialIconFolders, Partial<Record<SocialIconName, string>>>

@@ -17,6 +17,8 @@ input {
     margin-right: 0 !important;
 }
 
+
+
 table {
     border-collapse: separate !important;
 }
@@ -90,5 +92,9 @@ table {
   100% {
     box-shadow: inset 0px 0px 0px 30px #7ac142;
   }
+}
+
+p a {
+    text-decoration: underline !important;
 }
 

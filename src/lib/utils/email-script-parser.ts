@@ -1,4 +1,23 @@
-import { ButtonBlockAttributes, ColumnBlock, ColumnBlockAttributes, COMMON_SOCIAL_ICONS, CommonAttributes, DividerBlockAttributes, Email, FOLDER_SPECIFIC_ICONS, HeadingBlockAttributes, ImageBlockAttributes, LinkBlockAttributes, RowBlock, RowBlockAttributes, SocialIconFolders, SocialIconName, SocialsBlockAttributes, SurveyBlockAttributes, TextBlockAttributes } from '@/app/components/email-workspace/types'
+import {
+  ButtonBlockAttributes,
+  ColumnBlock,
+  ColumnBlockAttributes,
+  COMMON_SOCIAL_ICONS,
+  CommonAttributes,
+  DividerBlockAttributes,
+  Email,
+  FOLDER_SPECIFIC_ICONS,
+  HeadingBlockAttributes,
+  ImageBlockAttributes,
+  LinkBlockAttributes,
+  RowBlock,
+  RowBlockAttributes,
+  SocialIconFolders,
+  SocialIconName,
+  SocialsBlockAttributes,
+  SurveyBlockAttributes,
+  TextBlockAttributes,
+} from '@/app/components/email-workspace/types'
 import { createBlock, createColumn, createRow } from './email-helpers'
 import { resolveImageSrc } from './image-service'
 
@@ -57,7 +76,12 @@ function parsePadding(padding: string | undefined): Record<string, string> {
 }
 
 function parseEscapeSequences(text: string): string {
-  return text.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\')
+  return text
+    .replace(/\\n/g, '\n')
+    .replace(/\\t/g, '\t')
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'")
+    .replace(/\\\\/g, '\\')
 }
 
 // First, let's improve our base types for parsing
@@ -81,7 +105,10 @@ function isTarget(value: string | undefined): value is ButtonBlockAttributes['ta
 
 // Type guard for border style
 function isBorderStyle(value: string | undefined): value is NonNullable<RowBlockAttributes['borderStyle']> {
-  return typeof value === 'string' && ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'].includes(value)
+  return (
+    typeof value === 'string' &&
+    ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'].includes(value)
+  )
 }
 
 // Helper for ensuring string values
@@ -225,6 +252,7 @@ const parseImageAttributes: AttributeParser<ImageBlockAttributes> = (raw) => {
   const attrs: ImageBlockAttributes = {
     ...common,
     src: raw.src || '', // Required attribute
+    alt: raw.alt || '',
   }
 
   // Optional image-specific attributes
@@ -266,13 +294,30 @@ const parseDividerAttributes: AttributeParser<DividerBlockAttributes> = (raw) =>
 
 // Type guard for social icon folders
 function isSocialIconFolder(value: string | undefined): value is SocialIconFolders {
-  return typeof value === 'string' && ['socials-blue', 'socials-color', 'socials-dark-gray', 'socials-dark-round', 'socials-dark', 'socials-outline-black', 'socials-outline-color', 'socials-outline-gray', 'socials-outline-white', 'socials-white'].includes(value)
+  return (
+    typeof value === 'string' &&
+    [
+      'socials-blue',
+      'socials-color',
+      'socials-dark-gray',
+      'socials-dark-round',
+      'socials-dark',
+      'socials-outline-black',
+      'socials-outline-color',
+      'socials-outline-gray',
+      'socials-outline-white',
+      'socials-white',
+    ].includes(value)
+  )
 }
 
 // Type guard for social icon names
 function isSocialIconName(value: string | undefined): value is SocialIconName {
   // Get all possible values by combining common icons and folder-specific icons
-  const validIcons = new Set([...Object.keys(COMMON_SOCIAL_ICONS), ...Object.values(FOLDER_SPECIFIC_ICONS).flatMap((icons) => Object.keys(icons))])
+  const validIcons = new Set([
+    ...Object.keys(COMMON_SOCIAL_ICONS),
+    ...Object.values(FOLDER_SPECIFIC_ICONS).flatMap((icons) => Object.keys(icons)),
+  ])
   return typeof value === 'string' && validIcons.has(value as SocialIconName)
 }
 
@@ -454,7 +499,18 @@ export function parseEmailScript(script: string): RowBlock[] {
 
       // Extract container-specific attributes
       const containerAttrs: Record<string, any> = {}
-      const containerProps = ['align', 'maxWidth', 'minWidth', 'background', 'backgroundColor', 'backgroundImage', 'backgroundSize', 'backgroundPosition', 'backgroundRepeat', 'height']
+      const containerProps = [
+        'align',
+        'maxWidth',
+        'minWidth',
+        'background',
+        'backgroundColor',
+        'backgroundImage',
+        'backgroundSize',
+        'backgroundPosition',
+        'backgroundRepeat',
+        'height',
+      ]
 
       containerProps.forEach((prop) => {
         if (rowAttrs[prop] !== undefined) {
@@ -549,13 +605,37 @@ export function parseEmailScript(script: string): RowBlock[] {
   return rows
 }
 
-// Helper function to process blocks recursively and update image sources
-async function processBlocks(blocks: any[]): Promise<any[]> {
+// Add this helper function to determine image orientation
+function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 'square' {
+  // Count image blocks and total blocks in the row
+  let imageCount = 0
+  let totalBlocks = 0
+
+  row.columns.forEach((column) => {
+    const hasImage = column.blocks.some((block) => block.type === 'image')
+    if (hasImage) imageCount++
+    totalBlocks += column.blocks.length
+  })
+
+  // If there are more than 2 columns with images, use square
+  if (imageCount > 2) return 'square'
+
+  // If there's 1 image column and other content, use square
+  if (imageCount === 1 && totalBlocks > imageCount) return 'square'
+
+  // Default to landscape for 1-2 columns of just images
+  return 'landscape'
+}
+
+// Update the processBlocks function
+async function processBlocks(blocks: any[], row: RowBlock): Promise<any[]> {
+  const orientation = determineImageOrientation(row)
+
   return Promise.all(
     blocks.map(async (block) => {
       if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
-        // Resolve the image source
-        const resolvedSrc = await resolveImageSrc(block.attributes.src)
+        // Resolve the image source with determined orientation
+        const resolvedSrc = await resolveImageSrc(block.attributes.src, orientation)
         return {
           ...block,
           attributes: {
@@ -569,22 +649,22 @@ async function processBlocks(blocks: any[]): Promise<any[]> {
   )
 }
 
-// Helper function to process columns recursively
-async function processColumns(columns: any[]): Promise<any[]> {
+// Update the processColumns function to pass the row context
+async function processColumns(columns: any[], row: RowBlock): Promise<any[]> {
   return Promise.all(
     columns.map(async (column) => ({
       ...column,
-      blocks: column.blocks ? await processBlocks(column.blocks) : [],
+      blocks: column.blocks ? await processBlocks(column.blocks, row) : [],
     }))
   )
 }
 
-// Helper function to process rows recursively
+// Update the processRows function
 async function processRows(rows: any[]): Promise<any[]> {
   return Promise.all(
     rows.map(async (row) => ({
       ...row,
-      columns: row.columns ? await processColumns(row.columns) : [],
+      columns: row.columns ? await processColumns(row.columns, row) : [],
     }))
   )
 }

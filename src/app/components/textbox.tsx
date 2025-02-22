@@ -1,6 +1,6 @@
 'use client'
 
-import { ComponentProps, useEffect, useRef } from 'react'
+import { ComponentProps, useEffect, useRef, useState } from 'react'
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 
@@ -9,15 +9,25 @@ type Props = ComponentProps<typeof ReactQuill>
 export default function Textbox({ ...props }: Props) {
   const quillRef = useRef<ReactQuill>(null)
   const colorPickerRef = useRef<HTMLInputElement>(null)
+  const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isMounted) return
+
     if (quillRef.current) {
       const quill = quillRef.current.getEditor()
+      // Focus at the end of the content
+      quill.focus()
+      quill.setSelection(quill.getLength(), 0)
+
       const toolbar = quill.getModule('toolbar')
       const colorButton = toolbar.container.querySelector('.ql-color')
 
       if (colorButton) {
-        // Find the parent .ql-formats div
         const formatGroup = colorButton.closest('.ql-formats')
         if (formatGroup) {
           formatGroup.style.position = 'relative'
@@ -33,11 +43,17 @@ export default function Textbox({ ...props }: Props) {
             colorPicker.style.cursor = 'pointer'
             formatGroup.appendChild(colorPicker)
             colorPicker.addEventListener('click', updateColorPickerValue)
+
+            // Add cleanup function to remove event listener and element
+            return () => {
+              colorPicker.removeEventListener('click', updateColorPickerValue)
+              formatGroup.removeChild(colorPicker)
+            }
           }
         }
       }
     }
-  }, [])
+  }, [isMounted])
 
   const updateColorPickerValue = () => {
     if (quillRef.current && colorPickerRef.current) {
@@ -71,15 +87,17 @@ export default function Textbox({ ...props }: Props) {
 
   return (
     <div className="relative">
-      <ReactQuill
-        ref={quillRef}
-        className="mt-3 rounded-md"
-        theme="snow"
-        modules={{
-          toolbar: [['bold', 'underline', 'italic'], ['color']],
-        }}
-        {...props}
-      />
+      {isMounted && (
+        <ReactQuill
+          ref={quillRef}
+          className="mt-3 rounded-md"
+          theme="snow"
+          modules={{
+            toolbar: [['bold', 'underline', 'italic'], ['color']],
+          }}
+          {...props}
+        />
+      )}
       <input ref={colorPickerRef} type="color" onChange={handleColorPickerChange} />
     </div>
   )

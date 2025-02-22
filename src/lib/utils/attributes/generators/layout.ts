@@ -8,7 +8,10 @@ import { variantDefaults } from '../defaults/variants'
 type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
 
 export function getDefaultRowAttributes(row: RowBlock): Partial<RowBlock['attributes']> {
-  const baseRowDefaults: Partial<RowBlock['attributes']> = {}
+  const baseRowDefaults: Partial<RowBlock['attributes']> = {
+    paddingLeft: '16px',
+    paddingRight: '16px',
+  }
 
   return {
     ...baseRowDefaults,
@@ -64,7 +67,7 @@ export function generateColumnProps(column: ColumnBlock, row: RowBlock, mobileVi
   const rowTypeDefaults = getRowTypeBlockDefaults(column, row)
 
   let style: React.CSSProperties = {
-    ...rowTypeDefaults,
+    ...(rowTypeDefaults as React.CSSProperties),
     width: column.width,
     borderStyle: column.attributes.borderStyle,
     borderWidth: column.attributes.borderWidth,

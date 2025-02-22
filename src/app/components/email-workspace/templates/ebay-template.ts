@@ -109,15 +109,9 @@ export const ebayTemplateScript = `
 
   ROW type=footer  {
     COLUMN {
-      IMAGE src=${getPhotoUrl('ebaylogo.png', 'ebay')} alt="eBay Logo" height=40 textAlign=right
-    }
-    COLUMN {
-      SOCIALS folder=socials-color socialLinks=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
-    }
-  }
-
-  ROW type=footer {
-    COLUMN align=center {
+      IMAGE src=${getPhotoUrl('ebaylogo.png', 'ebay')} alt="eBay Logo"
+      HEADING text=<p>Connect with us</p> as=h4
+      SOCIALS folder=socials-dark-gray socialLinks=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
       TEXT text=<p><a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.</p>
       TEXT text=<p>If you have a question, <a href="/">contact us</a>. eBay I‌nc., 2‌025 H‌amilton A‌venue, S‌an J‌ose, C‌A 9‌5125, U‌nited S‌tates</p>
       TEXT text=<p>© 1995-2024 eBay Inc. or its affiliates</p>
@@ -126,4 +120,9 @@ export const ebayTemplateScript = `
 </EMAIL>
 `
 
-export const ebayTemplate = createEmail('Back-to-School Email', parseEmailScript(ebayTemplateScript), '#000000', '#000000')
+export const ebayTemplate = createEmail(
+  'Back-to-School Email',
+  parseEmailScript(ebayTemplateScript),
+  '#000000',
+  '#000000'
+)

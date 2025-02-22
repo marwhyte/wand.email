@@ -142,6 +142,7 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
         type: 'image',
         attributes: {
           src: '',
+          alt: '',
           paddingTop: '10px',
           paddingBottom: '10px',
           paddingLeft: '0',
