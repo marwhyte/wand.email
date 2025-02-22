@@ -56,18 +56,36 @@ const SurveyEditor = ({ block, onChange }: Props) => {
 
       <Field>
         <Label>Question</Label>
-        <Input value={survey.question} onChange={(e) => handleChange('question', e.target.value)} placeholder="Enter your survey question" />
+        <Input
+          value={survey.question}
+          onChange={(e) => handleChange('question', e.target.value)}
+          placeholder="Enter your survey question"
+        />
       </Field>
 
       {survey.kind === 'yes-no' && (
         <>
           <Field>
-            <Label>"Yes" Button Link</Label>
-            <Input type="url" pattern="https?://.*" title="Please enter a valid URL (e.g., https://example.com)" value={getLink('yes-no', 'yes')} onChange={(e) => handleLinkChange('yes-no', 'yes', e.target.value)} placeholder="Enter link for Yes response" />
+            <Label>Yes Button Link</Label>
+            <Input
+              type="url"
+              pattern="https?://.*"
+              title="Please enter a valid URL (e.g., https://example.com)"
+              value={getLink('yes-no', 'yes')}
+              onChange={(e) => handleLinkChange('yes-no', 'yes', e.target.value)}
+              placeholder="Enter link for Yes response"
+            />
           </Field>
           <Field>
-            <Label>"No" Button Link</Label>
-            <Input type="url" pattern="https?://.*" title="Please enter a valid URL (e.g., https://example.com)" value={getLink('yes-no', 'no')} onChange={(e) => handleLinkChange('yes-no', 'no', e.target.value)} placeholder="Enter link for No response" />
+            <Label>No Button Link</Label>
+            <Input
+              type="url"
+              pattern="https?://.*"
+              title="Please enter a valid URL (e.g., https://example.com)"
+              value={getLink('yes-no', 'no')}
+              onChange={(e) => handleLinkChange('yes-no', 'no', e.target.value)}
+              placeholder="Enter link for No response"
+            />
           </Field>
         </>
       )}
@@ -77,7 +95,14 @@ const SurveyEditor = ({ block, onChange }: Props) => {
           {[1, 2, 3, 4, 5].map((num) => (
             <Field key={num}>
               <Label>{`Rating ${num} Link`}</Label>
-              <Input type="url" pattern="https?://.*" title="Please enter a valid URL (e.g., https://example.com)" value={getLink('rating', num.toString())} onChange={(e) => handleLinkChange('rating', num.toString(), e.target.value)} placeholder={`Enter link for rating ${num}`} />
+              <Input
+                type="url"
+                pattern="https?://.*"
+                title="Please enter a valid URL (e.g., https://example.com)"
+                value={getLink('rating', num.toString())}
+                onChange={(e) => handleLinkChange('rating', num.toString(), e.target.value)}
+                placeholder={`Enter link for rating ${num}`}
+              />
             </Field>
           ))}
         </>

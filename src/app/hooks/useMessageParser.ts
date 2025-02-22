@@ -38,6 +38,7 @@ export function useMessageParser(message: Message) {
     }
 
     processMessage()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [message.content, message.id, emailState])
 
   useEffect(() => {
@@ -75,5 +76,6 @@ export function useMessageParser(message: Message) {
           })
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [emailState])
 }
