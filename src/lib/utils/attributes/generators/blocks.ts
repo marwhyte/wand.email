@@ -1,11 +1,35 @@
-import type { ButtonBlock, DividerBlock, EmailBlock, HeadingBlock, ImageBlock, LinkBlock, RowBlock, SurveyBlock, TextBlock } from '@/app/components/email-workspace/types'
+import type {
+  ButtonBlock,
+  DividerBlock,
+  EmailBlock,
+  HeadingBlock,
+  ImageBlock,
+  LinkBlock,
+  RowBlock,
+  SurveyBlock,
+  TextBlock,
+} from '@/app/components/email-workspace/types'
+import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
+import { getImgFromKey } from '../../misc'
 import { applyCommonAttributes, applyCommonClassName } from '../common'
-import { getAdditionalButtonStyles, getAdditionalDividerStyles, getAdditionalHeadingStyles, getAdditionalImageStyles, getAdditionalLinkStyles, getAdditionalSurveyStyles, getAdditionalTextStyles } from '../defaults/blocks'
+import {
+  getAdditionalButtonStyles,
+  getAdditionalDividerStyles,
+  getAdditionalHeadingStyles,
+  getAdditionalImageStyles,
+  getAdditionalLinkStyles,
+  getAdditionalSurveyStyles,
+  getAdditionalTextStyles,
+} from '../defaults/blocks'
 
 type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
 
-export function generateTextProps(block: TextBlock, parentRow: RowBlock, mobileView = false): OmitChildren<React.ComponentProps<typeof Text>> {
+export function generateTextProps(
+  block: TextBlock,
+  parentRow: RowBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Text>> {
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
@@ -15,7 +39,11 @@ export function generateTextProps(block: TextBlock, parentRow: RowBlock, mobileV
   }
 }
 
-export function generateHeadingProps(block: HeadingBlock, parentRow: RowBlock, mobileView = false): OmitChildren<React.ComponentProps<typeof Heading>> {
+export function generateHeadingProps(
+  block: HeadingBlock,
+  parentRow: RowBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Heading>> {
   return {
     as: block.attributes.as,
     style: {
@@ -28,9 +56,20 @@ export function generateHeadingProps(block: HeadingBlock, parentRow: RowBlock, m
   }
 }
 
-export function generateImageProps(block: ImageBlock, parentRow: RowBlock): OmitChildren<React.ComponentProps<typeof Img>> {
+export function generateImageProps(
+  block: ImageBlock,
+  parentRow: RowBlock,
+  company: Company | null
+): OmitChildren<React.ComponentProps<typeof Img>> {
+  const src =
+    block.attributes.src === 'logo'
+      ? company?.logo_image_key
+        ? getImgFromKey(company.logo_image_key)
+        : getImgFromKey('dummy-logo.png')
+      : block.attributes.src
+
   return {
-    src: block.attributes.src,
+    src,
     alt: block.attributes.alt,
     style: {
       ...applyCommonAttributes(block.attributes),
@@ -39,7 +78,11 @@ export function generateImageProps(block: ImageBlock, parentRow: RowBlock): Omit
   }
 }
 
-export function generateButtonProps(block: ButtonBlock, parentRow: RowBlock, mobileView = false): OmitChildren<React.ComponentProps<typeof Button>> {
+export function generateButtonProps(
+  block: ButtonBlock,
+  parentRow: RowBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Button>> {
   return {
     href: block.attributes.href,
     target: block.attributes.target,
@@ -52,7 +95,12 @@ export function generateButtonProps(block: ButtonBlock, parentRow: RowBlock, mob
   }
 }
 
-export function generateLinkProps(block: LinkBlock, parentRow: RowBlock, mobileView = false, defaultLinkColor?: string): OmitChildren<React.ComponentProps<typeof Link>> {
+export function generateLinkProps(
+  block: LinkBlock,
+  parentRow: RowBlock,
+  mobileView = false,
+  defaultLinkColor?: string
+): OmitChildren<React.ComponentProps<typeof Link>> {
   return {
     href: block.attributes.href,
     target: block.attributes.target,
@@ -65,7 +113,11 @@ export function generateLinkProps(block: LinkBlock, parentRow: RowBlock, mobileV
   }
 }
 
-export function generateDividerProps(block: DividerBlock, parentRow: RowBlock, mobileView = false): OmitChildren<React.ComponentProps<typeof Hr>> {
+export function generateDividerProps(
+  block: DividerBlock,
+  parentRow: RowBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Hr>> {
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
@@ -75,7 +127,11 @@ export function generateDividerProps(block: DividerBlock, parentRow: RowBlock, m
   }
 }
 
-export function generateSurveyProps(block: SurveyBlock, parentRow: RowBlock, mobileView = false): OmitChildren<React.ComponentProps<typeof Section>> {
+export function generateSurveyProps(
+  block: SurveyBlock,
+  parentRow: RowBlock,
+  mobileView = false
+): OmitChildren<React.ComponentProps<typeof Section>> {
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
@@ -89,15 +145,30 @@ export function getBlockAttributes<T extends EmailBlock>(
   block: T,
   parentRow: RowBlock,
   mobileView = false,
+  company: Company | null,
   defaultLinkColor?: string
-): T extends TextBlock ? ReturnType<typeof generateTextProps> : T extends HeadingBlock ? ReturnType<typeof generateHeadingProps> : T extends ImageBlock ? ReturnType<typeof generateImageProps> : T extends ButtonBlock ? ReturnType<typeof generateButtonProps> : T extends LinkBlock ? ReturnType<typeof generateLinkProps> : T extends DividerBlock ? ReturnType<typeof generateDividerProps> : T extends SurveyBlock ? ReturnType<typeof generateSurveyProps> : never {
+): T extends TextBlock
+  ? ReturnType<typeof generateTextProps>
+  : T extends HeadingBlock
+    ? ReturnType<typeof generateHeadingProps>
+    : T extends ImageBlock
+      ? ReturnType<typeof generateImageProps>
+      : T extends ButtonBlock
+        ? ReturnType<typeof generateButtonProps>
+        : T extends LinkBlock
+          ? ReturnType<typeof generateLinkProps>
+          : T extends DividerBlock
+            ? ReturnType<typeof generateDividerProps>
+            : T extends SurveyBlock
+              ? ReturnType<typeof generateSurveyProps>
+              : never {
   switch (block.type) {
     case 'text':
       return generateTextProps(block as TextBlock, parentRow, mobileView) as any
     case 'heading':
       return generateHeadingProps(block as HeadingBlock, parentRow, mobileView) as any
     case 'image':
-      return generateImageProps(block as ImageBlock, parentRow) as any
+      return generateImageProps(block as ImageBlock, parentRow, company) as any
     case 'button':
       return generateButtonProps(block as ButtonBlock, parentRow, mobileView) as any
     case 'link':

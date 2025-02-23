@@ -1,6 +1,7 @@
 import { isLocalDev } from '@/constants'
 import { addExport } from '@/lib/database/queries/exports'
 import { ExportType } from '@/lib/database/types'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getReactEmailCode } from '@/lib/utils/code-generation'
 import { ChevronLeftIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
@@ -25,6 +26,7 @@ type Props = {
 
 const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const { email } = useEmailStore()
+  const { company } = useChatStore()
   const [exportType, setExportType] = useState<ExportType | null>(null)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
@@ -38,8 +40,8 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
     setExportType(type)
   }
 
-  const htmlEmailCode = render(EmailRendererFinal({ email: email }))
-  const reactEmailCode = getReactEmailCode(email)
+  const htmlEmailCode = render(EmailRendererFinal({ email: email, company: company }))
+  const reactEmailCode = getReactEmailCode(company, email)
 
   const handleCopyReact = useCallback(async () => {
     try {
@@ -118,11 +120,26 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                           to your react project
                         </Heading>
                         <Text className="mt-4">npm</Text>
-                        <CodeBlock theme={dracula} lineNumbers language="bash" code={`npm install @react-email/components`} />
+                        <CodeBlock
+                          theme={dracula}
+                          lineNumbers
+                          language="bash"
+                          code={`npm install @react-email/components`}
+                        />
                         <Text>pnpm</Text>
-                        <CodeBlock theme={dracula} lineNumbers language="bash" code={`pnpm install @react-email/components`} />
+                        <CodeBlock
+                          theme={dracula}
+                          lineNumbers
+                          language="bash"
+                          code={`pnpm install @react-email/components`}
+                        />
                         <Text>yarn</Text>
-                        <CodeBlock theme={dracula} lineNumbers language="bash" code={`yarn add @react-email/components`} />
+                        <CodeBlock
+                          theme={dracula}
+                          lineNumbers
+                          language="bash"
+                          code={`yarn add @react-email/components`}
+                        />
                       </div>
                     )
                   } else if (currentStep.name === 'Create') {
@@ -132,7 +149,9 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                           Create Email Component
                         </Heading>
                         <Text className="mt-4">
-                          Create a new email component, for example <CodeInline>Email.tsx</CodeInline> in your project and copy and paste the code below. A common practice is to create a new email folder in your project.
+                          Create a new email component, for example <CodeInline>Email.tsx</CodeInline> in your project
+                          and copy and paste the code below. A common practice is to create a new email folder in your
+                          project.
                         </Text>
                         <div className="relative">
                           <div className="absolute bottom-2 right-2 mt-4 text-end">
@@ -202,7 +221,15 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           )}
         </DialogBody>
       </Dialog>
-      {notificationMessage && <Notification onClose={() => setNotificationMessage(null)} title={notificationMessage} status={notificationStatus} duration={4000} skipClose />}
+      {notificationMessage && (
+        <Notification
+          onClose={() => setNotificationMessage(null)}
+          title={notificationMessage}
+          status={notificationStatus}
+          duration={4000}
+          skipClose
+        />
+      )}
     </>
   )
 }

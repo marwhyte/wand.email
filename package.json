@@ -38,8 +38,6 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
-    "embla-carousel": "^8.5.1",
-    "embla-carousel-react": "^8.5.1",
     "framer-motion": "^11.15.0",
     "html-react-parser": "^5.1.12",
     "isomorphic-dompurify": "^2.19.0",

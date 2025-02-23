@@ -1,3 +1,4 @@
+import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { render } from '@react-email/components'
 import { useState } from 'react'
@@ -12,10 +13,11 @@ type Props = {
 
 const PreviewDialog = ({ open, onClose }: Props) => {
   const { email } = useEmailStore()
+  const { company } = useChatStore()
   const [selectedWidth, setSelectedWidth] = useState<'600' | '750'>('750')
 
   // Generate the complete HTML string
-  const htmlContent = render(EmailRendererFinal({ email }))
+  const htmlContent = render(EmailRendererFinal({ email: email, company: company }))
 
   const widthOptions = [
     { name: '600px', value: '600' },
@@ -41,7 +43,13 @@ const PreviewDialog = ({ open, onClose }: Props) => {
         </TabGroup>
       </DialogTitle>
       <DialogBody>
-        <iframe srcDoc={htmlContent} className="h-[70vh] border-0" style={{ width: `${selectedWidth}px` }} title="Email Preview" sandbox="allow-same-origin" />
+        <iframe
+          srcDoc={htmlContent}
+          className="h-[70vh] border-0"
+          style={{ width: `${selectedWidth}px` }}
+          title="Email Preview"
+          sandbox="allow-same-origin"
+        />
       </DialogBody>
     </Dialog>
   )

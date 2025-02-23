@@ -6,6 +6,7 @@ import FileUploader from '@/app/components/file-uploader'
 import { Input } from '@/app/components/input'
 import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getBlockAttributes } from '@/lib/utils/attributes'
 import { isValidHttpUrl, safeParseInt } from '@/lib/utils/misc'
@@ -57,11 +58,12 @@ type EmailBlockEditorProps = {
 
 const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
   const { email } = useEmailStore()
+  const { company } = useChatStore()
   const parentRow = email?.rows.find((row) =>
     row.columns.some((column) => column.blocks.some((b) => b.id === block.id))
   ) as RowBlock
 
-  const processedAttributes = getBlockAttributes(block, parentRow, false)
+  const processedAttributes = getBlockAttributes(block, parentRow, false, company)
 
   const optionsForItem = () => {
     switch (block.type) {

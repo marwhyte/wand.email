@@ -1,8 +1,15 @@
 import { renderToString } from 'react-dom/server'
-import { generateBodyProps, generateColumnProps, generateContainerProps, generateRowProps, getBlockAttributes } from './attributes'
+import {
+  generateBodyProps,
+  generateColumnProps,
+  generateContainerProps,
+  generateRowProps,
+  getBlockAttributes,
+} from './attributes'
 
 import { Email, EmailBlock, RowBlock } from '@/app/components/email-workspace/types'
 import parse from 'html-react-parser'
+import { Company } from '../database/types'
 
 const stringifyProps = (props: Record<string, any>) => {
   return Object.entries(props)
@@ -10,8 +17,8 @@ const stringifyProps = (props: Record<string, any>) => {
     .join(' ')
 }
 
-const renderBlock = (block: EmailBlock, parentRow: RowBlock) => {
-  const props = getBlockAttributes(block, parentRow)
+const renderBlock = (block: EmailBlock, parentRow: RowBlock, company: Company | null, linkColor?: string) => {
+  const props = getBlockAttributes(block, parentRow, false, company, linkColor)
   const propsString = stringifyProps(props)
 
   switch (block.type) {
@@ -29,7 +36,7 @@ const renderBlock = (block: EmailBlock, parentRow: RowBlock) => {
   }
 }
 
-export function getReactEmailCode(email?: Email) {
+export function getReactEmailCode(company: Company | null, email?: Email) {
   if (!email) return
 
   return `
@@ -61,7 +68,7 @@ export function getReactEmailCode(email?: Email) {
                         ${column.blocks
                           .map(
                             (block) => `
-                          ${renderBlock(block, row)}
+                          ${renderBlock(block, row, company, email?.linkColor)}
                         `
                           )
                           .join('')}

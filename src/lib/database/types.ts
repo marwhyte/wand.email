@@ -8,6 +8,7 @@ export interface Database {
   files: FileTable
   chats: ChatTable
   messages: MessageTable
+  companies: CompanyTable
 }
 
 export type ExportType = 'react' | 'html'
@@ -51,17 +52,21 @@ export interface UserTable {
   password?: string
   plan: Plan
   stripe_customer_id?: string
-  business_type?: BusinessType
-  primary_color?: string
-  secondary_color?: string
-  logo_file_id?: string
   is_onboarded: boolean
-  themes?: string[]
 }
 
-// New type with 'id' as string
 export type User = Omit<UserTable, 'id'> & { id: string }
 
+export interface CompanyTable {
+  id: Generated<string>
+  name: string
+  primary_color: string | null
+  logo_file_id: string | null
+  user_id: string
+  created_at: Date
+}
+
+export type Company = Omit<CompanyTable, 'id'> & { id: string; logo_image_key?: string | null }
 export interface ProjectTable {
   id: Generated<string>
   deleted_at: Date | null
@@ -105,6 +110,7 @@ export interface ChatTable {
   created_at: Date
   updated_at: Date
   deleted_at: Date | null
+  company_id: string | null
 }
 
 export type Chat = Omit<ChatTable, 'id'> & { id: string }

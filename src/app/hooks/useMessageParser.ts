@@ -53,12 +53,10 @@ export function useMessageParser(message: Message) {
       const emailMatch = message.content.match(emailRegex)
       const nameMatch = message.content.match(/<EMAIL\s+(?:[^>]*\s+)?name=["']([^"']*)["']/)
 
-      console.log(emailMatch, chatId, email, nameMatch)
       if (emailMatch && chatId && email && nameMatch) {
         const emailString = emailMatch[1]
         const emailObject: Email = { ...email, name: nameMatch[1], rows: parseEmailScript(emailString) }
 
-        console.log(emailObject)
         // Process images before updating the email
         processEmailImages(emailObject)
           .then((processedEmail) => {

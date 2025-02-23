@@ -8,7 +8,13 @@ import { db } from '../db'
 
 // Modified internal functions without caching
 const getChatsInternal = async (sessionUserId: string) => {
-  const chats = await db.selectFrom('chats').selectAll().where('user_id', '=', sessionUserId).where('deleted_at', 'is', null).orderBy('updated_at', 'desc').execute()
+  const chats = await db
+    .selectFrom('chats')
+    .selectAll()
+    .where('user_id', '=', sessionUserId)
+    .where('deleted_at', 'is', null)
+    .orderBy('updated_at', 'desc')
+    .execute()
 
   return chats
 }
@@ -19,16 +25,33 @@ const getMessageInternal = async (id: string, sessionUserId: string) => {
 }
 
 const getChatInternal = async (id: string, sessionUserId: string) => {
-  const chat = await db.selectFrom('chats').selectAll().where('id', '=', id).where('user_id', '=', sessionUserId).where('deleted_at', 'is', null).executeTakeFirst()
+  const chat = await db
+    .selectFrom('chats')
+    .selectAll()
+    .where('id', '=', id)
+    .where('user_id', '=', sessionUserId)
+    .where('deleted_at', 'is', null)
+    .executeTakeFirst()
   return chat
 }
 
 const getChatWithMessagesInternal = async (id: string, sessionUserId: string) => {
-  const chat = await db.selectFrom('chats').selectAll().where('id', '=', id).where('user_id', '=', sessionUserId).where('deleted_at', 'is', null).executeTakeFirst()
+  const chat = await db
+    .selectFrom('chats')
+    .selectAll()
+    .where('id', '=', id)
+    .where('user_id', '=', sessionUserId)
+    .where('deleted_at', 'is', null)
+    .executeTakeFirst()
 
   if (!chat) return undefined
 
-  const messages = await db.selectFrom('messages').selectAll().where('chat_id', '=', id).orderBy('sequence', 'asc').execute()
+  const messages = await db
+    .selectFrom('messages')
+    .selectAll()
+    .where('chat_id', '=', id)
+    .orderBy('sequence', 'asc')
+    .execute()
 
   const response = {
     ...chat,
@@ -42,7 +65,7 @@ const getChatWithMessagesInternal = async (id: string, sessionUserId: string) =>
   return response
 }
 
-export async function createChat(messages: Message[], title?: string, email?: Email) {
+export async function createChat(messages: Message[], title?: string, email?: Email, companyId?: string | null) {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
@@ -56,6 +79,7 @@ export async function createChat(messages: Message[], title?: string, email?: Em
         user_id: session.user?.id ?? '',
         title: title ?? '',
         email: email ?? null,
+        company_id: companyId ?? null,
         created_at: new Date(),
         updated_at: new Date(),
       })
@@ -92,7 +116,12 @@ export async function updateMessage(id: string, chatId: string, updates: { conte
   }
 
   if (updates.content !== undefined) {
-    await db.updateTable('messages').set({ content: updates.content }).where('id', '=', id).where('chat_id', '=', chatId).execute()
+    await db
+      .updateTable('messages')
+      .set({ content: updates.content })
+      .where('id', '=', id)
+      .where('chat_id', '=', chatId)
+      .execute()
   }
 
   revalidateTag('chats')
@@ -170,7 +199,12 @@ export async function deleteChat(id: string) {
     throw new Error('User not authenticated')
   }
 
-  await db.updateTable('chats').set({ deleted_at: new Date() }).where('id', '=', id).where('user_id', '=', session.user.id).execute()
+  await db
+    .updateTable('chats')
+    .set({ deleted_at: new Date() })
+    .where('id', '=', id)
+    .where('user_id', '=', session.user.id)
+    .execute()
 
   revalidateTag('chats')
 }

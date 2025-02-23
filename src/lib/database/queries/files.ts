@@ -44,7 +44,13 @@ export async function getFile(fileId: string) {
   return file
 }
 
-export async function addFile(userId: string | null, fileName: string, imageKey: string, sizeBytes: number) {
+export async function addFile(
+  userId: string | null,
+  fileName: string,
+  imageKey: string,
+  sizeBytes: number,
+  revalidate = true
+) {
   const file = await db
     .insertInto('files')
     .values({
@@ -58,7 +64,9 @@ export async function addFile(userId: string | null, fileName: string, imageKey:
     .returningAll()
     .executeTakeFirst()
 
-  revalidateTag('files')
+  if (revalidate) {
+    revalidateTag('files')
+  }
   return file
 }
 

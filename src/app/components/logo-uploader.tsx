@@ -18,13 +18,20 @@ const LogoUploader = ({ onUpload }: Props) => {
     const file = event.target.files?.[0]
     if (!file) return
 
+    // Validate file type
+    const validTypes = ['image/jpeg', 'image/png']
+    if (!validTypes.includes(file.type)) {
+      setError('Please upload only JPG or PNG image files.')
+      return
+    }
+
     setIsUploading(true)
     setError(null)
     const formData = new FormData()
     formData.append('file', file)
 
     try {
-      const result = await uploadFile(formData, true)
+      const result = await uploadFile(formData, false, false)
       if (result.success && result.file) {
         onUpload(result.file)
       } else {
@@ -45,11 +52,11 @@ const LogoUploader = ({ onUpload }: Props) => {
         id="file"
         name="file"
         type="file"
-        accept="image/*"
+        accept="image/jpeg, image/png, image/jpg"
         onChange={handleFileChange}
         ref={fileInputRef}
       />
-      <Button color="purple" onClick={() => fileInputRef.current?.click()}>
+      <Button className="mt-2" outline onClick={() => fileInputRef.current?.click()}>
         {isUploading ? <Loading height={16} width={16} /> : 'Upload Logo'}
       </Button>
       {error && (

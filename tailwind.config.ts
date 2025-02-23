@@ -14,6 +14,8 @@ const config: Config = {
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'glow-gradient':
+          'linear-gradient(to left, #ff5770, #e4428d, #c42da8, #9e16c3, #6501de, #9e16c3, #c42da8, #e4428d, #ff5770)',
       },
       fontFamily: {
         nextsunday: ['NextSunday', 'sans-serif'],
@@ -59,12 +61,17 @@ const config: Config = {
           '0%': { width: '100%' },
           '100%': { width: '0%' },
         },
+        'animate-glow': {
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '200% 50%' },
+        },
       },
       animation: {
         'animate-gradient': 'gradient 8s ease-in-out infinite',
         'progress-bar': 'progress 0.3s ease-in-out forwards',
         'grow-width': 'grow-width 0.3s ease-in-out forwards',
         'shrink-width': 'shrink-width 0.3s ease-in-out forwards',
+        glow: 'animate-glow 1.25s linear infinite',
       },
     },
   },

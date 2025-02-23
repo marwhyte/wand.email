@@ -31,7 +31,7 @@ const templateStructureDefinition = `
         HEADING text=<p>Heading text</p> as=h1|h2|h3
         TEXT text=<p>Body text</p>
         BUTTON text=<p>Click me</p> href="#"
-        IMAGE src="url | pexels:keyword" alt="description"
+        IMAGE src="logo | url | pexels:keyword" alt="description"
         LINK text=<p>Link text</p> href="#"
         DIVIDER
         SOCIALS folder=socials-color socialLinks=[{"icon": "facebook", "url": "#"}, {"icon": "twitter", "url": "#"}]
@@ -55,7 +55,7 @@ ${generateComponentLibraryDocs()}
   - Padding follows CSS shorthand (top,right,bottom,left)
   - Text content must be wrapped in <p> tags
   - Social icons must be one of: amazon-music, apple, behance, box, calendly, clubhouse, discord, dribbble, etsy, facebook, figma, github, google, imo, instagram, itunes, linkedin, medium, messenger, notion, paypal, pinterest, reddit, signal, skype, snapchat, soundcloud, spotify, square, streeteasy, telegram, threads, tiktok, tumblr, twitch, venmo, wechat, whatsapp, x, yelp, youtube-music, youtube, zillow
-  - Image sources can use format url or "pexels:keyword". only use pexels:keyword when you want to change the URL of an image. (e.g., "pexels:coffee")
+  - Image src can use logo, url, or "pexels:keyword". only use pexels:keyword when you want to change the URL of an image. (e.g., "pexels:coffee"). You can assume that logo is the company logo.
   - Components must use a name and type from the component library
   - Components can only use blocks listed in their allowed_blocks
   - Component types must match predefined options
@@ -68,7 +68,7 @@ ${generateComponentLibraryDocs()}
 </validation_rules>
 `
 
-export const getSystemPrompt = (baseTemplate?: string) => `
+export const getSystemPrompt = (companyName?: string, companyPrimaryColor?: string) => `
 You are SentSwiftly, an expert AI assistant for email template design. You generate and modify email templates using a specific script syntax.
 
 <instructions>
@@ -92,7 +92,7 @@ ${templateStructureDefinition}
       <EMAIL name="Back-to-School Email" preview="Ace back-to-school season with these deals!">
         ROW type=header {
           COLUMN {
-            IMAGE src="pexels:ebay logo" alt="eBay Logo"
+            IMAGE src="logo" alt="My Logo"
           }
         }
 
@@ -175,17 +175,6 @@ ${templateStructureDefinition}
           }
         }
 
-        ROW type=gallery {
-          COLUMN {
-            HEADING text=<p>Head to school in style</p> as=h2
-            TEXT text=<p>Outfit your ride with tech, storage, towing gear, and more.</p>
-            BUTTON text=<p>Get rolling</p> href="/"
-          }
-          COLUMN {
-            IMAGE src="pexels:navigation" alt="Navigation in car"
-          }
-        }
-
         ROW {
           COLUMN {
             DIVIDER
@@ -195,7 +184,7 @@ ${templateStructureDefinition}
 
         ROW type=footer  {
           COLUMN {
-            IMAGE src="pexels:ebay logo" alt="eBay Logo"
+            IMAGE src="logo" alt="My Logo"
             HEADING text=<p>Connect with us</p> as=h4
             SOCIALS folder=socials-dark-gray socialLinks=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
             TEXT text=<p><a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.</p>

@@ -1,6 +1,28 @@
-import { generateBodyProps, generateColumnProps, generateContainerProps, generateRowProps, getBlockAttributes, getRowAttributes } from '@/lib/utils/attributes'
+import { Company } from '@/lib/database/types'
+import {
+  generateBodyProps,
+  generateColumnProps,
+  generateContainerProps,
+  generateRowProps,
+  getBlockAttributes,
+  getRowAttributes,
+} from '@/lib/utils/attributes'
 import { chunk } from '@/lib/utils/misc'
-import { Body, Button, Column, Container, Head, Heading, Hr, Html, Img, Link, Preview, Row, Text } from '@react-email/components'
+import {
+  Body,
+  Button,
+  Column,
+  Container,
+  Head,
+  Heading,
+  Hr,
+  Html,
+  Img,
+  Link,
+  Preview,
+  Row,
+  Text,
+} from '@react-email/components'
 import parse from 'html-react-parser'
 import React from 'react'
 import EmailSocials from './email-components/email-socials'
@@ -9,27 +31,38 @@ import { ColumnBlock, Email, EmailBlock, RowBlock } from './types'
 
 type Props = {
   email?: Email
+  company: Company | null
 }
 
-const RenderBlockFinal = ({ block, parentRow, email }: { block: EmailBlock; parentRow: RowBlock; email?: Email }) => {
+const RenderBlockFinal = ({
+  block,
+  parentRow,
+  email,
+  company,
+}: {
+  block: EmailBlock
+  parentRow: RowBlock
+  email?: Email
+  company: Company | null
+}) => {
   switch (block.type) {
     case 'text':
-      const textProps = getBlockAttributes(block, parentRow)
+      const textProps = getBlockAttributes(block, parentRow, false, company, undefined)
       return <Text {...textProps}>{parse(block.content)}</Text>
     case 'heading':
-      const headingProps = getBlockAttributes(block, parentRow)
+      const headingProps = getBlockAttributes(block, parentRow, false, company, undefined)
       return <Heading {...headingProps}>{parse(block.content)}</Heading>
     case 'image':
-      const imageProps = getBlockAttributes(block, parentRow)
+      const imageProps = getBlockAttributes(block, parentRow, false, company, undefined)
       return <Img {...imageProps} />
     case 'button':
-      const buttonProps = getBlockAttributes(block, parentRow)
+      const buttonProps = getBlockAttributes(block, parentRow, false, company, undefined)
       return <Button {...buttonProps}>{parse(block.content)}</Button>
     case 'link':
-      const linkProps = getBlockAttributes(block, parentRow, false, email?.linkColor)
+      const linkProps = getBlockAttributes(block, parentRow, false, company, email?.linkColor)
       return <Link {...linkProps}>{parse(block.content)}</Link>
     case 'divider':
-      const dividerProps = getBlockAttributes(block, parentRow)
+      const dividerProps = getBlockAttributes(block, parentRow, false, company, undefined)
       return <Hr {...dividerProps} />
     case 'socials':
       return <EmailSocials isEditing={false} block={block} parentRow={parentRow} />
@@ -40,7 +73,7 @@ const RenderBlockFinal = ({ block, parentRow, email }: { block: EmailBlock; pare
   }
 }
 
-const RenderColumns = ({ row, email }: { row: RowBlock; email: Email }) => {
+const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; company: Company | null }) => {
   const rowAttributes = getRowAttributes(row)
   const columnSpacing = rowAttributes?.columnSpacing || 0
   const numColumns = row.columns.length
@@ -48,13 +81,20 @@ const RenderColumns = ({ row, email }: { row: RowBlock; email: Email }) => {
   const totalSpacerWidth = ((columnSpacing * numSpacers) / 600) * 100
   const columnWidth = (100 - totalSpacerWidth) / numColumns
 
-  const renderColumnContent = (column: ColumnBlock) => column.blocks.map((block) => <RenderBlockFinal key={block.id} block={block} parentRow={row} email={email} />)
+  const renderColumnContent = (column: ColumnBlock) =>
+    column.blocks.map((block) => (
+      <RenderBlockFinal key={block.id} block={block} parentRow={row} email={email} company={company} />
+    ))
 
-  const renderSpacer = (index: number) => columnSpacing > 0 && index < row.columns.length - 1 && <Column style={{ width: `${columnSpacing}px` }} />
+  const renderSpacer = (index: number) =>
+    columnSpacing > 0 && index < row.columns.length - 1 && <Column style={{ width: `${columnSpacing}px` }} />
 
   const renderColumnWithSpacer = (column: any, index: number, width?: string | number) => (
     <React.Fragment key={column.id}>
-      <Column {...generateColumnProps(column, row)} style={{ ...generateColumnProps(column, row).style, width: width || `${columnWidth}%` }}>
+      <Column
+        {...generateColumnProps(column, row)}
+        style={{ ...generateColumnProps(column, row).style, width: width || `${columnWidth}%` }}
+      >
         {renderColumnContent(column)}
       </Column>
       {renderSpacer(index)}
@@ -74,7 +114,10 @@ const RenderColumns = ({ row, email }: { row: RowBlock; email: Email }) => {
             <Row key={pairIndex}>
               {pair.map((column, index) => (
                 <React.Fragment key={column.id}>
-                  <Column {...generateColumnProps(column, row)} style={{ ...generateColumnProps(column, row).style, width: '48%' }}>
+                  <Column
+                    {...generateColumnProps(column, row)}
+                    style={{ ...generateColumnProps(column, row).style, width: '48%' }}
+                  >
                     {renderColumnContent(column)}
                   </Column>
                   {index === 0 && pair.length > 1 && columnSpacing > 0 && <Column style={{ width: '4%' }} />}
@@ -101,10 +144,12 @@ const RenderColumns = ({ row, email }: { row: RowBlock; email: Email }) => {
   }
 
   // Default row with spacers
-  return <Row {...generateRowProps(row)}>{row.columns.map((column, index) => renderColumnWithSpacer(column, index))}</Row>
+  return (
+    <Row {...generateRowProps(row)}>{row.columns.map((column, index) => renderColumnWithSpacer(column, index))}</Row>
+  )
 }
 
-export const EmailContent = ({ email }: { email: Email }) => {
+export const EmailContent = ({ email, company }: { email: Email; company: Company | null }) => {
   return (
     <Container
       width={email.width}
@@ -118,14 +163,14 @@ export const EmailContent = ({ email }: { email: Email }) => {
     >
       {email.rows.map((row) => (
         <Container key={row.id} {...generateContainerProps(row, email)}>
-          <RenderColumns row={row} email={email} />
+          <RenderColumns row={row} email={email} company={company} />
         </Container>
       ))}
     </Container>
   )
 }
 
-const EmailRendererFinal = ({ email }: Props) => {
+const EmailRendererFinal = ({ email, company }: Props) => {
   if (!email) return <></>
 
   return (
@@ -158,7 +203,7 @@ const EmailRendererFinal = ({ email }: Props) => {
       </Head>
       <Body {...generateBodyProps(email)}>
         <Preview>{email.preview}</Preview>
-        <EmailContent email={email} />
+        <EmailContent email={email} company={company} />
       </Body>
     </Html>
   )

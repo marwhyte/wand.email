@@ -4,7 +4,13 @@ import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { classNames } from '@/lib/utils/misc'
-import { ArrowDownTrayIcon, ComputerDesktopIcon, DevicePhoneMobileIcon, EyeIcon, PaperAirplaneIcon } from '@heroicons/react/20/solid'
+import {
+  ArrowDownTrayIcon,
+  ComputerDesktopIcon,
+  DevicePhoneMobileIcon,
+  EyeIcon,
+  PaperAirplaneIcon,
+} from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
 import { useSession } from 'next-auth/react'
 import { usePathname, useSearchParams } from 'next/navigation'
@@ -32,7 +38,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const exportOpener = useOpener()
   const previewOpener = useOpener()
   const id = searchParams.get('id')
-  const { title } = useChatStore()
+  const { title, company } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
@@ -58,7 +64,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
       const response = await fetch('/api/send', {
         method: 'POST',
         body: JSON.stringify({
-          html: render(EmailRendererFinal({ email: email })),
+          html: render(EmailRendererFinal({ email: email, company: company })),
           email: session.data.user.email,
         }),
         headers: {
@@ -79,7 +85,12 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
 
   return (
     <header>
-      <div className={classNames('z-100 flex w-full items-center justify-between bg-white px-4 py-4', chatStarted ? 'border-b border-gray-200' : '')}>
+      <div
+        className={classNames(
+          'z-100 flex w-full items-center justify-between bg-white px-4 py-4',
+          chatStarted ? 'border-b border-gray-200' : ''
+        )}
+      >
         <a href="/" className="-m-1.5 p-1.5">
           <span className="sr-only">SentSwiftly</span>
           <Logo className="z-100" text={false} />
@@ -103,8 +114,17 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
               <EyeIcon className="h-4 w-4" />
             </Button>
 
-            <Button disabled={emailStatus === 'loading'} onClick={sendTestEmail} tooltipPosition="left" tooltip="Send test email">
-              {emailStatus === 'loading' ? <Loading height={24} width={24} /> : <PaperAirplaneIcon className="h-4 w-4" />}
+            <Button
+              disabled={emailStatus === 'loading'}
+              onClick={sendTestEmail}
+              tooltipPosition="left"
+              tooltip="Send test email"
+            >
+              {emailStatus === 'loading' ? (
+                <Loading height={24} width={24} />
+              ) : (
+                <PaperAirplaneIcon className="h-4 w-4" />
+              )}
             </Button>
 
             <Button onClick={exportOpener.open} color="purple">

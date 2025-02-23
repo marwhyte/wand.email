@@ -31,7 +31,7 @@ const TemplateCard = ({ template, isSelected, onSelect }: TemplateCardProps) => 
                   transformOrigin: 'top center',
                 }}
               >
-                <EmailContent email={{ ...template.template, width: '600px' }} />
+                <EmailContent email={{ ...template.template, width: '600px' }} company={null} />
               </div>
             </div>
           </div>
