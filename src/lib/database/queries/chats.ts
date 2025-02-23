@@ -184,8 +184,6 @@ export async function updateChat(id: string, updates: { messages?: Message[]; ti
         // Insert new messages
         await trx.insertInto('messages').values(messageValues).returningAll().execute()
       }
-
-      revalidateTag('chats')
     })
   } catch (error) {
     console.error('Error updating chat:', error)

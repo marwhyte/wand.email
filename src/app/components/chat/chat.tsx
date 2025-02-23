@@ -261,7 +261,7 @@ export function ChatImpl({ companies, initialMessages, storeMessageHistory, chat
     runAnimation()
 
     if (messages.length === 0) {
-      await storeMessageHistory(messages, selectedCompanyId).catch((error) => toast.error(error.message))
+      storeMessageHistory(messages, selectedCompanyId).catch((error) => toast.error(error.message))
     }
 
     append({ role: 'user', content: _input })
