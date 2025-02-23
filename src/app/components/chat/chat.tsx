@@ -9,7 +9,6 @@ import { useMessageParser } from '@/app/hooks/useMessageParser'
 import { deleteCompany } from '@/lib/database/queries/companies'
 import { Company } from '@/lib/database/types'
 import { chatStore } from '@/lib/stores/chat'
-import { useEmailStore } from '@/lib/stores/emailStore'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
 import { useChat } from '@ai-sdk/react'
@@ -106,7 +105,6 @@ interface ChatProps {
 
 export function ChatImpl({ companies, initialMessages, storeMessageHistory, chatStarted, setChatStarted }: ChatProps) {
   const session = useSession()
-  const { setEmail } = useEmailStore()
   const companyOpener = useOpener()
 
   const searchParams = useSearchParams()
@@ -173,6 +171,9 @@ export function ChatImpl({ companies, initialMessages, storeMessageHistory, chat
 
   const { messages, status, input, handleInputChange, setInput, stop, append } = useChat({
     api: '/api/chat',
+    body: {
+      companyName: companies?.find((c) => c.id === selectedCompanyId)?.name,
+    },
     onFinish: () => {
       logger.debug('Finished streaming')
     },
@@ -189,7 +190,7 @@ export function ChatImpl({ companies, initialMessages, storeMessageHistory, chat
 
   const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200
 
-  const isLoading = status === 'streaming'
+  const isLoading = status === 'streaming' || status === 'submitted'
 
   useEffect(() => {
     setKey('started', initialMessages.length > 0)
@@ -197,6 +198,7 @@ export function ChatImpl({ companies, initialMessages, storeMessageHistory, chat
 
   useEffect(() => {
     if (!isLoading && messages.length > initialMessages.length) {
+      console.log('this happenes when it should not')
       storeMessageHistory(messages).catch((error) => toast.error(error.message))
     }
   }, [messages.length, initialMessages.length, isLoading])

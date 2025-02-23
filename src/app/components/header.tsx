@@ -1,5 +1,6 @@
 'use client'
 
+import { updateChat } from '@/lib/database/queries/chats'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
@@ -12,15 +13,18 @@ import {
   PaperAirplaneIcon,
 } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
+import debounce from 'lodash.debounce'
 import { useSession } from 'next-auth/react'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useOpener } from '../hooks'
 import { Logo } from './Logo'
+import { Badge } from './badge'
 import { Button } from './button'
 import EmailRendererFinal from './email-workspace/email-renderer-final'
 import ExportDialog from './email-workspace/export-dialog'
 import PreviewDialog from './email-workspace/preview-dialog'
+import { CommonAttributes, Email, EmailBlockType } from './email-workspace/types'
 import Loading from './loading'
 import Notification from './notification'
 import { Tab, TabGroup, TabList } from './tab'
@@ -30,9 +34,26 @@ type Props = {
   monthlyExportCount: number | null
 }
 
+// Add new types for changelog
+type ChangelogEntry = {
+  timestamp: Date
+  changes: ChangeType[]
+  email: Email
+}
+
+type ChangeType =
+  | { type: 'content'; blockId: string; field: string; old: string; new: string }
+  | { type: 'attributes'; blockId: string; field: keyof CommonAttributes; old: string; new: string }
+  | { type: 'structure'; action: 'add' | 'remove' | 'move'; blockId: string; blockType: EmailBlockType }
+  | { type: 'email_settings'; field: keyof Email; old: string; new: string }
+
 export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()
   const { email } = useEmailStore()
+  const { chatId } = useChatStore()
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [changelog, setChangelog] = useState<ChangelogEntry[]>([])
+
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const exportOpener = useOpener()
@@ -41,6 +62,100 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const { title, company } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+
+  console.log('changelog', changelog)
+  const detectChanges = (oldEmail: Email, newEmail: Email): ChangeType[] => {
+    const changes: ChangeType[] = []
+
+    // Define type-safe email settings to check
+    const emailSettings: (keyof Email)[] = ['fontFamily', 'bgColor', 'color', 'linkColor', 'width']
+
+    // Check email-level settings
+    emailSettings.forEach((field) => {
+      if (oldEmail[field] !== newEmail[field]) {
+        changes.push({
+          type: 'email_settings' as const,
+          field: field,
+          old: String(oldEmail[field]),
+          new: String(newEmail[field]),
+        })
+      }
+    })
+
+    // Compare rows and blocks
+    const oldBlocks = oldEmail.rows.flatMap((row) => row.columns.flatMap((col) => col.blocks))
+    const newBlocks = newEmail.rows.flatMap((row) => row.columns.flatMap((col) => col.blocks))
+
+    // Check for content changes in existing blocks
+    oldBlocks.forEach((oldBlock) => {
+      const newBlock = newBlocks.find((b) => b.id === oldBlock.id)
+      if (newBlock && 'content' in oldBlock && 'content' in newBlock) {
+        if (oldBlock.content !== newBlock.content) {
+          changes.push({
+            type: 'content',
+            blockId: oldBlock.id,
+            field: 'content',
+            old: oldBlock.content,
+            new: newBlock.content,
+          })
+        }
+      }
+    })
+
+    return changes
+  }
+
+  const debouncedSave = useCallback(
+    debounce(async (email: Email) => {
+      if (!chatId) return
+      setSaveStatus('saving')
+
+      try {
+        await updateChat(chatId, { email: email })
+
+        // Add new changelog entry
+        setChangelog((prev) => {
+          const lastEntry = prev[0]
+          const changes = lastEntry
+            ? detectChanges(lastEntry.email, email)
+            : [
+                {
+                  type: 'email_settings' as const,
+                  field: 'fontFamily' as keyof Email,
+                  old: 'Initial state',
+                  new: 'First save',
+                },
+              ]
+
+          return [
+            {
+              timestamp: new Date(),
+              changes,
+              email: email,
+            },
+            ...prev,
+          ]
+        })
+
+        setSaveStatus('saved')
+        setTimeout(() => setSaveStatus('idle'), 2000)
+      } catch (error) {
+        console.error('Failed to save:', error)
+        setSaveStatus('error')
+      }
+    }, 1500),
+    [chatId]
+  )
+
+  useEffect(() => {
+    if (!email || !chatId) return
+
+    // Don't set saving status here anymore
+    debouncedSave(email)
+
+    // Cleanup function to cancel debounced save if component unmounts
+    return () => debouncedSave.cancel()
+  }, [debouncedSave, email, chatId])
 
   const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>(mobileView ? 'mobile' : 'desktop')
 
@@ -100,6 +215,10 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
 
         {id && session?.data?.user && (
           <div className="flex items-center space-x-4">
+            {chatId && saveStatus === 'saving' && <Badge color="yellow">Saving...</Badge>}
+            {chatId && saveStatus === 'saved' && <Badge color="lime">Saved!</Badge>}
+            {chatId && saveStatus === 'error' && <Badge color="red">Save failed</Badge>}
+
             <TabGroup value={selectedDevice} className="flex justify-center" onChange={handleDeviceChange}>
               <TabList>
                 {deviceOptions.map((option) => (

@@ -116,7 +116,7 @@ export function Menu() {
             <div key={category} className="mt-4 space-y-1 first:mt-0">
               <div className="z-1 sticky top-0 pb-1 pl-2 pt-2 text-gray-500">{category}</div>
               {items
-                .filter((item) => item.title)
+                // .filter((item) => item.title)
                 .map((item) => (
                   <HistoryItem key={item.id} item={item} onDelete={() => setDialogContent({ type: 'delete', item })} />
                 ))}

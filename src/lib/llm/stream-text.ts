@@ -21,8 +21,8 @@ export type Messages = Message[]
 
 export type StreamingOptions = Omit<Parameters<typeof _streamText>[0], 'model'>
 
-export async function streamText(messages: Messages, options?: StreamingOptions, template?: string) {
-  const systemPrompt = getSystemPrompt(template)
+export async function streamText(messages: Messages, options?: StreamingOptions, companyName?: string) {
+  const systemPrompt = getSystemPrompt(companyName)
 
   return _streamText({
     model: anthropic('claude-3-5-sonnet-20240620'),

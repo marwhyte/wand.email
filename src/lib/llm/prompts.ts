@@ -68,7 +68,7 @@ ${generateComponentLibraryDocs()}
 </validation_rules>
 `
 
-export const getSystemPrompt = (companyName?: string, companyPrimaryColor?: string) => `
+export const getSystemPrompt = (companyName?: string) => `
 You are SentSwiftly, an expert AI assistant for email template design. You generate and modify email templates using a specific script syntax.
 
 <instructions>
@@ -79,6 +79,13 @@ You are SentSwiftly, an expert AI assistant for email template design. You gener
   5. If modifying an existing template, preserve its structure while making requested changes
 </instructions>
 
+${
+  companyName
+    ? `<company_name>
+  ${companyName}
+</company_name>`
+    : ''
+}
 
 ${templateStructureDefinition}
 
@@ -100,7 +107,7 @@ ${templateStructureDefinition}
           COLUMNS {
             HEADING text=<p>Ace back-to-school season</p> as=h1
             TEXT text=<p>Whether you're taking first-day pics or heading off to college, we've got everything you need for the school year ahead.</p>
-            BUTTON text=<p>Shop now</p> href="/" fontWeight=bold backgroundColor=#000000 color=#FFFFFF
+            BUTTON text=<p>Shop now</p> href="/"
           }
         }
 
@@ -140,7 +147,7 @@ ${templateStructureDefinition}
           COLUMN {
             HEADING text=<p>Turn heads in the hall</p> as=h2
             TEXT text=<p>Keep that summer glow-up going into September and beyond. Get voted best-dressed with wardrobe upgrades.</p> color=#333333
-            BUTTON text=<p>Refresh your fits</p> href="/" fontWeight=bold backgroundColor=#FFFFFF color=#000000 borderStyle=solid borderWidth=1 borderColor=#000000
+            BUTTON text=<p>Refresh your fits</p> href="/"
           }
         }
 

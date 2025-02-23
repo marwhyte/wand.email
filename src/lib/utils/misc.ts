@@ -1,3 +1,17 @@
+export function shouldUseDarkText(backgroundColor: string) {
+  // Convert hex to RGB
+  const hex = backgroundColor.replace('#', '')
+  const r = parseInt(hex.substr(0, 2), 16)
+  const g = parseInt(hex.substr(2, 2), 16)
+  const b = parseInt(hex.substr(4, 2), 16)
+
+  // Calculate relative luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+
+  // Use dark text if background is light (luminance > 0.5)
+  return luminance > 0.5
+}
+
 export function getFirstTwoInitials(name: string) {
   // Split the name by spaces
   const words = name.trim().split(/\s+/)
@@ -17,7 +31,8 @@ type ObjectWithCreatedAt = {
   created_at: Date
 }
 
-export const chunk = <T>(arr: T[], size: number): T[][] => Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size))
+export const chunk = <T>(arr: T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size))
 
 export function sortByCreatedAt<T extends ObjectWithCreatedAt>(projects: T[]): T[] {
   return projects.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())

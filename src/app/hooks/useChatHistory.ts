@@ -74,7 +74,7 @@ export function useChatHistory() {
 
           if (chat) {
             setChatId(chat.id)
-            setEmail(newEmail)
+            setEmail(chat.email ?? undefined)
             // Set company when creating new chat
             if (companyId) {
               const company = await getCompany(companyId)

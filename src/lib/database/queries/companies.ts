@@ -50,9 +50,18 @@ export async function getCompany(companyId: string) {
 
   const company = await db
     .selectFrom('companies')
-    .selectAll()
-    .where('id', '=', companyId)
-    .where('user_id', '=', session.user.id)
+    .leftJoin('files', 'files.id', 'companies.logo_file_id')
+    .select([
+      'companies.id',
+      'companies.name',
+      'companies.primary_color',
+      'companies.logo_file_id',
+      'companies.user_id',
+      'companies.created_at',
+      'files.image_key as logo_image_key',
+    ])
+    .where('companies.id', '=', companyId)
+    .where('companies.user_id', '=', session.user.id)
     .executeTakeFirst()
   return company
 }

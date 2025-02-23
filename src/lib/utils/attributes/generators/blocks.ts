@@ -81,16 +81,19 @@ export function generateImageProps(
 export function generateButtonProps(
   block: ButtonBlock,
   parentRow: RowBlock,
+  company: Company | null,
   mobileView = false
 ): OmitChildren<React.ComponentProps<typeof Button>> {
+  const style = {
+    ...applyCommonAttributes(block.attributes),
+    ...getAdditionalButtonStyles(block, parentRow, company),
+  }
+
   return {
     href: block.attributes.href,
     target: block.attributes.target,
     rel: block.attributes.rel,
-    style: {
-      ...applyCommonAttributes(block.attributes),
-      ...getAdditionalButtonStyles(block, parentRow),
-    },
+    style,
     className: applyCommonClassName(block.attributes, mobileView),
   }
 }
@@ -170,7 +173,7 @@ export function getBlockAttributes<T extends EmailBlock>(
     case 'image':
       return generateImageProps(block as ImageBlock, parentRow, company) as any
     case 'button':
-      return generateButtonProps(block as ButtonBlock, parentRow, mobileView) as any
+      return generateButtonProps(block as ButtonBlock, parentRow, company, mobileView) as any
     case 'link':
       return generateLinkProps(block as LinkBlock, parentRow, mobileView, defaultLinkColor) as any
     case 'divider':

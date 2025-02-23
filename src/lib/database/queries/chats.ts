@@ -104,7 +104,7 @@ export async function createChat(messages: Message[], title?: string, email?: Em
         .execute()
     }
 
-    revalidateTag('chats')
+    // revalidateTag('chats')
     return chat
   })
 }

@@ -8,7 +8,9 @@ import type {
   SurveyBlock,
   TextBlock,
 } from '@/app/components/email-workspace/types'
+import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
+import { shouldUseDarkText } from '../../misc'
 import { getRowTypeBlockDefaults } from './rowTypeBlocks'
 
 export const getAdditionalTextStyles = (
@@ -91,7 +93,8 @@ export const getAdditionalImageStyles = (
 
 export const getAdditionalButtonStyles = (
   buttonBlock: ButtonBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  company: Company | null
 ): React.ComponentProps<typeof Button>['style'] => {
   const baseDefaults = {
     display: 'inline-block',
@@ -109,6 +112,17 @@ export const getAdditionalButtonStyles = (
 
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(buttonBlock, parentRow) as React.ComponentProps<typeof Button>['style']) || {}
+
+  console.log(company?.primary_color, buttonBlock.attributes.backgroundColor)
+  if (company?.primary_color && !buttonBlock.attributes.backgroundColor) {
+    return {
+      ...baseDefaults,
+      ...rowTypeDefaults,
+      ...buttonBlock.attributes,
+      backgroundColor: company.primary_color,
+      color: shouldUseDarkText(company.primary_color) ? '#000000' : '#ffffff',
+    }
+  }
 
   return {
     ...baseDefaults,

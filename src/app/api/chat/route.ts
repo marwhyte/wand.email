@@ -7,7 +7,7 @@ import SwitchableStream from '@/lib/llm/switchable-stream'
 
 export async function POST(request: Request) {
   try {
-    const { messages } = (await request.json()) as { messages: Messages }
+    const { messages, companyName } = (await request.json()) as { messages: Messages; companyName?: string }
     const stream = new SwitchableStream()
 
     const options: StreamingOptions = {
@@ -28,13 +28,13 @@ export async function POST(request: Request) {
         messages.push({ role: 'assistant', content })
         messages.push({ role: 'user', content: CONTINUE_PROMPT })
 
-        const result = await streamText(messages, options)
+        const result = await streamText(messages, options, companyName)
 
         return stream.switchSource(result.toDataStream())
       },
     }
 
-    const result = await streamText(messages, options)
+    const result = await streamText(messages, options, companyName)
 
     stream.switchSource(result.toDataStream())
 
