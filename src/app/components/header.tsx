@@ -63,7 +63,6 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const { mobileView, setMobileView } = useMobileViewStore()
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
-  console.log('changelog', changelog)
   const detectChanges = (oldEmail: Email, newEmail: Email): ChangeType[] => {
     const changes: ChangeType[] = []
 

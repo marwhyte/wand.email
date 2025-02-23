@@ -7,6 +7,7 @@ import { Input } from '@components/input'
 import { Link } from '@components/link'
 import Loading from '@components/loading'
 import { ExclamationTriangleIcon } from '@heroicons/react/20/solid'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import React, { useState } from 'react'
 
@@ -19,6 +20,7 @@ const CredentialsForm = ({ register, redirectToInitialProject }: Props) => {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { update } = useSession()
 
   async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -47,8 +49,10 @@ const CredentialsForm = ({ register, redirectToInitialProject }: Props) => {
         })
         if (response.status === 201) {
           await doCredentialsLogin(formData)
+          await update()
 
-          router.push(redirectToInitialProject ? '/add-initial-project' : '/templates')
+          router.push('/')
+          sessionStorage.refre
         } else {
           setError(await response.text())
         }
@@ -59,8 +63,9 @@ const CredentialsForm = ({ register, redirectToInitialProject }: Props) => {
     } else {
       try {
         await doCredentialsLogin(formData)
+        await update()
 
-        router.push('/templates')
+        router.push('/')
       } catch (e) {
         console.error('here', e)
         setError('Invalid credentials. Please try again.')

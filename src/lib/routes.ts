@@ -13,6 +13,7 @@ export const PUBLIC_ROUTES = [
   '/api/auth/session',
   '/monitoring',
   '/api/auth/providers',
+  '/api/register',
   '/api/auth/error',
   '/api/stripe-webhook',
   '/api',

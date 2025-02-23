@@ -14,6 +14,9 @@ export default auth((req) => {
       nextUrl.pathname === route || (route.endsWith('/:id') && nextUrl.pathname.startsWith(route.replace('/:id', '/')))
   )
 
+  if (!isAuthenticated && !isPublicRoute) {
+    console.log(nextUrl.pathname)
+  }
   if (!isAuthenticated && !isPublicRoute) return Response.redirect(new URL(ROOT, nextUrl))
 })
 

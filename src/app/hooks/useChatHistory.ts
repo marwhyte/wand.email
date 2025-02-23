@@ -36,7 +36,7 @@ export function useChatHistory() {
       try {
         const chat = await getChatWithMessages(chatId)
 
-        if (chat) {
+        if (chat && !isCreatingChat) {
           const company = chat.company_id ? await getCompany(chat.company_id) : undefined
 
           setInitialMessages(chat.messages)
@@ -72,7 +72,9 @@ export function useChatHistory() {
           // Create new chat
           const chat = await createChat(messages, undefined, newEmail, companyId)
 
+          console.log('chat', chat)
           if (chat) {
+            console.log('inside here')
             setChatId(chat.id)
             setEmail(chat.email ?? undefined)
             // Set company when creating new chat
@@ -80,10 +82,11 @@ export function useChatHistory() {
               const company = await getCompany(companyId)
               setCompany(company ?? undefined)
             }
-            // Update URL without page navigation
-            const params = new URLSearchParams(searchParams)
+            // Update URL using createSearchParams
+            const params = new URLSearchParams()
             params.set('id', chat.id)
-            router.replace(`${pathname}?${params.toString()}`, { scroll: false })
+            router.replace(`${pathname}?${params}`, { scroll: false })
+            console.log('here is where we are')
           }
           setIsCreatingChat(false)
         } else {
