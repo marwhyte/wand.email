@@ -61,6 +61,8 @@ ${generateComponentLibraryDocs()}
   - Component types must match predefined options
   - Components will use default styling unless explicitly overridden
   - Row type must be one of: header, footer, gallery
+  - Gallery rows should use at least 2 columns when possible, the best is 2 columns with a photo column and text column, second best is multiple photo columns (e.g., 2 photo columns and 1 text column)
+  - Don't provide a width for gallery images.
   - Allowed blocks per row type:
     * header: NAVBAR, SOCIALS, TEXT, LINK, IMAGE
     * footer: NAVBAR, SOCIALS, TEXT, LINK, IMAGE

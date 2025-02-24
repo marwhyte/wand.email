@@ -311,12 +311,12 @@ export type ButtonBlockAttributes = CommonAttributes & {
   href: string
   target?: '_blank' | '_self' | '_parent' | '_top'
   rel?: string
-  backgroundColor: string
-  color: string
-  paddingTop: string
-  paddingBottom: string
-  paddingLeft: string
-  paddingRight: string
+  backgroundColor?: string
+  color?: string
+  paddingTop?: string
+  paddingBottom?: string
+  paddingLeft?: string
+  paddingRight?: string
   marginTop?: string
   marginBottom?: string
   borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'

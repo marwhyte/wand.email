@@ -230,13 +230,14 @@ const parseButtonAttributes: AttributeParser<ButtonBlockAttributes> = (raw) => {
   const attrs: ButtonBlockAttributes = {
     ...common,
     href: raw.href || '#',
-    backgroundColor: raw.backgroundColor || '#000000',
-    color: raw.color || '#ffffff',
-    paddingTop: ensurePx(raw.paddingTop || '10'),
-    paddingBottom: ensurePx(raw.paddingBottom || '10'),
-    paddingLeft: ensurePx(raw.paddingLeft || '20'),
-    paddingRight: ensurePx(raw.paddingRight || '20'),
+    backgroundColor: raw.backgroundColor,
+    color: raw.color,
   }
+
+  if (raw.paddingTop) attrs.paddingTop = ensurePx(raw.paddingTop)
+  if (raw.paddingBottom) attrs.paddingBottom = ensurePx(raw.paddingBottom)
+  if (raw.paddingLeft) attrs.paddingLeft = ensurePx(raw.paddingLeft)
+  if (raw.paddingRight) attrs.paddingRight = ensurePx(raw.paddingRight)
 
   if (isTarget(raw.target)) attrs.target = raw.target
   if (raw.rel) attrs.rel = raw.rel
