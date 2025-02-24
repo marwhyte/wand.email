@@ -1,5 +1,6 @@
 'use server'
 
+import { notifySlack } from '@/app/actions/notifySlack'
 import { auth } from '@/auth'
 import { db } from '../db'
 import { BusinessType, Plan } from '../types'
@@ -47,6 +48,12 @@ export async function addUser(user: {
     })
     .returningAll()
     .executeTakeFirst()
+
+  // Notify Slack about the new user
+  notifySlack(
+    `New user signed up!\nName: ${user.name}\nEmail: ${user.email}\nAuth: ${user.googleId ? 'Google' : 'Password'}`,
+    'upgrade'
+  )
 
   return result
 }
