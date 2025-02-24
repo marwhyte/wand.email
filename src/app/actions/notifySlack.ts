@@ -1,5 +1,7 @@
 'use server'
 
+import { isLocalDev } from '@/constants'
+
 type SlackChannelType = 'upgrade' | 'errors'
 
 const idForChannel = (channel: SlackChannelType) => {
@@ -10,10 +12,10 @@ const idForChannel = (channel: SlackChannelType) => {
 }
 
 export async function notifySlack(message: string, channel: SlackChannelType) {
-  // if (isLocalDev) {
-  //   console.log(`Slack message to send to channel ${channel}: `, message)
-  //   return
-  // }
+  if (isLocalDev) {
+    console.log(`Slack message to send to channel ${channel}: `, message)
+    return
+  }
 
   const channelId = idForChannel(channel)
 
