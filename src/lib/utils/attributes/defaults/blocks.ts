@@ -113,7 +113,6 @@ export const getAdditionalButtonStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(buttonBlock, parentRow) as React.ComponentProps<typeof Button>['style']) || {}
 
-  console.log(buttonBlock.attributes)
   if (company?.primary_color && !buttonBlock.attributes.backgroundColor) {
     return {
       ...baseDefaults,
@@ -121,6 +120,14 @@ export const getAdditionalButtonStyles = (
       ...buttonBlock.attributes,
       backgroundColor: company.primary_color,
       color: shouldUseDarkText(company.primary_color) ? '#000000' : '#ffffff',
+    }
+  } else if (!buttonBlock.attributes.backgroundColor) {
+    return {
+      ...baseDefaults,
+      ...rowTypeDefaults,
+      ...buttonBlock.attributes,
+      backgroundColor: '#000000',
+      color: '#ffffff',
     }
   }
 
