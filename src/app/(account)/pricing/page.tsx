@@ -1,14 +1,14 @@
 'use client'
 
+import { Footer } from '@/app/components/footer'
+import Nbsp from '@/app/components/nbsp'
+import { usePlan } from '@/app/components/payment/plan-provider'
 import { tiers } from '@/lib/data/plans'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon } from '@heroicons/react/20/solid'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import { Footer } from '../components/marketing/footer'
-import Nbsp from '../components/nbsp'
-import { usePlan } from '../components/payment/plan-provider'
 
 const frequencies = [
   { value: 'monthly', label: 'Monthly', priceSuffix: '/month' },

@@ -1,18 +1,74 @@
 export const maxDuration = 60
 
+import { generateTitleFromUserMessage } from '@/app/(chat)/actions'
+import { blankTemplate } from '@/app/components/email-workspace/templates/blank-template'
+import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
+import { createChat, getChat, updateChat } from '@/lib/database/queries/chats'
 import { CONTINUE_PROMPT } from '@/lib/llm/prompts'
-import { StreamingOptions, streamText, type Messages } from '@/lib/llm/stream-text'
+import { StreamingOptions, streamText } from '@/lib/llm/stream-text'
 import SwitchableStream from '@/lib/llm/switchable-stream'
+import { getMostRecentUserMessage } from '@/lib/utils/misc'
+import { Message } from 'ai'
+import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: Request) {
   try {
-    const { messages, companyName } = (await request.json()) as { messages: Messages; companyName?: string }
+    const session = await auth()
+
+    if (!session || !session.user || !session.user.id) {
+      return new Response('Unauthorized', { status: 401 })
+    }
+
+    const {
+      id,
+      messages,
+      companyName,
+      companyId,
+    }: { id: string; messages: Message[]; companyName?: string; companyId?: string } = await request.json()
+
+    const userMessage = getMostRecentUserMessage(messages)
+
+    if (!userMessage) {
+      return new Response('No user message found', { status: 400 })
+    }
+
+    const chat = await getChat(userMessage.id)
+
+    if (!chat) {
+      const title = await generateTitleFromUserMessage({
+        message: userMessage,
+      })
+
+      const email = { ...blankTemplate(), name: title }
+
+      await createChat({ messages, title, email, companyId, id })
+    } else {
+      if (chat.user_id !== session.user.id) {
+        return new Response('Unauthorized', { status: 401 })
+      }
+    }
+
+    await updateChat(id, {
+      messages,
+    })
+
     const stream = new SwitchableStream()
 
     const options: StreamingOptions = {
       toolChoice: 'none',
       onFinish: async ({ text: content, finishReason }) => {
+        const assistantMessageId = uuidv4()
+        messages.push({
+          id: assistantMessageId,
+          role: 'assistant',
+          content,
+        })
+
+        await updateChat(id, {
+          messages,
+        })
+
         if (finishReason !== 'length') {
           return stream.close()
         }
@@ -25,8 +81,12 @@ export async function POST(request: Request) {
 
         console.log(`Reached max token limit (${MAX_TOKENS}): Continuing message (${switchesLeft} switches left)`)
 
-        messages.push({ role: 'assistant', content })
-        messages.push({ role: 'user', content: CONTINUE_PROMPT })
+        // Note: We already added the assistant message above
+        messages.push({
+          id: uuidv4(),
+          role: 'user',
+          content: CONTINUE_PROMPT,
+        })
 
         const result = await streamText(messages, options, companyName)
 

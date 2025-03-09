@@ -8,12 +8,12 @@ import { useEffect, useState } from 'react'
 import AlertBox from '../alert-box'
 import { Badge } from '../badge'
 import { Button } from '../button'
-import { Dialog, DialogBody, DialogTitle } from '../dialog'
 import { Heading } from '../heading'
 import Loading from '../loading'
+import { usePlan } from '../payment/plan-provider'
 import { Switch } from '../switch'
 import { Strong, Text, TextLink } from '../text'
-import { usePlan } from './plan-provider'
+import { Dialog, DialogBody, DialogTitle } from './dialog'
 
 type Props = {
   open: boolean

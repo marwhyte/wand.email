@@ -3,6 +3,7 @@ export const maxDuration = 60
 import { streamText } from '@/lib/llm/stream-text'
 import { stripIndents } from '@/lib/utils/stripIndent'
 import { parseDataStreamPart } from 'ai'
+import { v4 as uuidv4 } from 'uuid'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
@@ -13,6 +14,7 @@ export async function POST(request: Request) {
 
     const result = await streamText([
       {
+        id: uuidv4(),
         role: 'user',
         content: stripIndents`
           I want you to improve the user prompt that is wrapped in \`<original_prompt>\` tags.

@@ -1,15 +1,18 @@
 'use client'
 
-import { Dialog, DialogButton, DialogDescription, DialogTitle } from '@/app/components/dialog'
+import { Dialog, DialogButton, DialogDescription, DialogTitle } from '@components/dialogs/dialog'
 import { motion, type Variants } from 'framer-motion'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
-import { deleteChat, getChats } from '@/lib/database/queries/chats'
+import { deleteChat } from '@/lib/database/queries/chats'
 import { Chat } from '@/lib/database/types'
 import { cubicEasingFn } from '@/lib/utils/easings'
+import { fetcher, truncate } from '@/lib/utils/misc'
 import { SparklesIcon } from '@heroicons/react/24/solid'
 import { signOut, useSession } from 'next-auth/react'
+import useSWR from 'swr'
 import Loading from '../loading'
+import { Text } from '../text'
 import { binDates } from './date-binning'
 import { HistoryItem } from './history-item'
 
@@ -38,29 +41,42 @@ type DialogContent = { type: 'delete'; item: Chat } | null
 
 export function Menu() {
   const menuRef = useRef<HTMLDivElement>(null)
-  const [list, setList] = useState<Chat[]>([])
-  const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const [dialogContent, setDialogContent] = useState<DialogContent>(null)
   const session = useSession()
+
   const closeDialog = () => {
     setDialogContent(null)
   }
 
-  const loadEntries = useCallback(async () => {
-    if (list.length === 0) {
-      setLoading(true)
+  const {
+    data: list = [],
+    isLoading: loading,
+    mutate,
+  } = useSWR<Array<Chat>>('/api/history', fetcher, {
+    fallbackData: [],
+  })
+
+  const handleDelete = async (chatId: string) => {
+    try {
+      const success = await deleteChat(chatId)
+      if (success) {
+        mutate(
+          list.filter((chat) => chat.id !== chatId),
+          false
+        )
+      }
+      closeDialog()
+    } catch (error) {
+      closeDialog()
     }
-    const entries = await getChats()
-    setLoading(false)
-    setList(entries)
-  }, [session.data?.user?.id])
+  }
 
   useEffect(() => {
     if (open) {
-      loadEntries()
+      mutate()
     }
-  }, [open])
+  }, [open, mutate])
 
   useEffect(() => {
     const enterThreshold = 40
@@ -140,9 +156,10 @@ export function Menu() {
                   </DialogButton>
                   <DialogButton
                     type="danger"
-                    onClick={(event) => {
-                      deleteChat(dialogContent.item.id)
-                      closeDialog()
+                    onClick={() => {
+                      if (dialogContent?.item) {
+                        handleDelete(dialogContent.item.id)
+                      }
                     }}
                   >
                     Delete
@@ -154,6 +171,10 @@ export function Menu() {
         </div>
 
         <div className="border-t border-gray-200 p-4">
+          <div className="mb-2 space-y-0.5 text-center">
+            <Text className="font-bold text-gray-500">Signed in as</Text>
+            <Text className="text-gray-600">{truncate(session.data?.user?.email || '', 30)}</Text>
+          </div>
           <button
             onClick={() => signOut()}
             className="w-full rounded-md bg-gray-100 p-2 text-gray-600 transition-colors hover:bg-gray-200"

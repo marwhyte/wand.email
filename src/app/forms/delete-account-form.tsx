@@ -1,9 +1,9 @@
 'use client'
 
 import { deleteUser } from '@/lib/database/queries/users'
+import { Dialog, DialogActions, DialogBody, DialogTitle } from '@components/dialogs/dialog'
 import { doLogout } from '../actions/authentication'
 import { Button } from '../components/button'
-import { Dialog, DialogActions, DialogBody, DialogTitle } from '../components/dialog'
 import { Divider } from '../components/divider'
 import { Subheading } from '../components/heading'
 import { Text } from '../components/text'

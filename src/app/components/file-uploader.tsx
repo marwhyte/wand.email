@@ -2,7 +2,7 @@
 
 import { useOpener } from '../hooks/useOpener'
 import { Button } from './button'
-import FileUploaderDialog from './email-workspace/file-uploader-dialog'
+import FileUploaderDialog from './dialogs/file-uploader-dialog'
 
 interface FileUploaderProps {
   onUpload: (src: string) => void

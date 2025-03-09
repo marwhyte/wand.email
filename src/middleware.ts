@@ -9,14 +9,13 @@ export default auth((req) => {
   const { nextUrl } = req
 
   const isAuthenticated = !!req.auth
+
   const isPublicRoute = PUBLIC_ROUTES.some(
     (route) =>
       nextUrl.pathname === route || (route.endsWith('/:id') && nextUrl.pathname.startsWith(route.replace('/:id', '/')))
   )
 
-  if (!isAuthenticated && !isPublicRoute) {
-    console.log(nextUrl.pathname)
-  }
+  // Only redirect unauthenticated users when accessing root with id param
   if (!isAuthenticated && !isPublicRoute) return Response.redirect(new URL(ROOT, nextUrl))
 })
 

@@ -3,7 +3,6 @@ import { uploadFile } from '@/app/actions/uploadFile'
 import { Opener } from '@/app/hooks/useOpener'
 import { getFiles } from '@/lib/database/queries/files'
 import { formatFileSize, getImgFromKey } from '@/lib/utils/misc'
-import { Dialog, DialogActions, DialogBody, DialogTitle } from '@components/dialog'
 import { TrashIcon } from '@heroicons/react/16/solid'
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { useRef, useState } from 'react'
@@ -12,6 +11,7 @@ import AlertBox from '../alert-box'
 import { Button } from '../button'
 import Loading from '../loading'
 import { Text } from '../text'
+import { Dialog, DialogActions, DialogBody, DialogTitle } from './dialog'
 
 const MAX_FILE_SIZE = 15 * 1024 * 1024 // 15MB in bytes
 

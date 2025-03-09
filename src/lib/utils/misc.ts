@@ -1,9 +1,11 @@
+import { Message } from '@ai-sdk/react'
+import { v4 as uuidv4 } from 'uuid'
 export function shouldUseDarkText(backgroundColor: string) {
   // Convert hex to RGB
   const hex = backgroundColor.replace('#', '')
-  const r = parseInt(hex.substr(0, 2), 16)
-  const g = parseInt(hex.substr(2, 2), 16)
-  const b = parseInt(hex.substr(4, 2), 16)
+  const r = parseInt(hex.substring(0, 2), 16)
+  const g = parseInt(hex.substring(2, 4), 16)
+  const b = parseInt(hex.substring(4, 6), 16)
 
   // Calculate relative luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
@@ -141,4 +143,33 @@ export function safeParseInt(value: string | number | undefined | null, defaultV
   // Try to parse string
   const parsed = parseInt(value, 10)
   return isNaN(parsed) ? defaultValue : parsed
+}
+
+export function getMostRecentUserMessage(messages: Array<Message>) {
+  const userMessages = messages.filter((message) => message.role === 'user')
+  return userMessages.at(-1)
+}
+
+export function generateUUID() {
+  return uuidv4()
+}
+
+interface ApplicationError extends Error {
+  info: string
+  status: number
+}
+
+export const fetcher = async (url: string) => {
+  const res = await fetch(url)
+
+  if (!res.ok) {
+    const error = new Error('An error occurred while fetching the data.') as ApplicationError
+
+    error.info = await res.json()
+    error.status = res.status
+
+    throw error
+  }
+
+  return res.json()
 }

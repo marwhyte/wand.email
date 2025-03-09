@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 type Props = {
-  children: React.ReactElement
+  children: React.ReactElement<any>
   id?: string
   width?: string
 }

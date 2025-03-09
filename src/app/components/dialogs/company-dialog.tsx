@@ -1,18 +1,18 @@
 'use client'
 
-import { Dialog, DialogTitle } from '@/app/components/dialog'
+import { Button } from '@/app/components/button'
+import { ColorInput } from '@/app/components/color-input'
+import { Field, FieldGroup, Label } from '@/app/components/fieldset'
+import { Input } from '@/app/components/input'
+import LogoUploader from '@/app/components/logo-uploader'
+import { Text } from '@/app/components/text'
 import { addCompany, updateCompany } from '@/lib/database/queries/companies'
 import { getFile } from '@/lib/database/queries/files'
 import { Company, File } from '@/lib/database/types'
 import { formatFileSize, getImgFromKey } from '@/lib/utils/misc'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
-import { Button } from './button'
-import { ColorInput } from './color-input'
-import { Field, FieldGroup, Label } from './fieldset'
-import { Input } from './input'
-import LogoUploader from './logo-uploader'
-import { Text } from './text'
+import { Dialog, DialogTitle } from './dialog'
 
 interface CompanyDialogProps {
   isOpen: boolean

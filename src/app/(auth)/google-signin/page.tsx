@@ -1,8 +1,8 @@
 'use client'
 
+import { doGoogleLogin } from '@/app/actions/authentication'
 import { useSession } from 'next-auth/react'
 import { useEffect } from 'react'
-import { doGoogleLogin } from '../actions/authentication'
 
 export default function SignInPopUpPage() {
   const { data: session, status } = useSession()

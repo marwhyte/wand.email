@@ -2,9 +2,9 @@ import { useCallback, useRef } from 'react'
 
 export function useSnapScroll() {
   const autoScrollRef = useRef(true)
-  const scrollNodeRef = useRef<HTMLDivElement>()
-  const onScrollRef = useRef<() => void>()
-  const observerRef = useRef<ResizeObserver>()
+  const scrollNodeRef = useRef<HTMLDivElement>(undefined)
+  const onScrollRef = useRef<() => void>(undefined)
+  const observerRef = useRef<ResizeObserver>(undefined)
 
   const messageRef = useCallback((node: HTMLDivElement | null) => {
     if (node) {

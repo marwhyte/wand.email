@@ -12,9 +12,9 @@ import {
 import { Session } from 'next-auth'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Button } from './components/button'
+import UpgradeDialog from './components/dialogs/upgrade-dialog'
 import { Logo } from './components/Logo'
 import { usePlan } from './components/payment/plan-provider'
-import UpgradeDialog from './components/payment/upgrade-dialog'
 import { Text } from './components/text'
 
 type Props = {

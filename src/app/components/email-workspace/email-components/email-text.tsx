@@ -14,5 +14,15 @@ export default function EmailText({ block, parentRow }: Props) {
   const searchParams = useSearchParams()
   const { mobileView } = useMobileViewStore()
 
-  return <Text {...generateTextProps(block, parentRow, mobileView)}>{parse(block.content)}</Text>
+  // Custom options for html-react-parser to style links
+  const options = {
+    replace: (domNode: any) => {
+      if (domNode.name === 'a' && !domNode.attribs.style) {
+        domNode.attribs.style = 'color: #0066CC;'
+        return domNode
+      }
+    },
+  }
+
+  return <Text {...generateTextProps(block, parentRow, mobileView)}>{parse(block.content, options)}</Text>
 }

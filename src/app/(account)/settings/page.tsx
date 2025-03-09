@@ -1,8 +1,8 @@
+import { Divider } from '@/app/components/divider'
+import { Heading } from '@/app/components/heading'
+import AccountForm from '@/app/forms/account-form'
+import DeleteAccountForm from '@/app/forms/delete-account-form'
 import { auth } from '@/auth'
-import { Divider } from '../components/divider'
-import { Heading } from '../components/heading'
-import AccountForm from '../forms/account-form'
-import DeleteAccountForm from '../forms/delete-account-form'
 
 const SettingsPage = async () => {
   const session = await auth()

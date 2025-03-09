@@ -109,7 +109,7 @@ const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; c
           {row.columns.map((column, index) => renderColumnWithSpacer(column, index))}
         </Row>
 
-        <Row className="show-on-mobile">
+        <Container className="show-on-mobile">
           {chunk(row.columns, 2).map((pair, pairIndex) => (
             <Row key={pairIndex}>
               {pair.map((column, index) => (
@@ -125,7 +125,7 @@ const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; c
               ))}
             </Row>
           ))}
-        </Row>
+        </Container>
       </>
     )
   }

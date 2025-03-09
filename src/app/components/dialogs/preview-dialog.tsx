@@ -2,9 +2,9 @@ import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { render } from '@react-email/components'
 import { useState } from 'react'
-import { Dialog, DialogBody, DialogTitle } from '../dialog'
+import EmailRendererFinal from '../email-workspace/email-renderer-final'
 import { Tab, TabGroup, TabList } from '../tab'
-import EmailRendererFinal from './email-renderer-final'
+import { Dialog, DialogBody, DialogTitle } from './dialog'
 
 type Props = {
   open: boolean

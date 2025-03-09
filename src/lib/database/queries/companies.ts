@@ -1,23 +1,8 @@
 'use server'
 
 import { auth } from '@/auth'
-import { revalidateTag, unstable_cache } from 'next/cache'
 import { db } from '../db'
 
-// Internal helper that takes userId as parameter for caching
-const getCompaniesInternal = unstable_cache(
-  async (userId: string) => {
-    const companies = await db.selectFrom('companies').selectAll().where('user_id', '=', userId).execute()
-    return companies
-  },
-  ['companies'],
-  {
-    tags: ['companies'],
-    revalidate: 60 * 60 * 24,
-  }
-)
-
-// Public functions that handle auth internally
 export async function getCompanies() {
   const session = await auth()
   if (!session?.user?.id) {
@@ -116,7 +101,6 @@ export async function addCompany({
         .executeTakeFirst()
     })
 
-  revalidateTag('companies')
   return company
 }
 
@@ -166,7 +150,6 @@ export async function updateCompany(
         .executeTakeFirst()
     })
 
-  revalidateTag('companies')
   return company
 }
 
@@ -177,6 +160,4 @@ export async function deleteCompany(companyId: string) {
   }
 
   await db.deleteFrom('companies').where('id', '=', companyId).where('user_id', '=', session.user.id).execute()
-
-  revalidateTag('companies')
 }

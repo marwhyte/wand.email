@@ -1,5 +1,5 @@
-import { BackgroundGradients } from './components/background-gradients'
-import { Header } from './components/header'
+import { BackgroundGradients } from '@/app/components/background-gradients'
+import { Header } from '@/app/components/header'
 
 export default function Loading() {
   return (

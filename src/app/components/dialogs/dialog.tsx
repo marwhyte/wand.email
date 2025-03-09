@@ -2,8 +2,8 @@ import * as Headless from '@headlessui/react'
 import clsx from 'clsx'
 import type React from 'react'
 import { memo } from 'react'
-import { Button } from './button'
-import { Text } from './text'
+import { Button } from '../button'
+import { Text } from '../text'
 
 const sizes = {
   xs: 'sm:max-w-xs',

@@ -63,10 +63,12 @@ export const getAdditionalHeadingStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(headingBlock, parentRow) as React.ComponentProps<typeof Heading>['style']) || {}
 
+  const { as, ...styleAttributes } = headingBlock.attributes
+
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
-    ...headingBlock.attributes,
+    ...styleAttributes,
   }
 }
 
@@ -84,10 +86,12 @@ export const getAdditionalImageStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(imageBlock, parentRow) as React.ComponentProps<typeof Img>['style']) || {}
 
+  const { src, alt, ...styleAttributes } = imageBlock.attributes
+
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
-    ...imageBlock.attributes,
+    ...styleAttributes,
   }
 }
 
@@ -113,19 +117,21 @@ export const getAdditionalButtonStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(buttonBlock, parentRow) as React.ComponentProps<typeof Button>['style']) || {}
 
-  if (company?.primary_color && !buttonBlock.attributes.backgroundColor) {
+  const { href, target, rel, ...styleAttributes } = buttonBlock.attributes
+
+  if (company?.primary_color && !styleAttributes.backgroundColor) {
     return {
       ...baseDefaults,
       ...rowTypeDefaults,
-      ...buttonBlock.attributes,
+      ...styleAttributes,
       backgroundColor: company.primary_color,
       color: shouldUseDarkText(company.primary_color) ? '#000000' : '#ffffff',
     }
-  } else if (!buttonBlock.attributes.backgroundColor) {
+  } else if (!styleAttributes.backgroundColor) {
     return {
       ...baseDefaults,
       ...rowTypeDefaults,
-      ...buttonBlock.attributes,
+      ...styleAttributes,
       backgroundColor: '#000000',
       color: '#ffffff',
     }
@@ -134,7 +140,7 @@ export const getAdditionalButtonStyles = (
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
-    ...buttonBlock.attributes,
+    ...styleAttributes,
   }
 }
 
@@ -153,10 +159,12 @@ export const getAdditionalLinkStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(linkBlock, parentRow) as React.ComponentProps<typeof Link>['style']) || {}
 
+  const { href, target, rel, ...styleAttributes } = linkBlock.attributes
+
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
-    ...linkBlock.attributes,
+    ...styleAttributes,
   }
 }
 
@@ -201,9 +209,12 @@ export const getAdditionalSurveyStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(surveyBlock, parentRow) as React.ComponentProps<typeof Section>['style']) || {}
 
+  // Create a copy of attributes without 'kind', 'question', and 'links' properties
+  const { kind, question, links, ...styleAttributes } = surveyBlock.attributes
+
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
-    ...surveyBlock.attributes,
+    ...styleAttributes,
   }
 }

@@ -1,137 +1,146 @@
 'use client'
 
-import Loading from '@/app/components/loading'
-import LoginForm from '@/app/forms/login-form'
-import RegistrationForm from '@/app/forms/registration-form'
 import { useOpener, usePromptEnhancer, useSnapScroll } from '@/app/hooks'
-import { useChatHistory } from '@/app/hooks/useChatHistory'
-import { useMessageParser } from '@/app/hooks/useMessageParser'
 import { deleteCompany } from '@/lib/database/queries/companies'
 import { Company } from '@/lib/database/types'
 import { chatStore } from '@/lib/stores/chat'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
-import { useChat } from '@ai-sdk/react'
-import { CheckIcon, ExclamationCircleIcon } from '@heroicons/react/24/solid'
-import type { Message } from 'ai'
+import { classNames } from '@/lib/utils/misc'
+import { Message, useChat } from '@ai-sdk/react'
+import { AuthDialog } from '@components/dialogs/auth-dialog'
+import CompanyDialog from '@components/dialogs/company-dialog'
+import { DeleteCompanyDialog } from '@components/dialogs/delete-company-dialog'
+import UpgradeDialog from '@components/dialogs/upgrade-dialog'
+import { Header } from '@components/header'
+import { Menu } from '@components/sidebar/menu'
+import { ChatToastContainer } from '@components/toast/chat-toast-container'
+import { ArrowDownCircleIcon } from '@heroicons/react/24/solid'
 import { useAnimate } from 'framer-motion'
 import { useSession } from 'next-auth/react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import { cssTransition, toast, ToastContainer } from 'react-toastify'
-import { Button } from '../button'
-import CompanyDialog from '../company-dialog'
-import { Dialog, DialogActions, DialogBody, DialogDescription, DialogTitle } from '../dialog'
-import { Header } from '../header'
-import UpgradeDialog from '../payment/upgrade-dialog'
-import { BaseChat } from './base-chat'
-
-const toastAnimation = cssTransition({
-  enter: 'animated fadeInRight',
-  exit: 'animated fadeOutRight',
-})
+import { useSWRConfig } from 'swr'
+import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
+import { v4 as uuidv4 } from 'uuid'
+import Workspace from '../email-workspace/email-workspace'
+import { ChatInput } from './chat-input'
+import { ChatIntro } from './chat-intro'
+import { CompanySection } from './company-section'
+import { Messages } from './messages'
 
 const logger = createScopedLogger('Chat')
 
 type Props = {
+  id: string
   companies: Company[] | null
   monthlyExportCount: number | null
+  initialMessages: Message[]
 }
 
-export function Chat({ companies, monthlyExportCount }: Props) {
-  renderLogger.trace('Chat')
+const TEXTAREA_MIN_HEIGHT = 76
+const TEXTAREA_MAX_HEIGHT = 200
 
-  const { ready, initialMessages, storeMessageHistory } = useChatHistory()
-  const [chatStarted, setChatStarted] = useState(false)
+function AutoScroller({ input }: { input: string }) {
+  const { isAtBottom, scrollToBottom } = useStickToBottomContext()
 
   useEffect(() => {
-    if (ready) {
-      setChatStarted(initialMessages.length > 0)
+    if (isAtBottom) {
+      scrollToBottom()
     }
-  }, [ready, initialMessages.length])
+  }, [input, isAtBottom, scrollToBottom])
+
+  return null
+}
+
+function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
+  const { isAtBottom, scrollToBottom } = useStickToBottomContext()
+
+  const bottomPosition = Math.min(166 + (textareaHeight - TEXTAREA_MIN_HEIGHT), 300)
 
   return (
-    <div className="mx-auto w-full">
-      <Header monthlyExportCount={monthlyExportCount} chatStarted={chatStarted} />
-      <div className="flex flex-1">
-        {ready && (
-          <ChatImpl
-            companies={companies}
-            initialMessages={initialMessages}
-            storeMessageHistory={storeMessageHistory}
-            chatStarted={chatStarted}
-            setChatStarted={setChatStarted}
-          />
-        )}
-        <ToastContainer
-          closeButton={({ closeToast }) => {
-            return (
-              <button className="Toastify__close-button" onClick={closeToast}>
-                <div className="i-ph:x text-lg" />
-              </button>
-            )
-          }}
-          icon={({ type }) => {
-            /**
-             * @todo Handle more types if we need them. This may require extra color palettes.
-             */
-            switch (type) {
-              case 'success': {
-                return <CheckIcon className="h-5 w-5 text-green-500" />
-              }
-              case 'error': {
-                return <ExclamationCircleIcon className="h-5 w-5 text-red-500" />
-              }
-            }
-
-            return undefined
-          }}
-          position="bottom-right"
-          pauseOnFocusLoss
-          transition={toastAnimation}
-        />
-      </div>
-    </div>
+    !isAtBottom && (
+      <button
+        className="absolute left-[50%] translate-x-[-50%] rounded-lg text-gray-500 hover:text-gray-700"
+        style={{ bottom: bottomPosition }}
+        onClick={() => scrollToBottom()}
+      >
+        <ArrowDownCircleIcon className="h-8 w-8" />
+      </button>
+    )
   )
 }
 
-interface ChatProps {
-  companies: Company[] | null
-  initialMessages: Message[]
-  storeMessageHistory: (messages: Message[], companyId?: string | null) => Promise<void>
-  chatStarted: boolean
-  setChatStarted: (started: boolean) => void
-}
+export function Chat({ id, companies, monthlyExportCount, initialMessages }: Props) {
+  const { mutate } = useSWRConfig()
 
-export function ChatImpl({ companies, initialMessages, storeMessageHistory, chatStarted, setChatStarted }: ChatProps) {
+  // Chat state and handlers
+  const { messages, status, input, handleInputChange, setInput, stop, append, reload, handleSubmit, setMessages } =
+    useChat({
+      id,
+      experimental_throttle: 100,
+      sendExtraMessageFields: true,
+      generateId: uuidv4,
+      body: {
+        id,
+        companyName: companies?.find((c) => c.id === selectedCompanyId)?.name,
+        companyId: companies?.find((c) => c.id === selectedCompanyId)?.id,
+      },
+      onFinish: () => {
+        logger.debug('Finished streaming')
+        mutate('/api/history')
+      },
+      initialMessages,
+    })
+  const isLoading = status === 'streaming' || status === 'submitted'
+
+  // UI and animation refs/state
+  const textareaRef = useRef<HTMLTextAreaElement>(null) as React.RefObject<HTMLTextAreaElement>
+  const TEXTAREA_MAX_HEIGHT = initialMessages.length > 0 ? 400 : 200
+  const [animationScope, animate] = useAnimate()
+  const [messageRef, scrollRef] = useSnapScroll()
+  const [textareaHeight, setTextareaHeight] = useState(TEXTAREA_MIN_HEIGHT)
+
+  // Auth and session
   const session = useSession()
-  const companyOpener = useOpener()
-
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-  const isUpgradeDialogOpen = searchParams.get('upgrade') === 'true'
-
-  const openUpgradeDialog = () => {
-    router.push(`${pathname}?upgrade=true&plan=starter`, { scroll: false })
-  }
-
-  const closeUpgradeDialog = () => {
-    router.push(pathname, { scroll: false })
-  }
-
   const [showSignUpDialog, setShowSignUpDialog] = useState(false)
-  const deleteOpener = useOpener()
   const [stepType, setStepType] = useState<'login' | 'signup'>('signup')
   const [pendingAction, setPendingAction] = useState<{
     type: 'send-message' | 'open-company-dialog'
     messageInput?: string
   } | null>(null)
 
-  const [isDeleting, setIsDeleting] = useState(false)
-
+  // Company management
   const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(companies?.length ? companies[0].id : null)
   const [activeCompany, setActiveCompany] = useState<Company | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Dialog openers
+  const companyOpener = useOpener()
+  const deleteOpener = useOpener()
+
+  // Navigation and routing
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const isUpgradeDialogOpen = searchParams.get('upgrade') === 'true'
+  const [chatStarted, setChatStarted] = useState(initialMessages.length > 0)
+
+  // Add the closeUpgradeDialog function
+  const closeUpgradeDialog = () => {
+    const params = new URLSearchParams(searchParams)
+    params.delete('upgrade')
+    router.replace(`${pathname}?${params.toString()}`)
+  }
+
+  // Global state
+  const showChat = chatStore((state) => state.showChat)
+  const setKey = chatStore((state) => state.setKey)
+
+  // Prompt enhancement
+  const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
+
+  renderLogger.trace('Chat')
 
   useEffect(() => {
     if (companies?.length && !selectedCompanyId) {
@@ -161,47 +170,6 @@ export function ChatImpl({ companies, initialMessages, storeMessageHistory, chat
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.status])
-
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  const showChat = chatStore((state) => state.showChat)
-  const setKey = chatStore((state) => state.setKey)
-
-  const [animationScope, animate] = useAnimate()
-
-  const { messages, status, input, handleInputChange, setInput, stop, append } = useChat({
-    api: '/api/chat',
-    body: {
-      companyName: companies?.find((c) => c.id === selectedCompanyId)?.name,
-    },
-    onFinish: () => {
-      logger.debug('Finished streaming')
-    },
-    initialMessages,
-  })
-
-  // Get the latest assistant message
-  const latestAssistantMessage = messages.findLast((m) => m.role === 'assistant')
-
-  // Add message parser hook with empty content if no message exists
-  useMessageParser(latestAssistantMessage ?? { role: 'assistant', content: '', id: '' })
-
-  const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
-
-  const TEXTAREA_MAX_HEIGHT = chatStarted ? 400 : 200
-
-  const isLoading = status === 'streaming' || status === 'submitted'
-
-  useEffect(() => {
-    setKey('started', initialMessages.length > 0)
-  }, [])
-
-  useEffect(() => {
-    if (!isLoading && messages.length > initialMessages.length) {
-      console.log('this happenes when it should not')
-      storeMessageHistory(messages).catch((error) => toast.error(error.message))
-    }
-  }, [messages.length, initialMessages.length, isLoading])
 
   const scrollTextArea = () => {
     const textarea = textareaRef.current
@@ -260,10 +228,6 @@ export function ChatImpl({ companies, initialMessages, storeMessageHistory, chat
 
     runAnimation()
 
-    if (messages.length === 0) {
-      storeMessageHistory(messages, selectedCompanyId).catch((error) => toast.error(error.message))
-    }
-
     append({ role: 'user', content: _input })
 
     setInput('')
@@ -272,8 +236,6 @@ export function ChatImpl({ companies, initialMessages, storeMessageHistory, chat
 
     textareaRef.current?.blur()
   }
-
-  const [messageRef, scrollRef] = useSnapScroll()
 
   const handleDeleteCompany = async (companyId: string) => {
     setActiveCompany(companies?.find((c) => c.id === companyId) || null)
@@ -306,95 +268,135 @@ export function ChatImpl({ companies, initialMessages, storeMessageHistory, chat
   }
 
   return (
-    <>
-      <BaseChat
-        ref={animationScope}
-        textareaRef={textareaRef}
-        input={input}
-        companies={companies}
-        showChat={showChat}
-        chatStarted={chatStarted}
-        isStreaming={isLoading}
-        enhancingPrompt={enhancingPrompt}
-        promptEnhanced={promptEnhanced}
-        sendMessage={sendMessage}
-        messageRef={messageRef}
-        handleInputChange={handleInputChange}
-        showCompanyDialog={(company) => {
-          setPendingAction({ type: 'open-company-dialog' })
-          if (session.data?.user?.id) {
-            setActiveCompany(company ?? null)
-            companyOpener.open()
-          } else {
-            setShowSignUpDialog(true)
-          }
-        }}
-        handleStop={abort}
-        messages={messages.map((message) => ({
-          ...message,
-          content: message === latestAssistantMessage ? message.content : message.content,
-        }))}
-        enhancePrompt={() => {
-          enhancePrompt(input, (input) => {
-            setInput(input)
-            scrollTextArea()
-          })
-        }}
-        handleDeleteCompany={handleDeleteCompany}
-        handleSelectCompany={handleSelectCompany}
-        selectedCompanyId={selectedCompanyId}
-      />
-      <Dialog open={showSignUpDialog} onClose={() => setShowSignUpDialog(false)} className="z-50">
-        <DialogTitle>{`${stepType === 'login' ? 'Log in' : 'Sign up'} to start creating emails`}</DialogTitle>
-        <DialogBody className="!mt-2">
-          <DialogDescription className="mb-4">Access and edit your saved emails anytime, anywhere.</DialogDescription>
-          {stepType === 'login' && <LoginForm redirectToInitialProject onSwitchType={() => setStepType('signup')} />}
-          {stepType === 'signup' && (
-            <RegistrationForm redirectToInitialProject onSwitchType={() => setStepType('login')} />
-          )}
-        </DialogBody>
-      </Dialog>
-      <CompanyDialog
-        company={activeCompany}
-        isOpen={companyOpener.isOpen}
-        onClose={companyOpener.close}
-        onSuccess={(company) => {
-          companyOpener.close()
-          setActiveCompany(null)
-        }}
-      />
+    <div className="mx-auto w-full">
+      {session.data?.user?.id && <Menu />}
+      <Header monthlyExportCount={monthlyExportCount} chatStarted={chatStarted} />
+      <div className="flex flex-1">
+        <>
+          <div
+            ref={animationScope}
+            className="relative mx-auto flex w-full items-center overflow-hidden"
+            data-chat-visible={showChat}
+          >
+            {session.data?.user?.id && <Menu />}
+            <div
+              className={classNames(`flex w-full justify-center`, {
+                '-mb-2': chatStarted,
+                'mt-[7vh]': !chatStarted,
+              })}
+            >
+              <div
+                className={classNames('flex min-w-[400px] shrink-[2] flex-col', {
+                  'max-w-[600px]': chatStarted,
+                  'border-r border-gray-200': chatStarted,
+                })}
+              >
+                {!chatStarted && <ChatIntro />}
+                <div
+                  className={classNames('px-6 pt-6', {
+                    'flex flex-col': chatStarted,
+                  })}
+                >
+                  <StickToBottom
+                    className={classNames('relative flex flex-col justify-end pb-6', {
+                      'h-[calc(100vh-100px)]': chatStarted,
+                    })}
+                    resize="smooth"
+                    initial="smooth"
+                  >
+                    <StickToBottom.Content className="relative flex-grow overflow-auto">
+                      <AutoScroller input={input} />
+                      <Messages
+                        ref={messageRef}
+                        className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col px-4 pb-6"
+                        messages={messages}
+                        isStreaming={isLoading}
+                      />
+                    </StickToBottom.Content>
+                    <ScrollToBottom textareaHeight={textareaHeight} />
 
-      <UpgradeDialog open={isUpgradeDialogOpen} onClose={closeUpgradeDialog} />
+                    <ChatInput
+                      textareaRef={textareaRef}
+                      input={input}
+                      isStreaming={isLoading}
+                      enhancingPrompt={enhancingPrompt}
+                      promptEnhanced={promptEnhanced}
+                      sendMessage={sendMessage}
+                      handleInputChange={(event) => {
+                        handleInputChange?.(event)
+                        if (textareaRef?.current) {
+                          setTextareaHeight(textareaRef.current.scrollHeight)
+                        }
+                      }}
+                      handleStop={abort}
+                      enhancePrompt={() => {
+                        enhancePrompt(input, (input) => {
+                          setInput(input)
+                          scrollTextArea()
+                        })
+                      }}
+                    />
+                  </StickToBottom>
+                </div>
+                {!chatStarted && (
+                  <CompanySection
+                    companies={companies}
+                    selectedCompanyId={selectedCompanyId}
+                    showCompanyDialog={(company) => {
+                      setPendingAction({ type: 'open-company-dialog' })
+                      if (session.data?.user?.id) {
+                        setActiveCompany(company ?? null)
+                        companyOpener.open()
+                      } else {
+                        setShowSignUpDialog(true)
+                      }
+                    }}
+                    handleSelectCompany={handleSelectCompany}
+                    handleDeleteCompany={handleDeleteCompany}
+                  />
+                )}
+              </div>
+              {chatStarted && (
+                <div className="w-full min-w-[920px] flex-1">
+                  <Workspace chatStarted={chatStarted} isStreaming={isLoading} />
+                </div>
+              )}
+            </div>
+          </div>
 
-      <Dialog
-        darkBackdrop
-        open={deleteOpener.isOpen}
-        onClose={() => {
-          deleteOpener.close()
-          setActiveCompany(null)
-        }}
-      >
-        <DialogBody>
-          <DialogTitle>Delete Company</DialogTitle>
-          <DialogDescription>
-            Are you sure you want to delete {activeCompany?.name}? This action cannot be undone.
-          </DialogDescription>
-        </DialogBody>
-        <DialogActions>
-          <Button
-            onClick={() => {
+          <AuthDialog
+            open={showSignUpDialog}
+            onClose={() => setShowSignUpDialog(false)}
+            stepType={stepType}
+            onSwitchType={(type) => setStepType(type)}
+          />
+
+          <CompanyDialog
+            company={activeCompany}
+            isOpen={companyOpener.isOpen}
+            onClose={companyOpener.close}
+            onSuccess={(company) => {
+              companyOpener.close()
+              setActiveCompany(null)
+            }}
+          />
+
+          <UpgradeDialog open={isUpgradeDialogOpen} onClose={closeUpgradeDialog} />
+
+          <DeleteCompanyDialog
+            open={deleteOpener.isOpen}
+            onClose={() => {
               deleteOpener.close()
               setActiveCompany(null)
             }}
-            color="light"
-          >
-            Cancel
-          </Button>
-          <Button onClick={confirmDeleteCompany} color="red">
-            {isDeleting ? <Loading height={16} width={16} /> : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
+            company={activeCompany}
+            isDeleting={isDeleting}
+            onConfirmDelete={confirmDeleteCompany}
+          />
+        </>
+
+        <ChatToastContainer />
+      </div>
+    </div>
   )
 }

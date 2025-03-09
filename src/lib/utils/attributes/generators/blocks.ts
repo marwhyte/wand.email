@@ -68,7 +68,7 @@ export function generateImageProps(
         : getImgFromKey('dummy-logo.png')
       : block.attributes.src
 
-  return {
+  const final = {
     src,
     alt: block.attributes.alt,
     style: {
@@ -76,6 +76,8 @@ export function generateImageProps(
       ...getAdditionalImageStyles(block, parentRow),
     },
   }
+
+  return final
 }
 
 export function generateButtonProps(

@@ -1,5 +1,5 @@
 import { classNames } from '@/lib/utils/misc'
-import { memo, type ComponentType } from 'react'
+import { memo, type ComponentType, type JSX } from 'react';
 
 type IconSize = 'sm' | 'md' | 'lg' | 'xl' | 'xxl'
 

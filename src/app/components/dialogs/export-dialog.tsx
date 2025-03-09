@@ -10,13 +10,13 @@ import { useCallback, useState } from 'react'
 import AlertBox from '../alert-box'
 import { Button } from '../button'
 import ButtonCard from '../button-card'
-import { Dialog, DialogBody, DialogTitle } from '../dialog'
+import EmailRendererFinal from '../email-workspace/email-renderer-final'
 import { Heading } from '../heading'
 import Nbsp from '../nbsp'
 import Notification from '../notification'
 import { Steps } from '../steps'
 import { Strong, Text, TextLink } from '../text'
-import EmailRendererFinal from './email-renderer-final'
+import { Dialog, DialogBody, DialogTitle } from './dialog'
 
 type Props = {
   open: boolean
