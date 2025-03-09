@@ -3,6 +3,7 @@
 import { classNames } from '@/lib/utils/misc'
 import type { Message } from 'ai'
 import React from 'react'
+import { AssistantMessage } from './assistant-message'
 import { UserMessage } from './user-message'
 
 interface MessagesProps {
@@ -39,7 +40,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                     </div>
                   )}
                   <div className="grid-col-1 grid w-full">
-                    {isUserMessage ? <UserMessage content={content} /> : <></>}
+                    {isUserMessage ? <UserMessage content={content} /> : <AssistantMessage content={content} />}
                   </div>
                 </div>
               </div>

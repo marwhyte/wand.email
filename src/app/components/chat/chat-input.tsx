@@ -16,7 +16,7 @@ interface ChatInputProps {
   enhancingPrompt: boolean
   promptEnhanced: boolean
   sendMessage?: (messageInput?: string) => void
-  handleInputChange?: (input: string) => void
+  handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void
   enhancePrompt?: () => void
   handleStop?: () => void
 }
@@ -32,22 +32,6 @@ export function ChatInput({
   enhancePrompt,
   handleStop,
 }: ChatInputProps) {
-  // useEffect(() => {
-  //   const textarea = textareaRef.current
-  //   if (textarea) {
-  //     const selectionStart = textarea.selectionStart
-  //     const selectionEnd = textarea.selectionEnd
-
-  //     textarea.style.height = 'auto'
-
-  //     const scrollHeight = textarea.scrollHeight
-  //     textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`
-  //     textarea.style.overflowY = scrollHeight > TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden'
-
-  //     textarea.setSelectionRange(selectionStart, selectionEnd)
-  //   }
-  // }, [input, textareaRef])
-
   return (
     <motion.div
       layout
@@ -77,9 +61,7 @@ export function ChatInput({
             }
           }}
           value={input}
-          onChange={(event) => {
-            handleInputChange?.(event.target.value)
-          }}
+          onChange={handleInputChange}
           style={{
             minHeight: TEXTAREA_MIN_HEIGHT,
             maxHeight: TEXTAREA_MAX_HEIGHT,

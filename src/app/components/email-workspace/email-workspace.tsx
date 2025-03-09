@@ -15,8 +15,6 @@ type Props = {
 export default function Workspace({ chatStarted, isStreaming }: Props) {
   const { email } = useEmailStore()
 
-  console.log('hi')
-
   if (!email || !chatStarted) {
     return null
   }

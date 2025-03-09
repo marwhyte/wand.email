@@ -54,7 +54,14 @@ const EmailRenderer = ({ email }: Props) => {
     setDropLine(null)
   }
 
-  const handleBlockDrop = (blockType: 'block' | 'newBlock', blockId: string, targetType: 'block' | 'column', targetId: string, position: 'above' | 'below', newBlockType?: EmailBlockType): void => {
+  const handleBlockDrop = (
+    blockType: 'block' | 'newBlock',
+    blockId: string,
+    targetType: 'block' | 'column',
+    targetId: string,
+    position: 'above' | 'below',
+    newBlockType?: EmailBlockType
+  ): void => {
     if (blockType === 'newBlock' && newBlockType) {
       handleNewBlockDrop(newBlockType, targetType, targetId, position)
     } else {
@@ -134,7 +141,12 @@ const EmailRenderer = ({ email }: Props) => {
     }
   }
 
-  const handleNewBlockDrop = (blockType: EmailBlockType, targetType: 'block' | 'column', targetId: string, position: 'above' | 'below') => {
+  const handleNewBlockDrop = (
+    blockType: EmailBlockType,
+    targetType: 'block' | 'column',
+    targetId: string,
+    position: 'above' | 'below'
+  ) => {
     const newEmail: Email = JSON.parse(JSON.stringify(email))
     const newBlock = createNewBlock(blockType)
 
@@ -229,7 +241,12 @@ const EmailRenderer = ({ email }: Props) => {
     setDropLine(null)
   }
 
-  const handleEmptyStateDrop = (item: { type: 'newBlock' | 'newRow'; id: string; newBlockType?: EmailBlockType; width?: string }) => {
+  const handleEmptyStateDrop = (item: {
+    type: 'newBlock' | 'newRow'
+    id: string
+    newBlockType?: EmailBlockType
+    width?: string
+  }) => {
     if (item.type === 'newRow') {
       addRow(item.width ?? '100%')
     } else if (item.type === 'newBlock' && item.newBlockType) {
@@ -268,7 +285,7 @@ const EmailRenderer = ({ email }: Props) => {
   })
 
   return (
-    <div className="w-full min-w-0 overflow-auto px-2 pt-4">
+    <div className="w-full min-w-0 overflow-x-auto overflow-y-auto px-2 pt-4">
       {/* @ts-ignore */}
       <div
         {...generateBodyProps(email, true)}
@@ -281,7 +298,19 @@ const EmailRenderer = ({ email }: Props) => {
         {email.rows.length > 0 ? (
           <>
             {email.rows.map((row) => (
-              <EmailRow key={row.id} row={row} moveRow={moveRow} mobileView={mobileView} dropLine={dropLine} onHover={handleHover} onDragEnd={handleDragEnd} dropTarget={dropTarget} setDropTarget={setDropTarget} onBlockDrop={handleBlockDrop} addRow={addRow} />
+              <EmailRow
+                key={row.id}
+                row={row}
+                moveRow={moveRow}
+                mobileView={mobileView}
+                dropLine={dropLine}
+                onHover={handleHover}
+                onDragEnd={handleDragEnd}
+                dropTarget={dropTarget}
+                setDropTarget={setDropTarget}
+                onBlockDrop={handleBlockDrop}
+                addRow={addRow}
+              />
             ))}
           </>
         ) : (
@@ -291,7 +320,9 @@ const EmailRenderer = ({ email }: Props) => {
             className={`flex h-64 items-center justify-center rounded-lg border-2 border-dashed transition-colors duration-200 ${isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
             style={{ maxWidth: '600px', margin: '0 auto' }}
           >
-            <p className={`text-lg ${isOver ? 'text-blue-500' : 'text-gray-500'}`}>{isOver ? 'Drop here' : 'Drag your first row or block here'}</p>
+            <p className={`text-lg ${isOver ? 'text-blue-500' : 'text-gray-500'}`}>
+              {isOver ? 'Drop here' : 'Drag your first row or block here'}
+            </p>
           </div>
         )}
       </div>
