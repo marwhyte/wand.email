@@ -41,7 +41,7 @@ export function HistoryItem({ item, onDelete }: HistoryItemProps) {
       ref={hoverRef}
       className="group flex items-center justify-between overflow-hidden rounded-md px-2 py-1 text-gray-600 hover:bg-gray-200"
     >
-      <a href={`?id=${item.id}`} className="relative flex w-full truncate">
+      <a href={`/chat/${item.id}`} className="relative flex w-full truncate">
         {item.title}
         <div className="absolute bottom-0 right-0 top-0 flex w-10 justify-end to-transparent group-hover:w-[60px] group-hover:from-gray-100 group-hover:from-45%">
           {hovering && (

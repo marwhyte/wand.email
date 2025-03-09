@@ -29,7 +29,7 @@ export async function streamText(
 ) {
   const systemPrompt = getSystemPrompt(companyName)
 
-  const model = provider === 'openai' ? openai('o3-mini') : anthropic('claude-3-haiku-20240307')
+  const model = provider === 'openai' ? openai('gpt-4o-mini') : anthropic('claude-3-haiku-20240307')
 
   return _streamText({
     model,
