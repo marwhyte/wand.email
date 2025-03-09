@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import SocialIcons from './social-icons'
 
@@ -15,17 +16,17 @@ export function Footer() {
       <SocialIcons />
 
       <span>•</span>
-      <a href="/help" className="hover:text-gray-900">
+      <Link href="/help" className="hover:text-gray-900">
         Help Center
-      </a>
+      </Link>
       <span>•</span>
-      <a href="/tos.html" className="hover:text-gray-900">
+      <Link href="/tos.html" className="hover:text-gray-900">
         Terms
-      </a>
+      </Link>
       <span>•</span>
-      <a href="/privacy.html" className="hover:text-gray-900">
+      <Link href="/privacy.html" className="hover:text-gray-900">
         Privacy
-      </a>
+      </Link>
     </footer>
   )
 }

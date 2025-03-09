@@ -15,6 +15,7 @@ import {
 import { render } from '@react-email/components'
 import debounce from 'lodash.debounce'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import { useOpener } from '../hooks'
@@ -205,10 +206,10 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
           chatStarted ? 'border-b border-gray-200' : ''
         )}
       >
-        <a href="/" className="-m-1.5 p-1.5">
+        <Link href="/" className="-m-1.5 p-1.5">
           <span className="sr-only">SentSwiftly</span>
           <Logo className="z-100" text={false} />
-        </a>
+        </Link>
 
         {title && <div className="absolute left-1/2 -translate-x-1/2 truncate font-medium">{title}</div>}
 

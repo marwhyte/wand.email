@@ -28,6 +28,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   return (
     <>
       <Chat
+        chat={chat}
         id={chat.id}
         initialMessages={chat.messages}
         companies={companies}

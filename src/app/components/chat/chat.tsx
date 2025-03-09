@@ -1,8 +1,9 @@
 'use client'
 
 import { useOpener, usePromptEnhancer, useSnapScroll } from '@/app/hooks'
+import { useChatHistory } from '@/app/hooks/useChatHistory'
 import { deleteCompany } from '@/lib/database/queries/companies'
-import { Company } from '@/lib/database/types'
+import { Chat as ChatType, Company } from '@/lib/database/types'
 import { chatStore } from '@/lib/stores/chat'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
@@ -33,6 +34,7 @@ const logger = createScopedLogger('Chat')
 
 type Props = {
   id: string
+  chat?: ChatType
   companies: Company[] | null
   monthlyExportCount: number | null
   initialMessages: Message[]
@@ -71,8 +73,9 @@ function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
   )
 }
 
-export function Chat({ id, companies, monthlyExportCount, initialMessages }: Props) {
+export function Chat({ id, companies, monthlyExportCount, initialMessages, chat }: Props) {
   const { mutate } = useSWRConfig()
+  useChatHistory({ chat: chat })
 
   // Chat state and handlers
   const { messages, status, input, handleInputChange, setInput, stop, append, reload, handleSubmit, setMessages } =

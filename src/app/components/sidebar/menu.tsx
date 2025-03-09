@@ -10,6 +10,7 @@ import { cubicEasingFn } from '@/lib/utils/easings'
 import { fetcher, truncate } from '@/lib/utils/misc'
 import { SparklesIcon } from '@heroicons/react/24/solid'
 import { signOut, useSession } from 'next-auth/react'
+import Link from 'next/link'
 import useSWR from 'swr'
 import Loading from '../loading'
 import { Text } from '../text'
@@ -110,7 +111,7 @@ export function Menu() {
       <div className="mt-20 flex h-[var(--header-height)] items-center">{/* Placeholder */}</div>
       <div className="flex h-full w-full flex-1 flex-col overflow-hidden">
         <div className="p-4">
-          <a
+          <Link
             href="/"
             className="flex items-center gap-2 rounded-md bg-blue-50 p-2 font-bold text-blue-500 transition-colors hover:bg-blue-100"
           >
@@ -118,7 +119,7 @@ export function Menu() {
               <SparklesIcon className="h-5 w-5" />
             </span>
             Start new chat
-          </a>
+          </Link>
         </div>
         <div className="my-2 pl-6 pr-5 font-medium">Your Chats</div>
         <div className="flex-1 overflow-scroll pb-5 pl-4 pr-5">
