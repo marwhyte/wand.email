@@ -2,9 +2,7 @@
 
 import { classNames } from '@/lib/utils/misc'
 import type { Message } from 'ai'
-import { motion } from 'framer-motion'
 import React from 'react'
-import { AssistantMessage } from './assistant-message'
 import { UserMessage } from './user-message'
 
 interface MessagesProps {
@@ -27,17 +25,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             const isLast = index === messages.length - 1
 
             return (
-              <motion.div
-                key={index}
-                layout
-                initial={isFirst ? { opacity: 0, y: 20 } : false}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: 0.3,
-                  ease: 'easeOut',
-                }}
-                className="space-y-2"
-              >
+              <div key={index} className="space-y-2">
                 <div
                   className={classNames('flex w-full gap-4 rounded-[calc(0.75rem-1px)] p-6', {
                     'bg-gray-100': isUserMessage || !isStreaming || (isStreaming && !isLast),
@@ -50,11 +38,11 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                       <div className="i-ph:user-fill text-xl"></div>
                     </div>
                   )}
-                  <div className="grid-col-1 grid">
-                    {isUserMessage ? <UserMessage content={content} /> : <AssistantMessage content={content} />}
+                  <div className="grid-col-1 grid w-full">
+                    {isUserMessage ? <UserMessage content={content} /> : <></>}
                   </div>
                 </div>
-              </motion.div>
+              </div>
             )
           })
         : null}

@@ -9,13 +9,8 @@ import { cubicEasingFn } from '@/lib/utils/easings'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
 import { classNames } from '@/lib/utils/misc'
 import { Message, useChat } from '@ai-sdk/react'
-import { AuthDialog } from '@components/dialogs/auth-dialog'
-import CompanyDialog from '@components/dialogs/company-dialog'
-import { DeleteCompanyDialog } from '@components/dialogs/delete-company-dialog'
-import UpgradeDialog from '@components/dialogs/upgrade-dialog'
 import { Header } from '@components/header'
 import { Menu } from '@components/sidebar/menu'
-import { ChatToastContainer } from '@components/toast/chat-toast-container'
 import { ArrowDownCircleIcon } from '@heroicons/react/24/solid'
 import { useAnimate } from 'framer-motion'
 import { useSession } from 'next-auth/react'
@@ -24,10 +19,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { v4 as uuidv4 } from 'uuid'
-import Workspace from '../email-workspace/email-workspace'
 import { ChatInput } from './chat-input'
 import { ChatIntro } from './chat-intro'
-import { CompanySection } from './company-section'
 import { Messages } from './messages'
 
 const logger = createScopedLogger('Chat')
@@ -78,23 +71,23 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
   useChatHistory({ chat: chat })
 
   // Chat state and handlers
-  const { messages, status, input, handleInputChange, setInput, stop, append, reload, handleSubmit, setMessages } =
-    useChat({
+  const { messages, status, input, setInput, stop, append, reload, handleSubmit, setMessages } = useChat({
+    id,
+    experimental_throttle: 100,
+    sendExtraMessageFields: true,
+    generateId: uuidv4,
+    body: {
       id,
-      experimental_throttle: 100,
-      sendExtraMessageFields: true,
-      generateId: uuidv4,
-      body: {
-        id,
-        companyName: companies?.find((c) => c.id === selectedCompanyId)?.name,
-        companyId: companies?.find((c) => c.id === selectedCompanyId)?.id,
-      },
-      onFinish: () => {
-        logger.debug('Finished streaming')
-        mutate('/api/history')
-      },
-      initialMessages,
-    })
+      companyName: companies?.find((c) => c.id === selectedCompanyId)?.name,
+      companyId: companies?.find((c) => c.id === selectedCompanyId)?.id,
+    },
+    onFinish: () => {
+      logger.debug('Finished streaming')
+      mutate('/api/history')
+    },
+    initialMessages,
+  })
+
   const isLoading = status === 'streaming' || status === 'submitted'
 
   // UI and animation refs/state
@@ -187,19 +180,6 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
     setKey('aborted', true)
   }
 
-  useEffect(() => {
-    const textarea = textareaRef.current
-
-    if (textarea) {
-      textarea.style.height = 'auto'
-
-      const scrollHeight = textarea.scrollHeight
-
-      textarea.style.height = `${Math.min(scrollHeight, TEXTAREA_MAX_HEIGHT)}px`
-      textarea.style.overflowY = scrollHeight > TEXTAREA_MAX_HEIGHT ? 'auto' : 'hidden'
-    }
-  }, [TEXTAREA_MAX_HEIGHT, input, textareaRef])
-
   const runAnimation = async () => {
     if (chatStarted) {
       return
@@ -231,7 +211,9 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
 
     runAnimation()
 
-    append({ role: 'user', content: _input })
+    window.history.replaceState({}, '', `/chat/${id}`)
+
+    handleSubmit()
 
     setInput('')
 
@@ -289,8 +271,7 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
               })}
             >
               <div
-                className={classNames('flex min-w-[400px] shrink-[2] flex-col', {
-                  'max-w-[600px]': chatStarted,
+                className={classNames('flex w-[370px] min-w-[370px] max-w-[370px] shrink-0 flex-col', {
                   'border-r border-gray-200': chatStarted,
                 })}
               >
@@ -325,12 +306,7 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
                       enhancingPrompt={enhancingPrompt}
                       promptEnhanced={promptEnhanced}
                       sendMessage={sendMessage}
-                      handleInputChange={(event) => {
-                        handleInputChange?.(event)
-                        if (textareaRef?.current) {
-                          setTextareaHeight(textareaRef.current.scrollHeight)
-                        }
-                      }}
+                      handleInputChange={setInput}
                       handleStop={abort}
                       enhancePrompt={() => {
                         enhancePrompt(input, (input) => {
@@ -341,7 +317,7 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
                     />
                   </StickToBottom>
                 </div>
-                {!chatStarted && (
+                {/* {!chatStarted && (
                   <CompanySection
                     companies={companies}
                     selectedCompanyId={selectedCompanyId}
@@ -357,17 +333,17 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
                     handleSelectCompany={handleSelectCompany}
                     handleDeleteCompany={handleDeleteCompany}
                   />
-                )}
+                )} */}
               </div>
-              {chatStarted && (
+              {/* {chatStarted && (
                 <div className="w-full min-w-[920px] flex-1">
                   <Workspace chatStarted={chatStarted} isStreaming={isLoading} />
                 </div>
-              )}
+              )} */}
             </div>
           </div>
 
-          <AuthDialog
+          {/* <AuthDialog
             open={showSignUpDialog}
             onClose={() => setShowSignUpDialog(false)}
             stepType={stepType}
@@ -395,10 +371,10 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
             company={activeCompany}
             isDeleting={isDeleting}
             onConfirmDelete={confirmDeleteCompany}
-          />
+          /> */}
         </>
 
-        <ChatToastContainer />
+        {/* <ChatToastContainer /> */}
       </div>
     </div>
   )

@@ -6,7 +6,7 @@ interface UserMessageProps {
 }
 
 export function UserMessage({ content }: UserMessageProps) {
-  return <div className="overflow-hidden pt-[4px]">{parse(sanitizeUserMessage(content))}</div>
+  return <div className="w-full overflow-hidden pt-[4px]">{parse(sanitizeUserMessage(content))}</div>
 }
 
 function sanitizeUserMessage(content: string) {
