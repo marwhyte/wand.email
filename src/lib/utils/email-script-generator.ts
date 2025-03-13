@@ -104,7 +104,6 @@ export function generateEmailScript(email: Email): string {
   const rows = email.rows.map(generateRow).join('\n\n')
 
   const emailAttrs = stringifyAttributes({
-    name: email.name,
     backgroundColor: email.bgColor,
     linkColor: email.linkColor,
     fontFamily: email.fontFamily,

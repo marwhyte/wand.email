@@ -8,6 +8,8 @@ import type {
   RowBlock,
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
+import { Company } from '@/lib/database/types'
+import { getImgSrc } from '../../misc'
 
 type BlockStyleModifier = {
   text?: Partial<TextBlockAttributes>
@@ -49,7 +51,11 @@ export const rowTypeBlockDefaults: Record<string, BlockStyleModifier> = {
   // Add other row types as needed
 }
 
-export function getRowTypeBlockDefaults(block: EmailBlock | ColumnBlock, parentRow?: RowBlock) {
+export function getRowTypeBlockDefaults(
+  block: EmailBlock | ColumnBlock,
+  parentRow?: RowBlock,
+  company?: Company | null
+) {
   if (!parentRow?.attributes.type) return {}
 
   const baseDefaults = rowTypeBlockDefaults[parentRow.attributes.type]?.[block.type as keyof BlockStyleModifier] || {}
@@ -68,7 +74,7 @@ export function getRowTypeBlockDefaults(block: EmailBlock | ColumnBlock, parentR
 
         if (!width) {
           const img = new Image()
-          img.src = attributes.src || ''
+          img.src = getImgSrc(attributes.src, company) || ''
 
           if (img.naturalWidth && img.naturalHeight) {
             const aspectRatio = img.naturalWidth / img.naturalHeight

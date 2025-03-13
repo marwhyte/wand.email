@@ -9,7 +9,7 @@ import { Heading } from '../heading'
 
 interface CompanySectionProps {
   companies?: Company[] | null
-  selectedCompanyId?: string | null
+  selectedCompany?: Company | null
   showCompanyDialog?: (company?: Company) => void
   handleSelectCompany?: (company: Company) => void
   handleDeleteCompany?: (companyId: string) => void
@@ -17,7 +17,7 @@ interface CompanySectionProps {
 
 export function CompanySection({
   companies,
-  selectedCompanyId,
+  selectedCompany,
   showCompanyDialog,
   handleSelectCompany,
   handleDeleteCompany,
@@ -49,8 +49,8 @@ export function CompanySection({
               className={classNames(
                 'flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors hover:bg-gray-50',
                 {
-                  'border-blue-500 bg-blue-50/50': selectedCompanyId === company.id,
-                  'border-gray-200': selectedCompanyId !== company.id,
+                  'border-blue-500 bg-blue-50/50': selectedCompany?.id === company.id,
+                  'border-gray-200': selectedCompany?.id !== company.id,
                 }
               )}
             >
@@ -74,7 +74,7 @@ export function CompanySection({
                 </div>
               </div>
               <div className="flex items-center space-x-1">
-                {selectedCompanyId === company.id && <Badge color="blue">Selected</Badge>}
+                {selectedCompany?.id === company.id && <Badge color="blue">Selected</Badge>}
 
                 <Button plain tooltip="Edit company" onClick={() => showCompanyDialog?.(company)}>
                   <PencilSquareIcon className="h-5 w-5 !text-gray-500" />

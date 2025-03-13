@@ -1,16 +1,12 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { useSearchParams } from 'next/navigation'
 
 type Props = {
   inputDisabled?: boolean
 }
 
 export function BackgroundGradients({ inputDisabled }: Props) {
-  const searchParams = useSearchParams()
-  const shouldShow = searchParams.get('id') === null
-
   // Define animation variants
   const fadeVariants = {
     initial: { opacity: 0 },
@@ -19,7 +15,7 @@ export function BackgroundGradients({ inputDisabled }: Props) {
   }
 
   // Use a single condition that persists the gradient
-  const showGradient = shouldShow || inputDisabled
+  const showGradient = inputDisabled
 
   return (
     <AnimatePresence initial={false}>

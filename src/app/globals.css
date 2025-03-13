@@ -62,6 +62,7 @@ table {
 
 .mobile-forced-full-width {
   display: inline-block !important;
+  width: 100% !important;
 }
 
 .mobile-forced-half-width {

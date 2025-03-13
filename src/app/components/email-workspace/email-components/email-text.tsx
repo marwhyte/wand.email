@@ -1,8 +1,8 @@
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateTextProps } from '@/lib/utils/attributes'
 import { Text } from '@react-email/components'
 import parse from 'html-react-parser'
-import { useSearchParams } from 'next/navigation'
 import { RowBlock, TextBlock } from '../types'
 
 type Props = {
@@ -11,18 +11,17 @@ type Props = {
 }
 
 export default function EmailText({ block, parentRow }: Props) {
-  const searchParams = useSearchParams()
   const { mobileView } = useMobileViewStore()
+  const { email } = useEmailStore()
 
-  // Custom options for html-react-parser to style links
   const options = {
     replace: (domNode: any) => {
-      if (domNode.name === 'a' && !domNode.attribs.style) {
-        domNode.attribs.style = 'color: #0066CC;'
+      if (domNode.name === 'a' && (!domNode.attribs.style || !domNode.attribs.style.includes('color'))) {
+        domNode.attribs.style = `color: ${email?.linkColor ?? '#0066CC'};`
         return domNode
       }
     },
   }
 
-  return <Text {...generateTextProps(block, parentRow, mobileView)}>{parse(block.content, options)}</Text>
+  return <Text {...generateTextProps(block, parentRow, mobileView, email)}>{parse(block.content, options)}</Text>
 }

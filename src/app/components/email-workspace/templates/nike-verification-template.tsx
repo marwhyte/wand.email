@@ -45,5 +45,12 @@ export const nikeVerificationTemplate = (): Email => {
 </EMAIL>
 `
 
-  return createEmail('nike verification code', parseEmailScript(aiScript), '#000000', '#000000', 'Helvetica Neue, Arial, sans-serif', '#FFFFFF', '400')
+  return createEmail(
+    parseEmailScript(aiScript),
+    '#000000',
+    '#000000',
+    'Helvetica Neue, Arial, sans-serif',
+    '#FFFFFF',
+    '400'
+  )
 }

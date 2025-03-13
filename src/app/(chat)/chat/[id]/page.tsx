@@ -1,15 +1,15 @@
 import { notFound } from 'next/navigation'
 
 import { Chat } from '@/app/components/chat/chat'
-import { DataStreamHandler } from '@/app/components/data-stream-handler'
 import { auth } from '@/auth'
 import { getChatWithMessages } from '@/lib/database/queries/chats'
-import { getCompanies } from '@/lib/database/queries/companies'
+import { getCompanies, getCompany } from '@/lib/database/queries/companies'
 import { getMonthlyExportCount } from '@/lib/database/queries/exports'
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params
   const { id } = params
+
   const chat = await getChatWithMessages(id)
 
   if (!chat) {
@@ -24,6 +24,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   const monthlyExportCount = await getMonthlyExportCount()
   const companies = await getCompanies()
+  const company = chat.company_id ? await getCompany(chat.company_id) : null
 
   return (
     <>
@@ -32,9 +33,9 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         id={chat.id}
         initialMessages={chat.messages}
         companies={companies}
+        chatCompany={company}
         monthlyExportCount={monthlyExportCount}
       />
-      <DataStreamHandler id={id} />
     </>
   )
 }

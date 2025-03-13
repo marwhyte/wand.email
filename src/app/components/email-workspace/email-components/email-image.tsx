@@ -1,7 +1,7 @@
+import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getBlockAttributes } from '@/lib/utils/attributes'
-import { Img } from '@react-email/components'
 import Image from 'next/image'
 import FileUploader from '../../file-uploader'
 import { ImageBlock, RowBlock } from '../types'
@@ -12,7 +12,9 @@ type Props = {
 }
 
 export default function EmailImage({ block, parentRow }: Props) {
-  const { setEmail, email, setCurrentBlock } = useEmailStore()
+  const { email, setCurrentBlock } = useEmailStore()
+  const { chatId } = useChatStore()
+  const saveEmail = useEmailSave(chatId)
   const { company } = useChatStore()
 
   const handleUpload = (src: string) => {
@@ -34,7 +36,7 @@ export default function EmailImage({ block, parentRow }: Props) {
       })),
     }
 
-    setEmail(updatedEmail)
+    saveEmail(updatedEmail)
     setCurrentBlock(updatedBlock)
   }
 
@@ -50,5 +52,7 @@ export default function EmailImage({ block, parentRow }: Props) {
     )
   }
 
-  return <Img {...getBlockAttributes(block, parentRow, false, company, email?.linkColor)} />
+  const attributes = getBlockAttributes(block, parentRow, false, company, email)
+
+  return <img {...attributes} />
 }

@@ -40,8 +40,8 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
     setExportType(type)
   }
 
-  const htmlEmailCode = render(EmailRendererFinal({ email: email, company: company }))
-  const reactEmailCode = getReactEmailCode(company, email)
+  const htmlEmailCode = open ? render(EmailRendererFinal({ email: email, company: company })) : ''
+  const reactEmailCode = open ? getReactEmailCode(company, email) : ''
 
   const handleCopyReact = useCallback(async () => {
     try {

@@ -1,7 +1,9 @@
-import { openai } from '@ai-sdk/openai'
-import { generateText, Message } from 'ai'
+'use server'
 
-export async function generateTitleFromUserMessage({ message }: { message: Message }) {
+import { openai } from '@ai-sdk/openai'
+import { generateText } from 'ai'
+
+export async function generateTitleFromUserMessage({ message }: { message: string }) {
   const { text: title } = await generateText({
     model: openai('gpt-4-turbo'),
     system: `\n
@@ -9,7 +11,7 @@ export async function generateTitleFromUserMessage({ message }: { message: Messa
       - ensure it is not more than 80 characters long
       - the title should be a summary of the user's message
       - do not use quotes or colons`,
-    prompt: JSON.stringify(message),
+    prompt: message,
   })
 
   return title

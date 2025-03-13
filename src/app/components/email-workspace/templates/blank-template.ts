@@ -9,13 +9,13 @@ export const blankTemplateScript = `
 export const blankTemplate = (): Email => {
   return {
     id: uuidv4(),
-    name: 'Blank Template',
     preview: 'Blank Template',
     fontFamily: 'Arial, sans-serif',
     width: '600',
     color: '#000000',
-    linkColor: '#000000',
+    linkColor: '#3b82f6',
     bgColor: '#FFFFFF',
+    rowBgColor: '#FFFFFF',
     rows: [],
   }
 }

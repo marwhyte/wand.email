@@ -52,7 +52,14 @@ export const templates: Template[] = [
   },
 ]
 
-export const templateTypes: TemplateTypes[] = ['personalized', 'recommended', 'ecommerce', 'transactional', 'welcome-series', 'newsletter']
+export const templateTypes: TemplateTypes[] = [
+  'personalized',
+  'recommended',
+  'ecommerce',
+  'transactional',
+  'welcome-series',
+  'newsletter',
+]
 
 export const getTemplateName = (id: string) => {
   const template = templates.find((template) => template.id === id)
@@ -128,13 +135,13 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
       return {
         ...baseBlock,
         type: 'heading',
-        attributes: { as: 'h2', paddingTop: '10px', paddingBottom: '10px', paddingLeft: '0', paddingRight: '0' },
+        attributes: { as: 'h2' },
       }
     case 'text':
       return {
         ...baseBlock,
         type: 'text',
-        attributes: { paddingTop: '10px', paddingBottom: '10px', paddingLeft: '0', paddingRight: '0' },
+        attributes: {},
       }
     case 'image':
       return {
@@ -172,7 +179,7 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
       return {
         ...baseBlock,
         type: 'link',
-        attributes: { href: '#', paddingTop: '10px', paddingBottom: '10px', paddingLeft: '0', paddingRight: '0' },
+        attributes: { href: '#' },
       }
     default:
       throw new Error(`Unsupported block type: ${type}`)

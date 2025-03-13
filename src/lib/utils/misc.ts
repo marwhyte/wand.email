@@ -1,5 +1,6 @@
 import { Message } from '@ai-sdk/react'
 import { v4 as uuidv4 } from 'uuid'
+import { Company } from '../database/types'
 export function shouldUseDarkText(backgroundColor: string) {
   // Convert hex to RGB
   const hex = backgroundColor.replace('#', '')
@@ -46,6 +47,14 @@ export function getPhotoUrl(name: string, template: string) {
 
 export function getImgFromKey(imageKey: string, thumbnail = false) {
   return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${imageKey}`
+}
+
+export function getImgSrc(src: string, company?: Company | null) {
+  return src === 'logo'
+    ? company?.logo_image_key
+      ? getImgFromKey(company.logo_image_key)
+      : getImgFromKey('dummy-logo.png')
+    : src
 }
 
 export function truncate(string: string, length: number) {

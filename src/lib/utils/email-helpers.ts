@@ -38,7 +38,12 @@ type RowWithColumnConfig = {
   width?: string
 }
 
-export const createRowWithColumn = ({ containerAttrs = {}, rowAttrs = {}, columnAttrs = {}, width = '100%' }: RowWithColumnConfig = {}) => {
+export const createRowWithColumn = ({
+  containerAttrs = {},
+  rowAttrs = {},
+  columnAttrs = {},
+  width = '100%',
+}: RowWithColumnConfig = {}) => {
   const column = createColumn([], width, columnAttrs)
   const row = {
     id: uuidv4(),
@@ -64,16 +69,27 @@ export const createRow = (containerAttrs = {}, attrs = {}) => ({
   columns: [],
 })
 
-export const createEmail = (name: string, rows: RowBlock[], color: string, linkColor: string, fontFamily = 'Arial', bgColor = '#ffffff', width = '600', bgImage: string | undefined = undefined, bgPosition: string | undefined = undefined, bgRepeat: string | undefined = undefined, bgSize: string | undefined = undefined): Email => ({
+export const createEmail = (
+  rows: RowBlock[],
+  color: string,
+  linkColor: string,
+  fontFamily = 'Arial',
+  bgColor = '#ffffff',
+  width = '600',
+  bgImage: string | undefined = undefined,
+  bgPosition: string | undefined = undefined,
+  bgRepeat: string | undefined = undefined,
+  bgSize: string | undefined = undefined
+): Email => ({
   id: uuidv4(),
-  name,
   rows,
   width,
   color,
   linkColor,
-  preview: name,
+  preview: '',
   fontFamily,
   bgColor,
+  rowBgColor: bgColor,
   bgImage,
   bgPosition,
   bgRepeat,
@@ -169,7 +185,14 @@ type TwoColumnConfig = {
   rightColumnWidth?: string
 }
 
-export const createRowWithTwoColumns = ({ containerAttrs = {}, rowAttrs = {}, leftColumnAttrs = {}, rightColumnAttrs = {}, leftColumnWidth = '50%', rightColumnWidth = '50%' }: TwoColumnConfig = {}) => {
+export const createRowWithTwoColumns = ({
+  containerAttrs = {},
+  rowAttrs = {},
+  leftColumnAttrs = {},
+  rightColumnAttrs = {},
+  leftColumnWidth = '50%',
+  rightColumnWidth = '50%',
+}: TwoColumnConfig = {}) => {
   const leftColumn = createColumn([], leftColumnWidth, leftColumnAttrs)
   const rightColumn = createColumn([], rightColumnWidth, rightColumnAttrs)
 

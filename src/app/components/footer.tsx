@@ -1,16 +1,8 @@
 'use client'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import SocialIcons from './social-icons'
 
 export function Footer() {
-  const searchParams = useSearchParams()
-  const chatStarted = searchParams.get('id')
-
-  if (chatStarted) {
-    return null
-  }
-
   return (
     <footer className="flex items-center justify-end gap-4 px-4 py-4 text-sm text-gray-600">
       <SocialIcons />

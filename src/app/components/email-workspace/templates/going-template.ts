@@ -84,4 +84,4 @@ export const goingTemplateScript = `
 </EMAIL>
 `
 
-export const goingTemplate = createEmail('Going Template', parseEmailScript(goingTemplateScript), '#004449', '#004449')
+export const goingTemplate = createEmail(parseEmailScript(goingTemplateScript), '#004449', '#004449')

@@ -1,21 +1,20 @@
 'use client'
 
+import { generateTitleFromUserMessage } from '@/app/(chat)/actions'
 import { useOpener, usePromptEnhancer, useSnapScroll } from '@/app/hooks'
 import { useChatHistory } from '@/app/hooks/useChatHistory'
+import { useMessageParser } from '@/app/hooks/useMessageParser'
+import { updateChat } from '@/lib/database/queries/chats'
 import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat as ChatType, Company } from '@/lib/database/types'
 import { chatStore } from '@/lib/stores/chat'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
 import { classNames } from '@/lib/utils/misc'
 import { Message, useChat } from '@ai-sdk/react'
-import { AuthDialog } from '@components/dialogs/auth-dialog'
-import CompanyDialog from '@components/dialogs/company-dialog'
-import { DeleteCompanyDialog } from '@components/dialogs/delete-company-dialog'
-import UpgradeDialog from '@components/dialogs/upgrade-dialog'
 import { Header } from '@components/header'
 import { Menu } from '@components/sidebar/menu'
-import { ChatToastContainer } from '@components/toast/chat-toast-container'
 import { ArrowDownCircleIcon } from '@heroicons/react/24/solid'
 import { useAnimate } from 'framer-motion'
 import { useSession } from 'next-auth/react'
@@ -36,6 +35,7 @@ type Props = {
   id: string
   chat?: ChatType
   companies: Company[] | null
+  chatCompany?: Company | null
   monthlyExportCount: number | null
   initialMessages: Message[]
 }
@@ -73,9 +73,10 @@ function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
   )
 }
 
-export function Chat({ id, companies, monthlyExportCount, initialMessages, chat }: Props) {
+export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMessages, chat }: Props) {
   const { mutate } = useSWRConfig()
-  useChatHistory({ chat: chat })
+  const { setTitle, setCompany, company } = useChatStore()
+  useChatHistory({ chat: chat, chatId: id, company: chatCompany })
 
   // Chat state and handlers
   const { messages, status, input, handleInputChange, setInput, stop, append, reload, handleSubmit, setMessages } =
@@ -86,15 +87,18 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
       generateId: uuidv4,
       body: {
         id,
-        companyName: companies?.find((c) => c.id === selectedCompanyId)?.name,
-        companyId: companies?.find((c) => c.id === selectedCompanyId)?.id,
+        companyName: company?.name,
+        companyId: company?.id,
       },
-      onFinish: () => {
+      onFinish: (message: Message) => {
         logger.debug('Finished streaming')
         mutate('/api/history')
       },
       initialMessages,
     })
+
+  const latestAssistantMessage = messages.findLast((m) => m.role === 'assistant')
+  useMessageParser(latestAssistantMessage ?? { role: 'assistant', content: '', id: '' })
 
   const isLoading = status === 'streaming' || status === 'submitted'
 
@@ -115,7 +119,6 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
   } | null>(null)
 
   // Company management
-  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(companies?.length ? companies[0].id : null)
   const [activeCompany, setActiveCompany] = useState<Company | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -147,15 +150,17 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
   renderLogger.trace('Chat')
 
   useEffect(() => {
-    if (companies?.length && !selectedCompanyId) {
-      setSelectedCompanyId(companies[0].id)
+    if (chat) return
+
+    if (companies?.length && !company) {
+      setCompany(companies[0])
     } else if (!companies?.length) {
-      setSelectedCompanyId(null)
+      setCompany(undefined)
     }
-    if (selectedCompanyId && !companies?.find((c) => c.id === selectedCompanyId)) {
-      setSelectedCompanyId(null)
+    if (company && !companies?.find((c) => c.id === company.id)) {
+      setCompany(undefined)
     }
-  }, [companies, selectedCompanyId])
+  }, [companies, company])
 
   useEffect(() => {
     if (session.data?.user) {
@@ -234,13 +239,21 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
 
     window.history.replaceState({}, '', `/chat/${id}`)
 
-    handleSubmit()
+    append({ role: 'user', content: _input })
 
     setInput('')
 
     resetEnhancer()
 
     textareaRef.current?.blur()
+
+    const title = await generateTitleFromUserMessage({
+      message: _input,
+    })
+
+    setTitle(title)
+
+    await updateChat(id, { title })
   }
 
   const handleDeleteCompany = async (companyId: string) => {
@@ -259,8 +272,8 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
     } catch (error) {
     } finally {
       setIsDeleting(false)
-      if (selectedCompanyId === activeCompany?.id) {
-        setSelectedCompanyId(null)
+      if (company?.id === activeCompany?.id) {
+        setCompany(undefined)
       }
 
       setActiveCompany(null)
@@ -270,7 +283,7 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
   }
 
   const handleSelectCompany = (company: Company) => {
-    setSelectedCompanyId(company.id)
+    setCompany(company)
   }
 
   return (
@@ -347,7 +360,7 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
                 {!chatStarted && (
                   <CompanySection
                     companies={companies}
-                    selectedCompanyId={selectedCompanyId}
+                    selectedCompany={company}
                     showCompanyDialog={(company) => {
                       setPendingAction({ type: 'open-company-dialog' })
                       if (session.data?.user?.id) {
@@ -364,13 +377,13 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
               </div>
               {chatStarted && (
                 <div className="w-full overflow-auto">
-                  <Workspace chatStarted={chatStarted} isStreaming={isLoading} />
+                  <Workspace isStreaming={isLoading} />
                 </div>
               )}
             </div>
           </div>
 
-          <AuthDialog
+          {/* <AuthDialog
             open={showSignUpDialog}
             onClose={() => setShowSignUpDialog(false)}
             stepType={stepType}
@@ -399,9 +412,10 @@ export function Chat({ id, companies, monthlyExportCount, initialMessages, chat 
             isDeleting={isDeleting}
             onConfirmDelete={confirmDeleteCompany}
           />
-        </>
+   
 
-        <ChatToastContainer />
+        <ChatToastContainer /> */}
+        </>
       </div>
     </div>
   )

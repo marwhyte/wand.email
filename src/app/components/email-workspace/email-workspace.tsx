@@ -8,15 +8,21 @@ import EmailEditor from './email-editor'
 import EmailRenderer from './email-renderer'
 
 type Props = {
-  chatStarted: boolean
   isStreaming: boolean
 }
 
-export default function Workspace({ chatStarted, isStreaming }: Props) {
+export default function Workspace({ isStreaming }: Props) {
   const { email } = useEmailStore()
 
-  if (!email || !chatStarted) {
-    return null
+  if (!email) {
+    return (
+      <div className="flex items-center justify-center" style={{ height: 'calc(100vh - 65px)' }}>
+        <div className="text-center">
+          <div className="border-primary mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-t-2"></div>
+          <p className="text-gray-500">Loading email content...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

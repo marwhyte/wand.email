@@ -1,6 +1,7 @@
 import type {
   ButtonBlock,
   DividerBlock,
+  Email,
   EmailBlock,
   HeadingBlock,
   ImageBlock,
@@ -11,8 +12,8 @@ import type {
 } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
-import { getImgFromKey } from '../../misc'
-import { applyCommonAttributes, applyCommonClassName } from '../common'
+import { getImgSrc } from '../../misc'
+import { applyCommonAttributes } from '../common'
 import {
   getAdditionalButtonStyles,
   getAdditionalDividerStyles,
@@ -28,14 +29,14 @@ type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
 export function generateTextProps(
   block: TextBlock,
   parentRow: RowBlock,
-  mobileView = false
+  mobileView = false,
+  email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Text>> {
   return {
     style: {
       ...applyCommonAttributes(block.attributes),
       ...getAdditionalTextStyles(block, parentRow),
     },
-    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
@@ -52,7 +53,6 @@ export function generateHeadingProps(
       marginBlockStart: 0,
       marginBlockEnd: 0,
     },
-    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
@@ -61,19 +61,13 @@ export function generateImageProps(
   parentRow: RowBlock,
   company: Company | null
 ): OmitChildren<React.ComponentProps<typeof Img>> {
-  const src =
-    block.attributes.src === 'logo'
-      ? company?.logo_image_key
-        ? getImgFromKey(company.logo_image_key)
-        : getImgFromKey('dummy-logo.png')
-      : block.attributes.src
-
+  const src = getImgSrc(block.attributes.src, company)
   const final = {
     src,
     alt: block.attributes.alt,
     style: {
       ...applyCommonAttributes(block.attributes),
-      ...getAdditionalImageStyles(block, parentRow),
+      ...getAdditionalImageStyles(block, parentRow, company),
     },
   }
 
@@ -96,7 +90,6 @@ export function generateButtonProps(
     target: block.attributes.target,
     rel: block.attributes.rel,
     style,
-    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
@@ -104,17 +97,22 @@ export function generateLinkProps(
   block: LinkBlock,
   parentRow: RowBlock,
   mobileView = false,
-  defaultLinkColor?: string
+  email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Link>> {
+  const mergedAttributes: React.ComponentProps<typeof Link>['style'] = {
+    ...applyCommonAttributes(block.attributes),
+    ...getAdditionalLinkStyles(block, parentRow),
+  }
+
+  if (email && !mergedAttributes.color) {
+    mergedAttributes.color = email.linkColor
+  }
+
   return {
     href: block.attributes.href,
     target: block.attributes.target,
     rel: block.attributes.rel,
-    style: {
-      ...applyCommonAttributes(block.attributes),
-      ...getAdditionalLinkStyles(block, parentRow),
-    },
-    className: applyCommonClassName(block.attributes, mobileView),
+    style: mergedAttributes,
   }
 }
 
@@ -123,12 +121,13 @@ export function generateDividerProps(
   parentRow: RowBlock,
   mobileView = false
 ): OmitChildren<React.ComponentProps<typeof Hr>> {
+  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...otherAttributes } = block.attributes
+
   return {
     style: {
-      ...applyCommonAttributes(block.attributes),
+      ...applyCommonAttributes(otherAttributes),
       ...getAdditionalDividerStyles(block, parentRow),
     },
-    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
@@ -142,7 +141,6 @@ export function generateSurveyProps(
       ...applyCommonAttributes(block.attributes),
       ...getAdditionalSurveyStyles(block, parentRow),
     },
-    className: applyCommonClassName(block.attributes, mobileView),
   }
 }
 
@@ -151,7 +149,7 @@ export function getBlockAttributes<T extends EmailBlock>(
   parentRow: RowBlock,
   mobileView = false,
   company: Company | null,
-  defaultLinkColor?: string
+  email: Email | null
 ): T extends TextBlock
   ? ReturnType<typeof generateTextProps>
   : T extends HeadingBlock
@@ -169,7 +167,7 @@ export function getBlockAttributes<T extends EmailBlock>(
               : never {
   switch (block.type) {
     case 'text':
-      return generateTextProps(block as TextBlock, parentRow, mobileView) as any
+      return generateTextProps(block as TextBlock, parentRow, mobileView, email) as any
     case 'heading':
       return generateHeadingProps(block as HeadingBlock, parentRow, mobileView) as any
     case 'image':
@@ -177,7 +175,7 @@ export function getBlockAttributes<T extends EmailBlock>(
     case 'button':
       return generateButtonProps(block as ButtonBlock, parentRow, company, mobileView) as any
     case 'link':
-      return generateLinkProps(block as LinkBlock, parentRow, mobileView, defaultLinkColor) as any
+      return generateLinkProps(block as LinkBlock, parentRow, mobileView, email) as any
     case 'divider':
       return generateDividerProps(block as DividerBlock, parentRow, mobileView) as any
     case 'survey':

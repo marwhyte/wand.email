@@ -120,9 +120,4 @@ export const ebayTemplateScript = `
 </EMAIL>
 `
 
-export const ebayTemplate = createEmail(
-  'Back-to-School Email',
-  parseEmailScript(ebayTemplateScript),
-  '#000000',
-  '#000000'
-)
+export const ebayTemplate = createEmail(parseEmailScript(ebayTemplateScript), '#000000', '#000000')

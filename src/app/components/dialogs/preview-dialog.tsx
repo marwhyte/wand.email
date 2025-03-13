@@ -17,7 +17,7 @@ const PreviewDialog = ({ open, onClose }: Props) => {
   const [selectedWidth, setSelectedWidth] = useState<'600' | '750'>('750')
 
   // Generate the complete HTML string
-  const htmlContent = render(EmailRendererFinal({ email: email, company: company }))
+  const htmlContent = open ? render(EmailRendererFinal({ email: email, company: company })) : ''
 
   const widthOptions = [
     { name: '600px', value: '600' },

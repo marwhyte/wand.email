@@ -1,8 +1,8 @@
 import { ColorInput } from '@/app/components/color-input'
 import { Field, Label } from '@/app/components/fieldset'
 import { Select } from '@/app/components/select'
+import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useChatStore } from '@/lib/stores/chatStore'
-import { useEmailStore } from '@/lib/stores/emailStore'
 import { getImgFromKey } from '@/lib/utils/misc'
 import { useCallback } from 'react'
 import Nbsp from '../nbsp'
@@ -14,14 +14,15 @@ type EmailSettingsProps = {
 }
 
 const EmailSettings = ({ email }: EmailSettingsProps) => {
-  const { setEmail } = useEmailStore()
-  const { company } = useChatStore()
+  const { company, chatId } = useChatStore()
+  const saveEmail = useEmailSave(chatId)
 
   const handleChange = useCallback(
     (attributes: Partial<Email>) => {
-      setEmail({ ...email, ...attributes })
+      const updatedEmail = { ...email, ...attributes }
+      saveEmail(updatedEmail)
     },
-    [email, setEmail]
+    [email]
   )
 
   const fontFamilies = [
@@ -68,6 +69,14 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
       <Field>
         <Label>Default text color</Label>
         <ColorInput value={email.color} onChange={(color) => handleChange({ color })} />
+      </Field>
+      <Field>
+        <Label>Default link color</Label>
+        <ColorInput value={email.linkColor} onChange={(linkColor) => handleChange({ linkColor })} />
+      </Field>
+      <Field>
+        <Label>Default row background color</Label>
+        <ColorInput value={email.rowBgColor} onChange={(rowBgColor) => handleChange({ rowBgColor })} />
       </Field>
       <Field>
         <Label>Font family</Label>

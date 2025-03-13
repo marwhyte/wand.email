@@ -20,18 +20,25 @@ export function getDefaultRowAttributes(row: RowBlock): Partial<RowBlock['attrib
   }
 }
 
-export const getRowAttributes = (row: RowBlock): Partial<RowBlock['attributes']> => {
+export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> => {
   const defaultAttributes = getDefaultRowAttributes(row)
   const mergedAttributes = { ...defaultAttributes, ...row.attributes }
+
+  if (email && !mergedAttributes.backgroundColor) {
+    mergedAttributes.backgroundColor = email.rowBgColor ?? '#ffffff'
+  }
 
   return mergedAttributes
 }
 
-export function generateContainerProps(row: RowBlock, email: Email): OmitChildren<React.ComponentProps<typeof Container>> {
-  const rowAttributes = getRowAttributes(row)
+export function generateContainerProps(
+  row: RowBlock,
+  email: Email
+): OmitChildren<React.ComponentProps<typeof Container>> {
+  const rowAttributes = getRowAttributes(row, email)
 
   return {
-    className: rowAttributes.hideOnMobile ? 'hide-on-mobile' : undefined,
+    className: `row-content${rowAttributes.hideOnMobile ? ' mobile_hide' : ''}`,
     style: {
       ...applyCommonAttributes(row.container.attributes),
       minWidth: row.container.attributes.minWidth,
@@ -41,10 +48,11 @@ export function generateContainerProps(row: RowBlock, email: Email): OmitChildre
   }
 }
 
-export function generateRowProps(row: RowBlock): OmitChildren<React.ComponentProps<typeof Row>> {
-  const mergedAttributes = getRowAttributes(row)
+export function generateRowProps(row: RowBlock, email: Email | null): OmitChildren<React.ComponentProps<typeof Row>> {
+  const mergedAttributes = getRowAttributes(row, email)
 
   return {
+    className: `row-content${mergedAttributes.stackOnMobile ? ' stack' : ''}`,
     style: {
       ...applyCommonAttributes(mergedAttributes),
       backgroundImage: mergedAttributes.backgroundImage,
@@ -52,46 +60,47 @@ export function generateRowProps(row: RowBlock): OmitChildren<React.ComponentPro
       borderWidth: mergedAttributes.borderWidth,
       borderStyle: mergedAttributes.borderStyle,
       minWidth: mergedAttributes.minWidth,
+      tableLayout: 'fixed',
     },
     align: mergedAttributes.align,
     bgcolor: mergedAttributes.backgroundColor ?? 'transparent',
   }
 }
 
-export function generateColumnProps(column: ColumnBlock, row: RowBlock, mobileView = false): OmitChildren<React.ComponentProps<typeof Column>> {
-  const columnIndex = row.columns.indexOf(column)
-  const isGallery = row.attributes.type === 'gallery'
-  const rowAttributes = getRowAttributes(row)
+export function generateColumnProps(
+  column: ColumnBlock,
+  row: RowBlock,
+  email: Email | null
+): OmitChildren<React.ComponentProps<typeof Column>> {
+  const rowAttributes = getRowAttributes(row, email)
 
   // Get column-specific defaults based on row type
   const rowTypeDefaults = getRowTypeBlockDefaults(column, row)
 
+  console.log('column.width', column.width)
+
   let style: React.CSSProperties = {
     ...(rowTypeDefaults as React.CSSProperties),
-    width: column.width,
+    width: column.width ?? '100%',
     borderStyle: column.attributes.borderStyle,
     borderWidth: column.attributes.borderWidth,
     borderColor: column.attributes.borderColor,
     borderSpacing: column.attributes.borderSpacing,
     verticalAlign: column.attributes.verticalAlign ?? rowTypeDefaults.verticalAlign ?? 'top',
-  }
-
-  if (rowAttributes.twoColumnsOnMobile && mobileView) {
-    style.paddingBottom = '12px'
-  }
-
-  if (rowAttributes.stackOnMobile && mobileView) {
-    style.width = '100%'
-    style.paddingBottom = '12px'
+    wordBreak: 'break-word',
   }
 
   return {
     align: column.attributes.align,
     style,
+    className: 'column',
   }
 }
 
-export function generateBodyProps(email: Email, skipBackgroundColor = false): OmitChildren<React.ComponentProps<typeof Body>> {
+export function generateBodyProps(
+  email: Email,
+  skipBackgroundColor = false
+): OmitChildren<React.ComponentProps<typeof Body>> {
   return {
     style: {
       margin: 0,

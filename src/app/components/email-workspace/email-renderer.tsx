@@ -1,7 +1,8 @@
 'use client'
 
+import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { createNewBlock } from '@/lib/data/templates'
-import { useEmailStore } from '@/lib/stores/emailStore'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateBodyProps } from '@/lib/utils/attributes'
 import { useCallback, useState } from 'react'
@@ -15,7 +16,8 @@ type Props = {
 }
 
 const EmailRenderer = ({ email }: Props) => {
-  const { setEmail } = useEmailStore()
+  const { chatId } = useChatStore()
+  const saveEmail = useEmailSave(chatId)
   const { mobileView } = useMobileViewStore()
   const [dropLine, setDropLine] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<{
@@ -34,7 +36,7 @@ const EmailRenderer = ({ email }: Props) => {
     const insertIndex = dragIndex < hoverIndex ? hoverIndex - 1 : hoverIndex
     newRows.splice(insertIndex, 0, draggedRow)
 
-    setEmail({
+    saveEmail({
       ...email,
       rows: newRows,
     })
@@ -136,7 +138,7 @@ const EmailRenderer = ({ email }: Props) => {
       }
 
       // Save the updated email
-      setEmail(newEmail)
+      saveEmail(newEmail)
       setDropTarget(null)
     }
   }
@@ -193,11 +195,11 @@ const EmailRenderer = ({ email }: Props) => {
       }
     }
 
-    setEmail(newEmail)
+    saveEmail(newEmail)
     setDropTarget(null)
   }
 
-  const addRow = (width: string) => {
+  const addRow = (widths: string[]) => {
     const newRows = [...email.rows]
     const newRow: RowBlock = {
       id: uuidv4(),
@@ -206,21 +208,19 @@ const EmailRenderer = ({ email }: Props) => {
       container: {
         attributes: {},
       },
-      columns: [
-        {
-          id: uuidv4(),
-          type: 'column',
-          width,
-          attributes: {
-            align: 'center',
-            paddingTop: '10px',
-            paddingBottom: '10px',
-            paddingLeft: '10px',
-            paddingRight: '10px',
-          },
-          blocks: [],
+      columns: widths.map((w) => ({
+        id: uuidv4(),
+        type: 'column',
+        width: w,
+        attributes: {
+          align: 'center',
+          paddingTop: '10px',
+          paddingBottom: '10px',
+          paddingLeft: '10px',
+          paddingRight: '10px',
         },
-      ],
+        blocks: [],
+      })),
     }
 
     if (dropLine === 'end' || dropLine === null) {
@@ -234,7 +234,7 @@ const EmailRenderer = ({ email }: Props) => {
       }
     }
 
-    setEmail({
+    saveEmail({
       ...email,
       rows: newRows,
     })
@@ -245,10 +245,11 @@ const EmailRenderer = ({ email }: Props) => {
     type: 'newBlock' | 'newRow'
     id: string
     newBlockType?: EmailBlockType
-    width?: string
+    widths?: string[]
   }) => {
     if (item.type === 'newRow') {
-      addRow(item.width ?? '100%')
+      console.log('newRow', item.widths)
+      addRow(item.widths ?? ['100%'])
     } else if (item.type === 'newBlock' && item.newBlockType) {
       const newRow: RowBlock = {
         id: uuidv4(),
@@ -261,7 +262,7 @@ const EmailRenderer = ({ email }: Props) => {
           {
             id: uuidv4(),
             type: 'column',
-            width: item.width ?? '100%',
+            width: '100%',
             attributes: {
               align: 'center',
             },
@@ -269,7 +270,7 @@ const EmailRenderer = ({ email }: Props) => {
           },
         ],
       }
-      setEmail({
+      saveEmail({
         ...email,
         rows: [newRow],
       })

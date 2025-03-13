@@ -104,5 +104,5 @@ export const stripeTemplateScript = `
 
 export const stripeTemplate = (): Email => {
   const rows = parseEmailScript(stripeTemplateScript)
-  return createEmail('The Update - November 2024', rows, '#0a2540', '#635BFF', 'Arial, sans-serif', 'transparent')
+  return createEmail(rows, '#0a2540', '#635BFF', 'Arial, sans-serif', 'transparent')
 }

@@ -7,7 +7,6 @@ import {
   getBlockAttributes,
   getRowAttributes,
 } from '@/lib/utils/attributes'
-import { chunk } from '@/lib/utils/misc'
 import {
   Body,
   Button,
@@ -30,7 +29,7 @@ import EmailSurvey from './email-components/email-survey'
 import { ColumnBlock, Email, EmailBlock, RowBlock } from './types'
 
 type Props = {
-  email?: Email
+  email: Email | null
   company: Company | null
 }
 
@@ -42,27 +41,27 @@ const RenderBlockFinal = ({
 }: {
   block: EmailBlock
   parentRow: RowBlock
-  email?: Email
+  email: Email | null
   company: Company | null
 }) => {
   switch (block.type) {
     case 'text':
-      const textProps = getBlockAttributes(block, parentRow, false, company, undefined)
+      const textProps = getBlockAttributes(block, parentRow, false, company, email)
       return <Text {...textProps}>{parse(block.content)}</Text>
     case 'heading':
-      const headingProps = getBlockAttributes(block, parentRow, false, company, undefined)
+      const headingProps = getBlockAttributes(block, parentRow, false, company, email)
       return <Heading {...headingProps}>{parse(block.content)}</Heading>
     case 'image':
-      const imageProps = getBlockAttributes(block, parentRow, false, company, undefined)
+      const imageProps = getBlockAttributes(block, parentRow, false, company, email)
       return <Img {...imageProps} />
     case 'button':
-      const buttonProps = getBlockAttributes(block, parentRow, false, company, undefined)
+      const buttonProps = getBlockAttributes(block, parentRow, false, company, email)
       return <Button {...buttonProps}>{parse(block.content)}</Button>
     case 'link':
-      const linkProps = getBlockAttributes(block, parentRow, false, company, email?.linkColor)
+      const linkProps = getBlockAttributes(block, parentRow, false, company, email)
       return <Link {...linkProps}>{parse(block.content)}</Link>
     case 'divider':
-      const dividerProps = getBlockAttributes(block, parentRow, false, company, undefined)
+      const dividerProps = getBlockAttributes(block, parentRow, false, company, email)
       return <Hr {...dividerProps} />
     case 'socials':
       return <EmailSocials isEditing={false} block={block} parentRow={parentRow} />
@@ -74,7 +73,7 @@ const RenderBlockFinal = ({
 }
 
 const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; company: Company | null }) => {
-  const rowAttributes = getRowAttributes(row)
+  const rowAttributes = getRowAttributes(row, email)
   const columnSpacing = rowAttributes?.columnSpacing || 0
   const numColumns = row.columns.length
   const numSpacers = numColumns - 1
@@ -87,65 +86,32 @@ const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; c
     ))
 
   const renderSpacer = (index: number) =>
-    columnSpacing > 0 && index < row.columns.length - 1 && <Column style={{ width: `${columnSpacing}px` }} />
+    columnSpacing > 0 &&
+    index < row.columns.length - 1 && <Column className="spacer-column" style={{ width: `${columnSpacing}px` }} />
 
-  const renderColumnWithSpacer = (column: any, index: number, width?: string | number) => (
-    <React.Fragment key={column.id}>
-      <Column
-        {...generateColumnProps(column, row)}
-        style={{ ...generateColumnProps(column, row).style, width: width || `${columnWidth}%` }}
-      >
-        {renderColumnContent(column)}
-      </Column>
-      {renderSpacer(index)}
-    </React.Fragment>
-  )
-
-  // Mobile version for two columns
-  if (rowAttributes?.twoColumnsOnMobile) {
-    return (
-      <>
-        <Row {...generateRowProps(row)} className="hide-on-mobile">
-          {row.columns.map((column, index) => renderColumnWithSpacer(column, index))}
-        </Row>
-
-        <Container className="show-on-mobile">
-          {chunk(row.columns, 2).map((pair, pairIndex) => (
-            <Row key={pairIndex}>
-              {pair.map((column, index) => (
-                <React.Fragment key={column.id}>
-                  <Column
-                    {...generateColumnProps(column, row)}
-                    style={{ ...generateColumnProps(column, row).style, width: '48%' }}
-                  >
-                    {renderColumnContent(column)}
-                  </Column>
-                  {index === 0 && pair.length > 1 && columnSpacing > 0 && <Column style={{ width: '4%' }} />}
-                </React.Fragment>
-              ))}
-            </Row>
-          ))}
-        </Container>
-      </>
-    )
-  }
-
-  // Mobile version for stack
-  if (rowAttributes?.stackOnMobile) {
-    return (
-      <>
-        <Row {...generateRowProps(row)} className="hide-on-mobile">
-          {row.columns.map((column, index) => renderColumnWithSpacer(column, index))}
-        </Row>
-
-        <Row className="show-on-mobile">{row.columns.map((column) => renderColumnWithSpacer(column, -1, '100%'))}</Row>
-      </>
-    )
-  }
-
-  // Default row with spacers
   return (
-    <Row {...generateRowProps(row)}>{row.columns.map((column, index) => renderColumnWithSpacer(column, index))}</Row>
+    <Row
+      {...generateRowProps(row, email)}
+      style={{
+        ...generateRowProps(row, email).style,
+        // @ts-ignore - MSO properties for Outlook compatibility
+        msoTableLspace: '0pts',
+        // @ts-ignore - MSO properties for Outlook compatibility
+        msoTableRspace: '0pts',
+      }}
+    >
+      {row.columns.map((column, index) => (
+        <React.Fragment key={column.id}>
+          <Column
+            {...generateColumnProps(column, row, email)}
+            style={{ ...generateColumnProps(column, row, email).style, width: `${columnWidth}%` }}
+          >
+            {renderColumnContent(column)}
+          </Column>
+          {renderSpacer(index)}
+        </React.Fragment>
+      ))}
+    </Row>
   )
 }
 
@@ -159,10 +125,24 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
         maxWidth: '100%',
         margin: '0 auto',
         width: `${email.width}px`,
+        // @ts-ignore - MSO properties for Outlook compatibility
+        msoTableLspace: '0pts',
+        // @ts-ignore - MSO properties for Outlook compatibility
+        msoTableRspace: '0pts',
       }}
     >
       {email.rows.map((row) => (
-        <Container key={row.id} {...generateContainerProps(row, email)}>
+        <Container
+          key={row.id}
+          {...generateContainerProps(row, email)}
+          style={{
+            ...generateContainerProps(row, email).style,
+            // @ts-ignore - MSO properties for Outlook compatibility
+            msoTableLspace: '0pts',
+            // @ts-ignore - MSO properties for Outlook compatibility
+            msoTableRspace: '0pts',
+          }}
+        >
           <RenderColumns row={row} email={email} company={company} />
         </Container>
       ))}
@@ -181,22 +161,73 @@ const EmailRendererFinal = ({ email, company }: Props) => {
             margin: 0 !important;
           }
 
+          p {
+            line-height: inherit
+          }
+
           p a {
             text-decoration: underline !important;
           }
-
-          .show-on-mobile {
-            display: none !important;
+          
+          * {
+            box-sizing: border-box;
           }
 
-          @media screen and (max-width: 739px) {
-            .hide-on-mobile {
+          body {
+            margin: 0;
+            padding: 0;
+          }
+
+          a[x-apple-data-detectors] {
+            color: inherit !important;
+            text-decoration: inherit !important;
+          }
+
+          #MessageViewBody a {
+            color: inherit;
+            text-decoration: none;
+          }
+
+          .row-content {
+				    width: 100% !important;
+			    }
+
+          .desktop_hide,
+          .desktop_hide table {
+            mso-hide: all;
+            display: none;
+            max-height: 0px;
+            overflow: hidden;
+          }
+
+          @media screen and (max-width: 600px) {
+            .mobile_hide {
               display: none !important;
             }
+
+            .mobile_hide {
+              min-height: 0;
+              max-height: 0;
+              max-width: 0;
+              overflow: hidden;
+              font-size: 0px;
+            }
             
-            .show-on-mobile {
-              display: table !important;
+            .stack .column {
               width: 100% !important;
+              display: block !important;
+              padding-bottom: 20px !important;
+            }
+
+            .stack .spacer-column {
+              display: none !important;
+              width: 0 !important;
+            }
+            
+            .desktop_hide,
+            .desktop_hide table {
+              display: table !important;
+              max-height: none !important;
             }
           }
         `}</style>

@@ -10,6 +10,7 @@ import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getBlockAttributes } from '@/lib/utils/attributes'
 import { isValidHttpUrl, safeParseInt } from '@/lib/utils/misc'
+import { useMemo } from 'react'
 import { Checkbox, CheckboxField, CheckboxGroup } from '../checkbox'
 import Range from '../range'
 import { Switch, SwitchField } from '../switch'
@@ -63,7 +64,41 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
     row.columns.some((column) => column.blocks.some((b) => b.id === block.id))
   ) as RowBlock
 
-  const processedAttributes = getBlockAttributes(block, parentRow, false, company)
+  const processedAttributes = getBlockAttributes(block, parentRow, false, company, email)
+
+  const blockPadding = useMemo(() => {
+    if (block.type === 'divider') {
+      return {
+        top:
+          String(processedAttributes.style?.marginTop) ??
+          String(processedAttributes.style?.paddingTop) ??
+          String(processedAttributes.style?.padding) ??
+          '0px',
+        right:
+          String(processedAttributes.style?.marginRight) ??
+          String(processedAttributes.style?.paddingRight) ??
+          String(processedAttributes.style?.padding) ??
+          '0px',
+        bottom:
+          String(processedAttributes.style?.marginBottom) ??
+          String(processedAttributes.style?.paddingBottom) ??
+          String(processedAttributes.style?.padding) ??
+          '0px',
+        left:
+          String(processedAttributes.style?.marginLeft) ??
+          String(processedAttributes.style?.paddingLeft) ??
+          String(processedAttributes.style?.padding) ??
+          '0px',
+      }
+    } else {
+      return {
+        top: String(processedAttributes.style?.paddingTop) ?? String(processedAttributes.style?.padding) ?? '0px',
+        right: String(processedAttributes.style?.paddingRight) ?? String(processedAttributes.style?.padding) ?? '0px',
+        bottom: String(processedAttributes.style?.paddingBottom) ?? String(processedAttributes.style?.padding) ?? '0px',
+        left: String(processedAttributes.style?.paddingLeft) ?? String(processedAttributes.style?.padding) ?? '0px',
+      }
+    }
+  }, [block])
 
   const optionsForItem = () => {
     switch (block.type) {
@@ -275,25 +310,25 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
             <Label>Width</Label>
             <SwitchField>
               <Switch
-                checked={String(processedAttributes.style?.width).includes('px')}
+                checked={String(processedAttributes.style?.width).includes('%')}
                 onChange={(checked) => {
                   const currentValue = parseInt(String(processedAttributes.style?.width).replace(/[%px]/g, '') || '100')
                   onChange({ width: `${currentValue}${checked ? '%' : 'px'}` })
                 }}
               />
-              <Label>{String(processedAttributes.style?.width).includes('px') ? 'px' : '%'}</Label>
+              <Label>{String(processedAttributes.style?.width).includes('%') ? '%' : 'px'}</Label>
             </SwitchField>
           </div>
           <Range
             key={`width-${block.id}`}
             min={3}
-            max={String(processedAttributes.style?.width).includes('px') ? 400 : 100}
-            isPercent={!String(processedAttributes.style?.width).includes('px')}
+            max={String(processedAttributes.style?.width).includes('%') ? 100 : 400}
+            isPercent={String(processedAttributes.style?.width).includes('%')}
             value={parseInt(String(processedAttributes.style?.width).replace(/[%px]/g, '') || '100')}
             onChange={(e) => {
               const value = parseInt(e.target.value) || 0
-              const unit = String(processedAttributes.style?.width).includes('px') ? 'px' : '%'
-              const maxValue = unit === 'px' ? 1000 : 100
+              const unit = String(processedAttributes.style?.width).includes('%') ? '%' : 'px'
+              const maxValue = unit === '%' ? 100 : 1000
               onChange({ width: `${Math.min(maxValue, Math.max(0, value))}${unit}` })
             }}
           />
@@ -387,12 +422,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         <Field>
           <Label>Padding</Label>
           <PaddingForm
-            padding={{
-              top: String(processedAttributes.style?.paddingTop ?? processedAttributes.style?.padding ?? '0px'),
-              right: String(processedAttributes.style?.paddingRight ?? processedAttributes.style?.padding ?? '0px'),
-              bottom: String(processedAttributes.style?.paddingBottom ?? processedAttributes.style?.padding ?? '0px'),
-              left: String(processedAttributes.style?.paddingLeft ?? processedAttributes.style?.padding ?? '0px'),
-            }}
+            padding={blockPadding}
             onChange={(values: Partial<PaddingValues>) => {
               const rowAttributes: Partial<RowBlockAttributes> = {
                 paddingTop: values.top,

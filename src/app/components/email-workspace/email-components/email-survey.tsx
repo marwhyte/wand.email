@@ -12,7 +12,17 @@ const EmailSurvey = ({ block, parentRow }: Props) => {
   if (block.attributes.kind === 'yes-no') {
     return (
       <Section {...generateSurveyProps(block, parentRow)}>
-        <Text style={{ marginBottom: '6px', fontSize: '16px', fontWeight: 'bold', lineHeight: '24px', color: 'rgb(55, 65, 81)' }}>{block.attributes.question}</Text>
+        <Text
+          style={{
+            marginBottom: '6px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            lineHeight: '24px',
+            color: 'rgb(55, 65, 81)',
+          }}
+        >
+          {block.attributes.question}
+        </Text>
         <Row>
           <Column align="center">
             <table>
@@ -40,7 +50,9 @@ const EmailSurvey = ({ block, parentRow }: Props) => {
   if (block.attributes.kind === 'rating') {
     return (
       <Section {...generateSurveyProps(block, parentRow)}>
-        <Text style={{ fontSize: '16px', lineHeight: '24px', color: 'rgb(55, 65, 81)' }}>{block.attributes.question}</Text>
+        <Text style={{ fontSize: '16px', lineHeight: '24px', color: 'rgb(55, 65, 81)' }}>
+          {block.attributes.question}
+        </Text>
         <Row>
           <Column align="center">
             <table>
@@ -48,7 +60,18 @@ const EmailSurvey = ({ block, parentRow }: Props) => {
                 <tr>
                   {[1, 2, 3, 4, 5].map((number) => (
                     <td align="center" style={{ padding: '4px' }} key={number}>
-                      <Button style={{ height: '38px', width: '38px', borderRadius: '8px', border: '1px solid rgb(79, 70, 229)', padding: '8px', fontWeight: '600', color: 'rgb(79, 70, 229)' }} href={block.attributes.links?.rating[number as 1 | 2 | 3 | 4 | 5]}>
+                      <Button
+                        style={{
+                          height: '38px',
+                          width: '38px',
+                          borderRadius: '8px',
+                          border: '1px solid rgb(79, 70, 229)',
+                          padding: '8px',
+                          fontWeight: '600',
+                          color: 'rgb(79, 70, 229)',
+                        }}
+                        href={block.attributes.links?.rating[number as 1 | 2 | 3 | 4 | 5]}
+                      >
                         {number}
                       </Button>
                     </td>

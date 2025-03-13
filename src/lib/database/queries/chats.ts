@@ -30,7 +30,7 @@ export async function createChat({
       .values({
         id,
         user_id: session?.user?.id ?? '',
-        title,
+        title: title ?? '',
         email,
         company_id: companyId,
         created_at: new Date(),
@@ -77,7 +77,10 @@ export async function updateMessage(id: string, chatId: string, updates: { conte
   }
 }
 
-export async function updateChat(id: string, updates: { messages?: Message[]; title?: string; email?: Email }) {
+export async function updateChat(
+  id: string,
+  updates: { messages?: Message[]; title?: string; email?: Email; parsed?: boolean }
+) {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
@@ -128,6 +131,7 @@ export async function updateChat(id: string, updates: { messages?: Message[]; ti
           role: msg.role,
           content: msg.content,
           sequence: index,
+          id: msg.id,
           created_at: msg.createdAt || new Date(),
         }))
 

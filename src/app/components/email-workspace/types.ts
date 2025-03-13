@@ -36,10 +36,10 @@ export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T
 
 export type Email = {
   id: string
-  name: string
   preview: string
   fontFamily: string
   bgColor: string
+  rowBgColor: string
   bgImage?: string
   bgPosition?: string
   bgRepeat?: string
@@ -167,7 +167,6 @@ export type LinkBlock = {
 
 // NOTE WHEN CHANGING THIS ALSO UPDATE LIST IN EMAIL-HELPERS.TS
 export type CommonAttributes = {
-  noSidePaddingOnMobile?: boolean
   paddingTop?: string
   paddingRight?: string
   paddingBottom?: string
@@ -217,7 +216,6 @@ export type RowBlockAttributes = CommonAttributes & {
   minWidth?: string
   stackOnMobile?: boolean
   reverseStackOnMobile?: boolean
-  twoColumnsOnMobile?: boolean
   columnSpacing?: number
   hideOnMobile?: boolean
   type?: ComponentType

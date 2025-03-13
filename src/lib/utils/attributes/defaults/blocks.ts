@@ -18,9 +18,9 @@ export const getAdditionalTextStyles = (
   parentRow: RowBlock
 ): React.ComponentProps<typeof Text>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Text>['style'] = {
-    paddingTop: '8px',
+    paddingTop: '10px',
     paddingRight: '0',
-    paddingBottom: '8px',
+    paddingBottom: '10px',
     paddingLeft: '0',
     margin: 0,
     fontSize: '16px',
@@ -74,7 +74,8 @@ export const getAdditionalHeadingStyles = (
 
 export const getAdditionalImageStyles = (
   imageBlock: ImageBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  company: Company | null
 ): React.ComponentProps<typeof Img>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Img>['style'] = {
     objectFit: 'contain',
@@ -84,7 +85,7 @@ export const getAdditionalImageStyles = (
   }
 
   const rowTypeDefaults =
-    (getRowTypeBlockDefaults(imageBlock, parentRow) as React.ComponentProps<typeof Img>['style']) || {}
+    (getRowTypeBlockDefaults(imageBlock, parentRow, company) as React.ComponentProps<typeof Img>['style']) || {}
 
   const { src, alt, ...styleAttributes } = imageBlock.attributes
 
@@ -149,7 +150,10 @@ export const getAdditionalLinkStyles = (
   parentRow: RowBlock
 ): React.ComponentProps<typeof Link>['style'] => {
   const baseDefaults = {
-    color: '#3b82f6',
+    paddingTop: '10px',
+    paddingRight: '0',
+    paddingBottom: '10px',
+    paddingLeft: '0',
     textDecoration: 'underline',
     fontSize: '16px',
     fontWeight: 'normal',
@@ -186,10 +190,22 @@ export const getAdditionalDividerStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(dividerBlock, parentRow) as React.ComponentProps<typeof Hr>['style']) || {}
 
+  // Extract padding values from attributes to apply to margins
+  const { paddingTop, paddingRight, paddingBottom, paddingLeft, ...otherAttributes } = dividerBlock.attributes
+
+  // Apply padding values to margins if they exist
+  const marginAdjustments: Partial<React.ComponentProps<typeof Hr>['style']> = {}
+  if (paddingTop !== undefined) marginAdjustments.marginTop = paddingTop
+  if (paddingRight !== undefined) marginAdjustments.marginRight = paddingRight
+  if (paddingBottom !== undefined) marginAdjustments.marginBottom = paddingBottom
+  if (paddingLeft !== undefined) marginAdjustments.marginLeft = paddingLeft
+
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
-    ...dividerBlock.attributes,
+    ...otherAttributes,
+    ...marginAdjustments,
+    padding: 0,
     borderTop: 'none',
   }
 }

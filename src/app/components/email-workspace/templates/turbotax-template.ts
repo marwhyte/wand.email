@@ -78,5 +78,5 @@ export const turbotaxTemplateScript = `
 
 export const turbotaxTemplate = (): Email => {
   const rows = parseEmailScript(turbotaxTemplateScript)
-  return createEmail('TurboTax Filing Preparation', rows, '#333333', '#205ea3', 'Lato, Arial, sans-serif', '#dfdfd8', '600px')
+  return createEmail(rows, '#333333', '#205ea3', 'Lato, Arial, sans-serif', '#dfdfd8', '600px')
 }

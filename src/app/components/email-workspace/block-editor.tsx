@@ -5,36 +5,52 @@ import { useCallback } from 'react'
 import { Button } from '@/app/components/button'
 import { Divider } from '@/app/components/divider'
 import { Text } from '@/app/components/text'
+import { useEmailSave } from '@/app/hooks/useEmailSave'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
 import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
-import 'react-quill/dist/quill.snow.css'
-import { v4 as uuidv4 } from 'uuid' // Add this import for generating new IDs
+import { v4 as uuidv4 } from 'uuid'
 import EmailBlockEditor from './email-block-editor'
 import RowEditor from './row-editor'
 import SocialsEditor from './socials-editor'
 import SurveyEditor from './survey-editor'
-import { ButtonBlockAttributes, ColumnBlock, ColumnBlockAttributes, CommonAttributes, Email, EmailBlock, ImageBlockAttributes, RowBlock, RowBlockAttributes, SocialsBlockAttributes, TextBlock } from './types'
+import {
+  ButtonBlockAttributes,
+  ColumnBlock,
+  ColumnBlockAttributes,
+  CommonAttributes,
+  Email,
+  EmailBlock,
+  ImageBlockAttributes,
+  RowBlock,
+  RowBlockAttributes,
+  SocialsBlockAttributes,
+  TextBlock,
+} from './types'
 
 type BlockEditorProps = {
   email: Email
 }
 
 const BlockEditor = ({ email }: BlockEditorProps) => {
-  const { currentBlock, setCurrentBlock, setEmail } = useEmailStore()
+  const { currentBlock, setCurrentBlock } = useEmailStore()
+  const { chatId } = useChatStore()
+  const saveEmail = useEmailSave(chatId)
 
-  const debouncedSave = useCallback(
+  const handleSave = useCallback(
     (updatedTemplate: Email) => {
-      setEmail(updatedTemplate)
+      saveEmail(updatedTemplate)
     },
-    // debounce((updatedTemplate: Email) => {
-    //   onSave(updatedTemplate)
-    // }, 300)
-    [setEmail]
+    [saveEmail]
   )
 
   const handleChange = useCallback(
-    (attributes: Partial<CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes | SocialsBlockAttributes>) => {
+    (
+      attributes: Partial<
+        CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes | SocialsBlockAttributes
+      >
+    ) => {
       if (currentBlock) {
         const updatedBlock = {
           ...currentBlock,
@@ -63,11 +79,11 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
             })),
           }
 
-          debouncedSave(updatedEmail)
+          handleSave(updatedEmail)
         }
       }
     },
-    [currentBlock, setCurrentBlock, email, debouncedSave]
+    [currentBlock, setCurrentBlock, email, handleSave]
   )
 
   const handleColumnWidthChange = useCallback(
@@ -85,10 +101,10 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           rows: email.rows.map((row) => (row.id === updatedBlock.id ? updatedBlock : row)),
         }
 
-        debouncedSave(updatedEmail)
+        handleSave(updatedEmail)
       }
     },
-    [currentBlock, setCurrentBlock, email, debouncedSave]
+    [currentBlock, setCurrentBlock, email, handleSave]
   )
 
   const handleColumnAttributeChange = useCallback(
@@ -96,7 +112,9 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       if (currentBlock && currentBlock.type === 'row') {
         const updatedBlock = {
           ...currentBlock,
-          columns: currentBlock.columns.map((column) => (column.id === columnId ? { ...column, attributes: { ...column.attributes, ...attributes } } : column)),
+          columns: currentBlock.columns.map((column) =>
+            column.id === columnId ? { ...column, attributes: { ...column.attributes, ...attributes } } : column
+          ),
         } as RowBlock
 
         setCurrentBlock(updatedBlock)
@@ -106,10 +124,10 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           rows: email.rows.map((row) => (row.id === updatedBlock.id ? updatedBlock : row)),
         }
 
-        debouncedSave(updatedEmail)
+        handleSave(updatedEmail)
       }
     },
-    [currentBlock, setCurrentBlock, email, debouncedSave]
+    [currentBlock, setCurrentBlock, email, handleSave]
   )
 
   const handleRowAttributeChange = useCallback(
@@ -127,10 +145,10 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           rows: email.rows.map((row) => (row.id === updatedBlock.id ? updatedBlock : row)),
         }
 
-        debouncedSave(updatedEmail)
+        handleSave(updatedEmail)
       }
     },
-    [currentBlock, setCurrentBlock, email, debouncedSave]
+    [currentBlock, setCurrentBlock, email, handleSave]
   )
 
   const deleteBlock = useCallback(() => {
@@ -155,9 +173,9 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       }
 
       setCurrentBlock(null)
-      debouncedSave(updatedEmail)
+      handleSave(updatedEmail)
     }
-  }, [currentBlock, email, setCurrentBlock, debouncedSave])
+  }, [currentBlock, email, setCurrentBlock, handleSave])
 
   const duplicateBlock = useCallback(() => {
     if (currentBlock) {
@@ -193,9 +211,9 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       }
 
       setCurrentBlock(newBlock)
-      debouncedSave(updatedEmail)
+      handleSave(updatedEmail)
     }
-  }, [currentBlock, email, setCurrentBlock, debouncedSave])
+  }, [currentBlock, email, setCurrentBlock, handleSave])
 
   if (!currentBlock) return null
 
@@ -207,17 +225,35 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           <Button onClick={deleteBlock} outline tooltip={currentBlock.type === 'row' ? 'Delete Row' : 'Delete Block'}>
             <TrashIcon className="!h-4 !w-4" />
           </Button>
-          <Button onClick={duplicateBlock} outline tooltip={currentBlock.type === 'row' ? 'Duplicate Row' : 'Duplicate Block'}>
+          <Button
+            onClick={duplicateBlock}
+            outline
+            tooltip={currentBlock.type === 'row' ? 'Duplicate Row' : 'Duplicate Block'}
+          >
             <Square2StackIcon className="!h-4 !w-4" />
           </Button>
-          <Button tooltipTransform="-translate-x-3/4" onClick={() => setCurrentBlock(null)} outline tooltip="Close Editor">
+          <Button
+            tooltipTransform="-translate-x-3/4"
+            onClick={() => setCurrentBlock(null)}
+            outline
+            tooltip="Close Editor"
+          >
             <XMarkIcon className="!h-4 !w-4" />
           </Button>
         </div>
       </div>
       <Divider className="mb-2" />
-      {currentBlock.type === 'row' && <RowEditor row={currentBlock} onColumnWidthChange={handleColumnWidthChange} onColumnAttributeChange={handleColumnAttributeChange} onRowAttributeChange={handleRowAttributeChange} />}
-      {currentBlock.type !== 'row' && currentBlock.type !== 'survey' && currentBlock.type !== 'socials' && <EmailBlockEditor block={currentBlock} onChange={handleChange} />}
+      {currentBlock.type === 'row' && (
+        <RowEditor
+          row={currentBlock}
+          onColumnWidthChange={handleColumnWidthChange}
+          onColumnAttributeChange={handleColumnAttributeChange}
+          onRowAttributeChange={handleRowAttributeChange}
+        />
+      )}
+      {currentBlock.type !== 'row' && currentBlock.type !== 'survey' && currentBlock.type !== 'socials' && (
+        <EmailBlockEditor block={currentBlock} onChange={handleChange} />
+      )}
       {currentBlock.type === 'survey' && <SurveyEditor block={currentBlock} onChange={handleChange} />}
       {currentBlock.type === 'socials' && <SocialsEditor block={currentBlock} onChange={handleChange} />}
     </div>

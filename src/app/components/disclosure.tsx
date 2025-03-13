@@ -17,7 +17,7 @@ export function Disclosure({
   return (
     <Headless.Disclosure {...props}>
       {({ open }) => (
-        <>
+        <div>
           <Headless.DisclosureButton
             className={clsx(
               'flex w-full justify-between rounded-lg bg-zinc-100 px-4 py-2 text-left text-sm font-medium text-zinc-900 hover:bg-zinc-200 focus:outline-none focus-visible:ring focus-visible:ring-zinc-500 focus-visible:ring-opacity-75',
@@ -32,7 +32,7 @@ export function Disclosure({
           >
             {children}
           </Headless.DisclosurePanel>
-        </>
+        </div>
       )}
     </Headless.Disclosure>
   )
@@ -44,7 +44,7 @@ export function DisclosureTitle({
 }: { className?: string } & Omit<Headless.DisclosurePanelProps<typeof Text>, 'className'>) {
   return (
     <Text
-      className={clsx(className, 'text-balance text-lg/6 font-semibold text-zinc-950 sm:text-base/6 dark:text-white')}
+      className={clsx(className, 'text-balance text-lg/6 font-semibold text-zinc-950 dark:text-white sm:text-base/6')}
     >
       {props.title}
     </Text>

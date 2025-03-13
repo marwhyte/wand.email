@@ -3,7 +3,6 @@ import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateButtonProps } from '@/lib/utils/attributes'
 import { Button } from '@react-email/components'
 import parse from 'html-react-parser'
-import { useSearchParams } from 'next/dist/client/components/navigation'
 import { ButtonBlock, RowBlock } from '../types'
 
 type Props = {
@@ -12,7 +11,6 @@ type Props = {
 }
 
 export default function EmailButton({ block, parentRow }: Props) {
-  const searchParams = useSearchParams()
   const { mobileView } = useMobileViewStore()
   const { company } = useChatStore()
 

@@ -39,7 +39,9 @@ function normalizeAttributes(attrs: Record<string, any>): Record<string, any> {
 
   // Filter out zero paddings
   const paddingProps = ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft']
-  const nonZeroPaddings = paddingProps.filter((prop) => attrs[prop] && attrs[prop] !== '0' && attrs[prop] !== '0px').reduce((acc, prop) => ({ ...acc, [prop]: attrs[prop] }), {})
+  const nonZeroPaddings = paddingProps
+    .filter((prop) => attrs[prop] && attrs[prop] !== '0' && attrs[prop] !== '0px')
+    .reduce((acc, prop) => ({ ...acc, [prop]: attrs[prop] }), {})
 
   // Normalize remaining attributes
   for (const [key, value] of Object.entries({ ...attrs, ...nonZeroPaddings })) {
@@ -87,7 +89,18 @@ describe('Email Script Generator', () => {
 
     // Parse the generated script back to an email structure
     const parsedRows = parseEmailScript(generatedScript)
-    const parsedEmail = createEmail(originalEmail.name, parsedRows, originalEmail.color, originalEmail.linkColor, originalEmail.fontFamily, originalEmail.bgColor, originalEmail.width, originalEmail.bgImage, originalEmail.bgPosition, originalEmail.bgRepeat, originalEmail.bgSize)
+    const parsedEmail = createEmail(
+      parsedRows,
+      originalEmail.color,
+      originalEmail.linkColor,
+      originalEmail.fontFamily,
+      originalEmail.bgColor,
+      originalEmail.width,
+      originalEmail.bgImage,
+      originalEmail.bgPosition,
+      originalEmail.bgRepeat,
+      originalEmail.bgSize
+    )
 
     // Compare the structures without ids
     expect(removeIds(parsedEmail)).toEqual(removeIds(originalEmail))

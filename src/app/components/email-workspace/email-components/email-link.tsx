@@ -15,7 +15,7 @@ export default function EmailLink({ block, parentRow }: Props) {
   const { mobileView } = useMobileViewStore()
 
   return (
-    <Link {...generateLinkProps(block, parentRow, mobileView, email?.linkColor)} href={undefined}>
+    <Link {...generateLinkProps(block, parentRow, mobileView, email)} href={undefined}>
       {parse(block.content)}
     </Link>
   )

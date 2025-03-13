@@ -1,8 +1,8 @@
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateColumnProps } from '@/lib/utils/attributes'
 import { ArrowDownCircleIcon, ArrowUpCircleIcon } from '@heroicons/react/20/solid'
 import { Column } from '@react-email/components'
-import { useSearchParams } from 'next/navigation'
 import React, { useRef } from 'react'
 import { useDrop } from 'react-dnd'
 import { EmailBlock as BlockType, ColumnBlock, EmailBlockType, RowBlock } from '../types'
@@ -15,15 +15,32 @@ type Props = {
   onBlockSelect: (block: BlockType) => void
   onColumnClick?: () => void
   dropTarget: { type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null
-  setDropTarget: React.Dispatch<React.SetStateAction<{ type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null>>
-  onBlockDrop: (blockType: 'block' | 'newBlock', blockId: string, targetType: 'block' | 'column', targetId: string, position: 'above' | 'below', newBlockType?: EmailBlockType) => void
+  setDropTarget: React.Dispatch<
+    React.SetStateAction<{ type: 'block' | 'column'; id: string; position: 'above' | 'below' } | null>
+  >
+  onBlockDrop: (
+    blockType: 'block' | 'newBlock',
+    blockId: string,
+    targetType: 'block' | 'column',
+    targetId: string,
+    position: 'above' | 'below',
+    newBlockType?: EmailBlockType
+  ) => void
 }
 
-export default function EmailColumn({ column, row, onBlockHover, onBlockSelect, onColumnClick, dropTarget, setDropTarget, onBlockDrop }: Props) {
+export default function EmailColumn({
+  column,
+  row,
+  onBlockHover,
+  onBlockSelect,
+  onColumnClick,
+  dropTarget,
+  setDropTarget,
+  onBlockDrop,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null)
-  const searchParams = useSearchParams()
   const { mobileView } = useMobileViewStore()
-
+  const { email } = useEmailStore()
   const handleColumnClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       onColumnClick?.()
@@ -51,8 +68,8 @@ export default function EmailColumn({ column, row, onBlockHover, onBlockSelect, 
 
   return (
     <Column
-      {...generateColumnProps(column, row, mobileView)}
-      className={`${generateColumnProps(column, row, mobileView).className || ''} ${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
+      {...generateColumnProps(column, row, email)}
+      className={`${generateColumnProps(column, row, email).className || ''} ${mobileView ? 'mobile-forced-full-width' : ''} ${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
       // @ts-ignore
       ref={drop}
@@ -73,7 +90,15 @@ export default function EmailColumn({ column, row, onBlockHover, onBlockSelect, 
         </div>
       )}
       {column.blocks.map((block) => (
-        <EmailBlock key={block.id} block={block} parentRow={row} onHover={onBlockHover} onSelect={onBlockSelect} dropTarget={dropTarget} setDropTarget={setDropTarget} />
+        <EmailBlock
+          key={block.id}
+          block={block}
+          parentRow={row}
+          onHover={onBlockHover}
+          onSelect={onBlockSelect}
+          dropTarget={dropTarget}
+          setDropTarget={setDropTarget}
+        />
       ))}
     </Column>
   )

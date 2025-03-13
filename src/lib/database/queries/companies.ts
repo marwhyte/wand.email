@@ -1,30 +1,70 @@
 'use server'
 
 import { auth } from '@/auth'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import { db } from '../db'
 
+// Internal helper that takes userId as parameter for caching
+const getCompaniesInternal = unstable_cache(
+  async (userId: string) => {
+    const companies = await db
+      .selectFrom('companies')
+      .leftJoin('files', 'files.id', 'companies.logo_file_id')
+      .select([
+        'companies.created_at',
+        'companies.id',
+        'companies.name',
+        'companies.logo_file_id',
+        'companies.primary_color',
+        'companies.user_id',
+        'files.image_key as logo_image_key',
+      ])
+      .where('companies.user_id', '=', userId)
+      .execute()
+    return companies
+  },
+  ['companies'],
+  {
+    tags: ['companies'],
+    revalidate: 60 * 60 * 24,
+  }
+)
+
+// Internal helper for getting a single company with caching
+const getCompanyInternal = unstable_cache(
+  async (userId: string, companyId: string) => {
+    const company = await db
+      .selectFrom('companies')
+      .leftJoin('files', 'files.id', 'companies.logo_file_id')
+      .select([
+        'companies.id',
+        'companies.name',
+        'companies.primary_color',
+        'companies.logo_file_id',
+        'companies.user_id',
+        'companies.created_at',
+        'files.image_key as logo_image_key',
+      ])
+      .where('companies.id', '=', companyId)
+      .where('companies.user_id', '=', userId)
+      .executeTakeFirst()
+    return company
+  },
+  ['company'],
+  {
+    tags: ['companies'],
+    revalidate: 60 * 60 * 24,
+  }
+)
+
+// Public functions that handle auth internally
 export async function getCompanies() {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
   }
 
-  const companies = await db
-    .selectFrom('companies')
-    .leftJoin('files', 'files.id', 'companies.logo_file_id')
-    .select([
-      'companies.created_at',
-      'companies.id',
-      'companies.name',
-      'companies.logo_file_id',
-      'companies.primary_color',
-      'companies.user_id',
-      'files.image_key as logo_image_key',
-    ])
-    .where('companies.user_id', '=', session.user.id)
-    .execute()
-
-  return companies
+  return getCompaniesInternal(session.user.id)
 }
 
 export async function getCompany(companyId: string) {
@@ -33,22 +73,7 @@ export async function getCompany(companyId: string) {
     throw new Error('User not authenticated')
   }
 
-  const company = await db
-    .selectFrom('companies')
-    .leftJoin('files', 'files.id', 'companies.logo_file_id')
-    .select([
-      'companies.id',
-      'companies.name',
-      'companies.primary_color',
-      'companies.logo_file_id',
-      'companies.user_id',
-      'companies.created_at',
-      'files.image_key as logo_image_key',
-    ])
-    .where('companies.id', '=', companyId)
-    .where('companies.user_id', '=', session.user.id)
-    .executeTakeFirst()
-  return company
+  return getCompanyInternal(session.user.id, companyId)
 }
 
 export async function addCompany({
@@ -101,6 +126,7 @@ export async function addCompany({
         .executeTakeFirst()
     })
 
+  revalidateTag('companies')
   return company
 }
 
@@ -150,6 +176,7 @@ export async function updateCompany(
         .executeTakeFirst()
     })
 
+  revalidateTag('companies')
   return company
 }
 
@@ -160,4 +187,6 @@ export async function deleteCompany(companyId: string) {
   }
 
   await db.deleteFrom('companies').where('id', '=', companyId).where('user_id', '=', session.user.id).execute()
+
+  revalidateTag('companies')
 }

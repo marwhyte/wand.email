@@ -1,6 +1,5 @@
 export const maxDuration = 60
 
-import { generateTitleFromUserMessage } from '@/app/(chat)/actions'
 import { blankTemplate } from '@/app/components/email-workspace/templates/blank-template'
 import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
@@ -20,7 +19,7 @@ export async function POST(request: Request) {
       return new Response('Unauthorized', { status: 401 })
     }
 
-    const {
+    let {
       id,
       messages,
       companyName,
@@ -36,13 +35,9 @@ export async function POST(request: Request) {
     const chat = await getChat(userMessage.id)
 
     if (!chat) {
-      const title = await generateTitleFromUserMessage({
-        message: userMessage,
-      })
+      const email = { ...blankTemplate() }
 
-      const email = { ...blankTemplate(), name: title }
-
-      await createChat({ messages, title, email, companyId, id })
+      await createChat({ messages, email, companyId, id })
     } else {
       if (chat.user_id !== session.user.id) {
         return new Response('Unauthorized', { status: 401 })

@@ -140,11 +140,6 @@ function isFontStyle(value: string | undefined): value is NonNullable<CommonAttr
 const parseCommonAttributes = (raw: RawAttributes): Partial<CommonAttributes> => {
   const attrs: Partial<CommonAttributes> = {}
 
-  // Boolean attributes
-  if (raw.noSidePaddingOnMobile) {
-    attrs.noSidePaddingOnMobile = raw.noSidePaddingOnMobile === 'true'
-  }
-
   // Padding handling
   if (raw.padding) {
     const paddingValues = parsePadding(raw.padding)
