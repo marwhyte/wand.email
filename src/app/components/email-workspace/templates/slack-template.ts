@@ -9,7 +9,7 @@ export const slackTemplateScript = `
     COLUMN align=center {
       IMAGE src="${getPhotoUrl('slack-logo.png', 'slack')}" alt="Slack Logo" width=120 padding=0,0,32,0
      HEADING text=<p>Your free trial has ended</p> as=h1 textAlign=left fontSize=36 fontWeight=bold padding=0,0,28,0 color=#1d1c1d
-      TEXT text=<p>SentSwiftly has now been downgraded to the free plan. Your team no longer has access to historical conversations & files, along with other Slack premium features.</p> textAlign=left fontSize=20 color=#434245 padding=0,0,20,0 lineHeight=28px
+      TEXT text=<p>SentSwiftly has now been downgraded to the free plan. Your team no longer has access to historical conversations & files, along with other Slack premium features.</p> textAlign=left fontSize=20 color=#434245 padding=0,0,20,0
     }
   }
 

@@ -38,7 +38,7 @@ export function generateContainerProps(
   const rowAttributes = getRowAttributes(row, email)
 
   return {
-    className: `row-content${rowAttributes.hideOnMobile ? ' mobile_hide' : ''}`,
+    className: rowAttributes.hideOnMobile ? 'mobile_hide' : undefined,
     style: {
       ...applyCommonAttributes(row.container.attributes),
       minWidth: row.container.attributes.minWidth,

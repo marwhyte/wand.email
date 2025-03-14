@@ -12,7 +12,7 @@ import { Email } from '../components/email-workspace/types'
 const logger = createScopedLogger('MessageParser')
 
 export function useMessageParser(message: Message) {
-  const { setEmail, email } = useEmailStore()
+  const { setEmail, email, setPreviousEmail } = useEmailStore()
   const { chatId } = useChatStore()
   const router = useRouter()
   const [processingMessageId, setProcessingMessageId] = useState<string | null>(null)
@@ -64,8 +64,9 @@ export function useMessageParser(message: Message) {
       processEmailImages(emailObject)
         .then((processedEmail) => {
           setEmail(processedEmail)
+          setPreviousEmail(emailObject)
           // Return the promise from updateChat so we can chain after it completes
-          return updateChat(chatId, { email: processedEmail }).then(() => {
+          return updateChat(chatId, { email: processedEmail, previousEmail: processedEmail }).then(() => {
             logger.debug('Found email:', emailString)
 
             // If we're using a blank template, navigate to the chat route after chat update completes
@@ -78,8 +79,9 @@ export function useMessageParser(message: Message) {
           console.error('Error processing email images:', error)
           // Still update with original email if image processing fails
           setEmail(emailObject)
+          setPreviousEmail(emailObject)
           // Return the promise from updateChat so we can chain after it completes
-          return updateChat(chatId, { email: emailObject }).then(() => {
+          return updateChat(chatId, { email: emailObject, previousEmail: emailObject }).then(() => {
             // Navigate even if image processing fails, but after chat update completes
             if (isBlankTemplate) {
               // router.push(`/chat/${chatId}`)

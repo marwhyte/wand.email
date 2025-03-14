@@ -20,7 +20,6 @@ export function applyCommonAttributes(attributes: CommonAttributes): React.CSSPr
     'textAlign',
     'verticalAlign',
     'fontSize',
-    'lineHeight',
     'color',
     'fontWeight',
     'textDecoration',

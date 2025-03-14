@@ -25,54 +25,49 @@ type BlockAttributes = Record<string, string | number>
 
 function parsePadding(padding: string | undefined): Record<string, string> {
   if (!padding) {
-    return {
-      paddingTop: '0px',
-      paddingRight: '0px',
-      paddingBottom: '0px',
-      paddingLeft: '0px',
-    }
+    return {} // Return empty object instead of zero values
   }
 
   const values: string[] = padding.split(',').map((p) => `${p}px`)
+  const result: Record<string, string> = {}
 
   // Handle different value counts according to CSS shorthand rules
   switch (values.length) {
     case 1: // All sides
-      return {
-        paddingTop: values[0],
-        paddingRight: values[0],
-        paddingBottom: values[0],
-        paddingLeft: values[0],
+      if (values[0] !== '0px') {
+        result.paddingTop = values[0]
+        result.paddingRight = values[0]
+        result.paddingBottom = values[0]
+        result.paddingLeft = values[0]
       }
+      break
     case 2: // Vertical, Horizontal
-      return {
-        paddingTop: values[0],
-        paddingRight: values[1],
-        paddingBottom: values[0],
-        paddingLeft: values[1],
+      if (values[0] !== '0px') {
+        result.paddingTop = values[0]
+        result.paddingBottom = values[0]
       }
+      if (values[1] !== '0px') {
+        result.paddingRight = values[1]
+        result.paddingLeft = values[1]
+      }
+      break
     case 3: // Top, Horizontal, Bottom
-      return {
-        paddingTop: values[0],
-        paddingRight: values[1],
-        paddingBottom: values[2],
-        paddingLeft: values[1],
+      if (values[0] !== '0px') result.paddingTop = values[0]
+      if (values[1] !== '0px') {
+        result.paddingRight = values[1]
+        result.paddingLeft = values[1]
       }
+      if (values[2] !== '0px') result.paddingBottom = values[2]
+      break
     case 4: // Top, Right, Bottom, Left
-      return {
-        paddingTop: values[0],
-        paddingRight: values[1],
-        paddingBottom: values[2],
-        paddingLeft: values[3],
-      }
-    default:
-      return {
-        paddingTop: '0px',
-        paddingRight: '0px',
-        paddingBottom: '0px',
-        paddingLeft: '0px',
-      }
+      if (values[0] !== '0px') result.paddingTop = values[0]
+      if (values[1] !== '0px') result.paddingRight = values[1]
+      if (values[2] !== '0px') result.paddingBottom = values[2]
+      if (values[3] !== '0px') result.paddingLeft = values[3]
+      break
   }
+
+  return result
 }
 
 function parseEscapeSequences(text: string): string {
@@ -136,21 +131,31 @@ function isFontStyle(value: string | undefined): value is NonNullable<CommonAttr
   return typeof value === 'string' && ['normal', 'italic', 'oblique'].includes(value)
 }
 
+// Helper function to handle padding for any attribute object
+function handlePadding(raw: RawAttributes, attrs: any) {
+  if (raw.padding) {
+    const paddingValues = parsePadding(raw.padding)
+    for (const [key, value] of Object.entries(paddingValues)) {
+      if (value !== '0px') {
+        attrs[key] = value
+      }
+    }
+  } else {
+    // Individual padding values - only add non-zero values
+    if (raw.paddingTop && raw.paddingTop !== '0') attrs.paddingTop = ensurePx(raw.paddingTop)
+    if (raw.paddingRight && raw.paddingRight !== '0') attrs.paddingRight = ensurePx(raw.paddingRight)
+    if (raw.paddingBottom && raw.paddingBottom !== '0') attrs.paddingBottom = ensurePx(raw.paddingBottom)
+    if (raw.paddingLeft && raw.paddingLeft !== '0') attrs.paddingLeft = ensurePx(raw.paddingLeft)
+  }
+  return attrs
+}
+
 // Parse common attributes with proper typing
 const parseCommonAttributes = (raw: RawAttributes): Partial<CommonAttributes> => {
   const attrs: Partial<CommonAttributes> = {}
 
-  // Padding handling
-  if (raw.padding) {
-    const paddingValues = parsePadding(raw.padding)
-    Object.assign(attrs, paddingValues)
-  } else {
-    // Individual padding values
-    if (raw.paddingTop) attrs.paddingTop = ensurePx(raw.paddingTop)
-    if (raw.paddingRight) attrs.paddingRight = ensurePx(raw.paddingRight)
-    if (raw.paddingBottom) attrs.paddingBottom = ensurePx(raw.paddingBottom)
-    if (raw.paddingLeft) attrs.paddingLeft = ensurePx(raw.paddingLeft)
-  }
+  // Handle padding
+  handlePadding(raw, attrs)
 
   // Display and dimensions
   if (raw.display) attrs.display = raw.display
@@ -173,7 +178,6 @@ const parseCommonAttributes = (raw: RawAttributes): Partial<CommonAttributes> =>
   if (isTextAlign(raw.textAlign)) attrs.textAlign = raw.textAlign
   if (isVerticalAlign(raw.verticalAlign)) attrs.verticalAlign = raw.verticalAlign
   if (raw.fontSize) attrs.fontSize = ensurePx(raw.fontSize)
-  if (raw.lineHeight) attrs.lineHeight = raw.lineHeight
   if (raw.color) attrs.color = raw.color
   if (isFontWeight(raw.fontWeight)) attrs.fontWeight = raw.fontWeight
   if (raw.textDecoration) attrs.textDecoration = raw.textDecoration
@@ -401,15 +405,31 @@ function parseAttributes(attrString: string): RawAttributes {
     attrString = attrString.replace(altMatch[0], '')
   }
 
-  // Parse remaining attributes
-  const pairs = attrString.match(/(\w+)=([^"\s]+|"[^"]+")/g) || []
+  // Parse remaining attributes - improved regex to handle values with or without quotes
+  // This regex matches key=value pairs where value can be:
+  // 1. A quoted string: key="value with spaces"
+  // 2. A non-quoted string without spaces: key=value
+  const pairs = attrString.match(/(\w+)=(?:"([^"]*)"|([^\s"]+))/g) || []
+
   pairs.forEach((pair) => {
-    const [key, value] = pair.split('=')
+    // Split only at the first equals sign
+    const equalIndex = pair.indexOf('=')
+    if (equalIndex === -1) return
+
+    const key = pair.substring(0, equalIndex)
+    let value = pair.substring(equalIndex + 1)
+
+    // Remove surrounding quotes if present
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.substring(1, value.length - 1)
+    }
+
     if (key === 'padding') {
-      Object.assign(attrs, parsePadding(value))
+      // Handle padding specially
+      const paddingValues = parsePadding(value)
+      Object.assign(attrs, paddingValues)
     } else {
-      // Remove quotes from non-text attributes
-      attrs[key] = value.replace(/"/g, '')
+      attrs[key] = value
     }
   })
 
@@ -463,14 +483,18 @@ function isColumnAlign(value: string | undefined): value is ColumnBlockAttribute
 
 // Parser for column attributes
 const parseColumnAttributes: AttributeParser<ColumnBlockAttributes> = (raw) => {
-  const attrs: ColumnBlockAttributes = {}
+  let attrs: ColumnBlockAttributes = {}
 
   // Parse column-specific attributes
   if (isColumnAlign(raw.align)) attrs.align = raw.align
+  if (isVerticalAlign(raw.verticalAlign)) attrs.verticalAlign = raw.verticalAlign
   if (raw.borderSpacing) attrs.borderSpacing = ensurePx(raw.borderSpacing)
   if (isBorderStyle(raw.borderStyle)) attrs.borderStyle = raw.borderStyle
   if (raw.borderWidth) attrs.borderWidth = ensurePx(raw.borderWidth)
   if (raw.borderColor) attrs.borderColor = raw.borderColor
+
+  // Handle padding
+  attrs = handlePadding(raw, attrs)
 
   return attrs
 }

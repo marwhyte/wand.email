@@ -1,3 +1,8 @@
+// Mock the image-service module directly
+jest.mock('@/lib/utils/image-service', () => ({
+  resolveImageSrc: jest.fn().mockResolvedValue('https://example.com/mock-image.jpg'),
+}))
+
 import { turbotaxTemplate, turbotaxTemplateScript } from '@/app/components/email-workspace/templates/turbotax-template'
 import { createEmail } from './email-helpers'
 import { generateEmailScript } from './email-script-generator'
@@ -5,53 +10,10 @@ import { parseEmailScript } from './email-script-parser'
 
 // Helper function to normalize scripts for comparison
 function normalizeScript(script: string): string {
-  return script
-    .trim()
-    .replace(/\s+/g, ' ') // Normalize whitespace
-    .replace(/\s*{\s*/g, ' { ') // Normalize braces
-    .replace(/\s*}\s*/g, ' } ')
-    .replace(/"\s+/g, '"') // Remove spaces after quotes
-    .replace(/\s+"/g, '"') // Remove spaces before quotes
-}
-
-// Helper function to normalize values
-function normalizeValue(value: any): any {
-  if (typeof value === 'string') {
-    // Remove 'px' suffix
-    value = value.replace(/px$/, '')
-
-    // Normalize letter spacing
-    if (value.endsWith('em')) {
-      value = '0%'
-    }
-
-    // Remove unit from line height
-    if (value.match(/^\d+px$/)) {
-      value = value.replace('px', '')
-    }
-  }
-  return value
+  return script.trim()
 }
 
 // Helper function to normalize attributes
-function normalizeAttributes(attrs: Record<string, any>): Record<string, any> {
-  const normalized: Record<string, any> = {}
-
-  // Filter out zero paddings
-  const paddingProps = ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft']
-  const nonZeroPaddings = paddingProps
-    .filter((prop) => attrs[prop] && attrs[prop] !== '0' && attrs[prop] !== '0px')
-    .reduce((acc, prop) => ({ ...acc, [prop]: attrs[prop] }), {})
-
-  // Normalize remaining attributes
-  for (const [key, value] of Object.entries({ ...attrs, ...nonZeroPaddings })) {
-    if (value != null && value !== '0' && value !== '0px' && !paddingProps.includes(key)) {
-      normalized[key] = normalizeValue(value)
-    }
-  }
-
-  return normalized
-}
 
 // Helper function to remove ids and normalize values
 function removeIds<T>(obj: T): T {
@@ -64,9 +26,9 @@ function removeIds<T>(obj: T): T {
     delete (newObj as any).id
 
     // Normalize attributes if they exist
-    if ('attributes' in newObj) {
-      ;(newObj as any).attributes = normalizeAttributes((newObj as any).attributes)
-    }
+    // if ('attributes' in newObj) {
+    //   ;(newObj as any).attributes = normalizeAttributes((newObj as any).attributes)
+    // }
 
     for (const key in newObj) {
       if (newObj[key] && typeof newObj[key] === 'object') {
@@ -95,6 +57,7 @@ describe('Email Script Generator', () => {
       originalEmail.linkColor,
       originalEmail.fontFamily,
       originalEmail.bgColor,
+      originalEmail.rowBgColor,
       originalEmail.width,
       originalEmail.bgImage,
       originalEmail.bgPosition,

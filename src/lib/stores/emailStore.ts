@@ -6,6 +6,8 @@ export interface EmailStore {
   setCurrentBlock: (block: EmailBlock | RowBlock | null) => void
   email: Email | null
   setEmail: (email: Email | undefined) => void
+  previousEmail: Email | null
+  setPreviousEmail: (email: Email | undefined) => void
 }
 
 export const useEmailStore = create<EmailStore>((set) => ({
@@ -13,4 +15,6 @@ export const useEmailStore = create<EmailStore>((set) => ({
   setCurrentBlock: (block) => set({ currentBlock: block }),
   email: null,
   setEmail: (email) => set({ email }),
+  previousEmail: null,
+  setPreviousEmail: (email) => set({ previousEmail: email }),
 }))

@@ -15,7 +15,7 @@ export const nikeVerificationTemplate = (): Email => {
   ROW padding=16 align=left {
     COLUMN align=left {
       HEADING text=<p>Your Nike Member profile code</p> fontSize=24 fontWeight=bold padding=0,0,8,0
-      TEXT text=<p>Here's the one-time verification code you requested:</p> padding=8,0,16,0 lineHeight=1.5
+      TEXT text=<p>Here's the one-time verification code you requested:</p> padding=8,0,16,0
     }
   }
   

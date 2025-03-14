@@ -9,9 +9,12 @@ import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat as ChatType, Company } from '@/lib/database/types'
 import { chatStore } from '@/lib/stores/chat'
 import { useChatStore } from '@/lib/stores/chatStore'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { cubicEasingFn } from '@/lib/utils/easings'
+import { generateEmailScript } from '@/lib/utils/email-script-generator'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
 import { classNames } from '@/lib/utils/misc'
+import { generateChangeLog } from '@/lib/utils/template-diff'
 import { Message, useChat } from '@ai-sdk/react'
 import { Header } from '@components/header'
 import { Menu } from '@components/sidebar/menu'
@@ -23,7 +26,12 @@ import { useEffect, useRef, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { v4 as uuidv4 } from 'uuid'
+import { AuthDialog } from '../dialogs/auth-dialog'
+import CompanyDialog from '../dialogs/company-dialog'
+import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
+import UpgradeDialog from '../dialogs/upgrade-dialog'
 import Workspace from '../email-workspace/email-workspace'
+import { ChatToastContainer } from '../toast/chat-toast-container'
 import { ChatInput } from './chat-input'
 import { ChatIntro } from './chat-intro'
 import { CompanySection } from './company-section'
@@ -75,7 +83,7 @@ function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
 
 export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMessages, chat }: Props) {
   const { mutate } = useSWRConfig()
-  const { setTitle, setCompany, company } = useChatStore()
+  const { setTitle, setCompany, company, title } = useChatStore()
   useChatHistory({ chat: chat, chatId: id, company: chatCompany })
 
   // Chat state and handlers
@@ -146,6 +154,9 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
   // Prompt enhancement
   const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
+
+  // Add email store access
+  const { email, previousEmail } = useEmailStore()
 
   renderLogger.trace('Chat')
 
@@ -239,7 +250,32 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
     window.history.replaceState({}, '', `/chat/${id}`)
 
-    append({ role: 'user', content: _input })
+    // Check if we have email changes to include
+    let messageContent = _input
+
+    if (email && previousEmail) {
+      // Compare using the script representation instead of JSON.stringify
+      const currentScript = generateEmailScript(email)
+      const previousScript = generateEmailScript(previousEmail)
+
+      if (currentScript !== previousScript) {
+        try {
+          // Generate change log between previous and current email
+          const changeLog = await generateChangeLog(previousEmail, email)
+
+          if (changeLog) {
+            // Prepend the change log to the user message
+            messageContent = `<email_changes>\n${changeLog}\n</email_changes>\n\n${_input}`
+          }
+        } catch (error) {
+          console.error('Failed to generate email change log:', error)
+          // Continue with just the user message if change log generation fails
+        }
+      }
+    }
+
+    // Append the message with change log if applicable
+    append({ role: 'user', content: messageContent })
 
     setInput('')
 
@@ -247,13 +283,15 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
     textareaRef.current?.blur()
 
-    const title = await generateTitleFromUserMessage({
-      message: _input,
-    })
+    if (!title) {
+      const title = await generateTitleFromUserMessage({
+        message: _input,
+      })
 
-    setTitle(title)
+      setTitle(title)
 
-    await updateChat(id, { title })
+      await updateChat(id, { title })
+    }
   }
 
   const handleDeleteCompany = async (companyId: string) => {
@@ -383,7 +421,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
             </div>
           </div>
 
-          {/* <AuthDialog
+          <AuthDialog
             open={showSignUpDialog}
             onClose={() => setShowSignUpDialog(false)}
             stepType={stepType}
@@ -412,9 +450,8 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
             isDeleting={isDeleting}
             onConfirmDelete={confirmDeleteCompany}
           />
-   
 
-        <ChatToastContainer /> */}
+          <ChatToastContainer />
         </>
       </div>
     </div>

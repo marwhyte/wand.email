@@ -107,6 +107,7 @@ export interface ChatTable {
   user_id: string
   title: string
   email: Email | null
+  previous_email: Email | null
   created_at: Date
   updated_at: Date
   deleted_at: Date | null

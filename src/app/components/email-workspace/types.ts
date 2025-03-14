@@ -35,19 +35,19 @@ export type ComponentVariant<T extends ComponentType> = (typeof componentLibrary
 export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T]['allowedBlocks'][number]
 
 export type Email = {
-  id: string
-  preview: string
-  fontFamily: string
   bgColor: string
-  rowBgColor: string
   bgImage?: string
   bgPosition?: string
   bgRepeat?: string
   bgSize?: string
   color: string
+  fontFamily: string
+  id: string
   linkColor: string
-  width: string
+  preview: string
+  rowBgColor: string
   rows: RowBlock[]
+  width: string
 }
 
 export type TemplateTypes =
@@ -186,7 +186,6 @@ export type CommonAttributes = {
   textAlign?: 'left' | 'center' | 'right' | 'justify'
   verticalAlign?: 'top' | 'middle' | 'bottom'
   fontSize?: string
-  lineHeight?: string
   color?: string
   fontWeight?: 'normal' | 'bold' | 'lighter' | 'bolder'
   textDecoration?: string

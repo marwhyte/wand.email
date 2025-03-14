@@ -79,7 +79,7 @@ export async function updateMessage(id: string, chatId: string, updates: { conte
 
 export async function updateChat(
   id: string,
-  updates: { messages?: Message[]; title?: string; email?: Email; parsed?: boolean }
+  updates: { messages?: Message[]; title?: string; email?: Email; previousEmail?: Email; parsed?: boolean }
 ) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -113,6 +113,14 @@ export async function updateChat(
           .execute()
       }
 
+      if (updates.previousEmail) {
+        await trx
+          .updateTable('chats')
+          .set({ previous_email: updates.previousEmail })
+          .where('id', '=', id)
+          .where('user_id', '=', session.user?.id ?? '')
+          .execute()
+      }
       // Update messages
       if (updates.messages) {
         // Delete existing messages
