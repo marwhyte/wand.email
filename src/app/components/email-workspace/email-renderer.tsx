@@ -205,9 +205,6 @@ const EmailRenderer = ({ email }: Props) => {
       id: uuidv4(),
       type: 'row',
       attributes: {},
-      container: {
-        attributes: {},
-      },
       columns: widths.map((w) => ({
         id: uuidv4(),
         type: 'column',
@@ -255,9 +252,6 @@ const EmailRenderer = ({ email }: Props) => {
         id: uuidv4(),
         type: 'row',
         attributes: {},
-        container: {
-          attributes: {},
-        },
         columns: [
           {
             id: uuidv4(),

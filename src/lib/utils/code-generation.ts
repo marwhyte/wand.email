@@ -27,7 +27,7 @@ const renderBlock = (block: EmailBlock, parentRow: RowBlock, company: Company | 
     case 'heading':
     case 'button':
     case 'link':
-      const content = renderToString(parse(block.content))
+      const content = renderToString(parse(block.attributes.content))
       return `<${block.type.charAt(0).toUpperCase() + block.type.slice(1)} ${propsString}>${content}</${block.type.charAt(0).toUpperCase() + block.type.slice(1)}>`
     case 'image':
       return `<img ${propsString} />`

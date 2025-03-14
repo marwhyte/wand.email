@@ -10,7 +10,7 @@ import type {
 } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
-import { shouldUseDarkText } from '../../misc'
+import { ensurePx, shouldUseDarkText } from '../../misc'
 import { getRowTypeBlockDefaults } from './rowTypeBlocks'
 
 export const getAdditionalTextStyles = (
@@ -118,30 +118,38 @@ export const getAdditionalButtonStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(buttonBlock, parentRow) as React.ComponentProps<typeof Button>['style']) || {}
 
-  const { href, target, rel, ...styleAttributes } = buttonBlock.attributes
+  const { href, target, rel, borderColor, borderWidth, borderStyle, ...styleAttributes } = buttonBlock.attributes
 
-  if (company?.primary_color && !styleAttributes.backgroundColor) {
-    return {
-      ...baseDefaults,
-      ...rowTypeDefaults,
-      ...styleAttributes,
-      backgroundColor: company.primary_color,
-      color: shouldUseDarkText(company.primary_color) ? '#000000' : '#ffffff',
-    }
-  } else if (!styleAttributes.backgroundColor) {
-    return {
-      ...baseDefaults,
-      ...rowTypeDefaults,
-      ...styleAttributes,
-      backgroundColor: '#000000',
-      color: '#ffffff',
-    }
-  }
+  const borderStyles = borderWidth
+    ? {
+        borderLeft: `${ensurePx(borderWidth)} ${borderStyle} ${borderColor}`,
+        borderRight: `${ensurePx(borderWidth)} ${borderStyle} ${borderColor}`,
+        borderTop: `${ensurePx(borderWidth)} ${borderStyle} ${borderColor}`,
+        borderBottom: `${ensurePx(borderWidth)} ${borderStyle} ${borderColor}`,
+      }
+    : {
+        borderLeft: '0px solid transparent',
+        borderRight: '0px solid transparent',
+        borderTop: '0px solid transparent',
+        borderBottom: '0px solid transparent',
+      }
+
+  const backgroundColor = styleAttributes.backgroundColor || company?.primary_color || '#000000'
+  const color = styleAttributes.backgroundColor
+    ? styleAttributes.color
+    : company?.primary_color
+      ? shouldUseDarkText(company.primary_color)
+        ? '#000000'
+        : '#ffffff'
+      : '#ffffff'
 
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
     ...styleAttributes,
+    ...borderStyles,
+    backgroundColor,
+    color,
   }
 }
 

@@ -1,6 +1,7 @@
-import type { ColumnBlock, Email, RowBlock } from '@/app/components/email-workspace/types'
+import type { ColumnBlock, Email, RowBlock, RowBlockAttributes } from '@/app/components/email-workspace/types'
 import type { Body, Column, Container, Row } from '@react-email/components'
-import { applyCommonAttributes } from '../common'
+import { ensurePx } from '../../misc'
+import { applyPaddingAttributes } from '../common'
 import { getRowTypeBlockDefaults } from '../defaults/rowTypeBlocks'
 import { getTypeDefaults } from '../defaults/rowTypes'
 import { variantDefaults } from '../defaults/variants'
@@ -39,11 +40,7 @@ export function generateContainerProps(
 
   return {
     className: rowAttributes.hideOnMobile ? 'mobile_hide' : undefined,
-    style: {
-      ...applyCommonAttributes(row.container.attributes),
-      minWidth: row.container.attributes.minWidth,
-      maxWidth: email.width,
-    },
+    style: {},
     width: email.width,
   }
 }
@@ -51,18 +48,25 @@ export function generateContainerProps(
 export function generateRowProps(row: RowBlock, email: Email | null): OmitChildren<React.ComponentProps<typeof Row>> {
   const mergedAttributes = getRowAttributes(row, email)
 
+  const borderStyles =
+    mergedAttributes.borderWidth && mergedAttributes.borderColor
+      ? {
+          borderLeft: `${ensurePx(mergedAttributes.borderWidth)} ${mergedAttributes.borderStyle || 'solid'} ${mergedAttributes.borderColor}`,
+          borderRight: `${ensurePx(mergedAttributes.borderWidth)} ${mergedAttributes.borderStyle || 'solid'} ${mergedAttributes.borderColor}`,
+          borderTop: `${ensurePx(mergedAttributes.borderWidth)} ${mergedAttributes.borderStyle || 'solid'} ${mergedAttributes.borderColor}`,
+          borderBottom: `${ensurePx(mergedAttributes.borderWidth)} ${mergedAttributes.borderStyle || 'solid'} ${mergedAttributes.borderColor}`,
+        }
+      : {}
+
+  console.log(borderStyles)
+
   return {
     className: `row-content${mergedAttributes.stackOnMobile ? ' stack' : ''}`,
     style: {
-      ...applyCommonAttributes(mergedAttributes),
-      backgroundImage: mergedAttributes.backgroundImage,
-      borderColor: mergedAttributes.borderColor,
-      borderWidth: mergedAttributes.borderWidth,
-      borderStyle: mergedAttributes.borderStyle,
-      minWidth: mergedAttributes.minWidth,
-      tableLayout: 'fixed',
+      ...applyPaddingAttributes(mergedAttributes),
+      ...getAdditionalRowStyles(mergedAttributes),
+      ...borderStyles,
     },
-    align: mergedAttributes.align,
     bgcolor: mergedAttributes.backgroundColor ?? 'transparent',
   }
 }
@@ -77,21 +81,13 @@ export function generateColumnProps(
   // Get column-specific defaults based on row type
   const rowTypeDefaults = getRowTypeBlockDefaults(column, row)
 
-  console.log('column.width', column.width)
-
   let style: React.CSSProperties = {
     ...(rowTypeDefaults as React.CSSProperties),
     width: column.width ?? '100%',
-    borderStyle: column.attributes.borderStyle,
-    borderWidth: column.attributes.borderWidth,
-    borderColor: column.attributes.borderColor,
-    borderSpacing: column.attributes.borderSpacing,
-    verticalAlign: column.attributes.verticalAlign ?? rowTypeDefaults.verticalAlign ?? 'top',
     wordBreak: 'break-word',
   }
 
   return {
-    align: column.attributes.align,
     style,
     className: 'column',
   }
@@ -105,12 +101,22 @@ export function generateBodyProps(
     style: {
       margin: 0,
       backgroundColor: skipBackgroundColor ? undefined : email.bgColor,
-      backgroundImage: email.bgImage ? `url(${email.bgImage})` : undefined,
-      backgroundSize: email.bgSize ? email.bgSize : undefined,
-      backgroundPosition: email.bgPosition ? email.bgPosition : undefined,
-      backgroundRepeat: email.bgRepeat ? email.bgRepeat : undefined,
       color: email.color,
       fontFamily: email.fontFamily,
     },
   }
+}
+
+function getAdditionalRowStyles(attributes: RowBlockAttributes): React.CSSProperties {
+  const styles: React.CSSProperties = {}
+
+  if (attributes.borderRadius) {
+    styles.borderRadius = attributes.borderRadius
+  }
+
+  if (attributes.verticalAlign) {
+    styles.verticalAlign = attributes.verticalAlign
+  }
+
+  return styles
 }

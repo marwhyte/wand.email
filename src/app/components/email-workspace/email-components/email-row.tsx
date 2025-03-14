@@ -1,6 +1,6 @@
 import DragLine from '@/app/components/drag-line'
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { applyCommonAttributes, generateRowProps, getRowAttributes } from '@/lib/utils/attributes'
+import { generateRowProps, getRowAttributes } from '@/lib/utils/attributes'
 import { classNames } from '@/lib/utils/misc'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { Container, Row } from '@react-email/components'
@@ -172,7 +172,6 @@ export default function EmailRow({
           className={rowAttributes.hideOnMobile && mobileView ? 'hidden' : undefined}
           style={{
             backgroundColor: email?.bgColor,
-            ...applyCommonAttributes(row.container.attributes),
           }}
         >
           {/* Simplified row rendering that matches email-renderer-final.tsx approach */}

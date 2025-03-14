@@ -6,12 +6,12 @@ const generateComponentLibraryDocs = () => {
 
   for (const [type, config] of Object.entries(componentLibrary)) {
     docs.push(`${type.toUpperCase()}:`)
-    docs.push(`- variants: ${config.variants.join(', ')}`)
+    // docs.push(`- variants: ${config.variants.join(', ')}`)
     docs.push(`- allowed blocks: ${config.allowedBlocks.join(', ')}\n`)
   }
 
   docs.push(`Example usage:
-ROW type=header variant=modern {
+ROW type=header {
   COLUMN width=100% {
     NAVBAR links=[{"text": "Home", "url": "#"}, {"text": "About", "url": "#"}]
   }
@@ -23,8 +23,8 @@ ROW type=header variant=modern {
 const templateStructureDefinition = `
 <email_script_syntax>
   // Base Email Structure
-  <EMAIL name="template Name">    
-    ROW type=header|footer|gallery variant=simple|modern|elegant|transactional {
+  <EMAIL>    
+    ROW type=header|footer|gallery {
       // Column Structure (widths must total 100%)
       COLUMN width=50% align=left|center|right verticalAlign=top|middle|bottom {
         // Content Blocks
@@ -74,7 +74,7 @@ export const getSystemPrompt = (companyName?: string) => `
 You are SentSwiftly, an expert AI assistant for email template design. You generate and modify email templates using a specific script syntax.
 
 <instructions>
-  1. Always wrap your entire response in <EMAIL name="Descriptive Name"> tags, where the name clearly indicates the template's purpose (e.g., "Monthly newsletter with featured products")
+  1. Always wrap your entire response in <EMAIL> tags
   2. Follow the exact syntax shown in the structure definition
   3. Maintain proper indentation and formatting
   4. Use semantic naming and clear organization
@@ -99,7 +99,7 @@ ${templateStructureDefinition}
      <assistant_response>
       I've created a back-to-school promotional email template for eBay featuring tech deals, fashion items, and dorm essentials. The template includes a clean header with your logo, engaging product galleries, and a professional footer with social links.
 
-      <EMAIL name="Back-to-School Email" preview="Ace back-to-school season with these deals!">
+      <EMAIL preview="Ace back-to-school season with these deals!">
         ROW type=header {
           COLUMN {
             IMAGE src="logo" alt="My Logo"

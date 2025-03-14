@@ -16,7 +16,7 @@ export default function EmailButton({ block, parentRow }: Props) {
 
   return (
     <Button {...generateButtonProps(block, parentRow, company, mobileView)} href={undefined}>
-      {parse(block.content)}
+      {parse(block.attributes.content)}
     </Button>
   )
 }

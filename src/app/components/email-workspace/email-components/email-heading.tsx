@@ -22,5 +22,9 @@ export default function EmailHeading({ block, parentRow }: Props) {
     },
   }
 
-  return <Heading {...generateHeadingProps(block, parentRow, mobileView)}>{parse(block.content, options)}</Heading>
+  return (
+    <Heading {...generateHeadingProps(block, parentRow, mobileView)}>
+      {parse(block.attributes.content, options)}
+    </Heading>
+  )
 }

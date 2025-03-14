@@ -3,26 +3,35 @@ import {
   ColumnBlock,
   ColumnBlockAttributes,
   COMMON_SOCIAL_ICONS,
-  CommonAttributes,
+  ComponentType,
+  ComponentVariant,
   DividerBlockAttributes,
   Email,
   FOLDER_SPECIFIC_ICONS,
   HeadingBlockAttributes,
   ImageBlockAttributes,
   LinkBlockAttributes,
+  PaddingAttributes,
   RowBlock,
   RowBlockAttributes,
   SocialIconFolders,
   SocialIconName,
   SocialsBlockAttributes,
   SurveyBlockAttributes,
+  TextAttributes,
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
 import { createBlock, createColumn, createRow } from './email-helpers'
 import { resolveImageSrc } from './image-service'
+import { ensurePx } from './misc'
 
-type BlockAttributes = Record<string, string | number>
+// ===== Base Parser Types =====
+type RawAttributes = Record<string, string>
+type AttributeParser<T> = (raw: RawAttributes) => T
+type BlockParserMap = typeof blockParsers
+type BlockType = keyof BlockParserMap
 
+// ===== Helper Functions =====
 function parsePadding(padding: string | undefined): Record<string, string> {
   if (!padding) {
     return {} // Return empty object instead of zero values
@@ -79,26 +88,23 @@ function parseEscapeSequences(text: string): string {
     .replace(/\\\\/g, '\\')
 }
 
-// First, let's improve our base types for parsing
-type AttributeValue = string | number | boolean | undefined
-type RawAttributes = Record<string, string> // What we get from initial parsing
+function ensureString(value: unknown, defaultValue: string = ''): string {
+  return typeof value === 'string' ? value : defaultValue
+}
 
-// Type guard to check if a value is a valid text alignment
-function isTextAlign(value: string | undefined): value is CommonAttributes['textAlign'] {
+// ===== Type Guards =====
+function isTextAlign(value: string | undefined): value is TextAttributes['textAlign'] {
   return typeof value === 'string' && ['left', 'center', 'right', 'justify'].includes(value)
 }
 
-// Type guard for font weight
-function isFontWeight(value: string | undefined): value is CommonAttributes['fontWeight'] {
+function isFontWeight(value: string | undefined): value is TextAttributes['fontWeight'] {
   return typeof value === 'string' && ['normal', 'bold', 'lighter', 'bolder'].includes(value)
 }
 
-// Type guard for target
 function isTarget(value: string | undefined): value is ButtonBlockAttributes['target'] {
   return typeof value === 'string' && ['_blank', '_self', '_parent', '_top'].includes(value)
 }
 
-// Type guard for border style
 function isBorderStyle(value: string | undefined): value is NonNullable<RowBlockAttributes['borderStyle']> {
   return (
     typeof value === 'string' &&
@@ -106,193 +112,10 @@ function isBorderStyle(value: string | undefined): value is NonNullable<RowBlock
   )
 }
 
-// Helper for ensuring string values
-function ensureString(value: unknown, defaultValue: string = ''): string {
-  return typeof value === 'string' ? value : defaultValue
-}
-
-// Parser types
-type AttributeParser<T> = (raw: RawAttributes) => T
-
-// Type guards for common attributes
-function isVerticalAlign(value: string | undefined): value is CommonAttributes['verticalAlign'] {
+function isVerticalAlign(value: string | undefined): value is RowBlockAttributes['verticalAlign'] {
   return typeof value === 'string' && ['top', 'middle', 'bottom'].includes(value)
 }
 
-function isTextTransform(value: string | undefined): value is NonNullable<CommonAttributes['textTransform']> {
-  return typeof value === 'string' && ['none', 'uppercase', 'lowercase', 'capitalize'].includes(value)
-}
-
-function isWhiteSpace(value: string | undefined): value is NonNullable<CommonAttributes['whiteSpace']> {
-  return typeof value === 'string' && ['normal', 'nowrap', 'pre', 'pre-wrap', 'pre-line'].includes(value)
-}
-
-function isFontStyle(value: string | undefined): value is NonNullable<CommonAttributes['fontStyle']> {
-  return typeof value === 'string' && ['normal', 'italic', 'oblique'].includes(value)
-}
-
-// Helper function to handle padding for any attribute object
-function handlePadding(raw: RawAttributes, attrs: any) {
-  if (raw.padding) {
-    const paddingValues = parsePadding(raw.padding)
-    for (const [key, value] of Object.entries(paddingValues)) {
-      if (value !== '0px') {
-        attrs[key] = value
-      }
-    }
-  } else {
-    // Individual padding values - only add non-zero values
-    if (raw.paddingTop && raw.paddingTop !== '0') attrs.paddingTop = ensurePx(raw.paddingTop)
-    if (raw.paddingRight && raw.paddingRight !== '0') attrs.paddingRight = ensurePx(raw.paddingRight)
-    if (raw.paddingBottom && raw.paddingBottom !== '0') attrs.paddingBottom = ensurePx(raw.paddingBottom)
-    if (raw.paddingLeft && raw.paddingLeft !== '0') attrs.paddingLeft = ensurePx(raw.paddingLeft)
-  }
-  return attrs
-}
-
-// Parse common attributes with proper typing
-const parseCommonAttributes = (raw: RawAttributes): Partial<CommonAttributes> => {
-  const attrs: Partial<CommonAttributes> = {}
-
-  // Handle padding
-  handlePadding(raw, attrs)
-
-  // Display and dimensions
-  if (raw.display) attrs.display = raw.display
-  if (raw.width) attrs.width = ensurePx(raw.width)
-  if (raw.maxWidth) attrs.maxWidth = ensurePx(raw.maxWidth)
-  if (raw.height) attrs.height = ensurePx(raw.height)
-
-  // Background properties
-  if (raw.background) attrs.background = raw.background
-  if (raw.backgroundColor) attrs.backgroundColor = raw.backgroundColor
-  if (raw.backgroundImage) attrs.backgroundImage = raw.backgroundImage
-  if (raw.backgroundSize) attrs.backgroundSize = raw.backgroundSize
-  if (raw.backgroundPosition) attrs.backgroundPosition = raw.backgroundPosition
-  if (raw.backgroundRepeat) attrs.backgroundRepeat = raw.backgroundRepeat
-
-  // Border
-  if (raw.borderRadius) attrs.borderRadius = ensurePx(raw.borderRadius)
-
-  // Text formatting
-  if (isTextAlign(raw.textAlign)) attrs.textAlign = raw.textAlign
-  if (isVerticalAlign(raw.verticalAlign)) attrs.verticalAlign = raw.verticalAlign
-  if (raw.fontSize) attrs.fontSize = ensurePx(raw.fontSize)
-  if (raw.color) attrs.color = raw.color
-  if (isFontWeight(raw.fontWeight)) attrs.fontWeight = raw.fontWeight
-  if (raw.textDecoration) attrs.textDecoration = raw.textDecoration
-  if (isTextTransform(raw.textTransform)) attrs.textTransform = raw.textTransform
-  if (isWhiteSpace(raw.whiteSpace)) attrs.whiteSpace = raw.whiteSpace
-  if (isFontStyle(raw.fontStyle)) attrs.fontStyle = raw.fontStyle
-
-  return attrs
-}
-
-// Helper functions
-function ensurePx(value: string): string {
-  // If value already has px or % suffix, return as is
-  if (value.endsWith('px') || value.endsWith('%')) {
-    return value
-  }
-
-  // Otherwise, append px∂
-  return `${value}px`
-}
-
-// Block-specific parsers
-const parseHeadingAttributes: AttributeParser<HeadingBlockAttributes> = (raw) => {
-  const common = parseCommonAttributes(raw)
-  const attrs: HeadingBlockAttributes = {
-    ...common,
-    as: (raw.as as HeadingBlockAttributes['as']) || 'h2',
-  }
-
-  // Heading-specific attributes
-  if (raw.fontFamily) attrs.fontFamily = raw.fontFamily
-  if (raw.letterSpacing) attrs.letterSpacing = ensurePx(raw.letterSpacing)
-  if (raw.textIndent) attrs.textIndent = ensurePx(raw.textIndent)
-
-  return attrs
-}
-
-const parseTextAttributes: AttributeParser<TextBlockAttributes> = (raw) => {
-  return {
-    ...parseCommonAttributes(raw),
-    fontFamily: raw.fontFamily,
-    letterSpacing: raw.letterSpacing,
-    textIndent: raw.textIndent,
-  }
-}
-
-const parseButtonAttributes: AttributeParser<ButtonBlockAttributes> = (raw) => {
-  const common = parseCommonAttributes(raw)
-  const attrs: ButtonBlockAttributes = {
-    ...common,
-    href: raw.href || '#',
-    backgroundColor: raw.backgroundColor,
-    color: raw.color,
-  }
-
-  if (raw.paddingTop) attrs.paddingTop = ensurePx(raw.paddingTop)
-  if (raw.paddingBottom) attrs.paddingBottom = ensurePx(raw.paddingBottom)
-  if (raw.paddingLeft) attrs.paddingLeft = ensurePx(raw.paddingLeft)
-  if (raw.paddingRight) attrs.paddingRight = ensurePx(raw.paddingRight)
-
-  if (isTarget(raw.target)) attrs.target = raw.target
-  if (raw.rel) attrs.rel = raw.rel
-  if (isBorderStyle(raw.borderStyle)) attrs.borderStyle = raw.borderStyle
-  if (raw.borderWidth) attrs.borderWidth = ensurePx(raw.borderWidth)
-  if (raw.borderColor) attrs.borderColor = raw.borderColor
-
-  return attrs
-}
-
-const parseImageAttributes: AttributeParser<ImageBlockAttributes> = (raw) => {
-  const common = parseCommonAttributes(raw)
-  const attrs: ImageBlockAttributes = {
-    ...common,
-    src: raw.src || '', // Required attribute
-    alt: raw.alt || '',
-  }
-
-  // Optional image-specific attributes
-  if (raw.alt) attrs.alt = raw.alt
-  if (raw.borderRadius) attrs.borderRadius = ensurePx(raw.borderRadius)
-
-  return attrs
-}
-
-const parseLinkAttributes: AttributeParser<LinkBlockAttributes> = (raw) => {
-  const common = parseCommonAttributes(raw)
-  const attrs: LinkBlockAttributes = {
-    ...common,
-    href: raw.href || '#', // Default to '#' if not provided
-  }
-
-  // Optional link-specific attributes
-  if (isTarget(raw.target)) attrs.target = raw.target
-  if (raw.rel) attrs.rel = raw.rel
-
-  return attrs
-}
-
-const parseDividerAttributes: AttributeParser<DividerBlockAttributes> = (raw) => {
-  const common = parseCommonAttributes(raw)
-  const attrs: DividerBlockAttributes = {
-    ...common,
-  }
-
-  // Divider-specific attributes
-  if (raw.borderStyle && ['solid', 'dashed', 'dotted'].includes(raw.borderStyle)) {
-    attrs.borderStyle = raw.borderStyle as DividerBlockAttributes['borderStyle']
-  }
-  if (raw.borderWidth) attrs.borderWidth = ensurePx(raw.borderWidth)
-  if (raw.borderColor) attrs.borderColor = raw.borderColor
-
-  return attrs
-}
-
-// Type guard for social icon folders
 function isSocialIconFolder(value: string | undefined): value is SocialIconFolders {
   return (
     typeof value === 'string' &&
@@ -311,7 +134,6 @@ function isSocialIconFolder(value: string | undefined): value is SocialIconFolde
   )
 }
 
-// Type guard for social icon names
 function isSocialIconName(value: string | undefined): value is SocialIconName {
   // Get all possible values by combining common icons and folder-specific icons
   const validIcons = new Set([
@@ -321,63 +143,44 @@ function isSocialIconName(value: string | undefined): value is SocialIconName {
   return typeof value === 'string' && validIcons.has(value as SocialIconName)
 }
 
-const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) => {
-  const common = parseCommonAttributes(raw)
+// ===== Base Attribute Parsers =====
+function handlePadding(raw: RawAttributes): PaddingAttributes {
+  const attrs: PaddingAttributes = {}
 
-  // Parse social links from raw attributes
-  const socialLinks: SocialsBlockAttributes['socialLinks'] = []
-
-  try {
-    const jsonStr = raw.socialLinks?.trim() || '[]'
-
-    // Validate JSON string format
-    if (!jsonStr.startsWith('[') || !jsonStr.endsWith(']')) {
-      console.error('Invalid JSON array format:', jsonStr)
-      throw new Error('Invalid JSON array format')
-    }
-
-    const rawLinks = JSON.parse(jsonStr)
-
-    if (Array.isArray(rawLinks)) {
-      for (const link of rawLinks) {
-        if (isSocialIconName(link.icon)) {
-          socialLinks.push({
-            icon: link.icon,
-            url: link.url || '',
-            title: link.title || '',
-            alt: link.alt || '',
-          })
-        }
-      }
-    }
-  } catch (e) {
-    console.error('Failed to parse social links:', e)
-    console.debug('Raw socialLinks value:', raw.socialLinks)
-    console.debug('socialLinks type:', typeof raw.socialLinks)
-  }
-
-  const attrs: SocialsBlockAttributes = {
-    ...common,
-    folder: isSocialIconFolder(raw.folder) ? raw.folder : 'socials-color',
-    socialLinks,
+  if (raw.padding) {
+    const paddingValues = parsePadding(raw.padding)
+    Object.assign(attrs, paddingValues)
+  } else {
+    // Individual padding values - only add non-zero values
+    if (raw.paddingTop && raw.paddingTop !== '0') attrs.paddingTop = ensurePx(raw.paddingTop)
+    if (raw.paddingRight && raw.paddingRight !== '0') attrs.paddingRight = ensurePx(raw.paddingRight)
+    if (raw.paddingBottom && raw.paddingBottom !== '0') attrs.paddingBottom = ensurePx(raw.paddingBottom)
+    if (raw.paddingLeft && raw.paddingLeft !== '0') attrs.paddingLeft = ensurePx(raw.paddingLeft)
   }
 
   return attrs
 }
 
-// Add survey block parser
-const parseSurveyAttributes: AttributeParser<SurveyBlockAttributes> = (raw) => {
-  const common = parseCommonAttributes(raw)
-  const attrs: SurveyBlockAttributes = {
-    ...common,
-    kind: raw.kind as SurveyBlockAttributes['kind'],
-    question: raw.question || '',
+function handleTextAttributes(raw: RawAttributes): TextAttributes {
+  const attrs: TextAttributes = {
+    content: '',
   }
+
+  // Find text content between <p> tags
+  if (raw.text) {
+    attrs.content = raw.text
+  }
+
+  if (raw.color) attrs.color = raw.color
+  if (isTextAlign(raw.textAlign)) attrs.textAlign = raw.textAlign as TextAttributes['textAlign']
+  if (isFontWeight(raw.fontWeight)) attrs.fontWeight = raw.fontWeight as TextAttributes['fontWeight']
+  if (raw.fontSize) attrs.fontSize = ensurePx(raw.fontSize)
+  if (raw.fontFamily) attrs.fontFamily = raw.fontFamily
+  if (raw.letterSpacing) attrs.letterSpacing = ensurePx(raw.letterSpacing)
 
   return attrs
 }
 
-// Update the parseAttributes function to be more specific
 function parseAttributes(attrString: string): RawAttributes {
   const attrs: RawAttributes = {}
 
@@ -389,13 +192,6 @@ function parseAttributes(attrString: string): RawAttributes {
     const normalizedJson = jsonValue.replace(/(\{|,)\s*(\w+):/g, '$1"$2":')
     attrs[key] = normalizedJson
     attrString = attrString.replace(fullMatch, '')
-  }
-
-  // Find text content between <p> tags
-  const textMatch = attrString.match(/<p>(.*?)<\/p>/)
-  if (textMatch) {
-    attrs.text = parseEscapeSequences(textMatch[1])
-    attrString = attrString.replace(textMatch[0], '')
   }
 
   // Special handling for alt attribute - capture everything between quotes
@@ -436,7 +232,163 @@ function parseAttributes(attrString: string): RawAttributes {
   return attrs
 }
 
-// Update the block parsers map with all block types
+// ===== Structural Block Parsers =====
+const parseRowAttributes: AttributeParser<RowBlockAttributes> = (raw) => {
+  return {
+    ...handlePadding(raw),
+    backgroundColor: raw.backgroundColor,
+    borderColor: raw.borderColor,
+    borderRadius: raw.borderRadius ? ensurePx(raw.borderRadius) : undefined,
+    borderStyle: isBorderStyle(raw.borderStyle) ? raw.borderStyle : undefined,
+    borderWidth: raw.borderWidth ? ensurePx(raw.borderWidth) : undefined,
+    columnSpacing: raw.columnSpacing ? Number(raw.columnSpacing) : undefined,
+    hideOnMobile: raw.hideOnMobile === 'true',
+    reverseStackOnMobile: raw.reverseStackOnMobile === 'true',
+    stackOnMobile: raw.stackOnMobile === 'true',
+    type: raw.type as ComponentType | undefined,
+    variant: raw.variant as ComponentVariant<ComponentType> | undefined,
+    verticalAlign: isVerticalAlign(raw.verticalAlign) ? raw.verticalAlign : undefined,
+  }
+}
+
+const parseColumnAttributes: AttributeParser<ColumnBlockAttributes> = (raw) => {
+  let attrs: ColumnBlockAttributes = {}
+
+  // Handle padding
+  // attrs = handlePadding(raw, attrs)
+
+  return attrs
+}
+
+// ===== Content Block Parsers =====
+const parseButtonAttributes: AttributeParser<ButtonBlockAttributes> = (raw) => {
+  return {
+    ...handleTextAttributes(raw),
+    ...handlePadding(raw),
+    backgroundColor: raw.backgroundColor,
+    borderColor: raw.borderColor,
+    borderRadius: raw.borderRadius ? ensurePx(raw.borderRadius) : undefined,
+    borderStyle: isBorderStyle(raw.borderStyle) ? raw.borderStyle : undefined,
+    borderWidth: raw.borderWidth ? ensurePx(raw.borderWidth) : undefined,
+    href: raw.href || '#',
+    marginBottom: raw.marginBottom ? ensurePx(raw.marginBottom) : undefined,
+    marginTop: raw.marginTop ? ensurePx(raw.marginTop) : undefined,
+    rel: raw.rel,
+    target: isTarget(raw.target) ? raw.target : undefined,
+  }
+}
+
+const parseDividerAttributes: AttributeParser<DividerBlockAttributes> = (raw) => {
+  const attrs: DividerBlockAttributes = {
+    ...handlePadding(raw),
+  }
+
+  // Divider-specific attributes
+  if (isBorderStyle(raw.borderStyle)) {
+    attrs.borderStyle = raw.borderStyle as DividerBlockAttributes['borderStyle']
+  }
+  if (raw.borderWidth) attrs.borderWidth = ensurePx(raw.borderWidth)
+  if (raw.borderColor) attrs.borderColor = raw.borderColor
+
+  return attrs
+}
+
+const parseHeadingAttributes: AttributeParser<HeadingBlockAttributes> = (raw) => {
+  return {
+    ...handleTextAttributes(raw),
+    ...handlePadding(raw),
+    as: (raw.as as HeadingBlockAttributes['as']) || 'h2',
+  }
+}
+
+const parseImageAttributes: AttributeParser<ImageBlockAttributes> = (raw) => {
+  return {
+    ...handlePadding(raw),
+    alt: raw.alt || '',
+    borderRadius: raw.borderRadius ? ensurePx(raw.borderRadius) : undefined,
+    marginLeft: raw.marginLeft ? ensurePx(raw.marginLeft) : undefined,
+    marginRight: raw.marginRight ? ensurePx(raw.marginRight) : undefined,
+    src: raw.src || '',
+    width: raw.width ? ensurePx(raw.width) : undefined,
+  }
+}
+
+const parseLinkAttributes: AttributeParser<LinkBlockAttributes> = (raw) => {
+  const attrs: LinkBlockAttributes = {
+    ...handleTextAttributes(raw),
+    ...handlePadding(raw),
+    href: raw.href || '#', // Default to '#' if not provided
+  }
+
+  // Optional link-specific attributes
+  if (isTarget(raw.target)) attrs.target = raw.target
+  if (raw.rel) attrs.rel = raw.rel
+
+  return attrs
+}
+
+const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) => {
+  const attrs: SocialsBlockAttributes = {
+    ...handlePadding(raw),
+    folder: isSocialIconFolder(raw.folder) ? raw.folder : 'socials-color',
+    socialLinks: [],
+  }
+
+  // Parse social links from raw attributes
+  try {
+    const jsonStr = raw.socialLinks?.trim() || '[]'
+
+    // Validate JSON string format
+    if (!jsonStr.startsWith('[') || !jsonStr.endsWith(']')) {
+      console.error('Invalid JSON array format:', jsonStr)
+      throw new Error('Invalid JSON array format')
+    }
+
+    const rawLinks = JSON.parse(jsonStr)
+
+    if (Array.isArray(rawLinks)) {
+      for (const link of rawLinks) {
+        if (isSocialIconName(link.icon)) {
+          attrs.socialLinks.push({
+            icon: link.icon,
+            url: link.url || '',
+            title: link.title || '',
+            alt: link.alt || '',
+          })
+        }
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse social links:', e)
+    console.debug('Raw socialLinks value:', raw.socialLinks)
+    console.debug('socialLinks type:', typeof raw.socialLinks)
+  }
+
+  // Optional margin attributes
+  if (raw.marginLeft) attrs.marginLeft = ensurePx(raw.marginLeft)
+  if (raw.marginRight) attrs.marginRight = ensurePx(raw.marginRight)
+
+  return attrs
+}
+
+const parseSurveyAttributes: AttributeParser<SurveyBlockAttributes> = (raw) => {
+  const attrs: SurveyBlockAttributes = {
+    ...handlePadding(raw),
+    kind: raw.kind as SurveyBlockAttributes['kind'],
+    question: raw.question || '',
+  }
+
+  return attrs
+}
+
+const parseTextAttributes: AttributeParser<TextBlockAttributes> = (raw) => {
+  return {
+    ...handleTextAttributes(raw),
+    ...handlePadding(raw),
+  }
+}
+
+// ===== Parser Registry =====
 const blockParsers = {
   heading: parseHeadingAttributes,
   text: parseTextAttributes,
@@ -448,57 +400,68 @@ const blockParsers = {
   survey: parseSurveyAttributes,
 } as const
 
-// Type-safe block creation mapping
-type BlockParserMap = typeof blockParsers
-type BlockType = keyof BlockParserMap
+// ===== Image Processing Helpers =====
+function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 'square' {
+  // Count image blocks and total blocks in the row
+  let imageCount = 0
+  let totalBlocks = 0
 
-// Add a new parser for row attributes
-const parseRowAttributes: AttributeParser<RowBlockAttributes> = (raw) => {
-  const common = parseCommonAttributes(raw)
-  const attrs: RowBlockAttributes = {
-    ...common,
-  }
+  row.columns.forEach((column) => {
+    const hasImage = column.blocks.some((block) => block.type === 'image')
+    if (hasImage) imageCount++
+    totalBlocks += column.blocks.length
+  })
 
-  // Row-specific attributes
-  if (raw.align) attrs.align = raw.align as RowBlockAttributes['align']
-  if (isBorderStyle(raw.borderStyle)) attrs.borderStyle = raw.borderStyle
-  if (raw.borderWidth) attrs.borderWidth = ensurePx(raw.borderWidth)
-  if (raw.borderColor) attrs.borderColor = raw.borderColor
-  if (raw.minWidth) attrs.minWidth = ensurePx(raw.minWidth)
-  if (raw.type) attrs.type = raw.type as RowBlockAttributes['type']
-  if (raw.variant) attrs.variant = raw.variant as RowBlockAttributes['variant']
+  // If there are more than 2 columns with images, use square
+  if (imageCount > 2) return 'square'
 
-  // Boolean attributes
-  if (raw.stackOnMobile) attrs.stackOnMobile = raw.stackOnMobile === 'true'
-  if (raw.reverseStackOnMobile) attrs.reverseStackOnMobile = raw.reverseStackOnMobile === 'true'
-  if (raw.hideOnMobile) attrs.hideOnMobile = raw.hideOnMobile === 'true'
+  // If there's 1 image column and other content, use square
+  if (imageCount === 1 && totalBlocks > imageCount) return 'square'
 
-  return attrs
+  // Default to landscape for 1-2 columns of just images
+  return 'landscape'
 }
 
-// Type guard for column alignment
-function isColumnAlign(value: string | undefined): value is ColumnBlockAttributes['align'] {
-  return typeof value === 'string' && ['left', 'center', 'right'].includes(value)
+async function processBlocks(blocks: any[], row: RowBlock): Promise<any[]> {
+  const orientation = determineImageOrientation(row)
+
+  return Promise.all(
+    blocks.map(async (block) => {
+      if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
+        // Resolve the image source with determined orientation
+        const resolvedSrc = await resolveImageSrc(block.attributes.src, orientation)
+        return {
+          ...block,
+          attributes: {
+            ...block.attributes,
+            src: resolvedSrc,
+          },
+        }
+      }
+      return block
+    })
+  )
 }
 
-// Parser for column attributes
-const parseColumnAttributes: AttributeParser<ColumnBlockAttributes> = (raw) => {
-  let attrs: ColumnBlockAttributes = {}
-
-  // Parse column-specific attributes
-  if (isColumnAlign(raw.align)) attrs.align = raw.align
-  if (isVerticalAlign(raw.verticalAlign)) attrs.verticalAlign = raw.verticalAlign
-  if (raw.borderSpacing) attrs.borderSpacing = ensurePx(raw.borderSpacing)
-  if (isBorderStyle(raw.borderStyle)) attrs.borderStyle = raw.borderStyle
-  if (raw.borderWidth) attrs.borderWidth = ensurePx(raw.borderWidth)
-  if (raw.borderColor) attrs.borderColor = raw.borderColor
-
-  // Handle padding
-  attrs = handlePadding(raw, attrs)
-
-  return attrs
+async function processColumns(columns: any[], row: RowBlock): Promise<any[]> {
+  return Promise.all(
+    columns.map(async (column) => ({
+      ...column,
+      blocks: column.blocks ? await processBlocks(column.blocks, row) : [],
+    }))
+  )
 }
 
+async function processRows(rows: any[]): Promise<any[]> {
+  return Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      columns: row.columns ? await processColumns(row.columns, row) : [],
+    }))
+  )
+}
+
+// ===== Main Parser Functions =====
 export function parseEmailScript(script: string): RowBlock[] {
   const rows: RowBlock[] = []
   const lines = script.trim().split('\n')
@@ -517,29 +480,7 @@ export function parseEmailScript(script: string): RowBlock[] {
 
       const rowAttrs = parseAttributes(rowMatch[1])
 
-      // Extract container-specific attributes
-      const containerAttrs: Record<string, any> = {}
-      const containerProps = [
-        'align',
-        'maxWidth',
-        'minWidth',
-        'background',
-        'backgroundColor',
-        'backgroundImage',
-        'backgroundSize',
-        'backgroundPosition',
-        'backgroundRepeat',
-        'height',
-      ]
-
-      containerProps.forEach((prop) => {
-        if (rowAttrs[prop] !== undefined) {
-          containerAttrs[prop] = rowAttrs[prop]
-          delete rowAttrs[prop]
-        }
-      })
-
-      currentRow = createRow(containerAttrs, parseRowAttributes(rowAttrs))
+      currentRow = createRow(parseRowAttributes(rowAttrs))
       rows.push(currentRow)
       depth++
       continue
@@ -625,71 +566,6 @@ export function parseEmailScript(script: string): RowBlock[] {
   return rows
 }
 
-// Add this helper function to determine image orientation
-function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 'square' {
-  // Count image blocks and total blocks in the row
-  let imageCount = 0
-  let totalBlocks = 0
-
-  row.columns.forEach((column) => {
-    const hasImage = column.blocks.some((block) => block.type === 'image')
-    if (hasImage) imageCount++
-    totalBlocks += column.blocks.length
-  })
-
-  // If there are more than 2 columns with images, use square
-  if (imageCount > 2) return 'square'
-
-  // If there's 1 image column and other content, use square
-  if (imageCount === 1 && totalBlocks > imageCount) return 'square'
-
-  // Default to landscape for 1-2 columns of just images
-  return 'landscape'
-}
-
-// Update the processBlocks function
-async function processBlocks(blocks: any[], row: RowBlock): Promise<any[]> {
-  const orientation = determineImageOrientation(row)
-
-  return Promise.all(
-    blocks.map(async (block) => {
-      if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
-        // Resolve the image source with determined orientation
-        const resolvedSrc = await resolveImageSrc(block.attributes.src, orientation)
-        return {
-          ...block,
-          attributes: {
-            ...block.attributes,
-            src: resolvedSrc,
-          },
-        }
-      }
-      return block
-    })
-  )
-}
-
-// Update the processColumns function to pass the row context
-async function processColumns(columns: any[], row: RowBlock): Promise<any[]> {
-  return Promise.all(
-    columns.map(async (column) => ({
-      ...column,
-      blocks: column.blocks ? await processBlocks(column.blocks, row) : [],
-    }))
-  )
-}
-
-// Update the processRows function
-async function processRows(rows: any[]): Promise<any[]> {
-  return Promise.all(
-    rows.map(async (row) => ({
-      ...row,
-      columns: row.columns ? await processColumns(row.columns, row) : [],
-    }))
-  )
-}
-
-// Main function to process the entire email object
 export async function processEmailImages(email: Email): Promise<Email> {
   return {
     ...email,

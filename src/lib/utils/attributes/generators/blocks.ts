@@ -13,7 +13,7 @@ import type {
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
 import { getImgSrc } from '../../misc'
-import { applyCommonAttributes } from '../common'
+import { applyPaddingAttributes, applyTextAttributes } from '../common'
 import {
   getAdditionalButtonStyles,
   getAdditionalDividerStyles,
@@ -34,7 +34,8 @@ export function generateTextProps(
 ): OmitChildren<React.ComponentProps<typeof Text>> {
   return {
     style: {
-      ...applyCommonAttributes(block.attributes),
+      ...applyPaddingAttributes(block.attributes),
+      ...applyTextAttributes(block.attributes),
       ...getAdditionalTextStyles(block, parentRow),
     },
   }
@@ -48,7 +49,8 @@ export function generateHeadingProps(
   return {
     as: block.attributes.as,
     style: {
-      ...applyCommonAttributes(block.attributes),
+      ...applyPaddingAttributes(block.attributes),
+      ...applyTextAttributes(block.attributes),
       ...getAdditionalHeadingStyles(block, parentRow),
       marginBlockStart: 0,
       marginBlockEnd: 0,
@@ -66,7 +68,7 @@ export function generateImageProps(
     src,
     alt: block.attributes.alt,
     style: {
-      ...applyCommonAttributes(block.attributes),
+      ...applyPaddingAttributes(block.attributes),
       ...getAdditionalImageStyles(block, parentRow, company),
     },
   }
@@ -81,7 +83,8 @@ export function generateButtonProps(
   mobileView = false
 ): OmitChildren<React.ComponentProps<typeof Button>> {
   const style = {
-    ...applyCommonAttributes(block.attributes),
+    ...applyPaddingAttributes(block.attributes),
+    ...applyTextAttributes(block.attributes),
     ...getAdditionalButtonStyles(block, parentRow, company),
   }
 
@@ -100,7 +103,8 @@ export function generateLinkProps(
   email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Link>> {
   const mergedAttributes: React.ComponentProps<typeof Link>['style'] = {
-    ...applyCommonAttributes(block.attributes),
+    ...applyPaddingAttributes(block.attributes),
+    ...applyTextAttributes(block.attributes),
     ...getAdditionalLinkStyles(block, parentRow),
   }
 
@@ -121,11 +125,8 @@ export function generateDividerProps(
   parentRow: RowBlock,
   mobileView = false
 ): OmitChildren<React.ComponentProps<typeof Hr>> {
-  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...otherAttributes } = block.attributes
-
   return {
     style: {
-      ...applyCommonAttributes(otherAttributes),
       ...getAdditionalDividerStyles(block, parentRow),
     },
   }
@@ -138,7 +139,7 @@ export function generateSurveyProps(
 ): OmitChildren<React.ComponentProps<typeof Section>> {
   return {
     style: {
-      ...applyCommonAttributes(block.attributes),
+      ...applyPaddingAttributes(block.attributes),
       ...getAdditionalSurveyStyles(block, parentRow),
     },
   }

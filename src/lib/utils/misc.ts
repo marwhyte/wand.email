@@ -15,6 +15,16 @@ export function shouldUseDarkText(backgroundColor: string) {
   return luminance > 0.5
 }
 
+export function ensurePx(value: string): string {
+  // If value already has px or % suffix, return as is
+  if (value.endsWith('px') || value.endsWith('%')) {
+    return value
+  }
+
+  // Otherwise, append px∂
+  return `${value}px`
+}
+
 export function getFirstTwoInitials(name: string) {
   // Split the name by spaces
   const words = name.trim().split(/\s+/)

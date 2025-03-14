@@ -1,34 +1,17 @@
-import type { CommonAttributes } from '@/app/components/email-workspace/types'
+import type { PaddingAttributes, TextAttributes } from '@/app/components/email-workspace/types'
 
-export function applyCommonAttributes(attributes: CommonAttributes): React.CSSProperties {
-  const commonProps = [
-    'paddingTop',
-    'paddingRight',
-    'paddingBottom',
-    'paddingLeft',
-    'display',
-    'width',
-    'maxWidth',
-    'height',
-    'background',
-    'backgroundColor',
-    'backgroundImage',
-    'backgroundPosition',
-    'backgroundSize',
-    'backgroundRepeat',
-    'borderRadius',
-    'textAlign',
-    'verticalAlign',
-    'fontSize',
-    'color',
-    'fontWeight',
-    'textDecoration',
-    'textTransform',
-    'whiteSpace',
-    'fontStyle',
-  ] as const
+export function applyTextAttributes(attributes: TextAttributes): React.CSSProperties {
+  const textProps = ['color', 'fontSize', 'fontWeight', 'textAlign', 'fontFamily', 'letterSpacing'] as const
 
   return Object.fromEntries(
-    commonProps.map((prop) => [prop, attributes[prop]]).filter(([_, value]) => value !== undefined)
+    textProps.map((prop) => [prop, attributes[prop]]).filter(([_, value]) => value !== undefined)
+  )
+}
+
+export function applyPaddingAttributes(attributes: PaddingAttributes): React.CSSProperties {
+  const paddingProps = ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'] as const
+
+  return Object.fromEntries(
+    paddingProps.map((prop) => [prop, attributes[prop]]).filter(([_, value]) => value !== undefined)
   )
 }

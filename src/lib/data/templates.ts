@@ -4,7 +4,21 @@ import { nikeVerificationTemplate } from '@/app/components/email-workspace/templ
 import { slackTemplate } from '@/app/components/email-workspace/templates/slack-template'
 import { stripeTemplate } from '@/app/components/email-workspace/templates/stripe-template'
 import { turbotaxTemplate } from '@/app/components/email-workspace/templates/turbotax-template'
-import { Email, EmailBlock, EmailBlockType, Template, TemplateTypes } from '@/app/components/email-workspace/types'
+import {
+  ButtonBlock,
+  DividerBlock,
+  Email,
+  EmailBlock,
+  EmailBlockType,
+  HeadingBlock,
+  ImageBlock,
+  LinkBlock,
+  SocialsBlock,
+  SurveyBlock,
+  Template,
+  TemplateTypes,
+  TextBlock,
+} from '@/app/components/email-workspace/types'
 import { v4 as uuidv4 } from 'uuid'
 
 export const templates: Template[] = [
@@ -72,17 +86,15 @@ export const getTemplate = (id: string): Email | null => {
   return template.template
 }
 
-export function createNewBlock(type: EmailBlockType): EmailBlock {
+export function createNewBlock<T extends EmailBlockType>(type: T): Extract<EmailBlock, { type: T }> {
   const baseBlock = {
     id: uuidv4(),
     type,
-    content: type === 'button' ? 'Button' : `I'm a new ${type} block`,
-    attributes: {},
   }
 
-  switch (baseBlock.type) {
-    case 'survey':
-      return {
+  switch (type) {
+    case 'survey': {
+      const block: SurveyBlock = {
         ...baseBlock,
         type: 'survey',
         attributes: {
@@ -90,13 +102,15 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
           question: 'How was your experience?',
         },
       }
-    case 'socials':
-      return {
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'socials': {
+      const block: SocialsBlock = {
         ...baseBlock,
         type: 'socials',
         attributes: {
           folder: 'socials-color',
-
           socialLinks: [
             {
               icon: 'facebook',
@@ -119,8 +133,11 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
           ],
         },
       }
-    case 'divider':
-      return {
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'divider': {
+      const block: DividerBlock = {
         ...baseBlock,
         type: 'divider',
         attributes: {
@@ -131,20 +148,34 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
           paddingBottom: '10px',
         },
       }
-    case 'heading':
-      return {
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'heading': {
+      const block: HeadingBlock = {
         ...baseBlock,
         type: 'heading',
-        attributes: { as: 'h2' },
+        attributes: {
+          as: 'h2',
+          content: `I'm a new heading block`,
+        },
       }
-    case 'text':
-      return {
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'text': {
+      const block: TextBlock = {
         ...baseBlock,
         type: 'text',
-        attributes: {},
+        attributes: {
+          content: `I'm a new text block`,
+        },
       }
-    case 'image':
-      return {
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'image': {
+      const block: ImageBlock = {
         ...baseBlock,
         type: 'image',
         attributes: {
@@ -157,11 +188,15 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
           width: '100%',
         },
       }
-    case 'button':
-      return {
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'button': {
+      const block: ButtonBlock = {
         ...baseBlock,
         type: 'button',
         attributes: {
+          content: 'Button',
           href: '#',
           backgroundColor: '#3b82f6',
           color: '#ffffff',
@@ -171,17 +206,27 @@ export function createNewBlock(type: EmailBlockType): EmailBlock {
           paddingRight: '20px',
           fontSize: '16px',
           fontWeight: 'bold',
-          textDecoration: 'none',
           borderRadius: '4px',
         },
       }
-    case 'link':
-      return {
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'link': {
+      const block: LinkBlock = {
         ...baseBlock,
         type: 'link',
-        attributes: { href: '#' },
+        attributes: {
+          content: `I'm a new link block`,
+          href: '#',
+        },
       }
-    default:
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    default: {
+      const _exhaustiveCheck: never = type
       throw new Error(`Unsupported block type: ${type}`)
+    }
   }
 }

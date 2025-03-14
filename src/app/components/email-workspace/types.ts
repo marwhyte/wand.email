@@ -36,10 +36,6 @@ export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T
 
 export type Email = {
   bgColor: string
-  bgImage?: string
-  bgPosition?: string
-  bgRepeat?: string
-  bgSize?: string
   color: string
   fontFamily: string
   id: string
@@ -81,28 +77,26 @@ export type Template = {
   types: TemplateTypes[]
 }
 
+// ===== Core Block Types =====
+export type EmailBlock =
+  | ButtonBlock
+  | DividerBlock
+  | HeadingBlock
+  | ImageBlock
+  | LinkBlock
+  | SocialsBlock
+  | SurveyBlock
+  | TextBlock
+
 export type EmailBlockType = EmailBlock['type']
 
+// ===== Structural Blocks =====
 export type RowBlock = {
   id: string
   type: 'row'
   attributes: RowBlockAttributes
-  container: {
-    align?: 'left' | 'center' | 'right'
-    attributes: ContainerBlockAttributes
-  }
   columns: ColumnBlock[]
 }
-
-export type EmailBlock =
-  | TextBlock
-  | ImageBlock
-  | ButtonBlock
-  | LinkBlock
-  | HeadingBlock
-  | DividerBlock
-  | SocialsBlock
-  | SurveyBlock
 
 export type ColumnBlock = {
   id: string
@@ -112,17 +106,11 @@ export type ColumnBlock = {
   blocks: EmailBlock[]
 }
 
-export type SurveyBlock = {
+// ===== Content Blocks =====
+export type ButtonBlock = {
   id: string
-  type: 'survey'
-  attributes: SurveyBlockAttributes
-}
-
-export type HeadingBlock = {
-  id: string
-  type: 'heading'
-  content: string
-  attributes: HeadingBlockAttributes
+  type: 'button'
+  attributes: ButtonBlockAttributes
 }
 
 export type DividerBlock = {
@@ -131,123 +119,139 @@ export type DividerBlock = {
   attributes: DividerBlockAttributes
 }
 
+export type HeadingBlock = {
+  id: string
+  type: 'heading'
+  attributes: HeadingBlockAttributes
+}
+
+export type ImageBlock = {
+  id: string
+  type: 'image'
+  attributes: ImageBlockAttributes
+}
+
+export type LinkBlock = {
+  id: string
+  type: 'link'
+  attributes: LinkBlockAttributes
+}
+
 export type SocialsBlock = {
   id: string
   type: 'socials'
   attributes: SocialsBlockAttributes
 }
 
+export type SurveyBlock = {
+  id: string
+  type: 'survey'
+  attributes: SurveyBlockAttributes
+}
+
 export type TextBlock = {
   id: string
   type: 'text'
-  content: string
   attributes: TextBlockAttributes
 }
 
-export type ImageBlock = {
-  id: string
-  type: 'image'
-  content: string
-  attributes: ImageBlockAttributes
-}
-
-export type ButtonBlock = {
-  id: string
-  type: 'button'
-  content: string
-  attributes: ButtonBlockAttributes
-}
-
-export type LinkBlock = {
-  id: string
-  type: 'link'
-  content: string
-  attributes: LinkBlockAttributes
-}
-
-// NOTE WHEN CHANGING THIS ALSO UPDATE LIST IN EMAIL-HELPERS.TS
-export type CommonAttributes = {
+// ===== Base Attribute Types =====
+export type PaddingAttributes = {
   paddingTop?: string
   paddingRight?: string
   paddingBottom?: string
   paddingLeft?: string
-  padding?: string
-  display?: string
-  width?: string
-  maxWidth?: string
-  height?: string
-  background?: string
-  backgroundColor?: string
-  backgroundImage?: string
-  backgroundSize?: string
-  backgroundPosition?: string
-  backgroundRepeat?: string
-  borderRadius?: string
-  textAlign?: 'left' | 'center' | 'right' | 'justify'
-  verticalAlign?: 'top' | 'middle' | 'bottom'
-  fontSize?: string
+}
+
+export type TextAttributes = {
   color?: string
+  content: string
+  textAlign?: 'left' | 'center' | 'right' | 'justify'
   fontWeight?: 'normal' | 'bold' | 'lighter' | 'bolder'
-  textDecoration?: string
-  textTransform?: 'none' | 'uppercase' | 'lowercase' | 'capitalize'
-  whiteSpace?: 'normal' | 'nowrap' | 'pre' | 'pre-wrap' | 'pre-line'
-  fontStyle?: 'normal' | 'italic' | 'oblique'
+  fontSize?: string
+  fontFamily?: string
+  letterSpacing?: string
 }
 
-export type ContainerBlockAttributes = {
-  align?: 'left' | 'center' | 'right'
-  maxWidth?: string
-  minWidth?: string
-  background?: string
+// ===== Structural Block Attributes =====
+export type RowBlockAttributes = PaddingAttributes & {
   backgroundColor?: string
-  backgroundImage?: string
-  backgroundSize?: string
-  backgroundPosition?: string
-  backgroundRepeat?: string
-  height?: string
-}
-
-export type RowBlockAttributes = CommonAttributes & {
-  align?: 'left' | 'center' | 'right'
+  borderColor?: string
+  borderRadius?: string
   borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
   borderWidth?: string
-  borderColor?: string
-  minWidth?: string
-  stackOnMobile?: boolean
-  reverseStackOnMobile?: boolean
   columnSpacing?: number
   hideOnMobile?: boolean
+  reverseStackOnMobile?: boolean
+  stackOnMobile?: boolean
   type?: ComponentType
   variant?: ComponentVariant<ComponentType>
-}
-
-export type ColumnBlockAttributes = {
-  align?: 'left' | 'center' | 'right'
-  borderSpacing?: string
   verticalAlign?: 'top' | 'middle' | 'bottom'
-  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
-  borderWidth?: string
-  borderColor?: string
-  paddingRight?: string
-  paddingLeft?: string
-  paddingTop?: string
-  paddingBottom?: string
 }
 
-export type DividerBlockAttributes = CommonAttributes & {
+export type ColumnBlockAttributes = {}
+
+// ===== Block-Specific Attributes =====
+export type ButtonBlockAttributes = TextAttributes &
+  PaddingAttributes & {
+    backgroundColor?: string
+    borderColor?: string
+    borderRadius?: string
+    borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
+    borderWidth?: string
+    href: string
+    marginBottom?: string
+    marginTop?: string
+    rel?: string
+    target?: '_blank' | '_self' | '_parent' | '_top'
+  }
+
+export type DividerBlockAttributes = PaddingAttributes & {
   borderStyle?: 'solid' | 'dashed' | 'dotted'
   borderWidth?: string
   borderColor?: string
 }
 
-export type SurveyBlockAttributes = CommonAttributes & {
-  kind: 'yes-no' | 'rating'
-  question: string
+export type HeadingBlockAttributes = TextAttributes &
+  PaddingAttributes & {
+    as: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+  }
+
+export type ImageBlockAttributes = PaddingAttributes & {
+  alt: string
+  borderRadius?: string
+  marginLeft?: string
+  marginRight?: string
+  src: string
+  width?: string
+}
+
+export type LinkBlockAttributes = TextAttributes &
+  PaddingAttributes & {
+    href: string
+    target?: '_blank' | '_self' | '_parent' | '_top'
+    rel?: string
+  }
+
+export type SocialsBlockAttributes = PaddingAttributes & {
+  folder: SocialIconFolders
+  marginLeft?: string
+  marginRight?: string
+  socialLinks: {
+    alt: string
+    icon: SocialIconName
+    title: string
+    url: string
+  }[]
+}
+
+export type SurveyBlockAttributes = PaddingAttributes & {
   color?: string
+  kind: 'yes-no' | 'rating'
   links?: {
     'yes-no': {
-      yes: string
       no: string
+      yes: string
     }
     rating: {
       1: string
@@ -257,7 +261,10 @@ export type SurveyBlockAttributes = CommonAttributes & {
       5: string
     }
   }
+  question: string
 }
+
+export type TextBlockAttributes = TextAttributes & PaddingAttributes & {}
 
 export type SocialIconFolders =
   | 'socials-blue'
@@ -270,62 +277,6 @@ export type SocialIconFolders =
   | 'socials-outline-gray'
   | 'socials-outline-white'
   | 'socials-white'
-
-export type SocialsBlockAttributes = CommonAttributes & {
-  folder: SocialIconFolders
-  socialLinks: {
-    icon: SocialIconName
-    url: string
-    title: string
-    alt: string
-  }[]
-  marginLeft?: string
-  marginRight?: string
-}
-
-export type TextBlockAttributes = CommonAttributes & {
-  fontFamily?: string
-  letterSpacing?: string
-  textIndent?: string
-}
-
-export type HeadingBlockAttributes = CommonAttributes & {
-  fontFamily?: string
-  letterSpacing?: string
-  textIndent?: string
-  as: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-}
-
-export type ImageBlockAttributes = CommonAttributes & {
-  src: string
-  borderRadius?: string
-  alt: string
-  marginLeft?: string
-  marginRight?: string
-}
-
-export type ButtonBlockAttributes = CommonAttributes & {
-  href: string
-  target?: '_blank' | '_self' | '_parent' | '_top'
-  rel?: string
-  backgroundColor?: string
-  color?: string
-  paddingTop?: string
-  paddingBottom?: string
-  paddingLeft?: string
-  paddingRight?: string
-  marginTop?: string
-  marginBottom?: string
-  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
-  borderWidth?: string
-  borderColor?: string
-}
-
-export type LinkBlockAttributes = CommonAttributes & {
-  href: string
-  target?: '_blank' | '_self' | '_parent' | '_top'
-  rel?: string
-}
 
 export type SocialIconName =
   | 'amazon-music'

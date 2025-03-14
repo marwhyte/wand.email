@@ -16,7 +16,7 @@ export default function EmailLink({ block, parentRow }: Props) {
 
   return (
     <Link {...generateLinkProps(block, parentRow, mobileView, email)} href={undefined}>
-      {parse(block.content)}
+      {parse(block.attributes.content)}
     </Link>
   )
 }

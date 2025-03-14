@@ -21,7 +21,6 @@ import { Button } from './button'
 import ExportDialog from './dialogs/export-dialog'
 import PreviewDialog from './dialogs/preview-dialog'
 import EmailRendererFinal from './email-workspace/email-renderer-final'
-import { CommonAttributes, Email, EmailBlockType } from './email-workspace/types'
 import Loading from './loading'
 import Notification from './notification'
 import { Tab, TabGroup, TabList } from './tab'
@@ -30,19 +29,6 @@ type Props = {
   chatStarted: boolean
   monthlyExportCount: number | null
 }
-
-// Add new types for changelog
-type ChangelogEntry = {
-  timestamp: Date
-  changes: ChangeType[]
-  email: Email
-}
-
-type ChangeType =
-  | { type: 'content'; blockId: string; field: string; old: string; new: string }
-  | { type: 'attributes'; blockId: string; field: keyof CommonAttributes; old: string; new: string }
-  | { type: 'structure'; action: 'add' | 'remove' | 'move'; blockId: string; blockType: EmailBlockType }
-  | { type: 'email_settings'; field: keyof Email; old: string; new: string }
 
 export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()

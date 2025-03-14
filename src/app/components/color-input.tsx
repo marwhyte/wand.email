@@ -29,8 +29,8 @@ export const ColorInput = forwardRef(function ColorInput(
   }
 
   return (
-    <div className="relative mt-2 flex items-center gap-2">
-      <Input ref={internalRef} type="color" onChange={handleChange} {...props} />
+    <div className="relative flex items-center gap-2">
+      <Input className="min-w-10" ref={internalRef} type="color" onChange={handleChange} {...props} />
       {showTransparent && (
         <button type="button" onClick={handleSetTransparent} title="Set transparent">
           <span className="sr-only">Set transparent</span>

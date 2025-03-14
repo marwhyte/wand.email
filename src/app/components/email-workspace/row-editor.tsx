@@ -234,10 +234,10 @@ export default function RowEditor({
             </Field>
             <PaddingForm
               padding={{
-                top: rowAttributes.paddingTop ?? rowAttributes.padding ?? '0px',
-                right: rowAttributes.paddingRight ?? rowAttributes.padding ?? '0px',
-                bottom: rowAttributes.paddingBottom ?? rowAttributes.padding ?? '0px',
-                left: rowAttributes.paddingLeft ?? rowAttributes.padding ?? '0px',
+                top: rowAttributes.paddingTop ?? '0px',
+                right: rowAttributes.paddingRight ?? '0px',
+                bottom: rowAttributes.paddingBottom ?? '0px',
+                left: rowAttributes.paddingLeft ?? '0px',
               }}
               onChange={(values: Partial<PaddingValues>) => {
                 const rowAttributes: Partial<RowBlockAttributes> = {
@@ -256,7 +256,7 @@ export default function RowEditor({
         <DisclosureBody>
           <Field>
             <Label>Row Border</Label>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Select
                 value={rowAttributes.borderStyle || 'solid'}
                 onChange={(e) => handleRowBorderChange('borderStyle', e.target.value)}
@@ -271,10 +271,12 @@ export default function RowEditor({
                 onChange={(e) => handleRowBorderChange('borderWidth', `${e.target.value}px`)}
                 placeholder="Width"
               />
-              <ColorInput
-                value={rowAttributes.borderColor || ''}
-                onChange={(e) => handleRowBorderChange('borderColor', e)}
-              />
+              <div className="flex w-48">
+                <ColorInput
+                  value={rowAttributes.borderColor || ''}
+                  onChange={(e) => handleRowBorderChange('borderColor', e)}
+                />
+              </div>
             </div>
           </Field>
         </DisclosureBody>

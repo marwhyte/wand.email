@@ -23,5 +23,7 @@ export default function EmailText({ block, parentRow }: Props) {
     },
   }
 
-  return <Text {...generateTextProps(block, parentRow, mobileView, email)}>{parse(block.content, options)}</Text>
+  return (
+    <Text {...generateTextProps(block, parentRow, mobileView, email)}>{parse(block.attributes.content, options)}</Text>
+  )
 }

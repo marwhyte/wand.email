@@ -19,14 +19,15 @@ import {
   ButtonBlockAttributes,
   ColumnBlock,
   ColumnBlockAttributes,
-  CommonAttributes,
   Email,
   EmailBlock,
   ImageBlockAttributes,
+  PaddingAttributes,
   RowBlock,
   RowBlockAttributes,
   SocialsBlockAttributes,
-  TextBlock,
+  TextAttributes,
+  TextBlockAttributes,
 } from './types'
 
 type BlockEditorProps = {
@@ -48,7 +49,12 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
   const handleChange = useCallback(
     (
       attributes: Partial<
-        CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes | SocialsBlockAttributes
+        | PaddingAttributes
+        | TextAttributes
+        | TextBlockAttributes
+        | ImageBlockAttributes
+        | ButtonBlockAttributes
+        | SocialsBlockAttributes
       >
     ) => {
       if (currentBlock) {
@@ -56,9 +62,6 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           ...currentBlock,
           attributes: { ...currentBlock.attributes, ...attributes },
         } as EmailBlock
-        if ('content' in updatedBlock && 'content' in attributes) {
-          updatedBlock.content = attributes.content as string
-        }
 
         if ('width' in updatedBlock && 'width' in attributes) {
           updatedBlock.width = attributes.width as string

@@ -58,11 +58,7 @@ describe('Email Script Generator', () => {
       originalEmail.fontFamily,
       originalEmail.bgColor,
       originalEmail.rowBgColor,
-      originalEmail.width,
-      originalEmail.bgImage,
-      originalEmail.bgPosition,
-      originalEmail.bgRepeat,
-      originalEmail.bgSize
+      originalEmail.width
     )
 
     // Compare the structures without ids

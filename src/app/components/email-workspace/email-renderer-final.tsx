@@ -20,6 +20,7 @@ import {
   Link,
   Preview,
   Row,
+  Section,
   Text,
 } from '@react-email/components'
 import parse from 'html-react-parser'
@@ -44,32 +45,36 @@ const RenderBlockFinal = ({
   email: Email | null
   company: Company | null
 }) => {
-  switch (block.type) {
-    case 'text':
-      const textProps = getBlockAttributes(block, parentRow, false, company, email)
-      return <Text {...textProps}>{parse(block.content)}</Text>
-    case 'heading':
-      const headingProps = getBlockAttributes(block, parentRow, false, company, email)
-      return <Heading {...headingProps}>{parse(block.content)}</Heading>
-    case 'image':
-      const imageProps = getBlockAttributes(block, parentRow, false, company, email)
-      return <Img {...imageProps} />
-    case 'button':
-      const buttonProps = getBlockAttributes(block, parentRow, false, company, email)
-      return <Button {...buttonProps}>{parse(block.content)}</Button>
-    case 'link':
-      const linkProps = getBlockAttributes(block, parentRow, false, company, email)
-      return <Link {...linkProps}>{parse(block.content)}</Link>
-    case 'divider':
-      const dividerProps = getBlockAttributes(block, parentRow, false, company, email)
-      return <Hr {...dividerProps} />
-    case 'socials':
-      return <EmailSocials isEditing={false} block={block} parentRow={parentRow} />
-    case 'survey':
-      return <EmailSurvey block={block} parentRow={parentRow} />
-    default:
-      return null
-  }
+  const content = (() => {
+    switch (block.type) {
+      case 'text':
+        const textProps = getBlockAttributes(block, parentRow, false, company, email)
+        return <Text {...textProps}>{parse(block.attributes.content)}</Text>
+      case 'heading':
+        const headingProps = getBlockAttributes(block, parentRow, false, company, email)
+        return <Heading {...headingProps}>{parse(block.attributes.content)}</Heading>
+      case 'image':
+        const imageProps = getBlockAttributes(block, parentRow, false, company, email)
+        return <Img {...imageProps} />
+      case 'button':
+        const buttonProps = getBlockAttributes(block, parentRow, false, company, email)
+        return <Button {...buttonProps}>{parse(block.attributes.content)}</Button>
+      case 'link':
+        const linkProps = getBlockAttributes(block, parentRow, false, company, email)
+        return <Link {...linkProps}>{parse(block.attributes.content)}</Link>
+      case 'divider':
+        const dividerProps = getBlockAttributes(block, parentRow, false, company, email)
+        return <Hr {...dividerProps} />
+      case 'socials':
+        return <EmailSocials isEditing={false} block={block} parentRow={parentRow} />
+      case 'survey':
+        return <EmailSurvey block={block} parentRow={parentRow} />
+      default:
+        return null
+    }
+  })()
+
+  return <Section>{content}</Section>
 }
 
 const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; company: Company | null }) => {

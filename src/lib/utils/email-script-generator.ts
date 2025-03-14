@@ -98,20 +98,37 @@ function stringifyAttributes(attributes: Record<string, any>): string {
 }
 
 function generateBlock(block: EmailBlock, indent: number = 2): string {
-  const spaces = ' '.repeat(indent * 2) // Double the indent for blocks
+  const spaces = ' '.repeat(indent * 2)
   const type = block.type.toUpperCase()
 
   // Only include content for blocks that should have it
   const contentBlocks = ['heading', 'text', 'button', 'link']
   const hasContent = contentBlocks.includes(block.type) && 'content' in block
 
-  const attrsObj = {
-    ...block.attributes,
-    ...(hasContent && { text: (block as any).content }),
+  // Create a copy of attributes to handle special cases
+  const attrsObj = { ...block.attributes }
+
+  // Handle content as text attribute for content blocks
+  if (hasContent && 'text' in attrsObj) {
+    attrsObj.text = (block as any).content
+  }
+
+  // Special handling for social links to ensure proper JSON formatting
+  if (block.type === 'socials' && 'socialLinks' in attrsObj) {
+    const links = attrsObj.socialLinks
+    if (Array.isArray(links)) {
+      // Store as array of objects, not as JSON string
+      attrsObj.socialLinks = links.map((link) => ({
+        icon: link.icon,
+        url: link.url || '',
+        title: link.title || '',
+        alt: link.alt || '',
+      }))
+    }
   }
 
   const attrs = stringifyAttributes(attrsObj)
-  const attrsStr = attrs ? ` ${attrs}` : '' // Only add space if there are attributes
+  const attrsStr = attrs ? ` ${attrs}` : ''
 
   return `${spaces}${type}${attrsStr}`
 }
@@ -141,14 +158,13 @@ function generateColumn(column: ColumnBlock, indent: number = 1): string {
 }
 
 function generateRow(row: RowBlock): string {
-  // Create a single attributes object with all properties
+  // Combine row and container attributes, prioritizing row attributes
   const allAttrs = {
     ...row.attributes,
-    ...row.container.attributes,
   }
 
   const attrs = stringifyAttributes(allAttrs)
-  const attrsStr = attrs ? ` ${attrs}` : '' // Only add space if there are attributes
+  const attrsStr = attrs ? ` ${attrs}` : ''
 
   // Check if all columns have the same width
   const allSameWidth = row.columns.length > 0 && row.columns.every((col) => col.width === row.columns[0].width)
@@ -156,9 +172,7 @@ function generateRow(row: RowBlock): string {
   // Generate columns, omitting width if they're all the same
   const columns = row.columns
     .map((col) => {
-      // Create a modified column object with width removed if all columns have the same width
       const columnForGeneration = allSameWidth ? { ...col, width: undefined } : col
-
       return generateColumn(columnForGeneration)
     })
     .join('\n')
@@ -175,12 +189,8 @@ export function generateEmailScript(email: Email): string {
     color: email.color,
     fontFamily: email.fontFamily,
     linkColor: email.linkColor,
-    rowBgColor: email.rowBgColor,
+    rowBackgroundColor: email.rowBgColor,
     width: email.width,
-    ...(email.bgImage && { backgroundImage: email.bgImage }),
-    ...(email.bgPosition && { backgroundPosition: email.bgPosition }),
-    ...(email.bgRepeat && { backgroundRepeat: email.bgRepeat }),
-    ...(email.bgSize && { backgroundSize: email.bgSize }),
   })
 
   return `<EMAIL ${emailAttrs}>\n${rows}\n</EMAIL>`

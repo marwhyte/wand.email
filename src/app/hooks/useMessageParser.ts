@@ -24,7 +24,7 @@ export function useMessageParser(message: Message) {
       return
     }
 
-    const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+[^>]*name=["'][^"']*["']/)
+    const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+[^>]*>/)
     const hasCloseTag = message.content.includes('</EMAIL>')
 
     // Case 1: Message has open tag but no close tag - mark it for processing
@@ -48,7 +48,7 @@ export function useMessageParser(message: Message) {
 
   // Helper function to process email content and avoid duplication
   const processEmailContent = (message: Message) => {
-    const emailRegex = /<EMAIL\s+[^>]*name=["'][^"']*["'][^>]*>([\s\S]*?)<\/EMAIL>/i
+    const emailRegex = /<EMAIL\s+[^>]*>([\s\S]*?)<\/EMAIL>/i
     const emailMatch = message.content.match(emailRegex)
 
     if (emailMatch && chatId) {

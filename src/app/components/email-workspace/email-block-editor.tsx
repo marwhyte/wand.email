@@ -13,27 +13,28 @@ import { isValidHttpUrl, safeParseInt } from '@/lib/utils/misc'
 import { useMemo } from 'react'
 import { Checkbox, CheckboxField, CheckboxGroup } from '../checkbox'
 import Range from '../range'
+import { Select } from '../select'
 import { Switch, SwitchField } from '../switch'
 import {
   ButtonBlock,
   ButtonBlockAttributes,
-  CommonAttributes,
   DividerBlock,
   HeadingBlock,
   ImageBlock,
   ImageBlockAttributes,
   LinkBlock,
+  PaddingAttributes,
   RowBlock,
   RowBlockAttributes,
   SocialsBlockAttributes,
+  TextAttributes,
   TextBlock,
+  TextBlockAttributes,
 } from './types'
 
 enum Options {
   BORDER_RADIUS = 'border-radius',
-  BORDER_STYLE = 'border-style',
-  BORDER_WIDTH = 'border-width',
-  BORDER_COLOR = 'border-color',
+  BORDER = 'border',
   TEXT = 'text',
   FONT_SIZE = 'font-size',
   FONT_WEIGHT = 'font-weight',
@@ -52,7 +53,12 @@ type EmailBlockEditorProps = {
   block: TextBlock | ImageBlock | ButtonBlock | LinkBlock | HeadingBlock | DividerBlock
   onChange: (
     attributes: Partial<
-      CommonAttributes | TextBlock | ImageBlockAttributes | ButtonBlockAttributes | SocialsBlockAttributes
+      | PaddingAttributes
+      | TextAttributes
+      | TextBlockAttributes
+      | ImageBlockAttributes
+      | ButtonBlockAttributes
+      | SocialsBlockAttributes
     >
   ) => void
 }
@@ -103,13 +109,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
   const optionsForItem = () => {
     switch (block.type) {
       case 'divider':
-        return [
-          Options.BORDER_STYLE,
-          Options.BORDER_WIDTH,
-          Options.BORDER_COLOR,
-          Options.PADDING,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.BORDER, Options.PADDING, Options.NO_PADDING_MOBILE]
       case 'text':
         return [
           Options.FONT_SIZE,
@@ -130,9 +130,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
           Options.TEXT_COLOR,
           Options.BACKGROUND_COLOR,
           Options.PADDING,
-          Options.BORDER_STYLE,
-          Options.BORDER_WIDTH,
-          Options.BORDER_COLOR,
+          Options.BORDER,
           Options.NO_PADDING_MOBILE,
         ]
       case 'heading':
@@ -166,12 +164,12 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
 
   return (
     <div className="flex flex-col gap-4">
-      {options.includes(Options.TEXT) && 'content' in block && (
+      {options.includes(Options.TEXT) && 'content' in block.attributes && (
         <Field>
           <Label>Text</Label>
           <Textbox
             key={`textbox-${block.id}`}
-            value={block.content || ''}
+            value={block.attributes.content || ''}
             onChange={(value: string) => onChange({ content: value })}
           />
         </Field>
@@ -347,46 +345,31 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         </Field>
       )}
 
-      {options.includes(Options.BORDER_WIDTH) && (
-        <Field>
-          <Label>Border Width</Label>
-          <Range
-            min={0}
-            max={10}
-            value={safeParseInt(String(processedAttributes.style?.borderWidth).replace('px', '')) || 1}
-            onChange={(e) => onChange({ borderWidth: e.target.value + 'px' })}
-          />
-        </Field>
-      )}
-
-      {options.includes(Options.BORDER_STYLE) && (
-        <Field>
-          <Label>Border Style</Label>
-          <CheckboxGroup className="mt-2">
-            <CheckboxField>
-              <Checkbox
-                checked={processedAttributes.style?.borderStyle === 'solid' || !processedAttributes.style?.borderStyle}
-                onChange={() => onChange({ borderStyle: 'solid' })}
+      {options.includes(Options.BORDER) &&
+        'borderStyle' in block.attributes &&
+        'borderWidth' in block.attributes &&
+        'borderColor' in block.attributes && (
+          <Field>
+            <Label>Row Border</Label>
+            <div className="flex gap-2">
+              <Select
+                value={block.attributes?.borderStyle || 'solid'}
+                onChange={(e) => onChange({ borderStyle: e.target.value as 'solid' | 'dashed' | 'dotted' })}
+              >
+                <option value="solid">Solid</option>
+                <option value="dashed">Dashed</option>
+                <option value="dotted">Dotted</option>
+              </Select>
+              <Input
+                type="number"
+                value={String(block.attributes?.borderWidth)?.replace('px', '') || ''}
+                onChange={(e) => onChange({ borderWidth: `${e.target.value}px` })}
+                placeholder="Width"
               />
-              <Label>Solid</Label>
-            </CheckboxField>
-            <CheckboxField>
-              <Checkbox
-                checked={processedAttributes.style?.borderStyle === 'dashed'}
-                onChange={() => onChange({ borderStyle: 'dashed' })}
-              />
-              <Label>Dashed</Label>
-            </CheckboxField>
-            <CheckboxField>
-              <Checkbox
-                checked={processedAttributes.style?.borderStyle === 'dotted'}
-                onChange={() => onChange({ borderStyle: 'dotted' })}
-              />
-              <Label>Dotted</Label>
-            </CheckboxField>
-          </CheckboxGroup>
-        </Field>
-      )}
+              <ColorInput value={block.attributes?.borderColor || ''} onChange={(e) => onChange({ borderColor: e })} />
+            </div>
+          </Field>
+        )}
 
       {options.includes(Options.TEXT_COLOR) && (
         <Field>
@@ -404,16 +387,6 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
           <ColorInput
             value={processedAttributes.style?.backgroundColor || '#ffffff'}
             onChange={(value) => onChange({ backgroundColor: value })}
-          />
-        </Field>
-      )}
-
-      {options.includes(Options.BORDER_COLOR) && (
-        <Field>
-          <Label>Border Color</Label>
-          <ColorInput
-            value={processedAttributes.style?.borderColor || '#000000'}
-            onChange={(value) => onChange({ borderColor: value })}
           />
         </Field>
       )}
