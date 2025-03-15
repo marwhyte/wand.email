@@ -1,5 +1,5 @@
 import { ColorInput } from '@/app/components/color-input'
-import { Field, Label } from '@/app/components/fieldset'
+import { Field, FieldGroup, Label } from '@/app/components/fieldset'
 import { Select } from '@/app/components/select'
 import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useChatStore } from '@/lib/stores/chatStore'
@@ -44,7 +44,7 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
   ]
 
   return (
-    <div className="flex w-full flex-col gap-4 p-4">
+    <FieldGroup className="p-4">
       <Field>
         <Label>
           Content area width:
@@ -120,7 +120,7 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
           </div>
         </Field>
       )}
-    </div>
+    </FieldGroup>
   )
 }
 

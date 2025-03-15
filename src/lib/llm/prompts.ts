@@ -28,11 +28,11 @@ const templateStructureDefinition = `
       // Column Structure (widths must total 100%)
       COLUMN width=50% align=left|center|right verticalAlign=top|middle|bottom {
         // Content Blocks
-        HEADING text=<p>Heading text</p> as=h1|h2|h3
-        TEXT text=<p>Body text</p>
-        BUTTON text=<p>Click me</p> href="#"
+        HEADING content=<p>Heading text</p> level=h1|h2|h3
+        TEXT content=<p>Body text</p>
+        BUTTON content=<p>Click me</p> href="#"
         IMAGE src="logo | url | pexels:keyword" alt="description"
-        LINK text=<p>Link text</p> href="#"
+        LINK content=<p>Link text</p> href="#"
         DIVIDER
         SOCIALS folder=socials-color socialLinks=[{"icon": "facebook", "url": "#"}, {"icon": "twitter", "url": "#"}]
         SURVEY kind=yes-no|rating question="Is this email helpful?"
@@ -56,6 +56,7 @@ ${generateComponentLibraryDocs()}
   - Text content must be wrapped in <p> tags
   - Social icons must be one of: amazon-music, apple, behance, box, calendly, clubhouse, discord, dribbble, etsy, facebook, figma, github, google, imo, instagram, itunes, linkedin, medium, messenger, notion, paypal, pinterest, reddit, signal, skype, snapchat, soundcloud, spotify, square, streeteasy, telegram, threads, tiktok, tumblr, twitch, venmo, wechat, whatsapp, x, yelp, youtube-music, youtube, zillow
   - Image src can use logo, url, or "pexels:keyword". only use pexels:keyword when you want to change the URL of an image. (e.g., "pexels:coffee"). You can assume that logo is the company logo.
+  - Image width must be a percentage between 1 and 100. Defaults to 100.
   - Components must use a name and type from the component library
   - Components can only use blocks listed in their allowed_blocks
   - Component types must match predefined options
@@ -108,9 +109,9 @@ ${templateStructureDefinition}
 
         ROW {
           COLUMNS {
-            HEADING text=<p>Ace back-to-school season</p> as=h1
-            TEXT text=<p>Whether you're taking first-day pics or heading off to college, we've got everything you need for the school year ahead.</p>
-            BUTTON text=<p>Shop now</p> href="/"
+            HEADING content=<p>Ace back-to-school season</p> level=h1
+            TEXT content=<p>Whether you're taking first-day pics or heading off to college, we've got everything you need for the school year ahead.</p>
+            BUTTON content=<p>Shop now</p> href="/"
           }
         }
 
@@ -123,54 +124,54 @@ ${templateStructureDefinition}
 
         ROW {
           COLUMN {
-            HEADING text=<p>Prep for class with tech deals</p> as=h2
+            HEADING content=<p>Prep for class with tech deals</p> level=h2
           }
         }
 
         ROW type=gallery {
           COLUMN {
             IMAGE src="pexels:laptop" alt="Laptop"
-            TEXT text=<p>Up to 70% off laptops</p> fontSize=14 textAlign=center
+            TEXT content=<p>Up to 70% off laptops</p> fontSize=14 textAlign=center
           }
           COLUMN {
             IMAGE src="pexels:ipad tablet" alt="iPad"
-            TEXT text=<p>iPads $100 and up</p> fontSize=14 textAlign=center
+            TEXT content=<p>iPads $100 and up</p> fontSize=14 textAlign=center
           }
           COLUMN {
             IMAGE src="pexels:headphones" alt="Headphones"
-            TEXT text=<p>Up to 70% off audio</p> fontSize=14 textAlign=center
+            TEXT content=<p>Up to 70% off audio</p> fontSize=14 textAlign=center
           }
           COLUMN {
             IMAGE src="pexels:smartphone" alt="Phone"
-            TEXT text=<p>Phones under $500</p> fontSize=14 textAlign=center
+            TEXT content=<p>Phones under $500</p> fontSize=14 textAlign=center
           }
         }
 
         ROW {
           COLUMN {
-            HEADING text=<p>Turn heads in the hall</p> as=h2
-            TEXT text=<p>Keep that summer glow-up going into September and beyond. Get voted best-dressed with wardrobe upgrades.</p> color=#333333
-            BUTTON text=<p>Refresh your fits</p> href="/"
+            HEADING content=<p>Turn heads in the hall</p> level=h2
+            TEXT content=<p>Keep that summer glow-up going into September and beyond. Get voted best-dressed with wardrobe upgrades.</p> color=#333333
+            BUTTON content=<p>Refresh your fits</p> href="/"
           }
         }
 
         ROW padding=12, 0 {
           COLUMN {
             IMAGE src="pexels:students group" alt="Students smiling together" width=100%
-            HEADING text=<p>Nail the style assignment</p> as=h3
+            HEADING content=<p>Nail the style assignment</p> level=h3
           }
         }
 
         ROW type=gallery {
           COLUMN {
             IMAGE src="pexels:smilingoutside" alt="Person smiling outside"
-            TEXT text=<p>Up to 70% off laptops</p> fontWeight=bold color=#111820
-            TEXT text=<p>Get first day-ready with men's clothing.</p>
+            TEXT content=<p>Up to 70% off laptops</p> fontWeight=bold color=#111820
+            TEXT content=<p>Get first day-ready with men's clothing.</p>
           }
           COLUMN {
             IMAGE src="pexels:smiling" alt="Person smiling"
-            TEXT text=<p>Fresh fashion for women</p> fontWeight=bold color=#111820
-            TEXT text=<p>Make the hallways your runway.</p>
+            TEXT content=<p>Fresh fashion for women</p> fontWeight=bold color=#111820
+            TEXT content=<p>Make the hallways your runway.</p>
           }
         }
 
@@ -179,9 +180,9 @@ ${templateStructureDefinition}
             IMAGE src="pexels:bed" alt="Bed in room"
           }
           COLUMN {
-            HEADING text=<p>Deck out your dorm</p> as=h2
-            TEXT text=<p>Own your space with decor, home essentials, and more.</p>
-            BUTTON text=<p>Start designing</p> href="/"
+            HEADING content=<p>Deck out your dorm</p> level=h2
+            TEXT content=<p>Own your space with decor, home essentials, and more.</p>
+            BUTTON content=<p>Start designing</p> href="/"
           }
         }
 
@@ -195,11 +196,11 @@ ${templateStructureDefinition}
         ROW type=footer  {
           COLUMN {
             IMAGE src="logo" alt="My Logo"
-            HEADING text=<p>Connect with us</p> as=h4
+            HEADING content=<p>Connect with us</p> level=h4
             SOCIALS folder=socials-dark-gray socialLinks=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
-            TEXT text=<p><a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.</p>
-            TEXT text=<p>If you have a question, <a href="/">contact us</a>. eBay I‌nc., 2‌025 H‌amilton A‌venue, S‌an J‌ose, C‌A 9‌5125, U‌nited S‌tates</p>
-            TEXT text=<p>© 1995-2024 eBay Inc. or its affiliates</p>
+            TEXT content=<p><a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.</p>
+            TEXT content=<p>If you have a question, <a href="/">contact us</a>. eBay I‌nc., 2‌025 H‌amilton A‌venue, S‌an J‌ose, C‌A 9‌5125, U‌nited S‌tates</p>
+            TEXT content=<p>© 1995-2024 eBay Inc. or its affiliates</p>
           }
         }
       </EMAIL>

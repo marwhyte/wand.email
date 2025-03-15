@@ -39,7 +39,7 @@ export function generateContainerProps(
   const rowAttributes = getRowAttributes(row, email)
 
   return {
-    className: rowAttributes.hideOnMobile ? 'mobile_hide' : undefined,
+    className: rowAttributes.hideOnMobile ? 'mobile_hide' : 'row-content',
     style: {},
     width: email.width,
   }
@@ -58,10 +58,10 @@ export function generateRowProps(row: RowBlock, email: Email | null): OmitChildr
         }
       : {}
 
-  console.log(borderStyles)
-
   return {
-    className: `row-content${mergedAttributes.stackOnMobile ? ' stack' : ''}`,
+    className: `row-content${mergedAttributes.stackOnMobile ? ' stack' : ''}${
+      mergedAttributes.hideOnMobile ? ' mobile_hide' : ''
+    }`,
     style: {
       ...applyPaddingAttributes(mergedAttributes),
       ...getAdditionalRowStyles(mergedAttributes),
@@ -85,6 +85,7 @@ export function generateColumnProps(
     ...(rowTypeDefaults as React.CSSProperties),
     width: column.width ?? '100%',
     wordBreak: 'break-word',
+    verticalAlign: rowAttributes.verticalAlign ?? 'top',
   }
 
   return {
@@ -112,10 +113,6 @@ function getAdditionalRowStyles(attributes: RowBlockAttributes): React.CSSProper
 
   if (attributes.borderRadius) {
     styles.borderRadius = attributes.borderRadius
-  }
-
-  if (attributes.verticalAlign) {
-    styles.verticalAlign = attributes.verticalAlign
   }
 
   return styles

@@ -10,14 +10,14 @@ export const testingTemplateComplex = `
   }
   ROW align=center  {
     COLUMN {
-      TEXT text=<p>Hello</p>
+      TEXT content=<p>Hello</p>
     }
   }
 
   ROW type=footer {
     COLUMN {
       IMAGE src="logo" alt="logo with text"
-      TEXT text=<p>Contact</p> 
+      TEXT content=<p>Contact</p> 
     }
     
   }

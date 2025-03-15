@@ -280,7 +280,7 @@ const EmailRenderer = ({ email }: Props) => {
   })
 
   return (
-    <div className="w-full min-w-0 overflow-x-auto overflow-y-auto px-2 pt-4">
+    <div className="w-full min-w-0 overflow-x-auto overflow-y-auto pt-4">
       {/* @ts-ignore */}
       <div
         {...generateBodyProps(email, true)}

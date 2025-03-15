@@ -44,8 +44,8 @@ function stringifyAttributes(attributes: Record<string, any>): string {
     if (key.startsWith('background') && (value === 'none' || value === 'no-repeat' || value === 'top left')) continue
 
     // Handle special cases
-    if (key === 'text') {
-      result.push(`text=<p>${value.replace(/\n/g, '\\n')}</p>`)
+    if (key === 'content') {
+      result.push(`content=<p>${value.replace(/\n/g, '\\n')}</p>`)
       continue
     }
 
@@ -101,16 +101,16 @@ function generateBlock(block: EmailBlock, indent: number = 2): string {
   const spaces = ' '.repeat(indent * 2)
   const type = block.type.toUpperCase()
 
-  // Only include content for blocks that should have it
-  const contentBlocks = ['heading', 'text', 'button', 'link']
-  const hasContent = contentBlocks.includes(block.type) && 'content' in block
-
   // Create a copy of attributes to handle special cases
   const attrsObj = { ...block.attributes }
 
-  // Handle content as text attribute for content blocks
-  if (hasContent && 'text' in attrsObj) {
-    attrsObj.text = (block as any).content
+  // Handle content for all content blocks consistently
+  const contentBlocks = ['heading', 'text', 'button', 'link']
+  if (contentBlocks.includes(block.type)) {
+    // For heading blocks, convert text to content
+    if ('content' in attrsObj) {
+      attrsObj.content = attrsObj.content.replace(/<p>([^]*?)<\/p>/, '$1').trim()
+    }
   }
 
   // Special handling for social links to ensure proper JSON formatting

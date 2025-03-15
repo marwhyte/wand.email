@@ -11,7 +11,15 @@ type Props = {
 const EmailDivider = ({ block, parentRow }: Props) => {
   const { mobileView } = useMobileViewStore()
 
-  return <Hr {...generateDividerProps(block, parentRow, mobileView)} />
+  const { style, ...attributes } = generateDividerProps(block, parentRow, mobileView)
+
+  const { paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyle } = style || {}
+
+  return (
+    <div style={{ paddingTop, paddingRight, paddingBottom, paddingLeft }}>
+      <Hr style={restStyle} {...attributes} />
+    </div>
+  )
 }
 
 export default EmailDivider

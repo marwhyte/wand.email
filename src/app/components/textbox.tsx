@@ -13,9 +13,11 @@ import { useEffect, useRef, useState } from 'react'
 type Props = {
   value: string
   onChange: (value: string) => void
+  hideToolbar?: boolean
+  preventNewlines?: boolean
 }
 
-export default function Textbox({ value, onChange }: Props) {
+export default function Textbox({ value, onChange, hideToolbar = false, preventNewlines = false }: Props) {
   const [linkUrl, setLinkUrl] = useState('')
   const { email } = useEmailStore()
   const [showLinkInput, setShowLinkInput] = useState(false)
@@ -46,6 +48,15 @@ export default function Textbox({ value, onChange }: Props) {
       attributes: {
         class: 'focus:outline-none',
       },
+      handleKeyDown: preventNewlines
+        ? (view, event) => {
+            // Prevent Enter key from creating new lines
+            if (event.key === 'Enter') {
+              return true // Return true to indicate the event was handled
+            }
+            return false // Let other key events pass through
+          }
+        : undefined,
     },
     immediatelyRender: false,
     extensions: [
@@ -151,59 +162,61 @@ export default function Textbox({ value, onChange }: Props) {
 
   return (
     <div className="overflow-hidden rounded-lg border border-gray-300 shadow-sm">
-      <div className="flex border-b border-gray-200 p-2">
-        <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
-          className={buttonClass(editor.isActive('bold'))}
-          title="Bold"
-        >
-          <BoldIcon className="h-5 w-5" />
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={buttonClass(editor.isActive('italic'))}
-          title="Italic"
-        >
-          <ItalicIcon className="h-5 w-5" />
-        </button>
-        <button
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
-          className={buttonClass(editor.isActive('underline'))}
-          title="Underline"
-        >
-          <UnderlineIcon className="h-5 w-5" />
-        </button>
-        <div className="mr-2 flex items-center">
-          <input
-            type="color"
-            onInput={(e) =>
-              editor
-                .chain()
-                .focus()
-                .setColor((e.target as HTMLInputElement).value)
-                .run()
-            }
-            title="Text Color"
-            className="h-8 w-8 cursor-pointer rounded-md bg-white p-1"
-          />
-        </div>
-        <button
-          onClick={handleLinkButtonClick}
-          className={buttonClass(editor.isActive('link'))}
-          title={editor.isActive('link') ? 'Edit Link' : 'Add Link'}
-        >
-          <LinkIcon className="h-5 w-5" />
-        </button>
-        {editor.isActive('link') && (
+      {!hideToolbar && (
+        <div className="flex border-b border-gray-200 p-2">
           <button
-            onClick={() => editor.chain().focus().unsetLink().run()}
-            title="Remove Link"
-            className="rounded-md p-2 text-red-600 hover:bg-red-50"
+            onClick={() => editor.chain().focus().toggleBold().run()}
+            className={buttonClass(editor.isActive('bold'))}
+            title="Bold"
           >
-            <LinkSlashIcon className="h-5 w-5" />
+            <BoldIcon className="h-5 w-5" />
           </button>
-        )}
-      </div>
+          <button
+            onClick={() => editor.chain().focus().toggleItalic().run()}
+            className={buttonClass(editor.isActive('italic'))}
+            title="Italic"
+          >
+            <ItalicIcon className="h-5 w-5" />
+          </button>
+          <button
+            onClick={() => editor.chain().focus().toggleUnderline().run()}
+            className={buttonClass(editor.isActive('underline'))}
+            title="Underline"
+          >
+            <UnderlineIcon className="h-5 w-5" />
+          </button>
+          <div className="mr-2 flex items-center">
+            <input
+              type="color"
+              onInput={(e) =>
+                editor
+                  .chain()
+                  .focus()
+                  .setColor((e.target as HTMLInputElement).value)
+                  .run()
+              }
+              title="Text Color"
+              className="h-8 w-8 cursor-pointer rounded-md bg-white p-1"
+            />
+          </div>
+          <button
+            onClick={handleLinkButtonClick}
+            className={buttonClass(editor.isActive('link'))}
+            title={editor.isActive('link') ? 'Edit Link' : 'Add Link'}
+          >
+            <LinkIcon className="h-5 w-5" />
+          </button>
+          {editor.isActive('link') && (
+            <button
+              onClick={() => editor.chain().focus().unsetLink().run()}
+              title="Remove Link"
+              className="rounded-md p-2 text-red-600 hover:bg-red-50"
+            >
+              <LinkSlashIcon className="h-5 w-5" />
+            </button>
+          )}
+        </div>
+      )}
 
       <div className="relative">
         {showLinkInput && (
@@ -239,7 +252,7 @@ export default function Textbox({ value, onChange }: Props) {
 
         <EditorContent
           editor={editor}
-          className="prose min-h-[150px] max-w-none p-2 focus-visible:outline-none [&_a:hover]:text-blue-800 [&_a]:text-blue-600"
+          className="max-w-none p-2 focus-visible:outline-none [&_a:hover]:text-blue-800 [&_a]:text-blue-600"
         />
       </div>
     </div>

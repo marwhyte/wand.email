@@ -103,7 +103,7 @@ const SocialsEditor = ({ block, onChange }: SocialIconsEditorProps) => {
           <div className="flex flex-col gap-4">
             {showAdvanced[index] && (
               <>
-                <Field>
+                <Field labelPosition="top">
                   <Label>Alt Text</Label>
                   <Input
                     value={link.alt}
@@ -114,7 +114,7 @@ const SocialsEditor = ({ block, onChange }: SocialIconsEditorProps) => {
               </>
             )}
 
-            <Field>
+            <Field labelPosition="top">
               <Label>URL</Label>
               <Input
                 type="url"
@@ -132,7 +132,7 @@ const SocialsEditor = ({ block, onChange }: SocialIconsEditorProps) => {
           <Label>Add Social Icon</Label>
           <Select onChange={(e) => handleAddSocial(e.target.value as SocialIconName)} value="">
             <option value="" disabled>
-              Select an icon to add...
+              Icons
             </option>
             {Array.from(validIcons)
               .sort()

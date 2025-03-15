@@ -2,10 +2,10 @@ import { Company } from '@/lib/database/types'
 import {
   generateBodyProps,
   generateColumnProps,
-  generateContainerProps,
   generateRowProps,
   getBlockAttributes,
   getRowAttributes,
+  OmitChildren,
 } from '@/lib/utils/attributes'
 import {
   Body,
@@ -20,7 +20,6 @@ import {
   Link,
   Preview,
   Row,
-  Section,
   Text,
 } from '@react-email/components'
 import parse from 'html-react-parser'
@@ -45,26 +44,79 @@ const RenderBlockFinal = ({
   email: Email | null
   company: Company | null
 }) => {
+  const blockProps = getBlockAttributes(block, parentRow, false, company, email)
+  const style = blockProps?.style || {}
+  const { paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyle } = style
+
+  // Check if all padding values are the same
+  const allPaddingSame =
+    paddingTop === paddingRight &&
+    paddingRight === paddingBottom &&
+    paddingBottom === paddingLeft &&
+    paddingTop !== undefined
+
+  // Extract padding value without 'px' for cellpadding
+  const cellPaddingValue = allPaddingSame ? (paddingTop as string).replace('px', '') : undefined
+
+  // Prepare column props
+  const columnProps: any = {
+    style: { width: '100%' },
+  }
+
+  // Add cellpadding to row if all padding values are the same
+  if (!allPaddingSame && (paddingTop || paddingRight || paddingBottom || paddingLeft)) {
+    // Add individual padding styles to column if they're different
+    columnProps.style = {
+      ...columnProps.style,
+      paddingTop,
+      paddingRight,
+      paddingBottom,
+      paddingLeft,
+    }
+  }
+
   const content = (() => {
     switch (block.type) {
       case 'text':
-        const textProps = getBlockAttributes(block, parentRow, false, company, email)
+        const textProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Text>>
         return <Text {...textProps}>{parse(block.attributes.content)}</Text>
       case 'heading':
-        const headingProps = getBlockAttributes(block, parentRow, false, company, email)
+        const headingProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Heading>>
         return <Heading {...headingProps}>{parse(block.attributes.content)}</Heading>
       case 'image':
-        const imageProps = getBlockAttributes(block, parentRow, false, company, email)
-        return <Img {...imageProps} />
+        const imageProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Img>>
+        // Extract align property and remaining props
+        const { align: imageAlign, ...imageRemainingProps } = imageProps as any
+        return (
+          // @ts-expect-error
+          <div align={imageAlign}>
+            <Img {...imageRemainingProps} />
+          </div>
+        )
       case 'button':
-        const buttonProps = getBlockAttributes(block, parentRow, false, company, email)
-        return <Button {...buttonProps}>{parse(block.attributes.content)}</Button>
+        const buttonProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Button>>
+        // Extract align property and remaining props
+        const { align: buttonAlign, ...buttonRemainingProps } = buttonProps as any
+        return (
+          // @ts-expect-error
+          <div align={buttonAlign}>
+            <Button {...buttonRemainingProps}>{parse(block.attributes.content)}</Button>
+          </div>
+        )
       case 'link':
-        const linkProps = getBlockAttributes(block, parentRow, false, company, email)
-        return <Link {...linkProps}>{parse(block.attributes.content)}</Link>
+        const linkProps = { ...blockProps, style: restStyle }
+        // Extract align property and remaining props
+        const { align: linkAlign, ...linkRemainingProps } = linkProps as any
+        return (
+          // @ts-expect-error
+          <div align={linkAlign}>
+            <Link {...linkRemainingProps}>{parse(block.attributes.content)}</Link>
+          </div>
+        )
       case 'divider':
-        const dividerProps = getBlockAttributes(block, parentRow, false, company, email)
-        return <Hr {...dividerProps} />
+        const dividerProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Hr>>
+        const { style: dividerStyle, ...attributes } = dividerProps as any
+        return <Hr {...attributes} style={{ ...dividerStyle }} />
       case 'socials':
         return <EmailSocials isEditing={false} block={block} parentRow={parentRow} />
       case 'survey':
@@ -74,7 +126,21 @@ const RenderBlockFinal = ({
     }
   })()
 
-  return <Section>{content}</Section>
+  return (
+    <table
+      width="100%"
+      border={0}
+      cellPadding={cellPaddingValue || '0'}
+      cellSpacing="0"
+      role="presentation"
+      // @ts-ignore
+      style={{ msoTableLspace: '0pt', msoTableRspace: '0pt', wordBreak: 'break-word' }}
+    >
+      <tr>
+        <td {...columnProps}>{content}</td>
+      </tr>
+    </table>
+  )
 }
 
 const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; company: Company | null }) => {
@@ -137,19 +203,19 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
       }}
     >
       {email.rows.map((row) => (
-        <Container
-          key={row.id}
-          {...generateContainerProps(row, email)}
-          style={{
-            ...generateContainerProps(row, email).style,
-            // @ts-ignore - MSO properties for Outlook compatibility
-            msoTableLspace: '0pts',
-            // @ts-ignore - MSO properties for Outlook compatibility
-            msoTableRspace: '0pts',
-          }}
-        >
-          <RenderColumns row={row} email={email} company={company} />
-        </Container>
+        // <Container
+        //   key={row.id}
+        //   {...generateContainerProps(row, email)}
+        //   style={{
+        //     ...generateContainerProps(row, email).style,
+        //     // @ts-ignore - MSO properties for Outlook compatibility
+        //     msoTableLspace: '0pts',
+        //     // @ts-ignore - MSO properties for Outlook compatibility
+        //     msoTableRspace: '0pts',
+        //   }}
+        // >
+        <RenderColumns row={row} email={email} company={company} key={row.id} />
+        // </Container>
       ))}
     </Container>
   )

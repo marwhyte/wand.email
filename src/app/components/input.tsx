@@ -30,12 +30,12 @@ export const Input = forwardRef(function Input(
   }: {
     className?: string
     error?: string
-    type?: 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url' | DateType
+    type?: 'email' | 'number' | 'password' | 'search' | 'tel' | 'text' | 'url' | 'color' | DateType
   } & Omit<Headless.InputProps, 'className'>,
   ref: React.ForwardedRef<HTMLInputElement>
 ) {
   return (
-    <>
+    <div>
       <span
         data-slot="control"
         className={clsx([
@@ -76,10 +76,14 @@ export const Input = forwardRef(function Input(
                 '[&::-webkit-datetime-edit-millisecond-field]:p-0',
                 '[&::-webkit-datetime-edit-meridiem-field]:p-0',
               ],
+            // Color input classes
+            props.type === 'color' && ['h-8 w-8 cursor-pointer p-0.5'],
             // Basic layout
             'relative block w-full appearance-none rounded-lg px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing[3])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]',
+            // Override padding for color inputs
+            props.type === 'color' && 'px-0.5 py-0.5 sm:px-0.5 sm:py-0.5',
             // Typography
-            'text-base/6 text-zinc-950 placeholder:text-zinc-500 sm:text-sm/6 dark:text-white',
+            'text-base/6 text-zinc-950 placeholder:text-zinc-500 dark:text-white sm:text-sm/6',
             // Border
             'border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20',
             // Background color
@@ -98,6 +102,139 @@ export const Input = forwardRef(function Input(
         />
       </span>
       {error && <p className="mt-2 text-sm text-red-600 dark:text-red-500">{error}</p>}
-    </>
+    </div>
+  )
+})
+
+export const NumberInput = forwardRef(function NumberInput(
+  {
+    className,
+    error,
+    min = 1,
+    max = 50,
+    value,
+    onChange,
+    id,
+    label,
+    helperText,
+    ...props
+  }: {
+    className?: string
+    error?: string
+    min?: number
+    max?: number
+    value?: number
+    onChange?: (value: number) => void
+    id?: string
+    label?: string
+    helperText?: string
+  } & Omit<Headless.InputProps, 'className' | 'type' | 'onChange' | 'value'>,
+  ref: React.ForwardedRef<HTMLInputElement>
+) {
+  const inputId = id || `number-input-${React.useId()}`
+  const [inputValue, setInputValue] = React.useState(value?.toString() || '')
+
+  React.useEffect(() => {
+    if (value !== undefined) {
+      setInputValue(value.toString())
+    }
+  }, [value])
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value
+    setInputValue(newValue)
+
+    const numValue = parseInt(newValue, 10)
+    if (!isNaN(numValue) && onChange) {
+      // Enforce min and max constraints when typing
+      const constrainedValue = Math.min(Math.max(numValue, min), max)
+      if (constrainedValue !== numValue) {
+        // Update the input value if it was constrained
+        setInputValue(constrainedValue.toString())
+      }
+      onChange(constrainedValue)
+    }
+  }
+
+  const increment = () => {
+    const currentValue = parseInt(inputValue, 10) || 0
+    const newValue = Math.min(currentValue + 1, max)
+    setInputValue(newValue.toString())
+    if (onChange) onChange(newValue)
+  }
+
+  const decrement = () => {
+    const currentValue = parseInt(inputValue, 10) || 0
+    const newValue = Math.max(currentValue - 1, min)
+    setInputValue(newValue.toString())
+    if (onChange) onChange(newValue)
+  }
+
+  return (
+    <div className={className}>
+      {label && (
+        <Headless.Label htmlFor={inputId} className="mb-1 block text-xs font-medium text-zinc-900 dark:text-white">
+          {label}
+        </Headless.Label>
+      )}
+      <div className="relative flex max-w-[6rem] items-center">
+        <button
+          type="button"
+          onClick={decrement}
+          className="h-8 rounded-s-md border border-zinc-300 bg-zinc-100 p-1.5 hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-100 dark:border-zinc-600 dark:bg-zinc-700 dark:hover:bg-zinc-600 dark:focus:ring-zinc-700"
+        >
+          <svg
+            className="h-2.5 w-2.5 text-zinc-900 dark:text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 18 2"
+          >
+            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1 1h16" />
+          </svg>
+        </button>
+        <Headless.Input
+          ref={ref}
+          type="text"
+          id={inputId}
+          value={inputValue}
+          onChange={handleChange}
+          aria-invalid={error ? 'true' : undefined}
+          data-input-counter
+          data-input-counter-min={min}
+          data-input-counter-max={max}
+          aria-describedby={helperText ? `${inputId}-helper-text` : undefined}
+          className="block h-8 w-full border-x-0 border-zinc-300 bg-zinc-50 py-1.5 text-center text-xs text-zinc-900 focus:border-blue-500 focus:ring-blue-500 dark:border-zinc-600 dark:bg-zinc-700 dark:text-white dark:placeholder-zinc-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
+          {...props}
+        />
+        <button
+          type="button"
+          onClick={increment}
+          className="h-8 rounded-e-md border border-zinc-300 bg-zinc-100 p-1.5 hover:bg-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-100 dark:border-zinc-600 dark:bg-zinc-700 dark:hover:bg-zinc-600 dark:focus:ring-zinc-700"
+        >
+          <svg
+            className="h-2.5 w-2.5 text-zinc-900 dark:text-white"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 18 18"
+          >
+            <path
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M9 1v16M1 9h16"
+            />
+          </svg>
+        </button>
+      </div>
+      {helperText && (
+        <p id={`${inputId}-helper-text`} className="mt-1 text-xs text-zinc-500 dark:text-zinc-400">
+          {helperText}
+        </p>
+      )}
+      {error && <p className="mt-1 text-xs text-red-600 dark:text-red-500">{error}</p>}
+    </div>
   )
 })

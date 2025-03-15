@@ -22,9 +22,29 @@ export default function EmailHeading({ block, parentRow }: Props) {
     },
   }
 
+  // Get all heading props
+  const headingProps = generateHeadingProps(block, parentRow, mobileView)
+
+  // Extract style properties
+  const { style, ...restHeadingProps } = headingProps
+
+  // Extract padding-related styles for the div
+  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
+
+  // Create div style with padding properties
+  const divStyle = {
+    padding,
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
+  }
+
   return (
-    <Heading {...generateHeadingProps(block, parentRow, mobileView)}>
-      {parse(block.attributes.content, options)}
-    </Heading>
+    <div style={divStyle}>
+      <Heading {...restHeadingProps} style={restStyles}>
+        {parse(block.attributes.content, options)}
+      </Heading>
+    </div>
   )
 }

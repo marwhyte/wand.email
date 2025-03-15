@@ -13,8 +13,6 @@ import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/soli
 import { v4 as uuidv4 } from 'uuid'
 import EmailBlockEditor from './email-block-editor'
 import RowEditor from './row-editor'
-import SocialsEditor from './socials-editor'
-import SurveyEditor from './survey-editor'
 import {
   ButtonBlockAttributes,
   ColumnBlock,
@@ -254,11 +252,7 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
           onRowAttributeChange={handleRowAttributeChange}
         />
       )}
-      {currentBlock.type !== 'row' && currentBlock.type !== 'survey' && currentBlock.type !== 'socials' && (
-        <EmailBlockEditor block={currentBlock} onChange={handleChange} />
-      )}
-      {currentBlock.type === 'survey' && <SurveyEditor block={currentBlock} onChange={handleChange} />}
-      {currentBlock.type === 'socials' && <SocialsEditor block={currentBlock} onChange={handleChange} />}
+      {currentBlock.type !== 'row' && <EmailBlockEditor block={currentBlock} onChange={handleChange} />}
     </div>
   )
 }

@@ -1,7 +1,7 @@
 import type { PaddingAttributes, TextAttributes } from '@/app/components/email-workspace/types'
 
 export function applyTextAttributes(attributes: TextAttributes): React.CSSProperties {
-  const textProps = ['color', 'fontSize', 'fontWeight', 'textAlign', 'fontFamily', 'letterSpacing'] as const
+  const textProps = ['color', 'fontSize', 'fontWeight', 'fontFamily', 'letterSpacing'] as const
 
   return Object.fromEntries(
     textProps.map((prop) => [prop, attributes[prop]]).filter(([_, value]) => value !== undefined)

@@ -156,7 +156,7 @@ export function createNewBlock<T extends EmailBlockType>(type: T): Extract<Email
         ...baseBlock,
         type: 'heading',
         attributes: {
-          as: 'h2',
+          level: 'h2',
           content: `I'm a new heading block`,
         },
       }

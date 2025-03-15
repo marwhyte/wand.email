@@ -20,8 +20,12 @@ export function CheckboxGroup({ className, ...props }: React.ComponentPropsWitho
 
 export function CheckboxField({
   className,
+  alignEnd = false,
   ...props
-}: { className?: string } & Omit<Headless.FieldProps, 'className'>) {
+}: {
+  className?: string
+  alignEnd?: boolean
+} & Omit<Headless.FieldProps, 'className'>) {
   return (
     <Headless.Field
       data-slot="field"
@@ -29,13 +33,22 @@ export function CheckboxField({
       className={clsx(
         className,
         // Base layout
-        'grid grid-cols-[1.125rem_1fr] items-center gap-x-4 gap-y-1 sm:grid-cols-[1rem_1fr]',
+        'grid items-center gap-x-4 gap-y-1',
+        alignEnd
+          ? 'grid-cols-[1fr_1.125rem] sm:grid-cols-[1fr_1rem]'
+          : 'grid-cols-[1.125rem_1fr] sm:grid-cols-[1rem_1fr]',
         // Control layout
-        '[&>[data-slot=control]]:col-start-1 [&>[data-slot=control]]:row-start-1 [&>[data-slot=control]]:justify-self-center',
+        alignEnd
+          ? '[&>[data-slot=control]]:col-start-2 [&>[data-slot=control]]:row-start-1 [&>[data-slot=control]]:justify-self-center'
+          : '[&>[data-slot=control]]:col-start-1 [&>[data-slot=control]]:row-start-1 [&>[data-slot=control]]:justify-self-center',
         // Label layout
-        '[&>[data-slot=label]]:col-start-2 [&>[data-slot=label]]:row-start-1 [&>[data-slot=label]]:justify-self-start',
+        alignEnd
+          ? '[&>[data-slot=label]]:col-start-1 [&>[data-slot=label]]:row-start-1 [&>[data-slot=label]]:justify-self-end'
+          : '[&>[data-slot=label]]:col-start-2 [&>[data-slot=label]]:row-start-1 [&>[data-slot=label]]:justify-self-start',
         // Description layout
-        '[&>[data-slot=description]]:col-start-2 [&>[data-slot=description]]:row-start-2',
+        alignEnd
+          ? '[&>[data-slot=description]]:col-start-1 [&>[data-slot=description]]:row-start-2 [&>[data-slot=description]]:text-right'
+          : '[&>[data-slot=description]]:col-start-2 [&>[data-slot=description]]:row-start-2',
         // With description
         '[&_[data-slot=label]]:has-[[data-slot=description]]:font-medium'
       )}

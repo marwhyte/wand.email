@@ -23,7 +23,27 @@ export default function EmailText({ block, parentRow }: Props) {
     },
   }
 
+  // Get all text props
+  const textProps = generateTextProps(block, parentRow, mobileView, email)
+
+  // Extract padding-related styles for the div
+  const { style, ...restTextProps } = textProps
+  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
+
+  // Create div style with only padding properties
+  const divStyle = {
+    padding,
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
+  }
+
   return (
-    <Text {...generateTextProps(block, parentRow, mobileView, email)}>{parse(block.attributes.content, options)}</Text>
+    <div style={divStyle}>
+      <Text {...restTextProps} style={restStyles}>
+        {parse(block.attributes.content, options)}
+      </Text>
+    </div>
   )
 }

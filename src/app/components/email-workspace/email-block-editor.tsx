@@ -1,70 +1,77 @@
 'use client'
 
 import { ColorInput } from '@/app/components/color-input'
-import { Field, Label } from '@/app/components/fieldset'
+import { Disclosure } from '@/app/components/disclosure'
+import { Field, FieldGroup, Label } from '@/app/components/fieldset'
 import FileUploader from '@/app/components/file-uploader'
-import { Input } from '@/app/components/input'
+import { Input, NumberInput } from '@/app/components/input'
 import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getBlockAttributes } from '@/lib/utils/attributes'
-import { isValidHttpUrl, safeParseInt } from '@/lib/utils/misc'
+import { capitalizeFirstLetter, isValidHttpUrl, safeParseInt } from '@/lib/utils/misc'
 import { useMemo } from 'react'
-import { Checkbox, CheckboxField, CheckboxGroup } from '../checkbox'
-import Range from '../range'
 import { Select } from '../select'
-import { Switch, SwitchField } from '../switch'
+import SocialsEditor from './socials-editor'
+import SurveyEditor from './survey-editor'
 import {
   ButtonBlock,
   ButtonBlockAttributes,
   DividerBlock,
   HeadingBlock,
+  HeadingBlockAttributes,
   ImageBlock,
   ImageBlockAttributes,
   LinkBlock,
   PaddingAttributes,
   RowBlock,
   RowBlockAttributes,
+  SocialsBlock,
   SocialsBlockAttributes,
+  SurveyBlock,
+  SurveyBlockAttributes,
   TextAttributes,
   TextBlock,
   TextBlockAttributes,
 } from './types'
 
 enum Options {
+  ALIGN = 'align',
   BORDER_RADIUS = 'border-radius',
   BORDER = 'border',
   TEXT = 'text',
-  FONT_SIZE = 'font-size',
-  FONT_WEIGHT = 'font-weight',
   TEXT_ALIGN = 'text-align',
-  MARGIN_ALIGNMENT = 'margin-alignment',
-  TEXT_COLOR = 'text-color',
+  TEXT_PROPERTIES = 'text-properties',
   BACKGROUND_COLOR = 'background-color',
   WIDTH = 'width',
   HREF = 'href',
   PADDING = 'padding',
   SRC = 'src',
   NO_PADDING_MOBILE = 'no-padding-mobile',
+  HEADING_LEVEL = 'heading-level',
 }
 
 type EmailBlockEditorProps = {
-  block: TextBlock | ImageBlock | ButtonBlock | LinkBlock | HeadingBlock | DividerBlock
+  block: TextBlock | SocialsBlock | ImageBlock | ButtonBlock | SurveyBlock | LinkBlock | HeadingBlock | DividerBlock
   onChange: (
     attributes: Partial<
       | PaddingAttributes
       | TextAttributes
       | TextBlockAttributes
+      | SocialsBlockAttributes
+      | SurveyBlockAttributes
       | ImageBlockAttributes
       | ButtonBlockAttributes
       | SocialsBlockAttributes
+      | HeadingBlockAttributes
     >
   ) => void
 }
 
 const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
   const { email } = useEmailStore()
+
   const { company } = useChatStore()
   const parentRow = email?.rows.find((row) =>
     row.columns.some((column) => column.blocks.some((b) => b.id === block.id))
@@ -73,88 +80,40 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
   const processedAttributes = getBlockAttributes(block, parentRow, false, company, email)
 
   const blockPadding = useMemo(() => {
-    if (block.type === 'divider') {
-      return {
-        top:
-          String(processedAttributes.style?.marginTop) ??
-          String(processedAttributes.style?.paddingTop) ??
-          String(processedAttributes.style?.padding) ??
-          '0px',
-        right:
-          String(processedAttributes.style?.marginRight) ??
-          String(processedAttributes.style?.paddingRight) ??
-          String(processedAttributes.style?.padding) ??
-          '0px',
-        bottom:
-          String(processedAttributes.style?.marginBottom) ??
-          String(processedAttributes.style?.paddingBottom) ??
-          String(processedAttributes.style?.padding) ??
-          '0px',
-        left:
-          String(processedAttributes.style?.marginLeft) ??
-          String(processedAttributes.style?.paddingLeft) ??
-          String(processedAttributes.style?.padding) ??
-          '0px',
-      }
-    } else {
-      return {
-        top: String(processedAttributes.style?.paddingTop) ?? String(processedAttributes.style?.padding) ?? '0px',
-        right: String(processedAttributes.style?.paddingRight) ?? String(processedAttributes.style?.padding) ?? '0px',
-        bottom: String(processedAttributes.style?.paddingBottom) ?? String(processedAttributes.style?.padding) ?? '0px',
-        left: String(processedAttributes.style?.paddingLeft) ?? String(processedAttributes.style?.padding) ?? '0px',
-      }
+    return {
+      top: String(processedAttributes.style?.paddingTop) ?? String(processedAttributes.style?.padding) ?? '0px',
+      right: String(processedAttributes.style?.paddingRight) ?? String(processedAttributes.style?.padding) ?? '0px',
+      bottom: String(processedAttributes.style?.paddingBottom) ?? String(processedAttributes.style?.padding) ?? '0px',
+      left: String(processedAttributes.style?.paddingLeft) ?? String(processedAttributes.style?.padding) ?? '0px',
     }
   }, [block])
 
   const optionsForItem = () => {
     switch (block.type) {
       case 'divider':
-        return [Options.BORDER, Options.PADDING, Options.NO_PADDING_MOBILE]
+        return [Options.BORDER, Options.PADDING]
       case 'text':
-        return [
-          Options.FONT_SIZE,
-          Options.FONT_WEIGHT,
-          Options.TEXT_ALIGN,
-          Options.TEXT_COLOR,
-          Options.BACKGROUND_COLOR,
-          Options.TEXT,
-          Options.PADDING,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.TEXT_PROPERTIES, Options.TEXT, Options.TEXT_ALIGN, Options.PADDING]
       case 'image':
-        return [Options.WIDTH, Options.MARGIN_ALIGNMENT, Options.BORDER_RADIUS, Options.PADDING, Options.SRC]
+        return [Options.WIDTH, Options.BORDER_RADIUS, Options.PADDING, Options.SRC, Options.ALIGN]
       case 'button':
         return [
+          Options.ALIGN,
           Options.TEXT,
           Options.HREF,
-          Options.TEXT_COLOR,
+          Options.TEXT_PROPERTIES,
           Options.BACKGROUND_COLOR,
           Options.PADDING,
           Options.BORDER,
-          Options.NO_PADDING_MOBILE,
         ]
       case 'heading':
-        return [
-          Options.TEXT,
-          Options.FONT_SIZE,
-          Options.FONT_WEIGHT,
-          Options.TEXT_COLOR,
-          Options.TEXT_ALIGN,
-          Options.PADDING,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.HEADING_LEVEL, Options.TEXT, Options.TEXT_PROPERTIES, Options.TEXT_ALIGN, Options.PADDING]
       case 'link':
-        return [
-          Options.TEXT_COLOR,
-          Options.HREF,
-          Options.BACKGROUND_COLOR,
-          Options.FONT_SIZE,
-          Options.FONT_WEIGHT,
-          Options.TEXT_ALIGN,
-          Options.TEXT,
-          Options.PADDING,
-          Options.NO_PADDING_MOBILE,
-        ]
+        return [Options.TEXT_PROPERTIES, Options.HREF, Options.TEXT, Options.PADDING, Options.ALIGN]
+      case 'socials':
+        return [Options.PADDING, Options.ALIGN]
+      case 'survey':
+        return [Options.PADDING]
       default:
         return []
     }
@@ -165,249 +124,290 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
   return (
     <div className="flex flex-col gap-4">
       {options.includes(Options.TEXT) && 'content' in block.attributes && (
-        <Field>
-          <Label>Text</Label>
-          <Textbox
-            key={`textbox-${block.id}`}
-            value={block.attributes.content || ''}
-            onChange={(value: string) => onChange({ content: value })}
-          />
-        </Field>
+        <Textbox
+          preventNewlines={block.type !== 'text'}
+          hideToolbar={block.type === 'link' || block.type === 'button'}
+          key={`textbox-${block.id}`}
+          value={block.attributes.content || ''}
+          onChange={(value: string) => onChange({ content: value })}
+        />
       )}
 
-      {options.includes(Options.HREF) && 'href' in processedAttributes && (
-        <Field>
-          <Label>Link URL</Label>
-          <Input
-            pattern="https?://.*"
-            title="Please enter a valid URL (e.g., https://example.com)"
-            invalid={!isValidHttpUrl(processedAttributes.href || '')}
-            error={
-              !isValidHttpUrl(processedAttributes.href || '')
-                ? 'Please enter a valid URL (e.g., https://example.com)'
-                : undefined
-            }
-            type="url"
-            value={processedAttributes.href || ''}
-            onChange={(e) => onChange({ href: e.target.value })}
-            placeholder="https://example.com"
-          />
-        </Field>
-      )}
+      {block.type !== 'text' && (
+        <Disclosure title={`${capitalizeFirstLetter(block.type)} Attributes`} defaultOpen>
+          <FieldGroup>
+            {block.type === 'survey' && <SurveyEditor block={block} onChange={onChange} />}
+            {block.type === 'socials' && <SocialsEditor block={block} onChange={onChange} />}
+            {options.includes(Options.HEADING_LEVEL) && block.type === 'heading' && (
+              <Field>
+                <Label>Heading Level</Label>
+                <div className="ml-auto w-24">
+                  <Select
+                    value={block.attributes.level || 'h2'}
+                    onChange={(e) => onChange({ level: e.target.value as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' })}
+                  >
+                    <option value="h1">H1</option>
+                    <option value="h2">H2</option>
+                    <option value="h3">H3</option>
+                    <option value="h4">H4</option>
+                    <option value="h5">H5</option>
+                    <option value="h6">H6</option>
+                  </Select>
+                </div>
+              </Field>
+            )}
+            {options.includes(Options.HREF) && 'href' in processedAttributes && (
+              <Field labelPosition="top">
+                <Label>Link URL</Label>
+                <Input
+                  pattern="https?://.*"
+                  title="Please enter a valid link"
+                  invalid={!isValidHttpUrl(processedAttributes.href || '')}
+                  error={!isValidHttpUrl(processedAttributes.href || '') ? 'Please enter a valid link' : undefined}
+                  type="url"
+                  value={processedAttributes.href || ''}
+                  onChange={(e) => onChange({ href: e.target.value })}
+                  placeholder="https://example.com"
+                />
+              </Field>
+            )}
+            {options.includes(Options.BACKGROUND_COLOR) && (
+              <Field>
+                <Label>Background Color</Label>
+                <ColorInput
+                  value={processedAttributes.style?.backgroundColor || '#ffffff'}
+                  onChange={(value) => onChange({ backgroundColor: value })}
+                />
+              </Field>
+            )}
+            {options.includes(Options.SRC) && block.type === 'image' && (
+              <>
+                <Field>
+                  <Label>Image URL</Label>
+                  <FileUploader onUpload={(src) => onChange({ src })} />
+                </Field>
+                <Field labelPosition="top">
+                  <Label>Alt Text</Label>
+                  <Input
+                    value={block.attributes.alt || ''}
+                    onChange={(e) => onChange({ alt: e.target.value })}
+                    placeholder="Describe the image for accessibility"
+                  />
+                </Field>
+              </>
+            )}
+            {options.includes(Options.ALIGN) && 'align' in processedAttributes && (
+              <Field>
+                <Label>Alignment</Label>
+                <Select
+                  value={processedAttributes.align as 'left' | 'center' | 'right' | undefined}
+                  onChange={(e) => onChange({ align: e.target.value as 'left' | 'center' | 'right' })}
+                >
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="right">Right</option>
+                </Select>
+              </Field>
+            )}
+            {options.includes(Options.WIDTH) && (
+              <Field>
+                <Label>Width</Label>
+                <NumberInput
+                  key={`width-${block.id}`}
+                  min={1}
+                  max={100}
+                  value={parseInt(String(processedAttributes.style?.width).replace(/[%px]/g, '') || '100')}
+                  onChange={(value) => {
+                    onChange({ width: `${Math.min(100, Math.max(0, value))}%` })
+                  }}
+                />
+              </Field>
+            )}
 
-      {options.includes(Options.SRC) && (
-        <Field>
-          <Label>Image URL</Label>
-          <FileUploader onUpload={(src) => onChange({ src })} />
-        </Field>
-      )}
+            {options.includes(Options.BORDER) && (block.type === 'button' || block.type === 'divider') && (
+              <Field labelPosition="top">
+                <Label>Border</Label>
+                <div className="flex gap-2">
+                  <div className="w-[106px]">
+                    <Select
+                      value={block.attributes?.borderStyle || 'solid'}
+                      onChange={(e) => onChange({ borderStyle: e.target.value as 'solid' | 'dashed' | 'dotted' })}
+                    >
+                      <option value="solid">Solid</option>
+                      <option value="dashed">Dashed</option>
+                      <option value="dotted">Dotted</option>
+                    </Select>
+                  </div>
+                  <NumberInput
+                    min={0}
+                    max={30}
+                    value={
+                      block.attributes?.borderWidth ? safeParseInt(block.attributes?.borderWidth.replace('px', '')) : 0
+                    }
+                    onChange={(value) => onChange({ borderWidth: `${value}px` })}
+                  />
 
-      {options.includes(Options.TEXT_ALIGN) && (
-        <Field>
-          <Label>Text Alignment</Label>
-          <CheckboxGroup className="mt-2">
-            <CheckboxField>
-              <Checkbox
-                checked={processedAttributes.style?.textAlign === 'left'}
-                onChange={() => onChange({ textAlign: 'left' })}
+                  <ColorInput
+                    value={block.attributes?.borderColor || ''}
+                    onChange={(e) => onChange({ borderColor: e })}
+                  />
+                </div>
+              </Field>
+            )}
+            {options.includes(Options.BORDER_RADIUS) && (
+              <Field>
+                <Label>Border Radius</Label>
+                <NumberInput
+                  min={0}
+                  max={200}
+                  value={safeParseInt(String(processedAttributes.style?.borderRadius).replace('px', '')) || 0}
+                  onChange={(value) => onChange({ borderRadius: `${value}px` })}
+                />
+              </Field>
+            )}
+          </FieldGroup>
+        </Disclosure>
+      )}
+      {options.includes(Options.TEXT_PROPERTIES) && (
+        <Disclosure title="Text Properties" defaultOpen>
+          <FieldGroup>
+            <Field>
+              <Label>Font Size</Label>
+              <NumberInput
+                className="ml-auto"
+                min={1}
+                max={144}
+                value={safeParseInt(String(processedAttributes.style?.fontSize).replace('px', '')) || 16}
+                onChange={(value) => onChange({ fontSize: `${value}px` })}
               />
-              <Label>Left</Label>
-            </CheckboxField>
-            <CheckboxField>
-              <Checkbox
-                checked={processedAttributes.style?.textAlign === 'center'}
-                onChange={() => onChange({ textAlign: 'center' })}
-              />
-              <Label>Center</Label>
-            </CheckboxField>
-            <CheckboxField>
-              <Checkbox
-                checked={processedAttributes.style?.textAlign === 'right'}
-                onChange={() => onChange({ textAlign: 'right' })}
-              />
-              <Label>Right</Label>
-            </CheckboxField>
-          </CheckboxGroup>
-        </Field>
-      )}
+            </Field>
 
-      {options.includes(Options.MARGIN_ALIGNMENT) && (
-        <Field>
-          <Label>Alignment</Label>
-          <CheckboxGroup className="mt-2">
-            <CheckboxField>
-              <Checkbox
-                checked={
-                  (processedAttributes.style?.marginLeft === '0px' &&
-                    processedAttributes.style?.marginRight === 'auto') ||
-                  (!processedAttributes.style?.marginLeft && !processedAttributes.style?.marginRight)
+            <Field>
+              <Label>Font Weight</Label>
+              <div className="ml-auto w-24">
+                <Select
+                  value={processedAttributes.style?.fontWeight || 'normal'}
+                  onChange={(e) => onChange({ fontWeight: e.target.value as 'normal' | 'bold' })}
+                >
+                  <option value="normal">Normal</option>
+                  <option value="bold">Bold</option>
+                </Select>
+              </div>
+            </Field>
+
+            <Field>
+              <Label>Letter Spacing</Label>
+              <NumberInput
+                className="ml-auto"
+                min={0}
+                max={100}
+                value={
+                  processedAttributes.style?.letterSpacing === 'normal'
+                    ? 0
+                    : safeParseInt(String(processedAttributes.style?.letterSpacing).replace('px', '')) || 0
                 }
-                onChange={() => onChange({ marginLeft: '0px', marginRight: 'auto' })}
+                onChange={(value) => onChange({ letterSpacing: value === 0 ? 'normal' : `${value}px` })}
               />
-              <Label>Left</Label>
-            </CheckboxField>
-            <CheckboxField>
-              <Checkbox
-                checked={
-                  processedAttributes.style?.marginLeft === 'auto' && processedAttributes.style?.marginRight === 'auto'
-                }
-                onChange={() => onChange({ marginLeft: 'auto', marginRight: 'auto' })}
+            </Field>
+
+            <Field>
+              <Label>Line Height</Label>
+              <div className="ml-auto w-24">
+                <Select
+                  value={
+                    processedAttributes.style?.lineHeight === '120%'
+                      ? 'small'
+                      : processedAttributes.style?.lineHeight === '150%'
+                        ? 'medium'
+                        : processedAttributes.style?.lineHeight === '180%'
+                          ? 'large'
+                          : processedAttributes.style?.lineHeight === '200%'
+                            ? 'extra-large'
+                            : 'medium'
+                  }
+                  onChange={(e) => {
+                    const value = e.target.value
+                    let lineHeight = '150%'
+                    if (value === 'small') lineHeight = '120%'
+                    if (value === 'large') lineHeight = '180%'
+                    if (value === 'extra-large') lineHeight = '200%'
+                    onChange({ lineHeight })
+                  }}
+                >
+                  <option value="small">Small</option>
+                  <option value="medium">Medium</option>
+                  <option value="large">Large</option>
+                  <option value="extra-large">XL</option>
+                </Select>
+              </div>
+            </Field>
+
+            <Field>
+              <Label>Text Color</Label>
+              <ColorInput
+                value={processedAttributes.style?.color || '#000000'}
+                onChange={(value) => onChange({ color: value })}
               />
-              <Label>Center</Label>
-            </CheckboxField>
-            <CheckboxField>
-              <Checkbox
-                checked={
-                  processedAttributes.style?.marginLeft === 'auto' && processedAttributes.style?.marginRight === '0px'
-                }
-                onChange={() => onChange({ marginLeft: 'auto', marginRight: '0px' })}
-              />
-              <Label>Right</Label>
-            </CheckboxField>
-          </CheckboxGroup>
-        </Field>
-      )}
+            </Field>
 
-      {options.includes(Options.FONT_SIZE) && (
-        <Field>
-          <Label>Font Size</Label>
-          <Range
-            min={4}
-            max={144}
-            value={safeParseInt(String(processedAttributes.style?.fontSize).replace('px', '')) || 16}
-            onChange={(e) => onChange({ fontSize: e.target.value + 'px' })}
-          />
-        </Field>
-      )}
-
-      {options.includes(Options.FONT_WEIGHT) && (
-        <Field>
-          <Label>Font Weight</Label>
-          <CheckboxGroup className="mt-2">
-            <CheckboxField>
-              <Checkbox
-                checked={processedAttributes.style?.fontWeight === 'normal' || !processedAttributes.style?.fontWeight}
-                onChange={() => onChange({ fontWeight: 'normal' })}
-              />
-              <Label>Normal</Label>
-            </CheckboxField>
-            <CheckboxField>
-              <Checkbox
-                checked={processedAttributes.style?.fontWeight === 'bold'}
-                onChange={() => onChange({ fontWeight: 'bold' })}
-              />
-              <Label>Bold</Label>
-            </CheckboxField>
-          </CheckboxGroup>
-        </Field>
-      )}
-
-      {options.includes(Options.WIDTH) && (
-        <Field>
-          <div className="flex items-center justify-between">
-            <Label>Width</Label>
-            <SwitchField>
-              <Switch
-                checked={String(processedAttributes.style?.width).includes('%')}
-                onChange={(checked) => {
-                  const currentValue = parseInt(String(processedAttributes.style?.width).replace(/[%px]/g, '') || '100')
-                  onChange({ width: `${currentValue}${checked ? '%' : 'px'}` })
-                }}
-              />
-              <Label>{String(processedAttributes.style?.width).includes('%') ? '%' : 'px'}</Label>
-            </SwitchField>
-          </div>
-          <Range
-            key={`width-${block.id}`}
-            min={3}
-            max={String(processedAttributes.style?.width).includes('%') ? 100 : 400}
-            isPercent={String(processedAttributes.style?.width).includes('%')}
-            value={parseInt(String(processedAttributes.style?.width).replace(/[%px]/g, '') || '100')}
-            onChange={(e) => {
-              const value = parseInt(e.target.value) || 0
-              const unit = String(processedAttributes.style?.width).includes('%') ? '%' : 'px'
-              const maxValue = unit === '%' ? 100 : 1000
-              onChange({ width: `${Math.min(maxValue, Math.max(0, value))}${unit}` })
-            }}
-          />
-        </Field>
-      )}
-
-      {options.includes(Options.BORDER_RADIUS) && (
-        <Field>
-          <Label>Border Radius</Label>
-          <Range
-            min={0}
-            max={200}
-            value={safeParseInt(String(processedAttributes.style?.borderRadius).replace('px', '')) || 0}
-            onChange={(e) => onChange({ borderRadius: e.target.value + 'px' })}
-          />
-        </Field>
-      )}
-
-      {options.includes(Options.BORDER) &&
-        'borderStyle' in block.attributes &&
-        'borderWidth' in block.attributes &&
-        'borderColor' in block.attributes && (
-          <Field>
-            <Label>Row Border</Label>
-            <div className="flex gap-2">
-              <Select
-                value={block.attributes?.borderStyle || 'solid'}
-                onChange={(e) => onChange({ borderStyle: e.target.value as 'solid' | 'dashed' | 'dotted' })}
-              >
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
-              </Select>
-              <Input
-                type="number"
-                value={String(block.attributes?.borderWidth)?.replace('px', '') || ''}
-                onChange={(e) => onChange({ borderWidth: `${e.target.value}px` })}
-                placeholder="Width"
-              />
-              <ColorInput value={block.attributes?.borderColor || ''} onChange={(e) => onChange({ borderColor: e })} />
-            </div>
-          </Field>
-        )}
-
-      {options.includes(Options.TEXT_COLOR) && (
-        <Field>
-          <Label>Text Color</Label>
-          <ColorInput
-            value={processedAttributes.style?.color || '#000000'}
-            onChange={(value) => onChange({ color: value })}
-          />
-        </Field>
-      )}
-
-      {options.includes(Options.BACKGROUND_COLOR) && (
-        <Field>
-          <Label>Background Color</Label>
-          <ColorInput
-            value={processedAttributes.style?.backgroundColor || '#ffffff'}
-            onChange={(value) => onChange({ backgroundColor: value })}
-          />
-        </Field>
+            {options.includes(Options.TEXT_ALIGN) && (
+              <Field>
+                <Label>Text Alignment</Label>
+                <div className="ml-auto w-24">
+                  <Select
+                    value={processedAttributes.style?.textAlign || 'left'}
+                    onChange={(e) => onChange({ textAlign: e.target.value as 'left' | 'center' | 'right' })}
+                  >
+                    <option value="left">Left</option>
+                    <option value="center">Center</option>
+                    <option value="right">Right</option>
+                  </Select>
+                </div>
+              </Field>
+            )}
+          </FieldGroup>
+        </Disclosure>
       )}
 
       {options.includes(Options.PADDING) && (
-        <Field>
-          <Label>Padding</Label>
-          <PaddingForm
-            padding={blockPadding}
-            onChange={(values: Partial<PaddingValues>) => {
-              const rowAttributes: Partial<RowBlockAttributes> = {
-                paddingTop: values.top,
-                paddingRight: values.right,
-                paddingBottom: values.bottom,
-                paddingLeft: values.left,
-              }
+        <Disclosure title={'Padding'} defaultOpen>
+          <FieldGroup>
+            <PaddingForm
+              label={block.type === 'button' ? 'Content Padding' : 'Padding'}
+              padding={blockPadding}
+              onChange={(values: Partial<PaddingValues>) => {
+                const rowAttributes: Partial<RowBlockAttributes> = {
+                  paddingTop: values.top,
+                  paddingRight: values.right,
+                  paddingBottom: values.bottom,
+                  paddingLeft: values.left,
+                }
 
-              onChange(rowAttributes)
-            }}
-          />
-        </Field>
+                onChange(rowAttributes)
+              }}
+            />
+            {block.type === 'button' && (
+              <PaddingForm
+                label="Padding"
+                padding={{
+                  top: String(processedAttributes.style?.marginTop) ?? '0px',
+                  right: String(processedAttributes.style?.marginRight) ?? '0px',
+                  bottom: String(processedAttributes.style?.marginBottom) ?? '0px',
+                  left: String(processedAttributes.style?.marginLeft) ?? '0px',
+                }}
+                onChange={(values: Partial<PaddingValues>) => {
+                  const rowAttributes: Partial<ButtonBlockAttributes> = {
+                    marginTop: values.top,
+                    marginRight: values.right,
+                    marginBottom: values.bottom,
+                    marginLeft: values.left,
+                  }
+                  onChange(rowAttributes)
+                }}
+              />
+            )}
+          </FieldGroup>
+        </Disclosure>
       )}
     </div>
   )

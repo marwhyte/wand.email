@@ -7,6 +7,7 @@ import type {
   ImageBlock,
   LinkBlock,
   RowBlock,
+  SocialsBlock,
   SurveyBlock,
   TextBlock,
 } from '@/app/components/email-workspace/types'
@@ -20,11 +21,12 @@ import {
   getAdditionalHeadingStyles,
   getAdditionalImageStyles,
   getAdditionalLinkStyles,
+  getAdditionalSocialsStyles,
   getAdditionalSurveyStyles,
   getAdditionalTextStyles,
 } from '../defaults/blocks'
 
-type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
+export type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
 
 export function generateTextProps(
   block: TextBlock,
@@ -47,7 +49,7 @@ export function generateHeadingProps(
   mobileView = false
 ): OmitChildren<React.ComponentProps<typeof Heading>> {
   return {
-    as: block.attributes.as,
+    as: block.attributes.level,
     style: {
       ...applyPaddingAttributes(block.attributes),
       ...applyTextAttributes(block.attributes),
@@ -65,6 +67,7 @@ export function generateImageProps(
 ): OmitChildren<React.ComponentProps<typeof Img>> {
   const src = getImgSrc(block.attributes.src, company)
   const final = {
+    align: block.attributes.align ?? 'center',
     src,
     alt: block.attributes.alt,
     style: {
@@ -89,9 +92,9 @@ export function generateButtonProps(
   }
 
   return {
+    // @ts-expect-error
+    align: block.attributes.align ?? 'center',
     href: block.attributes.href,
-    target: block.attributes.target,
-    rel: block.attributes.rel,
     style,
   }
 }
@@ -113,9 +116,9 @@ export function generateLinkProps(
   }
 
   return {
+    // @ts-expect-error
+    align: block.attributes.align ?? 'center',
     href: block.attributes.href,
-    target: block.attributes.target,
-    rel: block.attributes.rel,
     style: mergedAttributes,
   }
 }
@@ -132,12 +135,25 @@ export function generateDividerProps(
   }
 }
 
-export function generateSurveyProps(
-  block: SurveyBlock,
-  parentRow: RowBlock,
-  mobileView = false
+export function generateSocialsProps(
+  block: SocialsBlock,
+  parentRow: RowBlock
 ): OmitChildren<React.ComponentProps<typeof Section>> {
   return {
+    align: block.attributes.align ?? 'center',
+    style: {
+      ...applyPaddingAttributes(block.attributes),
+      ...getAdditionalSocialsStyles(block, parentRow),
+    },
+  }
+}
+
+export function generateSurveyProps(
+  block: SurveyBlock,
+  parentRow: RowBlock
+): OmitChildren<React.ComponentProps<typeof Section>> {
+  return {
+    color: block.attributes.color ?? '#4F46E5',
     style: {
       ...applyPaddingAttributes(block.attributes),
       ...getAdditionalSurveyStyles(block, parentRow),
@@ -165,7 +181,9 @@ export function getBlockAttributes<T extends EmailBlock>(
             ? ReturnType<typeof generateDividerProps>
             : T extends SurveyBlock
               ? ReturnType<typeof generateSurveyProps>
-              : never {
+              : T extends SocialsBlock
+                ? ReturnType<typeof generateSocialsProps>
+                : never {
   switch (block.type) {
     case 'text':
       return generateTextProps(block as TextBlock, parentRow, mobileView, email) as any
@@ -180,7 +198,9 @@ export function getBlockAttributes<T extends EmailBlock>(
     case 'divider':
       return generateDividerProps(block as DividerBlock, parentRow, mobileView) as any
     case 'survey':
-      return generateSurveyProps(block as SurveyBlock, parentRow, mobileView) as any
+      return generateSurveyProps(block as SurveyBlock, parentRow) as any
+    case 'socials':
+      return generateSocialsProps(block as SocialsBlock, parentRow) as any
     default:
       return {} as never
   }

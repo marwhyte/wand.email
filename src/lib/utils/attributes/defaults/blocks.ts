@@ -5,6 +5,7 @@ import type {
   ImageBlock,
   LinkBlock,
   RowBlock,
+  SocialsBlock,
   SurveyBlock,
   TextBlock,
 } from '@/app/components/email-workspace/types'
@@ -18,6 +19,7 @@ export const getAdditionalTextStyles = (
   parentRow: RowBlock
 ): React.ComponentProps<typeof Text>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Text>['style'] = {
+    textAlign: 'left',
     paddingTop: '10px',
     paddingRight: '0',
     paddingBottom: '10px',
@@ -26,15 +28,19 @@ export const getAdditionalTextStyles = (
     fontSize: '16px',
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
+    lineHeight: '120%',
+    letterSpacing: 'normal',
   }
 
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(textBlock, parentRow) as React.ComponentProps<typeof Text>['style']) || {}
 
+  const { content, ...styleAttributes } = textBlock.attributes
+
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
-    ...textBlock.attributes,
+    ...styleAttributes,
   }
 }
 
@@ -50,20 +56,22 @@ export const getAdditionalHeadingStyles = (
     h5: '12px',
   }
 
-  const baseDefaults = {
+  const baseDefaults: React.ComponentProps<typeof Heading>['style'] = {
+    textAlign: 'left',
     paddingTop: '12px',
     paddingRight: '0',
     paddingBottom: '12px',
     paddingLeft: '0',
     fontWeight: 'bold',
-    lineHeight: '100%',
-    fontSize: defaultHeadingSizes[headingBlock.attributes.as as keyof typeof defaultHeadingSizes] ?? '16px',
+    lineHeight: '120%',
+    letterSpacing: 'normal',
+    fontSize: defaultHeadingSizes[headingBlock.attributes.level as keyof typeof defaultHeadingSizes] ?? '16px',
   }
 
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(headingBlock, parentRow) as React.ComponentProps<typeof Heading>['style']) || {}
 
-  const { as, ...styleAttributes } = headingBlock.attributes
+  const { level, content, ...styleAttributes } = headingBlock.attributes
 
   return {
     ...baseDefaults,
@@ -80,7 +88,6 @@ export const getAdditionalImageStyles = (
   const baseDefaults: React.ComponentProps<typeof Img>['style'] = {
     objectFit: 'contain',
     borderRadius: '16px',
-    padding: 0,
     width: '100%',
   }
 
@@ -110,15 +117,17 @@ export const getAdditionalButtonStyles = (
     paddingRight: '14px',
     paddingBottom: '10px',
     paddingLeft: '14px',
-    marginTop: '12px',
-    marginBottom: '12px',
+    marginTop: '10px',
+    marginBottom: '10px',
+    marginLeft: '10px',
+    marginRight: '10px',
     cursor: 'pointer',
   }
 
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(buttonBlock, parentRow) as React.ComponentProps<typeof Button>['style']) || {}
 
-  const { href, target, rel, borderColor, borderWidth, borderStyle, ...styleAttributes } = buttonBlock.attributes
+  const { href, borderColor, borderWidth, borderStyle, align, content, ...styleAttributes } = buttonBlock.attributes
 
   const borderStyles = borderWidth
     ? {
@@ -142,6 +151,8 @@ export const getAdditionalButtonStyles = (
         ? '#000000'
         : '#ffffff'
       : '#ffffff'
+
+  console.log('1', borderStyles)
 
   return {
     ...baseDefaults,
@@ -171,7 +182,7 @@ export const getAdditionalLinkStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(linkBlock, parentRow) as React.ComponentProps<typeof Link>['style']) || {}
 
-  const { href, target, rel, ...styleAttributes } = linkBlock.attributes
+  const { href, align, content, ...styleAttributes } = linkBlock.attributes
 
   return {
     ...baseDefaults,
@@ -189,32 +200,46 @@ export const getAdditionalDividerStyles = (
     borderWidth: '1px',
     borderColor: '#E0E0E0',
     padding: 0,
-    marginLeft: '12px',
-    marginRight: '12px',
-    marginTop: '24px',
-    marginBottom: '24px',
+    paddingLeft: '12px',
+    paddingRight: '12px',
+    paddingTop: '24px',
+    paddingBottom: '24px',
   }
 
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(dividerBlock, parentRow) as React.ComponentProps<typeof Hr>['style']) || {}
 
   // Extract padding values from attributes to apply to margins
-  const { paddingTop, paddingRight, paddingBottom, paddingLeft, ...otherAttributes } = dividerBlock.attributes
-
-  // Apply padding values to margins if they exist
-  const marginAdjustments: Partial<React.ComponentProps<typeof Hr>['style']> = {}
-  if (paddingTop !== undefined) marginAdjustments.marginTop = paddingTop
-  if (paddingRight !== undefined) marginAdjustments.marginRight = paddingRight
-  if (paddingBottom !== undefined) marginAdjustments.marginBottom = paddingBottom
-  if (paddingLeft !== undefined) marginAdjustments.marginLeft = paddingLeft
+  const { ...otherAttributes } = dividerBlock.attributes
 
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
     ...otherAttributes,
-    ...marginAdjustments,
-    padding: 0,
     borderTop: 'none',
+  }
+}
+
+export const getAdditionalSocialsStyles = (
+  socialsBlock: SocialsBlock,
+  parentRow: RowBlock
+): React.ComponentProps<typeof Section>['style'] => {
+  const baseDefaults: React.ComponentProps<typeof Section>['style'] = {
+    paddingTop: '10px',
+    paddingRight: '10px',
+    paddingBottom: '10px',
+    paddingLeft: '10px',
+  }
+
+  const rowTypeDefaults =
+    (getRowTypeBlockDefaults(socialsBlock, parentRow) as React.ComponentProps<typeof Section>['style']) || {}
+
+  const { align, ...styleAttributes } = socialsBlock.attributes
+
+  return {
+    ...baseDefaults,
+    ...rowTypeDefaults,
+    ...styleAttributes,
   }
 }
 
@@ -223,11 +248,10 @@ export const getAdditionalSurveyStyles = (
   parentRow: RowBlock
 ): React.ComponentProps<typeof Section>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Section>['style'] = {
-    paddingTop: '12px',
-    paddingRight: '12px',
-    paddingBottom: '12px',
-    paddingLeft: '12px',
-    textAlign: 'center',
+    paddingTop: '10px',
+    paddingRight: '10px',
+    paddingBottom: '10px',
+    paddingLeft: '10px',
   }
 
   const rowTypeDefaults =

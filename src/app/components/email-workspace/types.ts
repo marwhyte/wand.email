@@ -166,11 +166,11 @@ export type PaddingAttributes = {
 export type TextAttributes = {
   color?: string
   content: string
-  textAlign?: 'left' | 'center' | 'right' | 'justify'
   fontWeight?: 'normal' | 'bold' | 'lighter' | 'bolder'
   fontSize?: string
   fontFamily?: string
   letterSpacing?: string
+  lineHeight?: string
 }
 
 // ===== Structural Block Attributes =====
@@ -182,7 +182,6 @@ export type RowBlockAttributes = PaddingAttributes & {
   borderWidth?: string
   columnSpacing?: number
   hideOnMobile?: boolean
-  reverseStackOnMobile?: boolean
   stackOnMobile?: boolean
   type?: ComponentType
   variant?: ComponentVariant<ComponentType>
@@ -194,6 +193,7 @@ export type ColumnBlockAttributes = {}
 // ===== Block-Specific Attributes =====
 export type ButtonBlockAttributes = TextAttributes &
   PaddingAttributes & {
+    align?: 'left' | 'center' | 'right'
     backgroundColor?: string
     borderColor?: string
     borderRadius?: string
@@ -201,9 +201,9 @@ export type ButtonBlockAttributes = TextAttributes &
     borderWidth?: string
     href: string
     marginBottom?: string
+    marginLeft?: string
+    marginRight?: string
     marginTop?: string
-    rel?: string
-    target?: '_blank' | '_self' | '_parent' | '_top'
   }
 
 export type DividerBlockAttributes = PaddingAttributes & {
@@ -214,29 +214,27 @@ export type DividerBlockAttributes = PaddingAttributes & {
 
 export type HeadingBlockAttributes = TextAttributes &
   PaddingAttributes & {
-    as: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+    level: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
+    textAlign?: 'left' | 'center' | 'right' | 'justify'
   }
 
 export type ImageBlockAttributes = PaddingAttributes & {
+  align?: 'left' | 'center' | 'right'
   alt: string
   borderRadius?: string
-  marginLeft?: string
-  marginRight?: string
   src: string
   width?: string
 }
 
 export type LinkBlockAttributes = TextAttributes &
   PaddingAttributes & {
+    align?: 'left' | 'center' | 'right'
     href: string
-    target?: '_blank' | '_self' | '_parent' | '_top'
-    rel?: string
   }
 
 export type SocialsBlockAttributes = PaddingAttributes & {
+  align?: 'left' | 'center' | 'right'
   folder: SocialIconFolders
-  marginLeft?: string
-  marginRight?: string
   socialLinks: {
     alt: string
     icon: SocialIconName
@@ -264,7 +262,10 @@ export type SurveyBlockAttributes = PaddingAttributes & {
   question: string
 }
 
-export type TextBlockAttributes = TextAttributes & PaddingAttributes & {}
+export type TextBlockAttributes = TextAttributes &
+  PaddingAttributes & {
+    textAlign?: 'left' | 'center' | 'right' | 'justify'
+  }
 
 export type SocialIconFolders =
   | 'socials-blue'

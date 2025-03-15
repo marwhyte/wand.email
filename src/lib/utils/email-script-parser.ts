@@ -93,16 +93,12 @@ function ensureString(value: unknown, defaultValue: string = ''): string {
 }
 
 // ===== Type Guards =====
-function isTextAlign(value: string | undefined): value is TextAttributes['textAlign'] {
+function isTextAlign(value: string | undefined): value is TextBlockAttributes['textAlign'] {
   return typeof value === 'string' && ['left', 'center', 'right', 'justify'].includes(value)
 }
 
 function isFontWeight(value: string | undefined): value is TextAttributes['fontWeight'] {
   return typeof value === 'string' && ['normal', 'bold', 'lighter', 'bolder'].includes(value)
-}
-
-function isTarget(value: string | undefined): value is ButtonBlockAttributes['target'] {
-  return typeof value === 'string' && ['_blank', '_self', '_parent', '_top'].includes(value)
 }
 
 function isBorderStyle(value: string | undefined): value is NonNullable<RowBlockAttributes['borderStyle']> {
@@ -114,6 +110,10 @@ function isBorderStyle(value: string | undefined): value is NonNullable<RowBlock
 
 function isVerticalAlign(value: string | undefined): value is RowBlockAttributes['verticalAlign'] {
   return typeof value === 'string' && ['top', 'middle', 'bottom'].includes(value)
+}
+
+function isAlign(value: string | undefined): value is ButtonBlockAttributes['align'] {
+  return typeof value === 'string' && ['left', 'center', 'right'].includes(value)
 }
 
 function isSocialIconFolder(value: string | undefined): value is SocialIconFolders {
@@ -163,26 +163,29 @@ function handlePadding(raw: RawAttributes): PaddingAttributes {
 
 function handleTextAttributes(raw: RawAttributes): TextAttributes {
   const attrs: TextAttributes = {
-    content: '',
-  }
-
-  // Find text content between <p> tags
-  if (raw.text) {
-    attrs.content = raw.text
+    content: raw.content || '',
   }
 
   if (raw.color) attrs.color = raw.color
-  if (isTextAlign(raw.textAlign)) attrs.textAlign = raw.textAlign as TextAttributes['textAlign']
   if (isFontWeight(raw.fontWeight)) attrs.fontWeight = raw.fontWeight as TextAttributes['fontWeight']
   if (raw.fontSize) attrs.fontSize = ensurePx(raw.fontSize)
   if (raw.fontFamily) attrs.fontFamily = raw.fontFamily
   if (raw.letterSpacing) attrs.letterSpacing = ensurePx(raw.letterSpacing)
+  if (raw.lineHeight) attrs.lineHeight = raw.lineHeight
 
   return attrs
 }
 
 function parseAttributes(attrString: string): RawAttributes {
   const attrs: RawAttributes = {}
+
+  // Special handling for content - capture everything between <p> tags
+  const contentMatch = attrString.match(/content=<p>(.*?)<\/p>/)
+  if (contentMatch) {
+    // Strip the <p> tags when storing the content
+    attrs.content = parseEscapeSequences(contentMatch[1])
+    attrString = attrString.replace(contentMatch[0], '')
+  }
 
   // Special handling for socialLinks - match both quoted and unquoted keys
   const jsonMatch = attrString.match(/(\w+)=(\[[\s\S]*?\])/)
@@ -234,7 +237,7 @@ function parseAttributes(attrString: string): RawAttributes {
 
 // ===== Structural Block Parsers =====
 const parseRowAttributes: AttributeParser<RowBlockAttributes> = (raw) => {
-  return {
+  const attrs: RowBlockAttributes = {
     ...handlePadding(raw),
     backgroundColor: raw.backgroundColor,
     borderColor: raw.borderColor,
@@ -242,13 +245,16 @@ const parseRowAttributes: AttributeParser<RowBlockAttributes> = (raw) => {
     borderStyle: isBorderStyle(raw.borderStyle) ? raw.borderStyle : undefined,
     borderWidth: raw.borderWidth ? ensurePx(raw.borderWidth) : undefined,
     columnSpacing: raw.columnSpacing ? Number(raw.columnSpacing) : undefined,
-    hideOnMobile: raw.hideOnMobile === 'true',
-    reverseStackOnMobile: raw.reverseStackOnMobile === 'true',
-    stackOnMobile: raw.stackOnMobile === 'true',
     type: raw.type as ComponentType | undefined,
     variant: raw.variant as ComponentVariant<ComponentType> | undefined,
     verticalAlign: isVerticalAlign(raw.verticalAlign) ? raw.verticalAlign : undefined,
   }
+
+  // Only add boolean fields if they are explicitly set
+  if (raw.hideOnMobile !== undefined) attrs.hideOnMobile = raw.hideOnMobile === 'true'
+  if (raw.stackOnMobile !== undefined) attrs.stackOnMobile = raw.stackOnMobile === 'true'
+
+  return attrs
 }
 
 const parseColumnAttributes: AttributeParser<ColumnBlockAttributes> = (raw) => {
@@ -265,6 +271,7 @@ const parseButtonAttributes: AttributeParser<ButtonBlockAttributes> = (raw) => {
   return {
     ...handleTextAttributes(raw),
     ...handlePadding(raw),
+    align: isAlign(raw.align) ? raw.align : undefined,
     backgroundColor: raw.backgroundColor,
     borderColor: raw.borderColor,
     borderRadius: raw.borderRadius ? ensurePx(raw.borderRadius) : undefined,
@@ -273,8 +280,6 @@ const parseButtonAttributes: AttributeParser<ButtonBlockAttributes> = (raw) => {
     href: raw.href || '#',
     marginBottom: raw.marginBottom ? ensurePx(raw.marginBottom) : undefined,
     marginTop: raw.marginTop ? ensurePx(raw.marginTop) : undefined,
-    rel: raw.rel,
-    target: isTarget(raw.target) ? raw.target : undefined,
   }
 }
 
@@ -294,16 +299,21 @@ const parseDividerAttributes: AttributeParser<DividerBlockAttributes> = (raw) =>
 }
 
 const parseHeadingAttributes: AttributeParser<HeadingBlockAttributes> = (raw) => {
-  return {
+  const attrs: HeadingBlockAttributes = {
     ...handleTextAttributes(raw),
     ...handlePadding(raw),
-    as: (raw.as as HeadingBlockAttributes['as']) || 'h2',
+    level: (raw.level as HeadingBlockAttributes['level']) || 'h2',
   }
+
+  if (isTextAlign(raw.textAlign)) attrs.textAlign = raw.textAlign as HeadingBlockAttributes['textAlign']
+
+  return attrs
 }
 
 const parseImageAttributes: AttributeParser<ImageBlockAttributes> = (raw) => {
   return {
     ...handlePadding(raw),
+    align: isAlign(raw.align) ? raw.align : undefined,
     alt: raw.alt || '',
     borderRadius: raw.borderRadius ? ensurePx(raw.borderRadius) : undefined,
     marginLeft: raw.marginLeft ? ensurePx(raw.marginLeft) : undefined,
@@ -317,12 +327,9 @@ const parseLinkAttributes: AttributeParser<LinkBlockAttributes> = (raw) => {
   const attrs: LinkBlockAttributes = {
     ...handleTextAttributes(raw),
     ...handlePadding(raw),
+    align: isAlign(raw.align) ? raw.align : undefined,
     href: raw.href || '#', // Default to '#' if not provided
   }
-
-  // Optional link-specific attributes
-  if (isTarget(raw.target)) attrs.target = raw.target
-  if (raw.rel) attrs.rel = raw.rel
 
   return attrs
 }
@@ -330,6 +337,7 @@ const parseLinkAttributes: AttributeParser<LinkBlockAttributes> = (raw) => {
 const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) => {
   const attrs: SocialsBlockAttributes = {
     ...handlePadding(raw),
+    align: isAlign(raw.align) ? raw.align : undefined,
     folder: isSocialIconFolder(raw.folder) ? raw.folder : 'socials-color',
     socialLinks: [],
   }
@@ -364,10 +372,6 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
     console.debug('socialLinks type:', typeof raw.socialLinks)
   }
 
-  // Optional margin attributes
-  if (raw.marginLeft) attrs.marginLeft = ensurePx(raw.marginLeft)
-  if (raw.marginRight) attrs.marginRight = ensurePx(raw.marginRight)
-
   return attrs
 }
 
@@ -382,10 +386,14 @@ const parseSurveyAttributes: AttributeParser<SurveyBlockAttributes> = (raw) => {
 }
 
 const parseTextAttributes: AttributeParser<TextBlockAttributes> = (raw) => {
-  return {
+  const attrs: TextBlockAttributes = {
     ...handleTextAttributes(raw),
     ...handlePadding(raw),
   }
+
+  if (isTextAlign(raw.textAlign)) attrs.textAlign = raw.textAlign as TextBlockAttributes['textAlign']
+
+  return attrs
 }
 
 // ===== Parser Registry =====

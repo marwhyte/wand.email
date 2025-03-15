@@ -1,7 +1,8 @@
-import { Field, Label } from '@/app/components/fieldset'
-import { Input } from '@/app/components/input'
+import * as Headless from '@headlessui/react'
+
+import { Label } from '@/app/components/fieldset'
+import { NumberInput } from '@/app/components/input'
 import { Switch, SwitchField } from '@/app/components/switch'
-import { Text } from '@components/text'
 import { useEffect, useState } from 'react'
 
 export type PaddingValues = {
@@ -13,10 +14,11 @@ export type PaddingValues = {
 
 type PaddingFormProps = {
   padding: PaddingValues
+  label?: string
   onChange: (values: Partial<PaddingValues>) => void
 }
 
-export default function PaddingForm({ padding, onChange }: PaddingFormProps) {
+export default function PaddingForm({ padding, label, onChange }: PaddingFormProps) {
   const [localPadding, setLocalPadding] = useState(padding)
   const [isAdvanced, setIsAdvanced] = useState(() => {
     const values = Object.values(padding)
@@ -27,15 +29,15 @@ export default function PaddingForm({ padding, onChange }: PaddingFormProps) {
     setLocalPadding(padding)
   }, [padding])
 
-  const handlePaddingChange = (side: 'Top' | 'Right' | 'Bottom' | 'Left', value: string) => {
-    const newValue = value === '' ? '' : isNaN(parseInt(value, 10)) ? '0px' : `${parseInt(value, 10)}px`
+  const handlePaddingChange = (side: 'Top' | 'Right' | 'Bottom' | 'Left', value: number) => {
+    const newValue = `${value}px`
     const newPadding = { ...localPadding, [side.toLowerCase()]: newValue }
     setLocalPadding(newPadding)
     onChange(newPadding) // Send the entire updated padding object
   }
 
-  const handleSimplePaddingChange = (value: string) => {
-    const newValue = value === '' ? '' : `${parseInt(value, 10)}px`
+  const handleSimplePaddingChange = (value: number) => {
+    const newValue = `${value}px`
     const newPadding = {
       top: newValue,
       right: newValue,
@@ -63,9 +65,9 @@ export default function PaddingForm({ padding, onChange }: PaddingFormProps) {
   }
 
   return (
-    <Field>
+    <Headless.Field>
       <div className="flex items-center justify-between">
-        <Label>Padding</Label>
+        <span className="text-sm text-gray-500">{label}</span>
         <SwitchField>
           <Switch checked={isAdvanced} onChange={handleAdvancedToggle} />
           <Label>Advanced</Label>
@@ -75,27 +77,27 @@ export default function PaddingForm({ padding, onChange }: PaddingFormProps) {
         {isAdvanced ? (
           (['Top', 'Right', 'Bottom', 'Left'] as const).map((side) => (
             <div key={side} className="flex items-center">
-              <Input
-                type="text"
-                value={localPadding[side.toLowerCase() as keyof typeof localPadding].replace('px', '')}
-                onChange={(e) => handlePaddingChange(side, e.target.value)}
-                placeholder="In px"
+              <NumberInput
+                label={side}
+                min={0}
+                max={60}
+                value={parseInt(localPadding[side.toLowerCase() as keyof typeof localPadding], 10) || 0}
+                onChange={(value) => handlePaddingChange(side, value)}
               />
-              <span className="ml-2 text-sm">{side}</span>
             </div>
           ))
         ) : (
-          <div className="">
-            <Input
-              type="text"
-              value={localPadding.top.replace('px', '')}
-              onChange={(e) => handleSimplePaddingChange(e.target.value)}
-              placeholder="In px"
+          <div>
+            <NumberInput
+              label="All sides"
+              min={0}
+              max={60}
+              value={parseInt(localPadding.top, 10) || 0}
+              onChange={(value) => handleSimplePaddingChange(value)}
             />
-            <Text className="ml-2 text-sm">All sides</Text>
           </div>
         )}
       </div>
-    </Field>
+    </Headless.Field>
   )
 }

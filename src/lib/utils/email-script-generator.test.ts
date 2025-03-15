@@ -10,7 +10,18 @@ import { parseEmailScript } from './email-script-parser'
 
 // Helper function to normalize scripts for comparison
 function normalizeScript(script: string): string {
-  return script.trim()
+  return script
+    .trim()
+    .split('\n')
+    .map((line) => {
+      const [component, ...attributeParts] = line.trim().split(' ')
+      if (!attributeParts.length) return line.trim()
+
+      const sortedAttributes = attributeParts.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+
+      return `${component} ${sortedAttributes.join(' ')}`
+    })
+    .join('\n')
 }
 
 // Helper function to normalize attributes
@@ -25,7 +36,7 @@ function removeIds<T>(obj: T): T {
     const newObj = { ...obj } as { [K in keyof T]: T[K] }
     delete (newObj as any).id
 
-    // Normalize attributes if they exist
+    // // Normalize attributes if they exist
     // if ('attributes' in newObj) {
     //   ;(newObj as any).attributes = normalizeAttributes((newObj as any).attributes)
     // }

@@ -77,30 +77,24 @@ const CredentialsForm = ({ register, redirectToInitialProject }: Props) => {
 
   return (
     <form className="flex flex-col gap-3" onSubmit={handleFormSubmit}>
-      {register && (
-        <div>
-          <Field>
+      <>
+        {register && (
+          <Field labelPosition="top" className="mb-4">
             <Label htmlFor="name" className="block text-sm font-medium leading-6 text-gray-900">
               Name
             </Label>
             <Input id="name" placeholder="Name" name="name" type="text" autoComplete="name" required />
           </Field>
-        </div>
-      )}
+        )}
 
-      <div>
-        <div>
-          <Field>
-            <Label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-              Email
-            </Label>
-            <Input id="email" placeholder="Email" name="email" type="email" autoComplete="email" required />
-          </Field>
-        </div>
-      </div>
+        <Field labelPosition="top" className="mb-4">
+          <Label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+            Email
+          </Label>
+          <Input id="email" placeholder="Email" name="email" type="email" autoComplete="email" required />
+        </Field>
 
-      <div>
-        <Field>
+        <Field labelPosition="top">
           <Label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
             Password
           </Label>
@@ -113,11 +107,8 @@ const CredentialsForm = ({ register, redirectToInitialProject }: Props) => {
             required
           />
         </Field>
-
-        <div className="mt-6 text-sm leading-6">
-          {!register && <Link href="/reset-password">Forgot password?</Link>}
-        </div>
-      </div>
+      </>
+      <div className="mt-6 text-sm leading-6">{!register && <Link href="/reset-password">Forgot password?</Link>}</div>
 
       {error && (
         <div className="border-l-4 border-yellow-400 bg-yellow-50 p-4">

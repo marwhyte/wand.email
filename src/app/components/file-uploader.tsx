@@ -12,12 +12,12 @@ const FileUploader = ({ onUpload }: FileUploaderProps) => {
   const opener = useOpener()
 
   return (
-    <div>
+    <>
       {opener.isOpen && <FileUploaderDialog onUpload={onUpload} opener={opener} />}
       <Button color="purple" onClick={opener.open}>
-        Choose a file
+        Browse
       </Button>
-    </div>
+    </>
   )
 }
 

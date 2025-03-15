@@ -18,28 +18,53 @@ export function Legend({ className, ...props }: { className?: string } & Omit<He
       {...props}
       className={clsx(
         className,
-        'text-base/6 font-semibold text-zinc-950 data-[disabled]:opacity-50 sm:text-sm/6 dark:text-white'
+        'text-base/6 font-semibold text-zinc-950 data-[disabled]:opacity-50 dark:text-white sm:text-sm/6'
       )}
     />
   )
 }
 
 export function FieldGroup({ className, ...props }: React.ComponentPropsWithoutRef<'div'>) {
-  return <div data-slot="control" {...props} className={clsx(className, 'space-y-8')} />
+  return (
+    <div
+      data-slot="control"
+      {...props}
+      className={clsx(
+        className,
+        'divide-y divide-zinc-200 dark:divide-zinc-800',
+        '[&>*]:py-4 [&>:first-child]:pt-0 [&>:last-child]:pb-0'
+      )}
+    />
+  )
 }
 
-export function Field({ className, ...props }: { className?: string } & Omit<Headless.FieldProps, 'className'>) {
+export function Field({
+  className,
+  labelPosition = 'side',
+  ...props
+}: {
+  className?: string
+  labelPosition?: 'side' | 'top'
+} & Omit<Headless.FieldProps, 'className'>) {
   return (
     <Headless.Field
       {...props}
       className={clsx(
         className,
-        '[&>[data-slot=label]+[data-slot=control]]:mt-1',
-        '[&>[data-slot=label]+[data-slot=description]]:mt-1',
-        '[&>[data-slot=description]+[data-slot=control]]:mt-1',
-        '[&>[data-slot=control]+[data-slot=description]]:mt-1',
-        '[&>[data-slot=control]+[data-slot=error]]:mt-1',
-        '[&>[data-slot=label]]:font-medium'
+        'grid grid-cols-1 gap-x-4',
+        labelPosition === 'side' && 'sm:grid-cols-[3fr_2fr]',
+        '[&>[data-slot=label]]:font-medium',
+        labelPosition === 'side' && '[&>[data-slot=label]]:sm:self-center',
+        labelPosition === 'side' &&
+          '[&:has([data-slot=label])>[data-slot=control]]:sm:w-full [&:has([data-slot=label])>[data-slot=control]]:sm:justify-self-end',
+        labelPosition === 'side' &&
+          '[&:has([data-slot=label])>[data-slot=control]]:sm:col-start-2 [&:not(:has([data-slot=label]))>[data-slot=control]]:col-span-full [&>[data-slot=control]]:col-span-1',
+        labelPosition === 'side' &&
+          '[&:has([data-slot=label])>[data-slot=description]]:sm:col-start-2 [&:not(:has([data-slot=label]))>[data-slot=description]]:col-span-full [&>[data-slot=description]]:col-span-1',
+        labelPosition === 'side' &&
+          '[&:has([data-slot=label])>[data-slot=error]]:sm:col-start-2 [&:not(:has([data-slot=label]))>[data-slot=error]]:col-span-full [&>[data-slot=error]]:col-span-1',
+        labelPosition === 'top' &&
+          '[&>[data-slot=control]]:col-span-full [&>[data-slot=description]]:col-span-full [&>[data-slot=error]]:col-span-full'
       )}
     />
   )
@@ -52,7 +77,7 @@ export function Label({ className, ...props }: { className?: string } & Omit<Hea
       {...props}
       className={clsx(
         className,
-        'select-none text-base/6 text-zinc-950 data-[disabled]:opacity-50 sm:text-sm/6 dark:text-white'
+        'select-none text-base/6 text-zinc-950 data-[disabled]:opacity-50 dark:text-white sm:text-sm/6'
       )}
     />
   )
@@ -68,7 +93,7 @@ export function Description({
       {...props}
       className={clsx(
         className,
-        'text-base/6 text-zinc-500 data-[disabled]:opacity-50 sm:text-sm/6 dark:text-zinc-400'
+        'text-base/6 text-zinc-500 data-[disabled]:opacity-50 dark:text-zinc-400 sm:text-sm/6'
       )}
     />
   )
@@ -82,7 +107,7 @@ export function ErrorMessage({
     <Headless.Description
       data-slot="error"
       {...props}
-      className={clsx(className, 'text-base/6 text-red-600 data-[disabled]:opacity-50 sm:text-sm/6 dark:text-red-500')}
+      className={clsx(className, 'text-base/6 text-red-600 data-[disabled]:opacity-50 dark:text-red-500 sm:text-sm/6')}
     />
   )
 }

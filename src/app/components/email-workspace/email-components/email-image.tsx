@@ -54,5 +54,26 @@ export default function EmailImage({ block, parentRow }: Props) {
 
   const attributes = getBlockAttributes(block, parentRow, false, company, email)
 
-  return <img {...attributes} />
+  // Extract align and style properties
+  // @ts-expect-error
+  const { align, style, ...imageAttributes } = attributes
+
+  // Extract padding-related styles for the div
+  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
+
+  // Create div style with padding properties
+  const divStyle = {
+    padding,
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
+  }
+
+  return (
+    // @ts-expect-error
+    <div align={align} style={divStyle}>
+      <img {...imageAttributes} style={restStyles} />
+    </div>
+  )
 }

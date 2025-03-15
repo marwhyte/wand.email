@@ -1,3 +1,4 @@
+import { generateSocialsProps, generateSurveyProps } from '@/lib/utils/attributes'
 import EmailButton from './email-components/email-button'
 import EmailDivider from './email-components/email-divider'
 import EmailHeading from './email-components/email-heading'
@@ -33,10 +34,34 @@ const RenderBlock = ({ block, parentRow }: Props) => {
     return <EmailDivider block={block} parentRow={parentRow} />
   }
   if (block.type === 'socials') {
-    return <EmailSocials block={block} parentRow={parentRow} />
+    const attributes = generateSocialsProps(block, parentRow)
+    return (
+      <div
+        style={{
+          paddingTop: attributes.style?.paddingTop,
+          paddingLeft: attributes.style?.paddingLeft,
+          paddingRight: attributes.style?.paddingRight,
+          paddingBottom: attributes.style?.paddingBottom,
+        }}
+      >
+        <EmailSocials block={block} parentRow={parentRow} />
+      </div>
+    )
   }
   if (block.type === 'survey') {
-    return <EmailSurvey block={block} parentRow={parentRow} />
+    const attributes = generateSurveyProps(block, parentRow)
+    return (
+      <div
+        style={{
+          paddingTop: attributes.style?.paddingTop,
+          paddingLeft: attributes.style?.paddingLeft,
+          paddingRight: attributes.style?.paddingRight,
+          paddingBottom: attributes.style?.paddingBottom,
+        }}
+      >
+        <EmailSurvey block={block} parentRow={parentRow} />
+      </div>
+    )
   }
 
   return null

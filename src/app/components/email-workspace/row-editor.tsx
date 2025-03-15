@@ -1,12 +1,13 @@
 import { Button } from '@/app/components/button'
 import { Checkbox } from '@/app/components/checkbox'
 import Disclosure, { DisclosureBody } from '@/app/components/disclosure'
-import { Field, Label } from '@/app/components/fieldset'
-import { Input } from '@/app/components/input'
+import { Field, FieldGroup, Label } from '@/app/components/fieldset'
+import { Input, NumberInput } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getRowAttributes } from '@/lib/utils/attributes'
+import { safeParseInt } from '@/lib/utils/misc'
 import { Bars3Icon, PlusIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuidv4 } from 'uuid'
@@ -194,28 +195,42 @@ export default function RowEditor({
 
   return (
     <div className="space-y-4">
-      <Disclosure title="Layout">
+      <Disclosure defaultOpen title="Layout">
         <DisclosureBody>
-          <div className="space-y-4">
+          <FieldGroup>
             <Field>
-              <div className="flex items-center gap-2">
+              <Label htmlFor="stackOnMobile">Stack columns on mobile</Label>
+              <div className="flex items-center justify-end">
                 <Checkbox
                   id="stackOnMobile"
                   checked={rowAttributes.stackOnMobile ?? false}
                   onChange={(e) => onRowAttributeChange({ stackOnMobile: e })}
                 />
-                <Label htmlFor="stackOnMobile">Stack columns on mobile</Label>
               </div>
             </Field>
+
             <Field>
-              <div className="flex items-center gap-2">
+              <Label htmlFor="hideOnMobile">Hide on mobile</Label>
+              <div className="flex justify-end">
                 <Checkbox
                   id="hideOnMobile"
                   checked={rowAttributes.hideOnMobile ?? false}
                   onChange={(e) => onRowAttributeChange({ hideOnMobile: e })}
                 />
-                <Label htmlFor="hideOnMobile">Hide on mobile</Label>
               </div>
+            </Field>
+
+            <Field>
+              <Label htmlFor="verticalAlign">Vertical Alignment</Label>
+              <Select
+                id="verticalAlign"
+                value={rowAttributes.verticalAlign || 'top'}
+                onChange={(e) => onRowAttributeChange({ verticalAlign: e.target.value as 'top' | 'middle' | 'bottom' })}
+              >
+                <option value="top">Top</option>
+                <option value="middle">Middle</option>
+                <option value="bottom">Bottom</option>
+              </Select>
             </Field>
             <Field>
               <Label htmlFor="columnSpacing">Column Spacing</Label>
@@ -249,43 +264,60 @@ export default function RowEditor({
                 handleRowPaddingChange(rowAttributes)
               }}
             />
-          </div>
+          </FieldGroup>
         </DisclosureBody>
       </Disclosure>
-      <Disclosure title="Borders">
+      <Disclosure defaultOpen title="Borders">
         <DisclosureBody>
-          <Field>
-            <Label>Row Border</Label>
-            <div className="flex items-center gap-2">
-              <Select
-                value={rowAttributes.borderStyle || 'solid'}
-                onChange={(e) => handleRowBorderChange('borderStyle', e.target.value)}
-              >
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
-              </Select>
-              <Input
-                type="number"
-                value={rowAttributes.borderWidth?.replace('px', '') || ''}
-                onChange={(e) => handleRowBorderChange('borderWidth', `${e.target.value}px`)}
-                placeholder="Width"
-              />
-              <div className="flex w-48">
+          <FieldGroup>
+            <Field labelPosition="top">
+              <Label>Border</Label>
+              <div className="flex gap-2">
+                <div className="w-[106px]">
+                  <Select
+                    value={row.attributes?.borderStyle || 'solid'}
+                    onChange={(e) =>
+                      handleRowBorderChange('borderStyle', e.target.value as 'solid' | 'dashed' | 'dotted')
+                    }
+                  >
+                    <option value="solid">Solid</option>
+                    <option value="dashed">Dashed</option>
+                    <option value="dotted">Dotted</option>
+                  </Select>
+                </div>
+                <NumberInput
+                  min={0}
+                  max={30}
+                  value={row.attributes?.borderWidth ? safeParseInt(row.attributes?.borderWidth.replace('px', '')) : 0}
+                  onChange={(value) => handleRowBorderChange('borderWidth', `${value}px`)}
+                />
+
                 <ColorInput
-                  value={rowAttributes.borderColor || ''}
+                  value={row.attributes?.borderColor || ''}
                   onChange={(e) => handleRowBorderChange('borderColor', e)}
                 />
               </div>
-            </div>
-          </Field>
+            </Field>
+
+            <Field>
+              <Label>Rounded Corners</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  type="number"
+                  value={rowAttributes.borderRadius?.replace('px', '') || ''}
+                  onChange={(e) => handleRowBorderChange('borderRadius', `${e.target.value}px`)}
+                />
+                <span className="text-sm text-gray-500">px</span>
+              </div>
+            </Field>
+          </FieldGroup>
         </DisclosureBody>
       </Disclosure>
 
-      <Disclosure title="Background">
+      <Disclosure defaultOpen title="Background">
         <DisclosureBody>
           <Field>
-            <Label>Row Background Color</Label>
+            <Label>Background Color</Label>
             <ColorInput
               value={rowAttributes.backgroundColor || ''}
               onChange={(e) => handleRowBackgroundColorChange(e)}

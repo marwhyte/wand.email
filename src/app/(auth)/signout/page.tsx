@@ -5,7 +5,9 @@ import { useEffect } from 'react'
 
 const Signout = () => {
   useEffect(() => {
-    doLogout()
+    doLogout().then(() => {
+      window.location.href = '/'
+    })
   }, [])
   return null
 }

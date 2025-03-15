@@ -28,7 +28,7 @@ export function Disclosure({
             <ChevronUpIcon className={clsx('h-5 w-5 text-zinc-500', open ? 'rotate-180 transform' : '')} />
           </Headless.DisclosureButton>
           <Headless.DisclosurePanel
-            className={clsx(className, '!mt-1 px-4 pb-2 pt-2 text-sm text-zinc-500', 'dark:text-zinc-400')}
+            className={clsx(className, '!mt-1 px-2 pb-2 pt-2 text-sm text-zinc-500', 'dark:text-zinc-400')}
           >
             {children}
           </Headless.DisclosurePanel>

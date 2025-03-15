@@ -9,16 +9,20 @@ type Props = {
 }
 
 const EmailSurvey = ({ block, parentRow }: Props) => {
+  const { color } = generateSurveyProps(block, parentRow)
+
   if (block.attributes.kind === 'yes-no') {
     return (
-      <Section {...generateSurveyProps(block, parentRow)}>
+      <Section>
         <Text
           style={{
-            marginBottom: '6px',
+            margin: 0,
+            paddingBottom: '6px',
             fontSize: '16px',
             fontWeight: 'bold',
             lineHeight: '24px',
-            color: 'rgb(55, 65, 81)',
+            color: color,
+            textAlign: 'center',
           }}
         >
           {block.attributes.question}
@@ -49,8 +53,17 @@ const EmailSurvey = ({ block, parentRow }: Props) => {
 
   if (block.attributes.kind === 'rating') {
     return (
-      <Section {...generateSurveyProps(block, parentRow)}>
-        <Text style={{ fontSize: '16px', lineHeight: '24px', color: 'rgb(55, 65, 81)' }}>
+      <Section>
+        <Text
+          style={{
+            fontSize: '16px',
+            lineHeight: '24px',
+            color: color,
+            margin: 0,
+            paddingBottom: '16px',
+            textAlign: 'center',
+          }}
+        >
           {block.attributes.question}
         </Text>
         <Row>
@@ -65,12 +78,12 @@ const EmailSurvey = ({ block, parentRow }: Props) => {
                           height: '38px',
                           width: '38px',
                           borderRadius: '8px',
-                          border: '1px solid rgb(79, 70, 229)',
+                          border: `1px solid ${color}`,
                           padding: '8px',
                           fontWeight: '600',
-                          color: 'rgb(79, 70, 229)',
+                          color: color,
                         }}
-                        href={block.attributes.links?.rating[number as 1 | 2 | 3 | 4 | 5]}
+                        href={block.attributes.links?.rating?.[number as 1 | 2 | 3 | 4 | 5] ?? '/'}
                       >
                         {number}
                       </Button>
