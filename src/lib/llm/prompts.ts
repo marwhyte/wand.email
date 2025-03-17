@@ -56,6 +56,12 @@ const templateStructureDefinition = `
   </EMAIL>
 </email_script_syntax>
 
+<email_state_format>
+When a user message includes an <email_state> tag, it contains the current state of the email being edited. 
+You will only see email states for the two most recent user messages, allowing you to understand recent changes.
+Use this information to provide context-aware responses about the email's current state and recent modifications.
+</email_state_format>
+
 <component_library>
 ${generateComponentLibraryDocs()}
 </component_library>
@@ -144,19 +150,19 @@ ${templateStructureDefinition}
         ROW type=gallery {
           COLUMN {
             IMAGE src="pexels:laptop" alt="Laptop"
-            TEXT content=<p>Up to 70% off laptops</p> fontSize=14 textAlign=center
+            TEXT content=<p>Up to 70% off laptops</p>
           }
           COLUMN {
             IMAGE src="pexels:ipad tablet" alt="iPad"
-            TEXT content=<p>iPads $100 and up</p> fontSize=14 textAlign=center
+            TEXT content=<p>iPads $100 and up</p>
           }
           COLUMN {
             IMAGE src="pexels:headphones" alt="Headphones"
-            TEXT content=<p>Up to 70% off audio</p> fontSize=14 textAlign=center
+            TEXT content=<p>Up to 70% off audio</p>
           }
           COLUMN {
             IMAGE src="pexels:smartphone" alt="Phone"
-            TEXT content=<p>Phones under $500</p> fontSize=14 textAlign=center
+            TEXT content=<p>Phones under $500</p>
           }
         }
 

@@ -32,8 +32,8 @@ type Props = {
 
 export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()
-  const { email } = useEmailStore()
-  const { title, company } = useChatStore()
+  const { email, setEmail } = useEmailStore()
+  const { title, setTitle, company } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
@@ -89,7 +89,14 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
           chatStarted ? 'border-b border-gray-200' : ''
         )}
       >
-        <Link href="/" className="-m-1.5 p-1.5">
+        <Link
+          onClick={() => {
+            setEmail(undefined)
+            setTitle(undefined)
+          }}
+          href="/"
+          className="-m-1.5 p-1.5"
+        >
           <span className="sr-only">SentSwiftly</span>
           <Logo className="z-100" text={false} />
         </Link>

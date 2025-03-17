@@ -1,6 +1,7 @@
 import { CheckCircleIcon, ExclamationTriangleIcon, InformationCircleIcon, XCircleIcon } from '@heroicons/react/20/solid'
 import { ReactNode } from 'react'
 import { TextButton } from './button'
+import { Text } from './text'
 
 type AlertStatus = 'error' | 'success' | 'info' | 'warning'
 
@@ -49,12 +50,12 @@ export default function AlertBox({ children, status, action }: AlertBoxProps) {
 
   return (
     <div className={`rounded-md ${bgColor} border-l-4 p-4 ${borderColor}`}>
-      <div className="flex">
+      <div className="flex items-center">
         <div className="flex-shrink-0">
           <Icon aria-hidden="true" className={`h-5 w-5 ${iconColor}`} />
         </div>
         <div className="ml-3 flex-grow">
-          <p className={`text-sm ${textColor}`}>{children}</p>
+          <Text className={`text-sm ${textColor}`}>{children}</Text>
         </div>
         {action && (
           <div className="ml-auto pl-3">

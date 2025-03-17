@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from 'react'
 
 import { deleteChat } from '@/lib/database/queries/chats'
 import { Chat } from '@/lib/database/types'
+import { useChatStore } from '@/lib/stores/chatStore'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { fetcher, truncate } from '@/lib/utils/misc'
 import { SparklesIcon, StarIcon } from '@heroicons/react/24/solid'
@@ -18,7 +20,6 @@ import { usePlan } from '../payment/plan-provider'
 import { Text } from '../text'
 import { binDates } from './date-binning'
 import { HistoryItem } from './history-item'
-
 const menuVariants = {
   closed: {
     opacity: 0,
@@ -43,6 +44,8 @@ const menuVariants = {
 type DialogContent = { type: 'delete'; item: Chat } | null
 
 export function Menu() {
+  const { setEmail } = useEmailStore()
+  const { setTitle } = useChatStore()
   const menuRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const [dialogContent, setDialogContent] = useState<DialogContent>(null)
@@ -123,6 +126,10 @@ export function Menu() {
       <div className="flex h-full w-full flex-1 flex-col overflow-hidden">
         <div className="p-4">
           <Link
+            onClick={() => {
+              setEmail(undefined)
+              setTitle(undefined)
+            }}
             href="/"
             className="flex items-center gap-2 rounded-md bg-blue-50 p-2 font-bold text-blue-500 transition-colors hover:bg-blue-100"
           >

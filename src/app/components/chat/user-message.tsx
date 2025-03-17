@@ -14,7 +14,7 @@ function sanitizeUserMessage(content: string) {
   const withoutModifications = content.replace(modificationsRegex, '').trim()
 
   // Remove content wrapped in <email_changes> tags
-  const withoutEmailChanges = withoutModifications.replace(/<email_changes>[\s\S]*?<\/email_changes>/g, '')
+  const withoutEmailChanges = withoutModifications.replace(/<email_state>[\s\S]*?<\/email_state>/g, '')
 
   return withoutEmailChanges
 }

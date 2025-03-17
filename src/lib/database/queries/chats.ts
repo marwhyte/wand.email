@@ -2,8 +2,8 @@
 
 import { Email } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
+import { getMessageId } from '@/lib/utils/misc'
 import type { Message } from 'ai'
-import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db'
 
 export async function createChat({
@@ -62,7 +62,7 @@ export async function createChat({
   })
 }
 
-export async function updateMessage(id: string, chatId: string, updates: { content?: string }) {
+export async function updateMessage(id: string, chatId: string, updates: { content?: string; email?: Email }) {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
@@ -76,6 +76,39 @@ export async function updateMessage(id: string, chatId: string, updates: { conte
       .where('chat_id', '=', chatId)
       .execute()
   }
+
+  if (updates.email !== undefined) {
+    await db
+      .updateTable('messages')
+      .set({ email: updates.email })
+      .where('id', '=', id)
+      .where('chat_id', '=', chatId)
+      .execute()
+  }
+}
+
+export async function deleteMessagesAfterId(id: string, chatId: string) {
+  // Retrieve the created_at timestamp of the message with the given id
+  const message = await db
+    .selectFrom('messages')
+    .select('created_at')
+    .where('id', '=', id)
+    .where('chat_id', '=', chatId)
+    .executeTakeFirst()
+
+  if (!message) {
+    throw new Error('Message not found')
+  }
+
+  // Delete messages created after the retrieved timestamp
+  await db.deleteFrom('messages').where('created_at', '>', message.created_at).where('chat_id', '=', chatId).execute()
+
+  return await db
+    .selectFrom('messages')
+    .selectAll()
+    .where('chat_id', '=', chatId)
+    .orderBy('created_at', 'asc')
+    .execute()
 }
 
 export async function updateChat(
@@ -128,12 +161,14 @@ export async function updateChat(
         // Get existing messages to preserve created_at for existing messages
         const existingMessages = await trx
           .selectFrom('messages')
-          .select(['id', 'created_at'])
+          .select(['id', 'created_at', 'email'])
           .where('chat_id', '=', id)
           .execute()
 
         // Create a map of existing message IDs to their created_at timestamps
-        const existingMessageMap = new Map(existingMessages.map((msg) => [msg.id, msg.created_at]))
+        const existingMessageMap = new Map(
+          existingMessages.map((msg) => [msg.id, { created_at: msg.created_at, email: msg.email }])
+        )
 
         // Delete existing messages
         await trx.deleteFrom('messages').where('chat_id', '=', id).execute()
@@ -151,7 +186,7 @@ export async function updateChat(
           let created_at: Date = new Date()
           if (existingMessageMap.get(msg.id)) {
             // Use existing timestamp from database
-            created_at = existingMessageMap.get(msg.id) as Date
+            created_at = existingMessageMap.get(msg.id)?.created_at as Date
           } else if (msg.createdAt) {
             // Convert provided timestamp to a Date object
             created_at = new Date(msg.createdAt)
@@ -160,10 +195,12 @@ export async function updateChat(
             created_at = new Date()
           }
 
+          const email = existingMessageMap.get(msg.id)?.email ?? null
+
           // Generate a UUID if the message ID doesn't match UUID format
           // This handles IDs like "msg-7WwZKPfuDXRErECZ4uIXvpLw"
-          const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(msg.id || '')
-          const messageId = isValidUuid ? msg.id : uuidv4()
+
+          const messageId = getMessageId(msg)
 
           return {
             chat_id: id,
@@ -172,6 +209,7 @@ export async function updateChat(
             sequence: index,
             id: messageId,
             created_at,
+            email,
           }
         })
 
@@ -280,6 +318,7 @@ export async function getChatWithMessages(id: string) {
       sequence: msg.sequence,
       created_at: msg.created_at,
       content: msg.content,
+      email: msg.email,
     })),
   }
 

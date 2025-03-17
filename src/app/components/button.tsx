@@ -108,8 +108,8 @@ const styles = {
       '[--btn-icon:theme(colors.amber.600)]',
     ],
     yellow: [
-      'text-yellow-950 [--btn-hover-overlay:theme(colors.white/25%)] [--btn-bg:theme(colors.yellow.300)] [--btn-border:theme(colors.yellow.400/80%)]',
-      '[--btn-icon:theme(colors.yellow.600)] data-[active]:[--btn-icon:theme(colors.yellow.700)] data-[hover]:[--btn-icon:theme(colors.yellow.700)]',
+      'text-yellow-900 [--btn-hover-overlay:theme(colors.white/25%)] [--btn-bg:theme(colors.yellow.200)] [--btn-border:theme(colors.yellow.300/80%)]',
+      '[--btn-icon:theme(colors.yellow.500)] data-[active]:[--btn-icon:theme(colors.yellow.600)] data-[hover]:[--btn-icon:theme(colors.yellow.600)]',
     ],
     lime: [
       'text-lime-950 [--btn-hover-overlay:theme(colors.white/25%)] [--btn-bg:theme(colors.lime.300)] [--btn-border:theme(colors.lime.400/80%)]',
@@ -174,6 +174,8 @@ type ButtonProps = (
   tooltipTransform?: string
   tooltipPosition?: 'top' | 'bottom' | 'left' | 'right'
   disabled?: boolean
+  size?: 'small'
+  loading?: boolean
 } & (Omit<Headless.ButtonProps, 'className'> | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>)
 
 export const Button = forwardRef(function Button(
@@ -187,6 +189,8 @@ export const Button = forwardRef(function Button(
     tooltipTransform,
     tooltipPosition = 'top',
     disabled,
+    size,
+    loading,
     ...props
   }: ButtonProps,
   ref: React.ForwardedRef<HTMLElement>
@@ -196,7 +200,9 @@ export const Button = forwardRef(function Button(
     styles.base,
     outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
     tooltip && 'group',
-    disabled && 'cursor-not-allowed opacity-50'
+    disabled && 'cursor-not-allowed opacity-50',
+    size === 'small' && '!px-2 !py-1 !text-xs',
+    loading && 'relative'
   )
 
   const getTooltipPositionClasses = (position: string) => {
@@ -216,10 +222,15 @@ export const Button = forwardRef(function Button(
 
   const content = (
     <>
+      {loading && (
+        <span className="absolute inset-0 flex items-center justify-center">
+          <span className="loader" />
+        </span>
+      )}
       <TouchTarget>{children}</TouchTarget>
       {tooltip && (
         <span
-          className={`pointer-events-none absolute ${getTooltipPositionClasses(tooltipPosition)} ${tooltipPosition === 'left' || tooltipPosition === 'right' ? '' : tooltipTransform || '-translate-x-1/2'} whitespace-nowrap rounded bg-gray-800 px-2 py-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100`}
+          className={`pointer-events-none absolute z-100 text-xs ${getTooltipPositionClasses(tooltipPosition)} ${tooltipPosition === 'left' || tooltipPosition === 'right' ? '' : tooltipTransform || '-translate-x-1/2'} whitespace-nowrap rounded bg-gray-800 px-1 py-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100`}
         >
           {tooltip}
         </span>
@@ -232,7 +243,7 @@ export const Button = forwardRef(function Button(
       {content}
     </Link>
   ) : (
-    <Headless.Button {...props} className={clsx(classes, 'cursor-pointer')} ref={ref} disabled={disabled}>
+    <Headless.Button {...props} className={clsx(classes, 'cursor-pointer')} ref={ref} disabled={disabled || loading}>
       {content}
     </Headless.Button>
   )
@@ -259,4 +270,29 @@ export function TextButton({ children, ...props }: React.ComponentPropsWithoutRe
       {children}
     </Headless.Button>
   )
+}
+
+// Add spinner styles
+const spinnerStyles = `
+  .loader {
+    border: 2px solid transparent;
+    border-top-color: currentColor;
+    border-radius: 50%;
+    width: 1rem;
+    height: 1rem;
+    animation: spin 0.75s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+`
+
+// Inject spinner styles into the document
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style')
+  style.textContent = spinnerStyles
+  document.head.append(style)
 }

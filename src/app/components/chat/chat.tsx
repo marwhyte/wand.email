@@ -1,6 +1,6 @@
 'use client'
 
-import { generateChangeLog, generateTitleFromUserMessage } from '@/app/(chat)/actions'
+import { generateTitleFromUserMessage } from '@/app/(chat)/actions'
 import { usePlan } from '@/app/components/payment/plan-provider'
 import { useOpener, usePromptEnhancer, useSnapScroll } from '@/app/hooks'
 import { useChatHistory } from '@/app/hooks/useChatHistory'
@@ -8,7 +8,6 @@ import { useMessageParser } from '@/app/hooks/useMessageParser'
 import { updateChat } from '@/lib/database/queries/chats'
 import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat as ChatType, Company } from '@/lib/database/types'
-import { getSystemPrompt } from '@/lib/llm/prompts'
 import { chatStore } from '@/lib/stores/chat'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -86,31 +85,33 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
   const { setTitle, setCompany, company, title } = useChatStore()
   useChatHistory({ chat: chat, chatId: id, company: chatCompany })
 
-  console.log(getSystemPrompt())
-
   // Chat state and handlers
-  const { messages, status, input, handleInputChange, setInput, stop, append, reload, handleSubmit, setMessages } =
-    useChat({
+  const { messages, status, input, handleInputChange, setInput, stop, append } = useChat({
+    id,
+    experimental_throttle: 100,
+    sendExtraMessageFields: true,
+    generateId: () => {
+      return uuidv4()
+    },
+    body: {
       id,
-      experimental_throttle: 100,
-      sendExtraMessageFields: true,
-      generateId: uuidv4,
-      body: {
-        id,
-        companyName: company?.name,
-        companyId: company?.id,
-      },
-      onFinish: (message: Message) => {
-        logger.debug('Finished streaming')
-        mutate('/api/history')
-      },
-      initialMessages,
-    })
+      companyName: company?.name,
+      companyId: company?.id,
+    },
+    onFinish: (message: Message) => {
+      logger.debug('Finished streaming')
+      mutate('/api/history')
+    },
+    initialMessages,
+  })
+
+  console.log(messages)
 
   const latestAssistantMessage = messages.findLast((m) => m.role === 'assistant')
   useMessageParser(latestAssistantMessage ?? { role: 'assistant', content: '', id: '' })
 
-  const isLoading = status === 'streaming' || status === 'submitted'
+  const [generatingChangeLog, setGeneratingChangeLog] = useState(false)
+  const isLoading = status === 'streaming' || status === 'submitted' || generatingChangeLog
 
   // UI and animation refs/state
   const textareaRef = useRef<HTMLTextAreaElement>(null) as React.RefObject<HTMLTextAreaElement>
@@ -149,7 +150,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
   const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
 
   // Add email store access
-  const { email, previousEmail } = useEmailStore()
+  const { email } = useEmailStore()
 
   renderLogger.trace('Chat')
 
@@ -243,41 +244,20 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
     window.history.replaceState({}, '', `/chat/${id}`)
 
-    // Check if we have email changes to include
     let messageContent = _input
 
-    if (email && previousEmail) {
-      // Compare using the script representation instead of JSON.stringify
-      const currentScript = generateEmailScript(email)
-      const previousScript = generateEmailScript(previousEmail)
+    setInput('')
+    resetEnhancer()
+    textareaRef.current?.blur()
 
-      if (currentScript !== previousScript) {
-        console.log('this guy')
-        try {
-          // Generate change log between previous and current email
-          const changeLog = await generateChangeLog(previousEmail, email)
-
-          if (changeLog) {
-            // Prepend the change log to the user message
-            messageContent = `<email_changes>\n${changeLog}\n</email_changes>\n\n${_input}`
-          }
-
-          console.log('messageContent', messageContent)
-        } catch (error) {
-          console.error('Failed to generate email change log:', error)
-          // Continue with just the user message if change log generation fails
-        }
-      }
+    if (email) {
+      const emailScript = generateEmailScript(email)
+      // Include the current email state with the message
+      messageContent = `<email_state>\n${emailScript}\n</email_state>\n\n${_input}`
     }
 
-    // Append the message with change log if applicable
+    // Append the message
     append({ role: 'user', content: messageContent })
-
-    setInput('')
-
-    resetEnhancer()
-
-    textareaRef.current?.blur()
 
     if (!title) {
       const title = await generateTitleFromUserMessage({

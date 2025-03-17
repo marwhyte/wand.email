@@ -1,10 +1,8 @@
-import type { Message } from 'ai'
 import { create } from 'zustand'
 import { Company } from '../database/types'
 
 interface ChatStore {
   chatId: string | undefined
-  messages: Message[]
   company: Company | null
   title: string | undefined
   setChatId: (id: string | undefined) => void
@@ -15,7 +13,6 @@ interface ChatStore {
 export const useChatStore = create<ChatStore>((set) => ({
   chatId: undefined,
   company: null,
-  messages: [],
   title: undefined,
   setChatId: (id) => set({ chatId: id }),
   setTitle: (title) => set({ title }),

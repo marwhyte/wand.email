@@ -59,6 +59,23 @@ export function sortBySequence<T extends ObjectWithSequence>(items: T[]): T[] {
   return items.sort((a, b) => a.sequence - b.sequence)
 }
 
+export function getMessageId(message: Message) {
+  const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(message.id || '')
+
+  if (isValidUuid) {
+    return message.id
+  }
+
+  // @ts-ignore
+  if (message.revisionId) {
+    // @ts-ignore
+    // @ts-ignore
+    return message.revisionId
+  }
+
+  return generateUUID()
+}
+
 export function getPhotoUrl(name: string, template: string) {
   return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${template}/${name}`
 }

@@ -1,22 +1,117 @@
+'use client'
+
+import { useOpener } from '@/app/hooks'
+import { deleteMessagesAfterId, updateChat } from '@/lib/database/queries/chats'
+import { useChatStore } from '@/lib/stores/chatStore'
+import { useEmailStore } from '@/lib/stores/emailStore'
+import { parseEmailScript } from '@/lib/utils/email-script-parser'
+import { useChat } from '@ai-sdk/react'
+import type { Message } from 'ai'
+import { useRouter } from 'next/navigation'
 import React from 'react'
+import { Button } from '../button'
+import { RevertDialog } from '../dialogs/revert-dialog'
+import { blankTemplate } from '../email-workspace/templates/blank-template'
+import { Email } from '../email-workspace/types'
 
 interface EmailProcessingStatusProps {
   isComplete: boolean
-  version: number
   hasContentBefore?: boolean
   hasContentAfter?: boolean
+  message: Message
+  messages: Message[]
+  disabled?: boolean
 }
 
 export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
   isComplete,
   hasContentBefore = false,
   hasContentAfter = false,
+  message,
+  messages,
+  disabled,
 }) => {
+  const revertOpener = useOpener()
+  const { email, setEmail } = useEmailStore()
+  const { chatId } = useChatStore()
+
+  const { setMessages } = useChat({
+    id: chatId,
+  })
+
+  const router = useRouter()
+
+  // Find the index of the current message
+  const currentMessageIndex = messages.findIndex((msg) => msg.id === message.id)
+
+  // Count email versions before this message
+  const version = messages
+    .slice(0, currentMessageIndex) // Only look at messages before the current one
+    .filter((msg) => msg.role === 'assistant' && msg.content.includes('<EMAIL')).length
+
   // Determine margin classes based on content before/after
-  const marginClasses = `${hasContentBefore ? 'mt-4' : ''} ${hasContentAfter ? 'mb-4' : ''} max-w-sm rounded-lg border border-gray-200 bg-white px-2 py-4 shadow-sm`
+  const marginClasses = `${hasContentBefore ? 'mt-4' : ''} ${hasContentAfter ? 'mb-4' : ''} max-w-sm rounded-lg border border-gray-200 bg-white p-3 shadow-sm`
+
+  // Count total email versions for comparison
+  const totalEmailVersions = messages.filter((msg) => msg.role === 'assistant' && msg.content.includes('<EMAIL')).length
+
+  // Determine if the button should be disabled and its label
+  const isMostRecentVersion = version === totalEmailVersions - 1
+  const isOnlyAssistantMessage =
+    messages.filter((msg) => msg.role === 'assistant' && msg.content.includes('<EMAIL')).length === 1
+  const buttonLabel = isMostRecentVersion ? 'Undo' : 'Restore'
+  const buttonDisabled = isOnlyAssistantMessage || disabled
+  const buttonTooltip = isOnlyAssistantMessage ? 'Nothing to restore' : undefined
+
+  const handleRevert = async () => {
+    const revertedMessage = isMostRecentVersion
+      ? messages
+          .slice(0, currentMessageIndex)
+          .reverse()
+          .filter((msg) => msg.role === 'assistant' && msg.content.includes('<EMAIL'))[0]
+      : message
+
+    if (revertedMessage) {
+      const emailRegex = /<EMAIL\s+[^>]*>([\s\S]*?)<\/EMAIL>/i
+      const emailMatch = revertedMessage.content.match(emailRegex)
+
+      if (emailMatch && chatId) {
+        const emailString = emailMatch[1]
+        const emailObject: Email = {
+          ...(email || blankTemplate()),
+          rows: parseEmailScript(emailString),
+        }
+        updateChat(chatId, {
+          email: emailObject,
+        })
+          .then(() => {
+            deleteMessagesAfterId(revertedMessage.id, chatId).then((messages) => {
+              setEmail(emailObject)
+              setMessages(messages)
+            })
+          })
+          .catch((error) => {
+            console.error('Error processing things:', error)
+          })
+      }
+    }
+  }
 
   return (
     <div className={marginClasses}>
+      <div className="flex items-center justify-between pb-3 pl-1">
+        <span className="text-xs font-medium text-gray-900">Version {version + 1}</span>
+        <Button
+          onClick={revertOpener.open}
+          size="small"
+          outline
+          disabled={buttonDisabled}
+          tooltip={buttonTooltip}
+          tooltipTransform="-top-9 -left-14"
+        >
+          {buttonLabel}
+        </Button>
+      </div>
       <div className="flex items-center">
         {isComplete ? (
           <svg
@@ -53,6 +148,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
           {isComplete ? 'Applied changes successfully' : 'Applying changes...'}
         </span>
       </div>
+      <RevertDialog isOpen={revertOpener.isOpen} onClose={revertOpener.close} onConfirm={handleRevert} />
     </div>
   )
 }

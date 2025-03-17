@@ -1,5 +1,4 @@
 'use client'
-
 import { AnimatePresence, motion } from 'framer-motion'
 
 type Props = {
@@ -15,7 +14,9 @@ export function BackgroundGradients({ inputDisabled }: Props) {
   }
 
   // Use a single condition that persists the gradient
-  const showGradient = inputDisabled
+  const showGradient = !inputDisabled
+
+  return
 
   return (
     <AnimatePresence initial={false}>
@@ -23,7 +24,7 @@ export function BackgroundGradients({ inputDisabled }: Props) {
         <>
           <motion.div
             variants={fadeVariants}
-            initial={inputDisabled ? 'animate' : 'initial'}
+            initial={!inputDisabled ? 'animate' : 'initial'}
             animate="animate"
             exit="exit"
             transition={{ duration: 0.5 }}

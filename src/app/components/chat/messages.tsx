@@ -20,8 +20,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const { id, isStreaming = false, messages = [] } = props
   const { data } = useSession()
 
-  console.log(messages)
-
   return (
     <div id={id} ref={ref} className={props.className + ' w-full'}>
       {messages.length > 0
@@ -30,9 +28,6 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             const isUserMessage = role === 'user'
             const isFirst = index === 0
             const isLast = index === messages.length - 1
-
-            // Calculate version by counting previous messages containing "<EMAIL"
-            const version = messages.slice(0, index).filter((msg) => msg.content.includes('<EMAIL')).length
 
             return (
               <div key={index} className="space-y-2">
@@ -70,7 +65,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                     {isUserMessage ? (
                       <UserMessage content={content} />
                     ) : (
-                      <AssistantMessage content={content} version={version} />
+                      <AssistantMessage content={content} message={message} messages={messages} />
                     )}
                   </div>
                 </div>

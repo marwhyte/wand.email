@@ -1,12 +1,14 @@
 import { EmailProcessingStatus } from '@/app/components/chat/email-processing-status'
+import type { Message } from 'ai'
 import { memo } from 'react'
 
 interface AssistantMessageProps {
   content: string
-  version: number
+  message: Message
+  messages: Message[]
 }
 
-export const AssistantMessage = memo(({ content, version }: AssistantMessageProps) => {
+export const AssistantMessage = memo(({ content, message, messages }: AssistantMessageProps) => {
   // Remove triple backticks wrapping content if they exist
   // Also handle partial backticks at the beginning during streaming
   const cleanedContent = content.replace(/^```(?:.*?)\n([\s\S]*?)```$/m, '$1').replace(/^`{1,3}(?:.*?)(?:\n|$)/, '') // Remove partial backticks at the beginning
@@ -30,9 +32,11 @@ export const AssistantMessage = memo(({ content, version }: AssistantMessageProp
       {beforeEmail}
       <EmailProcessingStatus
         isComplete={hasEmailEnd}
-        version={version}
         hasContentBefore={!!beforeEmail && beforeEmail.trim() !== ''}
         hasContentAfter={hasEmailEnd && !!textAfterEnd && textAfterEnd.trim() !== ''}
+        message={message}
+        messages={messages}
+        disabled={!hasEmailEnd}
       />
       {hasEmailEnd && textAfterEnd}
     </div>

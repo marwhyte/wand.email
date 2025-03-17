@@ -123,6 +123,7 @@ export interface MessageTable {
   content: string
   created_at: Date
   sequence: number
+  email: Email | null
 }
 
 export type Message = Omit<MessageTable, 'id'> & { id: string }
