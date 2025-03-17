@@ -131,7 +131,7 @@ export const NumberInput = forwardRef(function NumberInput(
   } & Omit<Headless.InputProps, 'className' | 'type' | 'onChange' | 'value'>,
   ref: React.ForwardedRef<HTMLInputElement>
 ) {
-  const inputId = id || `number-input-${React.useId()}`
+  const inputId = `number-input-${React.useId()}`
   const [inputValue, setInputValue] = React.useState(value?.toString() || '')
 
   React.useEffect(() => {

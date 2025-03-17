@@ -13,7 +13,7 @@ export function Footer() {
       <SocialIcons />
 
       <span>•</span>
-      <Link href="/help" className="hover:text-gray-900">
+      <Link href="mailto:support@sentswiftly.com" className="hover:text-gray-900">
         Help Center
       </Link>
       <span>•</span>
