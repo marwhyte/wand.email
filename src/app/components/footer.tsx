@@ -1,8 +1,13 @@
 'use client'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import Link from 'next/link'
 import SocialIcons from './social-icons'
 
 export function Footer() {
+  const { email } = useEmailStore()
+
+  if (email) return
+
   return (
     <footer className="flex items-center justify-end gap-4 px-4 py-4 text-sm text-gray-600">
       <SocialIcons />

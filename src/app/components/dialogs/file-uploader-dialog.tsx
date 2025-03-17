@@ -29,8 +29,6 @@ export default function FileUploaderDialog({ opener, onUpload }: Props) {
   const [fileToDelete, setFileToDelete] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  console.log('data', data, isLoading)
-
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return

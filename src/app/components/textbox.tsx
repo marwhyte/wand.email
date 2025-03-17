@@ -15,9 +15,16 @@ type Props = {
   onChange: (value: string) => void
   hideToolbar?: boolean
   preventNewlines?: boolean
+  autofocus?: boolean
 }
 
-export default function Textbox({ value, onChange, hideToolbar = false, preventNewlines = false }: Props) {
+export default function Textbox({
+  value,
+  onChange,
+  hideToolbar = false,
+  preventNewlines = false,
+  autofocus = false,
+}: Props) {
   const [linkUrl, setLinkUrl] = useState('')
   const { email } = useEmailStore()
   const [showLinkInput, setShowLinkInput] = useState(false)
@@ -59,6 +66,7 @@ export default function Textbox({ value, onChange, hideToolbar = false, preventN
         : undefined,
     },
     immediatelyRender: false,
+    autofocus: autofocus,
     extensions: [
       StarterKit,
       Underline,
@@ -97,6 +105,11 @@ export default function Textbox({ value, onChange, hideToolbar = false, preventN
       const html = editor.getHTML()
       const cleanedHtml = html.replace(/^<p>(.*)<\/p>$/, '$1')
       onChange(cleanedHtml)
+    },
+    onCreate: ({ editor }) => {
+      if (autofocus) {
+        editor.commands.focus('end') // Move cursor to the end
+      }
     },
   })
 
@@ -251,6 +264,7 @@ export default function Textbox({ value, onChange, hideToolbar = false, preventN
         )}
 
         <EditorContent
+          autoFocus
           editor={editor}
           className="max-w-none p-2 focus-visible:outline-none [&_a:hover]:text-blue-800 [&_a]:text-blue-600"
         />

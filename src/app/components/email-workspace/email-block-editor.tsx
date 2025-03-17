@@ -88,6 +88,15 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
     }
   }, [block])
 
+  const contentPadding = useMemo(() => {
+    return {
+      top: String(processedAttributes.style?.marginTop) ?? '0px',
+      right: String(processedAttributes.style?.marginRight) ?? '0px',
+      bottom: String(processedAttributes.style?.marginBottom) ?? '0px',
+      left: String(processedAttributes.style?.marginLeft) ?? '0px',
+    }
+  }, [block])
+
   const optionsForItem = () => {
     switch (block.type) {
       case 'divider':
@@ -125,6 +134,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
     <div className="flex flex-col gap-4">
       {options.includes(Options.TEXT) && 'content' in block.attributes && (
         <Textbox
+          autofocus
           preventNewlines={block.type !== 'text'}
           hideToolbar={block.type === 'link' || block.type === 'button'}
           key={`textbox-${block.id}`}
@@ -373,7 +383,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         <Disclosure title={'Padding'} defaultOpen>
           <FieldGroup>
             <PaddingForm
-              label={block.type === 'button' ? 'Content Padding' : 'Padding'}
+              label="Padding"
               padding={blockPadding}
               onChange={(values: Partial<PaddingValues>) => {
                 const rowAttributes: Partial<RowBlockAttributes> = {
@@ -388,19 +398,14 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
             />
             {block.type === 'button' && (
               <PaddingForm
-                label="Padding"
-                padding={{
-                  top: String(processedAttributes.style?.marginTop) ?? '0px',
-                  right: String(processedAttributes.style?.marginRight) ?? '0px',
-                  bottom: String(processedAttributes.style?.marginBottom) ?? '0px',
-                  left: String(processedAttributes.style?.marginLeft) ?? '0px',
-                }}
+                label="Content Padding"
+                padding={contentPadding}
                 onChange={(values: Partial<PaddingValues>) => {
                   const rowAttributes: Partial<ButtonBlockAttributes> = {
-                    marginTop: values.top,
-                    marginRight: values.right,
-                    marginBottom: values.bottom,
-                    marginLeft: values.left,
+                    contentPaddingTop: values.top,
+                    contentPaddingRight: values.right,
+                    contentPaddingBottom: values.bottom,
+                    contentPaddingLeft: values.left,
                   }
                   onChange(rowAttributes)
                 }}

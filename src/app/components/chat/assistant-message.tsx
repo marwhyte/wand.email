@@ -1,17 +1,22 @@
-import { CheckCircleIcon } from '@heroicons/react/24/solid'
+import { EmailProcessingStatus } from '@/app/components/chat/email-processing-status'
 import { memo } from 'react'
 
 interface AssistantMessageProps {
   content: string
+  version: number
 }
 
-export const AssistantMessage = memo(({ content }: AssistantMessageProps) => {
-  // Split content at first EMAIL tag
-  const [beforeEmail, afterEmail] = content.split(/<EMAIL\s+[^>]*name=["'][^"']*["'][^>]*>/)
+export const AssistantMessage = memo(({ content, version }: AssistantMessageProps) => {
+  // Remove triple backticks wrapping content if they exist
+  // Also handle partial backticks at the beginning during streaming
+  const cleanedContent = content.replace(/^```(?:.*?)\n([\s\S]*?)```$/m, '$1').replace(/^`{1,3}(?:.*?)(?:\n|$)/, '') // Remove partial backticks at the beginning
+
+  // Split content at first EMAIL tag - updated regex to not require name attribute
+  const [beforeEmail, afterEmail] = cleanedContent.split(/<EMAIL\s*[^>]*>/)
 
   // If no EMAIL tag found, show full content
   if (!afterEmail) {
-    return <div className="w-full overflow-hidden">{content}</div>
+    return <div className="w-full overflow-hidden">{cleanedContent}</div>
   }
 
   // Check if there's a closing tag
@@ -23,24 +28,12 @@ export const AssistantMessage = memo(({ content }: AssistantMessageProps) => {
   return (
     <div className="w-full overflow-hidden">
       {beforeEmail}
-      <div className="my-2 rounded-lg bg-blue-50 p-4">
-        <div className="flex flex-col items-center justify-center gap-2">
-          {hasEmailEnd ? (
-            <>
-              <CheckCircleIcon className="h-6 w-6 text-green-500" />
-              <span className="text-sm font-medium text-blue-600">Email changes applied successfully</span>
-            </>
-          ) : (
-            <>
-              <div className="relative h-6 w-6">
-                <div className="absolute inset-0 rounded-full border-2 border-blue-100" />
-                <div className="absolute inset-0 rounded-full border-2 border-blue-500 border-t-transparent" />
-              </div>
-              <div className="text-sm font-medium text-blue-600">Applying email changes...</div>
-            </>
-          )}
-        </div>
-      </div>
+      <EmailProcessingStatus
+        isComplete={hasEmailEnd}
+        version={version}
+        hasContentBefore={!!beforeEmail && beforeEmail.trim() !== ''}
+        hasContentAfter={hasEmailEnd && !!textAfterEnd && textAfterEnd.trim() !== ''}
+      />
       {hasEmailEnd && textAfterEnd}
     </div>
   )

@@ -20,8 +20,18 @@ export default function EmailButton({ block, parentRow }: Props) {
   // @ts-expect-error
   const { align, style, ...buttonPropsWithoutAlignAndStyle } = buttonProps
 
-  // Extract padding-related styles for the div
-  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
+  const {
+    padding,
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
+    marginTop,
+    marginRight,
+    marginBottom,
+    marginLeft,
+    ...restStyles
+  } = style || {}
 
   // Create div style with padding properties
   const divStyle = {
@@ -32,10 +42,18 @@ export default function EmailButton({ block, parentRow }: Props) {
     paddingLeft,
   }
 
+  const buttonStyle = {
+    ...restStyles,
+    paddingTop: marginTop,
+    paddingRight: marginRight,
+    paddingBottom: marginBottom,
+    paddingLeft: marginLeft,
+  }
+
   return (
     // @ts-expect-error
     <div align={align} style={divStyle}>
-      <Button {...buttonPropsWithoutAlignAndStyle} style={restStyles} href={undefined}>
+      <Button {...buttonPropsWithoutAlignAndStyle} style={buttonStyle} href={undefined}>
         {parse(block.attributes.content)}
       </Button>
     </div>

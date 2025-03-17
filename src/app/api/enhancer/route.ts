@@ -1,22 +1,15 @@
 export const maxDuration = 60
 
-import { streamText } from '@/lib/llm/stream-text'
 import { stripIndents } from '@/lib/utils/stripIndent'
-import { parseDataStreamPart } from 'ai'
-import { v4 as uuidv4 } from 'uuid'
+import { openai } from '@ai-sdk/openai'
+import { parseDataStreamPart, streamText } from 'ai'
 
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
-
 export async function POST(request: Request) {
   try {
     const { message } = (await request.json()) as { message: string }
-
-    const result = await streamText([
-      {
-        id: uuidv4(),
-        role: 'user',
-        content: stripIndents`
+    const content = stripIndents`
           I want you to improve the user prompt that is wrapped in \`<original_prompt>\` tags.
 
           IMPORTANT: Only respond with the improved prompt and nothing else!
@@ -24,10 +17,17 @@ export async function POST(request: Request) {
           <original_prompt>
             ${message}
           </original_prompt>
-        `,
-      },
-    ])
+        `
 
+    const result = await streamText({
+      model: openai('gpt-4o-mini'),
+      messages: [
+        {
+          role: 'user',
+          content,
+        },
+      ],
+    })
     const transformStream = new TransformStream({
       transform(chunk, controller) {
         const text = decoder.decode(chunk)

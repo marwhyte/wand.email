@@ -1,13 +1,13 @@
 'use client'
 
-import { useQueryParam } from '@/app/hooks/useQueryParam'
+import { usePersistedState } from '@/app/hooks/usePersistedState'
 import { useEmailStore } from '@/lib/stores/emailStore'
+import { useEffect } from 'react'
 
 import { Tab, TabGroup, TabList } from '@/app/components/tab'
 import { Text } from '@/app/components/text'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
 import { Cog6ToothIcon, Square3Stack3DIcon, TableCellsIcon } from '@heroicons/react/24/outline'
-import { useEffect } from 'react'
 import BlockEditor from './block-editor'
 import EmailComponents from './email-components'
 import EmailRows from './email-rows'
@@ -29,7 +29,8 @@ const tabIcons = {
 export default function EmailEditor({ email }: { email: Email }) {
   const { currentBlock, setCurrentBlock } = useEmailStore()
 
-  const [tab, setTab] = useQueryParam<Tabs>('tab', Tabs.CONTENT, (value) => Object.values(Tabs).includes(value as Tabs))
+  // Use our custom hook with the email ID as namespace
+  const [tab, setTab] = usePersistedState<Tabs>('editorTab', Tabs.CONTENT, `email_${email.id}`, 'session')
 
   useEffect(() => {
     if (currentBlock?.type === 'row') {
@@ -37,7 +38,7 @@ export default function EmailEditor({ email }: { email: Email }) {
     } else if (currentBlock) {
       setTab(Tabs.CONTENT)
     }
-  }, [currentBlock])
+  }, [currentBlock, setTab])
 
   const handleTabChange = (index: number) => {
     const newTab = Object.values(Tabs)[index]

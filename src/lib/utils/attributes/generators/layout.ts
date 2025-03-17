@@ -12,6 +12,8 @@ export function getDefaultRowAttributes(row: RowBlock): Partial<RowBlock['attrib
   const baseRowDefaults: Partial<RowBlock['attributes']> = {
     paddingLeft: '16px',
     paddingRight: '16px',
+    stackOnMobile: true,
+    columnSpacing: 12,
   }
 
   return {

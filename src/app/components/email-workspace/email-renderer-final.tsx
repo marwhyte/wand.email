@@ -97,10 +97,25 @@ const RenderBlockFinal = ({
         const buttonProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Button>>
         // Extract align property and remaining props
         const { align: buttonAlign, ...buttonRemainingProps } = buttonProps as any
+
+        // Extract margin values from style and remove them
+        const { marginTop, marginRight, marginBottom, marginLeft, ...styleWithoutMargins } = restStyle
+
+        // Apply directional margins as padding to the button
+        const buttonStyle = {
+          ...styleWithoutMargins,
+          paddingTop: marginTop,
+          paddingRight: marginRight,
+          paddingBottom: marginBottom,
+          paddingLeft: marginLeft,
+        }
+
         return (
           // @ts-expect-error
           <div align={buttonAlign}>
-            <Button {...buttonRemainingProps}>{parse(block.attributes.content)}</Button>
+            <Button {...buttonRemainingProps} style={buttonStyle}>
+              {parse(block.attributes.content)}
+            </Button>
           </div>
         )
       case 'link':

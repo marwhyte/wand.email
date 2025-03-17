@@ -8,11 +8,13 @@ import { deleteChat } from '@/lib/database/queries/chats'
 import { Chat } from '@/lib/database/types'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { fetcher, truncate } from '@/lib/utils/misc'
-import { SparklesIcon } from '@heroicons/react/24/solid'
+import { SparklesIcon, StarIcon } from '@heroicons/react/24/solid'
 import { signOut, useSession } from 'next-auth/react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import Loading from '../loading'
+import { usePlan } from '../payment/plan-provider'
 import { Text } from '../text'
 import { binDates } from './date-binning'
 import { HistoryItem } from './history-item'
@@ -45,6 +47,15 @@ export function Menu() {
   const [open, setOpen] = useState(false)
   const [dialogContent, setDialogContent] = useState<DialogContent>(null)
   const session = useSession()
+  const { plan, setUpgradeDialogOpen } = usePlan()
+  const isPremium = plan !== 'free'
+  const router = useRouter()
+
+  const handleUpgradeClick = () => {
+    setUpgradeDialogOpen(true)
+    setOpen(false)
+    router.push('/')
+  }
 
   const closeDialog = () => {
     setDialogContent(null)
@@ -172,9 +183,26 @@ export function Menu() {
         </div>
 
         <div className="border-t border-gray-200 p-4">
+          {!isPremium && (
+            <div className="mb-2 space-y-0.5 text-center">
+              <button
+                onClick={handleUpgradeClick}
+                type="button"
+                className="mb-2 me-2 rounded-lg bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 px-5 py-2.5 text-sm font-medium text-gray-900 hover:bg-gradient-to-bl focus:outline-none focus:ring-4 focus:ring-red-100 dark:focus:ring-red-400"
+              >
+                Upgrade to Premium
+              </button>
+            </div>
+          )}
           <div className="mb-2 space-y-0.5 text-center">
             <Text className="font-bold text-gray-500">Signed in as</Text>
             <Text className="text-gray-600">{truncate(session.data?.user?.email || '', 30)}</Text>
+            {isPremium && (
+              <Text className="text-xs font-medium text-blue-600">
+                <StarIcon className="mr-0.5 inline-block h-3 w-3" />
+                Premium Plan
+              </Text>
+            )}
           </div>
           <button
             onClick={() => signOut()}

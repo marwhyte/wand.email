@@ -245,7 +245,6 @@ const EmailRenderer = ({ email }: Props) => {
     widths?: string[]
   }) => {
     if (item.type === 'newRow') {
-      console.log('newRow', item.widths)
       addRow(item.widths ?? ['100%'])
     } else if (item.type === 'newBlock' && item.newBlockType) {
       const newRow: RowBlock = {

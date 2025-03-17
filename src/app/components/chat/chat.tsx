@@ -1,12 +1,14 @@
 'use client'
 
-import { generateTitleFromUserMessage } from '@/app/(chat)/actions'
+import { generateChangeLog, generateTitleFromUserMessage } from '@/app/(chat)/actions'
+import { usePlan } from '@/app/components/payment/plan-provider'
 import { useOpener, usePromptEnhancer, useSnapScroll } from '@/app/hooks'
 import { useChatHistory } from '@/app/hooks/useChatHistory'
 import { useMessageParser } from '@/app/hooks/useMessageParser'
 import { updateChat } from '@/lib/database/queries/chats'
 import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat as ChatType, Company } from '@/lib/database/types'
+import { getSystemPrompt } from '@/lib/llm/prompts'
 import { chatStore } from '@/lib/stores/chat'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -14,14 +16,12 @@ import { cubicEasingFn } from '@/lib/utils/easings'
 import { generateEmailScript } from '@/lib/utils/email-script-generator'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
 import { classNames } from '@/lib/utils/misc'
-import { generateChangeLog } from '@/lib/utils/template-diff'
 import { Message, useChat } from '@ai-sdk/react'
 import { Header } from '@components/header'
 import { Menu } from '@components/sidebar/menu'
 import { ArrowDownCircleIcon } from '@heroicons/react/24/solid'
 import { useAnimate } from 'framer-motion'
 import { useSession } from 'next-auth/react'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
@@ -86,6 +86,8 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
   const { setTitle, setCompany, company, title } = useChatStore()
   useChatHistory({ chat: chat, chatId: id, company: chatCompany })
 
+  console.log(getSystemPrompt())
+
   // Chat state and handlers
   const { messages, status, input, handleInputChange, setInput, stop, append, reload, handleSubmit, setMessages } =
     useChat({
@@ -134,19 +136,10 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
   const companyOpener = useOpener()
   const deleteOpener = useOpener()
 
-  // Navigation and routing
-  const searchParams = useSearchParams()
-  const router = useRouter()
-  const pathname = usePathname()
-  const isUpgradeDialogOpen = searchParams.get('upgrade') === 'true'
   const [chatStarted, setChatStarted] = useState(initialMessages.length > 0)
 
-  // Add the closeUpgradeDialog function
-  const closeUpgradeDialog = () => {
-    const params = new URLSearchParams(searchParams)
-    params.delete('upgrade')
-    router.replace(`${pathname}?${params.toString()}`)
-  }
+  // Get upgrade dialog state from plan provider
+  const { upgradeDialogOpen, setUpgradeDialogOpen } = usePlan()
 
   // Global state
   const showChat = chatStore((state) => state.showChat)
@@ -259,6 +252,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
       const previousScript = generateEmailScript(previousEmail)
 
       if (currentScript !== previousScript) {
+        console.log('this guy')
         try {
           // Generate change log between previous and current email
           const changeLog = await generateChangeLog(previousEmail, email)
@@ -267,6 +261,8 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
             // Prepend the change log to the user message
             messageContent = `<email_changes>\n${changeLog}\n</email_changes>\n\n${_input}`
           }
+
+          console.log('messageContent', messageContent)
         } catch (error) {
           console.error('Failed to generate email change log:', error)
           // Continue with just the user message if change log generation fails
@@ -438,7 +434,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
             }}
           />
 
-          <UpgradeDialog open={isUpgradeDialogOpen} onClose={closeUpgradeDialog} />
+          <UpgradeDialog />
 
           <DeleteCompanyDialog
             open={deleteOpener.isOpen}

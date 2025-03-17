@@ -127,7 +127,27 @@ export const getAdditionalButtonStyles = (
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(buttonBlock, parentRow) as React.ComponentProps<typeof Button>['style']) || {}
 
-  const { href, borderColor, borderWidth, borderStyle, align, content, ...styleAttributes } = buttonBlock.attributes
+  const {
+    href,
+    borderColor,
+    borderWidth,
+    borderStyle,
+    align,
+    content,
+    contentPaddingBottom,
+    contentPaddingLeft,
+    contentPaddingRight,
+    contentPaddingTop,
+    ...styleAttributes
+  } = buttonBlock.attributes
+
+  // Apply directional content padding to margins if they exist
+  const margins = {
+    marginTop: contentPaddingTop ?? baseDefaults.marginTop,
+    marginBottom: contentPaddingBottom ?? baseDefaults.marginBottom,
+    marginLeft: contentPaddingLeft ?? baseDefaults.marginLeft,
+    marginRight: contentPaddingRight ?? baseDefaults.marginRight,
+  }
 
   const borderStyles = borderWidth
     ? {
@@ -152,13 +172,12 @@ export const getAdditionalButtonStyles = (
         : '#ffffff'
       : '#ffffff'
 
-  console.log('1', borderStyles)
-
   return {
     ...baseDefaults,
     ...rowTypeDefaults,
     ...styleAttributes,
     ...borderStyles,
+    ...margins,
     backgroundColor,
     color,
   }
@@ -247,12 +266,7 @@ export const getAdditionalSurveyStyles = (
   surveyBlock: SurveyBlock,
   parentRow: RowBlock
 ): React.ComponentProps<typeof Section>['style'] => {
-  const baseDefaults: React.ComponentProps<typeof Section>['style'] = {
-    paddingTop: '10px',
-    paddingRight: '10px',
-    paddingBottom: '10px',
-    paddingLeft: '10px',
-  }
+  const baseDefaults: React.ComponentProps<typeof Section>['style'] = {}
 
   const rowTypeDefaults =
     (getRowTypeBlockDefaults(surveyBlock, parentRow) as React.ComponentProps<typeof Section>['style']) || {}

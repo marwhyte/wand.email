@@ -1,29 +1,148 @@
 export const componentLibrary = {
   header: {
+    example: `
+      ROW type=header {
+        COLUMN {
+          LOGO src="logo" alt="Logo"
+        }
+      }
+    `,
     variants: ['simple', 'modern', 'elegant'],
-    allowedBlocks: ['NAVBAR', 'SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
+    allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   footer: {
+    example: `
+      ROW type=footer {
+        COLUMN {
+          LOGO src="logo" alt="Logo"
+          TEXT content=<p>Company Name</p>
+          SOCIALS folder=socials-color socialLinks=[{"icon": "facebook", "url": "#"}, {"icon": "x", "url": "#"}, {"icon": "instagram", "url": "#"}]
+          TEXT content=<p>123 Main Street Anytown, CA 12345<br>United States</p>
+          TEXT content=<p>mail@company.com</p>
+          TEXT content=<p>© 2024 Company Name. All rights reserved.</p>
+        }
+      }
+    `,
     variants: ['simple', 'modern', 'elegant'],
-    allowedBlocks: ['NAVBAR', 'SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
-  },
-  ecommerce: {
-    variants: ['grid', 'featured', 'showcase'],
-    allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'BUTTON'],
+    allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   gallery: {
+    example: `
+      ROW type=gallery {
+        COLUMN {
+          IMAGE src="pexels:bed" alt="Bed in room"
+        }
+        COLUMN {
+          HEADING content=<p>Deck out your dorm</p> level=h2
+          TEXT content=<p>Own your space with decor, home essentials, and more.</p>
+          BUTTON content=<p>Start designing</p> href="/"
+        }
+      }
+    `,
     variants: ['list', 'cards', 'magazine'],
     allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
   },
-  features: {
-    variants: ['icons', 'cards', 'columns'],
-    allowedBlocks: ['IMAGE', 'HEADING', 'TEXT'],
-  },
-  survey: {
-    variants: ['simple', 'detailed'],
-    allowedBlocks: ['HEADING', 'TEXT', 'BUTTON'],
-  },
 } as const
+
+export const blockLibrary = {
+  BUTTON: {
+    attributes: {
+      align: ['left', 'center', 'right'],
+      backgroundColor: ['#000000'],
+      borderColor: ['#000000'],
+      borderRadius: ['4'],
+      borderStyle: ['solid', 'dashed', 'dotted'],
+      borderWidth: ['1'],
+      contentPadding: ['10,0,10,0'],
+      color: ['#ffffff'],
+      content: ['<p>Click Here</p>'],
+      fontWeight: ['normal', 'bold'],
+      fontSize: ['16'],
+      padding: ['10,0,10,0'],
+      href: ['"#"'],
+    },
+  },
+  DIVIDER: {
+    attributes: {
+      borderStyle: ['solid', 'dashed', 'dotted'],
+      borderWidth: ['1'],
+      borderColor: ['#dddddd'],
+      padding: ['10,0,10,0'],
+    },
+  },
+  HEADING: {
+    attributes: {
+      level: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
+      textAlign: ['left', 'center', 'right'],
+      color: ['#000000'],
+      content: ['<p>Heading Text</p>'],
+      fontWeight: ['bold'],
+      fontSize: ['18'],
+      lineHeight: ['1.2'],
+      padding: ['10,0,10,0'],
+    },
+  },
+  IMAGE: {
+    attributes: {
+      align: ['left', 'center', 'right'],
+      alt: ['"Image description"'],
+      borderRadius: ['8'],
+      src: ['"logo"', '"pexels:keyword"', '"https://images.pexels.com/photos/example.png"'],
+      width: ['100%', '50%'],
+      padding: ['10,0,10,0'],
+    },
+  },
+  LINK: {
+    attributes: {
+      align: ['left', 'center', 'right'],
+      href: ['"#"'],
+      color: ['#0000FF'],
+      content: ['<p>Click here</p>'],
+      fontWeight: ['normal', 'bold'],
+      fontSize: ['16'],
+      padding: ['5,0,5,0'],
+    },
+  },
+  SOCIALS: {
+    attributes: {
+      align: ['left', 'center', 'right'],
+      folder: [
+        'socials-blue',
+        'socials-color',
+        'socials-dark-gray',
+        'socials-dark-round',
+        'socials-dark',
+        'socials-outline-black',
+        'socials-outline-color',
+        'socials-outline-gray',
+        'socials-outline-white',
+        'socials-white',
+      ],
+      socialLinks: ['[{"icon": "facebook", "url": "#"}, {"icon": "x", "url": "#"}, {"icon": "instagram", "url": "#"}]'],
+      padding: ['10,0,10,0'],
+    },
+  },
+  SURVEY: {
+    attributes: {
+      color: ['#000000'],
+      kind: ['yes-no', 'rating'],
+      question: ['How would you rate your experience?'],
+      padding: ['10,0,10,0'],
+    },
+  },
+  TEXT: {
+    attributes: {
+      textAlign: ['left', 'center', 'right'],
+      color: ['#000000'],
+      content: ['<p>Your text content goes here.</p>'],
+      fontWeight: ['normal', 'bold'],
+      fontSize: ['16'],
+      lineHeight: ['1.5'],
+      letterSpacing: ['normal'],
+      padding: ['10,0,10,0'],
+    },
+  },
+}
 
 // Type for component types
 export type ComponentType = keyof typeof componentLibrary
@@ -178,7 +297,7 @@ export type RowBlockAttributes = PaddingAttributes & {
   backgroundColor?: string
   borderColor?: string
   borderRadius?: string
-  borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
+  borderStyle?: 'solid' | 'dashed' | 'dotted'
   borderWidth?: string
   columnSpacing?: number
   hideOnMobile?: boolean
@@ -197,13 +316,13 @@ export type ButtonBlockAttributes = TextAttributes &
     backgroundColor?: string
     borderColor?: string
     borderRadius?: string
-    borderStyle?: 'solid' | 'dashed' | 'dotted' | 'double' | 'groove' | 'ridge' | 'inset' | 'outset'
+    borderStyle?: 'solid' | 'dashed' | 'dotted'
     borderWidth?: string
     href: string
-    marginBottom?: string
-    marginLeft?: string
-    marginRight?: string
-    marginTop?: string
+    contentPaddingBottom?: string
+    contentPaddingLeft?: string
+    contentPaddingRight?: string
+    contentPaddingTop?: string
   }
 
 export type DividerBlockAttributes = PaddingAttributes & {
@@ -215,7 +334,7 @@ export type DividerBlockAttributes = PaddingAttributes & {
 export type HeadingBlockAttributes = TextAttributes &
   PaddingAttributes & {
     level: 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6'
-    textAlign?: 'left' | 'center' | 'right' | 'justify'
+    textAlign?: 'left' | 'center' | 'right'
   }
 
 export type ImageBlockAttributes = PaddingAttributes & {
@@ -264,7 +383,7 @@ export type SurveyBlockAttributes = PaddingAttributes & {
 
 export type TextBlockAttributes = TextAttributes &
   PaddingAttributes & {
-    textAlign?: 'left' | 'center' | 'right' | 'justify'
+    textAlign?: 'left' | 'center' | 'right'
   }
 
 export type SocialIconFolders =

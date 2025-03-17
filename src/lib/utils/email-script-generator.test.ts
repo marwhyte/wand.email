@@ -3,6 +3,7 @@ jest.mock('@/lib/utils/image-service', () => ({
   resolveImageSrc: jest.fn().mockResolvedValue('https://example.com/mock-image.jpg'),
 }))
 
+import { testingTemplateComplex } from '@/app/components/email-workspace/templates/testing-template-complex'
 import { turbotaxTemplate, turbotaxTemplateScript } from '@/app/components/email-workspace/templates/turbotax-template'
 import { createEmail } from './email-helpers'
 import { generateEmailScript } from './email-script-generator'
@@ -14,11 +15,51 @@ function normalizeScript(script: string): string {
     .trim()
     .split('\n')
     .map((line) => {
-      const [component, ...attributeParts] = line.trim().split(' ')
-      if (!attributeParts.length) return line.trim()
+      // Handle quoted attributes and HTML tags properly
+      const matches = line.trim().match(/^(\S+)(.*)$/)
+      if (!matches) return line.trim()
 
-      const sortedAttributes = attributeParts.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
+      const [, component, attributesStr] = matches
+      if (!attributesStr.trim()) return line.trim()
 
+      // Parse attributes considering quotes and HTML tags
+      const attributes: string[] = []
+      let currentAttr = ''
+      let inQuotes = false
+      let inTag = false
+
+      for (let i = 0; i < attributesStr.length; i++) {
+        const char = attributesStr[i]
+
+        if (char === '"') {
+          inQuotes = !inQuotes
+          currentAttr += char
+        } else if (char === '<' && !inQuotes) {
+          // Check if this is the start of an HTML tag by looking ahead
+          const remainingText = attributesStr.substring(i)
+          const tagMatch = remainingText.match(/^<\/?[a-z][a-z0-9]*(\s|\/?>)/i)
+          if (tagMatch) {
+            inTag = true
+          }
+          currentAttr += char
+        } else if (char === '>' && !inQuotes && inTag) {
+          inTag = false
+          currentAttr += char
+        } else if (char === ' ' && !inQuotes && !inTag) {
+          if (currentAttr.trim()) {
+            attributes.push(currentAttr.trim())
+            currentAttr = ''
+          }
+        } else {
+          currentAttr += char
+        }
+      }
+
+      if (currentAttr.trim()) {
+        attributes.push(currentAttr.trim())
+      }
+
+      const sortedAttributes = attributes.sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()))
       return `${component} ${sortedAttributes.join(' ')}`
     })
     .join('\n')
@@ -85,5 +126,43 @@ describe('Email Script Generator', () => {
     const normalizedTemplate = normalizeScript(turbotaxTemplateScript)
 
     expect(normalizedGenerated).toEqual(normalizedTemplate)
+  })
+
+  it('should handle complex templates in both directions', () => {
+    // Parse the original script to get an email structure
+    const parsedRows = parseEmailScript(testingTemplateComplex)
+    const originalEmail = createEmail(
+      parsedRows,
+      '#333333', // color
+      '#0066cc', // linkColor
+      'Arial, sans-serif', // fontFamily
+      '#f7f7f7', // bgColor
+      '#f7f7f7', // rowBgColor
+      '600' // width
+    )
+
+    // Generate script from the parsed email structure
+    const generatedScript = generateEmailScript(originalEmail)
+
+    // Parse the generated script back to an email structure
+    const reparsedRows = parseEmailScript(generatedScript)
+    const reparsedEmail = createEmail(
+      reparsedRows,
+      originalEmail.color,
+      originalEmail.linkColor,
+      originalEmail.fontFamily,
+      originalEmail.bgColor,
+      originalEmail.rowBgColor,
+      originalEmail.width
+    )
+
+    // Compare the structures without ids
+    expect(removeIds(reparsedEmail)).toEqual(removeIds(originalEmail))
+
+    // Compare normalized versions of the scripts
+    const normalizedGenerated = normalizeScript(generatedScript)
+    const normalizedOriginal = normalizeScript(testingTemplateComplex)
+
+    expect(normalizedGenerated).toEqual(normalizedOriginal)
   })
 })

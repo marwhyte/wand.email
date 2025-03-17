@@ -90,8 +90,6 @@ export default function EmailRow({
       if (item.type === 'row' && dropLine !== null && item.id !== row.id) {
         moveRow(item.id, row.id)
       } else if (dropLine !== null && item.type === 'newRow') {
-        console.log('newRow123', item.widths)
-
         addRow(item.widths ?? ['100%'], row.id)
       } else if (dropTarget && item.type !== 'row' && item.type !== 'newRow') {
         onBlockDrop(item.type, item.id, dropTarget.type, dropTarget.id, dropTarget.position, item.newBlockType)

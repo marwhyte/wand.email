@@ -1,9 +1,10 @@
 import { createCheckoutSession } from '@/app/actions/checkoutSessions'
 import { notifySlack } from '@/app/actions/notifySlack'
+import { usePersistedState } from '@/app/hooks/usePersistedState'
 import { Tier, tiers } from '@/lib/data/plans'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon, XMarkIcon } from '@heroicons/react/20/solid'
-import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import AlertBox from '../alert-box'
 import { Badge } from '../badge'
@@ -15,41 +16,32 @@ import { Switch } from '../switch'
 import { Strong, Text, TextLink } from '../text'
 import { Dialog, DialogBody, DialogTitle } from './dialog'
 
-type Props = {
-  open: boolean
-  onClose: () => void
-}
-
-const UpgradeDialog = ({ open, onClose }: Props) => {
-  const searchParams = useSearchParams()
+const UpgradeDialog = () => {
   const router = useRouter()
   const pathname = usePathname()
 
-  const { plan, refetchUser } = usePlan()
+  const { plan, refetchUser, upgradeDialogOpen, setUpgradeDialogOpen } = usePlan()
 
   const [step, setStep] = useState<'select-plan' | 'success-loading' | 'success'>('select-plan')
 
-  const [selectedTier, setSelectedTier] = useState(() => {
-    const planParam = searchParams.get('plan')
-    return tiers.find((tier) => tier.id === planParam) || tiers[1]
-  })
+  const [selectedTier, setSelectedTier] = usePersistedState<Tier>('selectedTier', () => tiers[1], 'upgrade_dialog')
 
-  const [annually, setAnnually] = useState(() => {
-    return searchParams.get('annually') === 'true'
-  })
+  const [annually, setAnnually] = usePersistedState<boolean>('annually', false, 'upgrade_dialog')
+
+  const [upgradeSuccess, setUpgradeSuccess] = usePersistedState<boolean>('upgradeSuccess', false, 'upgrade_dialog')
 
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    const newParams = new URLSearchParams(searchParams.toString())
-    setSelectedTier(tiers.find((tier) => tier.id === newParams.get('plan')) || tiers[1])
-    setAnnually(newParams.get('annually') === 'true')
-  }, [searchParams])
+  const onClose = () => {
+    setUpgradeDialogOpen(false)
+  }
 
   useEffect(() => {
-    const checkSuccess = async () => {
-      if (searchParams.get('success') === 'true') {
-        setStep('success-loading')
+    if (upgradeSuccess) {
+      setStep('success-loading')
+      setUpgradeSuccess(false)
+
+      const checkSuccess = async () => {
         while (true) {
           const updatedUser = await refetchUser()
 
@@ -58,20 +50,20 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
             setStep('success')
             break
           }
-          await new Promise((resolve) => setTimeout(resolve, 2000)) // Wait for 2 seconds before retrying
+          await new Promise((resolve) => setTimeout(resolve, 2000))
         }
       }
-    }
 
-    checkSuccess()
-  }, [searchParams, refetchUser, plan])
+      checkSuccess()
+    }
+  }, [upgradeSuccess, refetchUser, setUpgradeSuccess])
 
   const handleUpgrade = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
     try {
-      const fullPath = `${pathname}?${searchParams.toString()}`
-      await createCheckoutSession(selectedTier.id, annually, fullPath)
+      await createCheckoutSession(selectedTier.id, annually, window.location.href)
+      setUpgradeSuccess(true)
     } catch (error) {
       setError('An error occurred while creating the checkout session. Please try again.')
     }
@@ -79,20 +71,14 @@ const UpgradeDialog = ({ open, onClose }: Props) => {
 
   const handleSelectTier = (tier: Tier) => {
     setSelectedTier(tier)
-    const newParams = new URLSearchParams(searchParams.toString())
-    newParams.set('plan', tier.id)
-    router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
   }
 
   const handleSelectAnnually = (annually: boolean) => {
     setAnnually(annually)
-    const newParams = new URLSearchParams(searchParams.toString())
-    newParams.set('annually', annually.toString())
-    router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
   }
 
   return (
-    <Dialog background="gray" size="3xl" open={open || step === 'success-loading'} onClose={onClose}>
+    <Dialog background="gray" size="3xl" open={upgradeDialogOpen || step === 'success-loading'} onClose={onClose}>
       {step === 'select-plan' ? (
         <>
           <DialogTitle>

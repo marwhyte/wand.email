@@ -30,7 +30,10 @@ const EmailSocials = ({ block, isEditing = true, parentRow }: Props) => {
         <tbody>
           <tr>
             {block.attributes.socialLinks.map((social) => (
-              <td key={social.url === '/' ? Math.random() : social.url} style={{ padding: '0 4px' }}>
+              <td
+                key={social.url === '/' || social.url === '#' ? Math.random() : social.url}
+                style={{ padding: '0 4px' }}
+              >
                 <a href={isEditing ? undefined : social.url} target="_blank">
                   <img
                     src={getPhotoUrl(`${social.icon}.png`, block.attributes.folder)}

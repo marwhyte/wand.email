@@ -32,7 +32,7 @@ export async function POST(request: Request) {
       return new Response('No user message found', { status: 400 })
     }
 
-    const chat = await getChat(userMessage.id)
+    const chat = await getChat(id)
 
     if (!chat) {
       const email = { ...blankTemplate() }

@@ -3,6 +3,7 @@
 import { Email } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import type { Message } from 'ai'
+import { v4 as uuidv4 } from 'uuid'
 import { db } from '../db'
 
 export async function createChat({
@@ -121,8 +122,19 @@ export async function updateChat(
           .where('user_id', '=', session.user?.id ?? '')
           .execute()
       }
+
       // Update messages
       if (updates.messages) {
+        // Get existing messages to preserve created_at for existing messages
+        const existingMessages = await trx
+          .selectFrom('messages')
+          .select(['id', 'created_at'])
+          .where('chat_id', '=', id)
+          .execute()
+
+        // Create a map of existing message IDs to their created_at timestamps
+        const existingMessageMap = new Map(existingMessages.map((msg) => [msg.id, msg.created_at]))
+
         // Delete existing messages
         await trx.deleteFrom('messages').where('chat_id', '=', id).execute()
 
@@ -134,14 +146,34 @@ export async function updateChat(
         })
 
         // Prepare message values with sequential ordering
-        const messageValues = sortedMessages.map((msg, index) => ({
-          chat_id: id,
-          role: msg.role,
-          content: msg.content,
-          sequence: index,
-          id: msg.id,
-          created_at: msg.createdAt || new Date(),
-        }))
+        const messageValues = sortedMessages.map((msg, index) => {
+          // For created_at, ensure we're using consistent UTC dates
+          let created_at: Date = new Date()
+          if (existingMessageMap.get(msg.id)) {
+            // Use existing timestamp from database
+            created_at = existingMessageMap.get(msg.id) as Date
+          } else if (msg.createdAt) {
+            // Convert provided timestamp to a Date object
+            created_at = new Date(msg.createdAt)
+          } else {
+            // Create a new UTC timestamp
+            created_at = new Date()
+          }
+
+          // Generate a UUID if the message ID doesn't match UUID format
+          // This handles IDs like "msg-7WwZKPfuDXRErECZ4uIXvpLw"
+          const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(msg.id || '')
+          const messageId = isValidUuid ? msg.id : uuidv4()
+
+          return {
+            chat_id: id,
+            role: msg.role,
+            content: msg.content,
+            sequence: index,
+            id: messageId,
+            created_at,
+          }
+        })
 
         // Insert new messages
         await trx.insertInto('messages').values(messageValues).returningAll().execute()
@@ -245,6 +277,8 @@ export async function getChatWithMessages(id: string) {
     messages: messages.map((msg) => ({
       id: msg.id,
       role: msg.role,
+      sequence: msg.sequence,
+      created_at: msg.created_at,
       content: msg.content,
     })),
   }

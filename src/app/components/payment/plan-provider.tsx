@@ -7,6 +7,8 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 const PlanContext = createContext<{
   plan: Plan | null | undefined
   refetchUser: () => Promise<User | null | undefined>
+  upgradeDialogOpen: boolean
+  setUpgradeDialogOpen: (open: boolean) => void
 } | null>(null)
 
 // Create a custom hook to use the context
@@ -32,6 +34,7 @@ interface PlanProviderProps {
 
 const PlanProvider = ({ children, fetchUser, plan }: PlanProviderProps) => {
   const [userPlan, setUserPlan] = useState<Plan | null | undefined>(plan)
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState<boolean>(false)
 
   const refetchUser = async () => {
     const updatedUser = await fetchUser()
@@ -45,7 +48,18 @@ const PlanProvider = ({ children, fetchUser, plan }: PlanProviderProps) => {
     setUserPlan(plan)
   }, [plan])
 
-  return <PlanContext.Provider value={{ plan: userPlan, refetchUser }}>{children}</PlanContext.Provider>
+  return (
+    <PlanContext.Provider
+      value={{
+        plan: userPlan,
+        refetchUser,
+        upgradeDialogOpen,
+        setUpgradeDialogOpen,
+      }}
+    >
+      {children}
+    </PlanContext.Provider>
+  )
 }
 
 export default PlanProvider

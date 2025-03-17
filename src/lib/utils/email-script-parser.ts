@@ -102,10 +102,7 @@ function isFontWeight(value: string | undefined): value is TextAttributes['fontW
 }
 
 function isBorderStyle(value: string | undefined): value is NonNullable<RowBlockAttributes['borderStyle']> {
-  return (
-    typeof value === 'string' &&
-    ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'inset', 'outset'].includes(value)
-  )
+  return typeof value === 'string' && ['solid', 'dashed', 'dotted'].includes(value)
 }
 
 function isVerticalAlign(value: string | undefined): value is RowBlockAttributes['verticalAlign'] {
@@ -176,6 +173,62 @@ function handleTextAttributes(raw: RawAttributes): TextAttributes {
   return attrs
 }
 
+function handleContentPadding(raw: RawAttributes): Record<string, string> {
+  const attrs: Record<string, string> = {}
+
+  if (raw.contentPadding) {
+    const values: string[] = raw.contentPadding.split(',').map((p) => `${p}px`)
+
+    // Handle different value counts according to CSS shorthand rules
+    switch (values.length) {
+      case 1: // All sides
+        if (values[0] !== '0px') {
+          attrs.contentPaddingTop = values[0]
+          attrs.contentPaddingRight = values[0]
+          attrs.contentPaddingBottom = values[0]
+          attrs.contentPaddingLeft = values[0]
+        }
+        break
+      case 2: // Vertical, Horizontal
+        if (values[0] !== '0px') {
+          attrs.contentPaddingTop = values[0]
+          attrs.contentPaddingBottom = values[0]
+        }
+        if (values[1] !== '0px') {
+          attrs.contentPaddingRight = values[1]
+          attrs.contentPaddingLeft = values[1]
+        }
+        break
+      case 3: // Top, Horizontal, Bottom
+        if (values[0] !== '0px') attrs.contentPaddingTop = values[0]
+        if (values[1] !== '0px') {
+          attrs.contentPaddingRight = values[1]
+          attrs.contentPaddingLeft = values[1]
+        }
+        if (values[2] !== '0px') attrs.contentPaddingBottom = values[2]
+        break
+      case 4: // Top, Right, Bottom, Left
+        if (values[0] !== '0px') attrs.contentPaddingTop = values[0]
+        if (values[1] !== '0px') attrs.contentPaddingRight = values[1]
+        if (values[2] !== '0px') attrs.contentPaddingBottom = values[2]
+        if (values[3] !== '0px') attrs.contentPaddingLeft = values[3]
+        break
+    }
+  } else {
+    // Individual contentPadding values - only add non-zero values
+    if (raw.contentPaddingTop && raw.contentPaddingTop !== '0')
+      attrs.contentPaddingTop = ensurePx(raw.contentPaddingTop)
+    if (raw.contentPaddingRight && raw.contentPaddingRight !== '0')
+      attrs.contentPaddingRight = ensurePx(raw.contentPaddingRight)
+    if (raw.contentPaddingBottom && raw.contentPaddingBottom !== '0')
+      attrs.contentPaddingBottom = ensurePx(raw.contentPaddingBottom)
+    if (raw.contentPaddingLeft && raw.contentPaddingLeft !== '0')
+      attrs.contentPaddingLeft = ensurePx(raw.contentPaddingLeft)
+  }
+
+  return attrs
+}
+
 function parseAttributes(attrString: string): RawAttributes {
   const attrs: RawAttributes = {}
 
@@ -227,6 +280,14 @@ function parseAttributes(attrString: string): RawAttributes {
       // Handle padding specially
       const paddingValues = parsePadding(value)
       Object.assign(attrs, paddingValues)
+    } else if (key === 'contentPadding') {
+      // Handle contentPadding specially
+      const contentPaddingValues = parsePadding(value)
+      // Convert regular padding keys to contentPadding keys
+      Object.entries(contentPaddingValues).forEach(([paddingKey, paddingValue]) => {
+        const contentKey = paddingKey.replace('padding', 'contentPadding')
+        attrs[contentKey] = paddingValue
+      })
     } else {
       attrs[key] = value
     }
@@ -239,20 +300,22 @@ function parseAttributes(attrString: string): RawAttributes {
 const parseRowAttributes: AttributeParser<RowBlockAttributes> = (raw) => {
   const attrs: RowBlockAttributes = {
     ...handlePadding(raw),
-    backgroundColor: raw.backgroundColor,
-    borderColor: raw.borderColor,
-    borderRadius: raw.borderRadius ? ensurePx(raw.borderRadius) : undefined,
-    borderStyle: isBorderStyle(raw.borderStyle) ? raw.borderStyle : undefined,
-    borderWidth: raw.borderWidth ? ensurePx(raw.borderWidth) : undefined,
-    columnSpacing: raw.columnSpacing ? Number(raw.columnSpacing) : undefined,
-    type: raw.type as ComponentType | undefined,
-    variant: raw.variant as ComponentVariant<ComponentType> | undefined,
-    verticalAlign: isVerticalAlign(raw.verticalAlign) ? raw.verticalAlign : undefined,
   }
 
-  // Only add boolean fields if they are explicitly set
-  if (raw.hideOnMobile !== undefined) attrs.hideOnMobile = raw.hideOnMobile === 'true'
-  if (raw.stackOnMobile !== undefined) attrs.stackOnMobile = raw.stackOnMobile === 'true'
+  // Only add properties if they exist in raw (even if they're falsy but valid values)
+  if ('backgroundColor' in raw) attrs.backgroundColor = raw.backgroundColor
+  if ('borderColor' in raw) attrs.borderColor = raw.borderColor
+  if ('borderRadius' in raw) attrs.borderRadius = ensurePx(raw.borderRadius)
+  if ('borderStyle' in raw && isBorderStyle(raw.borderStyle)) attrs.borderStyle = raw.borderStyle
+  if ('borderWidth' in raw) attrs.borderWidth = ensurePx(raw.borderWidth)
+  if ('columnSpacing' in raw) attrs.columnSpacing = Number(raw.columnSpacing)
+  if ('type' in raw) attrs.type = raw.type as ComponentType
+  if ('variant' in raw) attrs.variant = raw.variant as ComponentVariant<ComponentType>
+  if ('verticalAlign' in raw && isVerticalAlign(raw.verticalAlign)) attrs.verticalAlign = raw.verticalAlign
+
+  // Boolean fields need special handling
+  if ('hideOnMobile' in raw) attrs.hideOnMobile = raw.hideOnMobile === 'true'
+  if ('stackOnMobile' in raw) attrs.stackOnMobile = raw.stackOnMobile === 'true'
 
   return attrs
 }
@@ -268,19 +331,21 @@ const parseColumnAttributes: AttributeParser<ColumnBlockAttributes> = (raw) => {
 
 // ===== Content Block Parsers =====
 const parseButtonAttributes: AttributeParser<ButtonBlockAttributes> = (raw) => {
-  return {
+  const attrs: ButtonBlockAttributes = {
     ...handleTextAttributes(raw),
     ...handlePadding(raw),
-    align: isAlign(raw.align) ? raw.align : undefined,
-    backgroundColor: raw.backgroundColor,
-    borderColor: raw.borderColor,
-    borderRadius: raw.borderRadius ? ensurePx(raw.borderRadius) : undefined,
-    borderStyle: isBorderStyle(raw.borderStyle) ? raw.borderStyle : undefined,
-    borderWidth: raw.borderWidth ? ensurePx(raw.borderWidth) : undefined,
-    href: raw.href || '#',
-    marginBottom: raw.marginBottom ? ensurePx(raw.marginBottom) : undefined,
-    marginTop: raw.marginTop ? ensurePx(raw.marginTop) : undefined,
+    ...handleContentPadding(raw),
+    href: raw.href || '#', // Default value is fine
   }
+
+  if ('align' in raw && isAlign(raw.align)) attrs.align = raw.align
+  if ('backgroundColor' in raw) attrs.backgroundColor = raw.backgroundColor
+  if ('borderColor' in raw) attrs.borderColor = raw.borderColor
+  if ('borderRadius' in raw) attrs.borderRadius = ensurePx(raw.borderRadius)
+  if ('borderStyle' in raw && isBorderStyle(raw.borderStyle)) attrs.borderStyle = raw.borderStyle
+  if ('borderWidth' in raw) attrs.borderWidth = ensurePx(raw.borderWidth)
+
+  return attrs
 }
 
 const parseDividerAttributes: AttributeParser<DividerBlockAttributes> = (raw) => {
@@ -311,16 +376,17 @@ const parseHeadingAttributes: AttributeParser<HeadingBlockAttributes> = (raw) =>
 }
 
 const parseImageAttributes: AttributeParser<ImageBlockAttributes> = (raw) => {
-  return {
+  const attrs: ImageBlockAttributes = {
     ...handlePadding(raw),
-    align: isAlign(raw.align) ? raw.align : undefined,
-    alt: raw.alt || '',
-    borderRadius: raw.borderRadius ? ensurePx(raw.borderRadius) : undefined,
-    marginLeft: raw.marginLeft ? ensurePx(raw.marginLeft) : undefined,
-    marginRight: raw.marginRight ? ensurePx(raw.marginRight) : undefined,
-    src: raw.src || '',
-    width: raw.width ? ensurePx(raw.width) : undefined,
+    alt: raw.alt || '', // Default value is fine
+    src: raw.src || '', // Default value is fine
   }
+
+  if ('align' in raw && isAlign(raw.align)) attrs.align = raw.align
+  if ('borderRadius' in raw) attrs.borderRadius = ensurePx(raw.borderRadius)
+  if ('width' in raw) attrs.width = ensurePx(raw.width)
+
+  return attrs
 }
 
 const parseLinkAttributes: AttributeParser<LinkBlockAttributes> = (raw) => {
@@ -380,6 +446,7 @@ const parseSurveyAttributes: AttributeParser<SurveyBlockAttributes> = (raw) => {
     ...handlePadding(raw),
     kind: raw.kind as SurveyBlockAttributes['kind'],
     question: raw.question || '',
+    color: raw.color,
   }
 
   return attrs

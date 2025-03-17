@@ -20,7 +20,49 @@ function stringifyAttributes(attributes: Record<string, any>): string {
 
     // Only add padding if at least one value is non-zero
     if (values.some((v) => v !== '0')) {
-      attrs.padding = values.join(',')
+      // Simplify padding notation when possible
+      const [top, right, bottom, left] = values
+
+      if (top === right && right === bottom && bottom === left) {
+        // All sides equal - use single value: padding=10
+        attrs.padding = top
+      } else if (top === bottom && right === left) {
+        // Top/bottom and left/right pairs are equal - use two values: padding=10,20
+        attrs.padding = `${top},${right}`
+      } else {
+        // Use full four-value format
+        attrs.padding = values.join(',')
+      }
+    }
+  }
+
+  // Convert single-direction contentPadding to full contentPadding string
+  const contentPaddingProps = ['contentPaddingTop', 'contentPaddingRight', 'contentPaddingBottom', 'contentPaddingLeft']
+  const hasContentPadding = contentPaddingProps.some((prop) => attrs[prop] != null)
+
+  if (hasContentPadding) {
+    // Only include non-zero contentPadding values
+    const values = contentPaddingProps.map((prop) => {
+      const value = attrs[prop]?.replace('px', '') || '0'
+      delete attrs[prop]
+      return value
+    })
+
+    // Only add contentPadding if at least one value is non-zero
+    if (values.some((v) => v !== '0')) {
+      // Simplify contentPadding notation when possible
+      const [top, right, bottom, left] = values
+
+      if (top === right && right === bottom && bottom === left) {
+        // All sides equal - use single value: contentPadding=10
+        attrs.contentPadding = top
+      } else if (top === bottom && right === left) {
+        // Top/bottom and left/right pairs are equal - use two values: contentPadding=10,20
+        attrs.contentPadding = `${top},${right}`
+      } else {
+        // Use full four-value format
+        attrs.contentPadding = values.join(',')
+      }
     }
   }
 
@@ -191,6 +233,8 @@ export function generateEmailScript(email: Email): string {
     linkColor: email.linkColor,
     rowBackgroundColor: email.rowBgColor,
     width: email.width,
+    // Only include preview if it exists and is not empty
+    ...(email.preview ? { preview: email.preview } : {}),
   })
 
   return `<EMAIL ${emailAttrs}>\n${rows}\n</EMAIL>`

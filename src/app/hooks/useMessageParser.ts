@@ -4,7 +4,6 @@ import { useEmailStore } from '@/lib/stores/emailStore'
 import { parseEmailScript, processEmailImages } from '@/lib/utils/email-script-parser'
 import { createScopedLogger } from '@/lib/utils/logger'
 import { Message } from 'ai'
-import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { blankTemplate } from '../components/email-workspace/templates/blank-template'
 import { Email } from '../components/email-workspace/types'
@@ -14,7 +13,6 @@ const logger = createScopedLogger('MessageParser')
 export function useMessageParser(message: Message) {
   const { setEmail, email, setPreviousEmail } = useEmailStore()
   const { chatId } = useChatStore()
-  const router = useRouter()
   const [processingMessageId, setProcessingMessageId] = useState<string | null>(null)
   const [processedMessageIds, setProcessedMessageIds] = useState<Set<string>>(new Set())
 
@@ -64,7 +62,7 @@ export function useMessageParser(message: Message) {
       processEmailImages(emailObject)
         .then((processedEmail) => {
           setEmail(processedEmail)
-          setPreviousEmail(emailObject)
+          setPreviousEmail(processedEmail)
           // Return the promise from updateChat so we can chain after it completes
           return updateChat(chatId, { email: processedEmail, previousEmail: processedEmail }).then(() => {
             logger.debug('Found email:', emailString)

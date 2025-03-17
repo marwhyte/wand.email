@@ -5,6 +5,7 @@ import { auth } from '@/auth'
 import { getChatWithMessages } from '@/lib/database/queries/chats'
 import { getCompanies, getCompany } from '@/lib/database/queries/companies'
 import { getMonthlyExportCount } from '@/lib/database/queries/exports'
+import { sortByCreatedAt } from '@/lib/utils/misc'
 
 export default async function Page(props: { params: Promise<{ id: string }> }) {
   const params = await props.params
@@ -31,7 +32,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
       <Chat
         chat={chat}
         id={chat.id}
-        initialMessages={chat.messages}
+        initialMessages={sortByCreatedAt(chat.messages)}
         companies={companies}
         chatCompany={company}
         monthlyExportCount={monthlyExportCount}
