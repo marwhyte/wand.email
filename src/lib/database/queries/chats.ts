@@ -2,7 +2,6 @@
 
 import { Email } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
-import { getMessageId } from '@/lib/utils/misc'
 import type { Message } from 'ai'
 import { db } from '../db'
 
@@ -67,6 +66,14 @@ export async function updateMessage(id: string, chatId: string, updates: { conte
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
   }
+
+  // Check if the message exists
+  const message = await db
+    .selectFrom('messages')
+    .select('id')
+    .where('id', '=', id)
+    .where('chat_id', '=', chatId)
+    .executeTakeFirst()
 
   if (updates.content !== undefined) {
     await db
@@ -197,17 +204,12 @@ export async function updateChat(
 
           const email = existingMessageMap.get(msg.id)?.email ?? null
 
-          // Generate a UUID if the message ID doesn't match UUID format
-          // This handles IDs like "msg-7WwZKPfuDXRErECZ4uIXvpLw"
-
-          const messageId = getMessageId(msg)
-
           return {
             chat_id: id,
             role: msg.role,
             content: msg.content,
             sequence: index,
-            id: messageId,
+            id: msg.id,
             created_at,
             email,
           }

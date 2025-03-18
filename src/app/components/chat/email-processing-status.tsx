@@ -1,18 +1,14 @@
 'use client'
 
 import { useOpener } from '@/app/hooks'
-import { deleteMessagesAfterId, updateChat } from '@/lib/database/queries/chats'
+import { deleteMessagesAfterId, getMessage, updateChat } from '@/lib/database/queries/chats'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { useChat } from '@ai-sdk/react'
 import type { Message } from 'ai'
-import { useRouter } from 'next/navigation'
 import React from 'react'
 import { Button } from '../button'
 import { RevertDialog } from '../dialogs/revert-dialog'
-import { blankTemplate } from '../email-workspace/templates/blank-template'
-import { Email } from '../email-workspace/types'
 
 interface EmailProcessingStatusProps {
   isComplete: boolean
@@ -38,8 +34,6 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
   const { setMessages } = useChat({
     id: chatId,
   })
-
-  const router = useRouter()
 
   // Find the index of the current message
   const currentMessageIndex = messages.findIndex((msg) => msg.id === message.id)
@@ -72,21 +66,17 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
       : message
 
     if (revertedMessage) {
-      const emailRegex = /<EMAIL\s+[^>]*>([\s\S]*?)<\/EMAIL>/i
-      const emailMatch = revertedMessage.content.match(emailRegex)
+      const newMessage = await getMessage(revertedMessage.id)
 
-      if (emailMatch && chatId) {
-        const emailString = emailMatch[1]
-        const emailObject: Email = {
-          ...(email || blankTemplate()),
-          rows: parseEmailScript(emailString),
-        }
+      if (newMessage?.email && chatId) {
         updateChat(chatId, {
-          email: emailObject,
+          email: newMessage.email,
         })
           .then(() => {
-            deleteMessagesAfterId(revertedMessage.id, chatId).then((messages) => {
-              setEmail(emailObject)
+            deleteMessagesAfterId(newMessage.id, chatId).then((messages) => {
+              if (newMessage.email) {
+                setEmail(newMessage.email)
+              }
               setMessages(messages)
             })
           })

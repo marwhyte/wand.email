@@ -1,11 +1,18 @@
 'use server'
 
+import { updateMessage } from '@/lib/database/queries/chats'
 import { generateEmailScript } from '@/lib/utils/email-script-generator'
 import { stripIndents } from '@/lib/utils/stripIndent'
 import { google } from '@ai-sdk/google'
 import { openai } from '@ai-sdk/openai'
-import { generateText } from 'ai'
+import { generateText, Message } from 'ai'
 import { Email } from '../components/email-workspace/types'
+
+export async function updateEmailForMessage(chatId: string, message: Message, email: Email) {
+  if (message.role !== 'assistant') return
+
+  updateMessage(message.id, chatId, { email })
+}
 
 export async function generateTitleFromUserMessage({ message }: { message: string }) {
   const { text: title } = await generateText({

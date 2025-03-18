@@ -5,7 +5,7 @@ import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
 import { createChat, getChat, updateChat } from '@/lib/database/queries/chats'
 import { CONTINUE_PROMPT } from '@/lib/llm/prompts'
-import { StreamingOptions, streamText } from '@/lib/llm/stream-text'
+import { DEFAULT_PROVIDER, StreamingOptions, streamText } from '@/lib/llm/stream-text'
 import SwitchableStream from '@/lib/llm/switchable-stream'
 import { getMostRecentUserMessage } from '@/lib/utils/misc'
 import { Message } from 'ai'
@@ -50,10 +50,11 @@ export async function POST(request: Request) {
 
     const stream = new SwitchableStream()
 
+    let assistantMessageId = uuidv4()
+
     const options: StreamingOptions = {
       toolChoice: 'none',
       onFinish: async ({ text: content, finishReason }) => {
-        const assistantMessageId = uuidv4()
         messages.push({
           id: assistantMessageId,
           role: 'assistant',
@@ -76,6 +77,7 @@ export async function POST(request: Request) {
 
         console.log(`Reached max token limit (${MAX_TOKENS}): Continuing message (${switchesLeft} switches left)`)
 
+        assistantMessageId = uuidv4()
         // Note: We already added the assistant message above
         messages.push({
           id: uuidv4(),
@@ -83,13 +85,13 @@ export async function POST(request: Request) {
           content: CONTINUE_PROMPT,
         })
 
-        const result = await streamText(messages, options, companyName)
+        const result = await streamText(messages, options, companyName, DEFAULT_PROVIDER, assistantMessageId)
 
         return stream.switchSource(result.toDataStream())
       },
     }
 
-    const result = await streamText(messages, options, companyName)
+    const result = await streamText(messages, options, companyName, DEFAULT_PROVIDER, assistantMessageId)
 
     stream.switchSource(result.toDataStream())
 

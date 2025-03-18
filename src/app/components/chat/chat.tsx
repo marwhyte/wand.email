@@ -98,14 +98,12 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
       companyName: company?.name,
       companyId: company?.id,
     },
-    onFinish: (message: Message) => {
+    onFinish: () => {
       logger.debug('Finished streaming')
       mutate('/api/history')
     },
     initialMessages,
   })
-
-  console.log(messages)
 
   const latestAssistantMessage = messages.findLast((m) => m.role === 'assistant')
   useMessageParser(latestAssistantMessage ?? { role: 'assistant', content: '', id: '' })

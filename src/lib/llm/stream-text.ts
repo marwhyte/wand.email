@@ -20,13 +20,14 @@ export type StreamingOptions = Omit<Parameters<typeof _streamText>[0], 'model'>
 export type ModelProvider = 'openai' | 'anthropic' | 'google'
 
 // Get the model provider from environment variable, default to 'google'
-const DEFAULT_PROVIDER = (process.env.LLM_PROVIDER as ModelProvider) || 'google'
+export const DEFAULT_PROVIDER = (process.env.LLM_PROVIDER as ModelProvider) || 'google'
 
 export async function streamText(
   messages: Messages,
   options?: StreamingOptions,
   companyName?: string,
-  provider: ModelProvider = DEFAULT_PROVIDER
+  provider: ModelProvider = DEFAULT_PROVIDER,
+  assistantMessageId?: string
 ) {
   const systemPrompt = getSystemPrompt(companyName)
 
@@ -57,7 +58,8 @@ export async function streamText(
 
   return _streamText({
     experimental_generateMessageId: () => {
-      return uuidv4()
+      const messageId = assistantMessageId || uuidv4()
+      return messageId
     },
     model,
     system: systemPrompt,

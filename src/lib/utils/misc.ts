@@ -1,6 +1,9 @@
+import { blankTemplate } from '@/app/components/email-workspace/templates/blank-template'
+import { Email } from '@/app/components/email-workspace/types'
 import { Message } from '@ai-sdk/react'
 import { v4 as uuidv4 } from 'uuid'
 import { Company } from '../database/types'
+import { parseEmailScript } from './email-script-parser'
 export function shouldUseDarkText(backgroundColor: string) {
   // Convert hex to RGB
   const hex = backgroundColor.replace('#', '')
@@ -59,29 +62,34 @@ export function sortBySequence<T extends ObjectWithSequence>(items: T[]): T[] {
   return items.sort((a, b) => a.sequence - b.sequence)
 }
 
-export function getMessageId(message: Message) {
-  const isValidUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(message.id || '')
-
-  if (isValidUuid) {
-    return message.id
-  }
-
-  // @ts-ignore
-  if (message.revisionId) {
-    // @ts-ignore
-    // @ts-ignore
-    return message.revisionId
-  }
-
-  return generateUUID()
-}
-
 export function getPhotoUrl(name: string, template: string) {
   return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${template}/${name}`
 }
 
 export function getImgFromKey(imageKey: string, thumbnail = false) {
   return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${imageKey}`
+}
+
+export function getEmailFromMessage(email: Email | null, message: Message) {
+  const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+[^>]*>/)
+  const hasCloseTag = message.content.includes('</EMAIL>')
+
+  if (hasOpenTag && hasCloseTag) {
+    const emailRegex = /<EMAIL\s+[^>]*>([\s\S]*?)<\/EMAIL>/i
+    const emailMatch = message.content.match(emailRegex)
+
+    if (emailMatch) {
+      const emailString = emailMatch[1]
+      const emailObject: Email = {
+        ...(email || blankTemplate()),
+        rows: parseEmailScript(emailString),
+      }
+
+      return emailObject
+    }
+  }
+
+  return null
 }
 
 export function getImgSrc(src: string, company?: Company | null) {
