@@ -324,7 +324,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
               >
                 {!chatStarted && <ChatIntro />}
                 <div
-                  className={classNames('px-6 pt-6', {
+                  className={classNames('', {
                     'flex flex-col': chatStarted,
                   })}
                 >
@@ -335,7 +335,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                     resize="smooth"
                     initial="smooth"
                   >
-                    <StickToBottom.Content className="relative flex-grow overflow-auto">
+                    <StickToBottom.Content className="relative flex-grow overflow-auto px-4 pt-4">
                       <AutoScroller input={input} />
                       <Messages
                         ref={messageRef}

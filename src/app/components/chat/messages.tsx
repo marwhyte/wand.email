@@ -32,7 +32,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
             return (
               <div key={index} className="space-y-2">
                 <div
-                  className={classNames('flex w-full gap-3 rounded-[calc(0.75rem-1px)] p-4', {
+                  className={classNames('flex w-full gap-3 rounded-[calc(0.75rem-1px)] px-3 py-4', {
                     'bg-gray-100': isUserMessage || !isStreaming || (isStreaming && !isLast),
                     'bg-gradient-to-b from-gray-100 from-30% to-transparent': isStreaming && isLast,
                     'mt-4': !isFirst,
