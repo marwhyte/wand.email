@@ -1,4 +1,4 @@
-import { blockLibrary, componentLibrary } from '@/app/components/email-workspace/types'
+import { blockLibrary, COMMON_SOCIAL_ICONS, componentLibrary } from '@/app/components/email-workspace/types'
 import { stripIndents } from '../utils/stripIndent'
 
 // Function to generate documentation for the component library
@@ -46,7 +46,7 @@ const templateStructureDefinition = `
         IMAGE src="pexels:keyword" alt="description"
         LINK content=<p>Link text</p> href="#"
         DIVIDER
-        SOCIALS folder=socials-color socialLinks=[{"icon": "facebook", "url": "#"}, {"icon": "twitter", "url": "#"}]
+        SOCIALS folder=socials-color links=[{"icon": "facebook", "url": "#"}, {"icon": "twitter", "url": "#"}]
         SURVEY kind=rating question="Is this email helpful?"
       }
       COLUMN {
@@ -75,7 +75,7 @@ ${generateBlockAttributesDocs()}
   - Columns in a row will have equal widths by default. Only specify column widths when you need custom proportions, and ensure they total 100% per row.
   - Padding follows CSS shorthand (top,right,bottom,left)
   - Text content must be wrapped in <p> tags. Do not apply any styling attributes directly to these p tags (like style="color: red"). Instead, use the block-level attributes (like color, fontSize, etc.) to style the text.
-  - Social icons must be one of: amazon-music, apple, behance, box, calendly, clubhouse, discord, dribbble, etsy, facebook, figma, github, google, imo, instagram, itunes, linkedin, medium, messenger, notion, paypal, pinterest, reddit, signal, skype, snapchat, soundcloud, spotify, square, streeteasy, telegram, threads, tiktok, tumblr, twitch, venmo, wechat, whatsapp, x, yelp, youtube-music, youtube, zillow
+  - Social icons must be one of: ${Object.keys(COMMON_SOCIAL_ICONS).join(', ')}
   - Image src can use logo, url, or "pexels:keyword". only use pexels:keyword when you want to change the URL of an image. (e.g., "pexels:coffee"). You can assume that logo is the company logo.
   - Image width must be a percentage between 1 and 100. Defaults to 100.
   - Components must use a name and type from the component library
@@ -216,7 +216,7 @@ ${templateStructureDefinition}
           COLUMN {
             IMAGE src="logo" alt="My Logo"
             HEADING content=<p>Connect with us</p> level=h4
-            SOCIALS folder=socials-dark-gray socialLinks=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
+            SOCIALS folder=socials-dark-gray links=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
             TEXT content=<p><a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.</p>
             TEXT content=<p>If you have a question, <a href="/">contact us</a>. eBay I‌nc., 2‌025 H‌amilton A‌venue, S‌an J‌ose, C‌A 9‌5125, U‌nited S‌tates</p>
             TEXT content=<p>© 1995-2024 eBay Inc. or its affiliates</p>

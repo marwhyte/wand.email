@@ -1,6 +1,7 @@
 import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
+import { Email } from '../../types'
 
 export const goingTemplateScript = `
 <EMAIL name="Going Template" backgroundColor=#D7FFC2 linkColor=#004449>
@@ -84,4 +85,10 @@ export const goingTemplateScript = `
 </EMAIL>
 `
 
-export const goingTemplate = createEmail(parseEmailScript(goingTemplateScript), '#004449', '#004449')
+export const goingTemplate = (): Email => {
+  const rows = parseEmailScript(goingTemplateScript, {
+    id: '1',
+    rows: [],
+  })
+  return createEmail(rows, '#004449', '#004449')
+}

@@ -3,11 +3,12 @@ import { Field, FieldGroup, Label } from '@/app/components/fieldset'
 import { Select } from '@/app/components/select'
 import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useChatStore } from '@/lib/stores/chatStore'
+import { getEmailAttributes } from '@/lib/utils/attributes'
 import { getImgFromKey } from '@/lib/utils/misc'
 import { useCallback } from 'react'
+import { NumberInput } from '../input'
 import Nbsp from '../nbsp'
-import Range from '../range'
-import { Email } from './types'
+import { Email, EmailStyleVariant } from './types'
 
 type EmailSettingsProps = {
   email: Email
@@ -26,62 +27,61 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
   )
 
   const fontFamilies = [
-    { label: 'Sans-serif', value: 'sans-serif' },
-    { label: 'Arial', value: 'Arial, sans-serif' },
-    { label: 'Times new roman', value: 'TimesNewRoman, "Times New Roman", Times, Beskerville, Georgia, serif' },
-    { label: 'Georgia', value: 'Georgia, Times, "Times New Roman", serif' },
-    { label: 'Helvetica Neue', value: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
-    { label: 'Courier New', value: "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace" },
-    { label: 'Lato', value: "'Lato', Tahoma, Verdana, Segoe, sans-serif" },
-    { label: 'Open Sans', value: "'Open Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif" },
-    { label: 'Merriweather', value: "'Merriweather', 'Georgia', serif" },
-    {
-      label: 'ヒラギノ角ゴ Pro W3',
-      value:
-        'ヒラギノ角ゴ Pro W3, Hiragino Kaku Gothic Pro, Osaka, メイリオ, Meiryo, ＭＳ Ｐゴシック, MS PGothic, sans-serif',
-    },
-    { label: 'Inter', value: "'Inter', sans-serif" },
+    { label: 'Arial', value: 'Arial, Helvetica, sans-serif' },
+    { label: 'Helvetica', value: 'Helvetica, Arial, sans-serif' },
+    { label: 'Times New Roman', value: '"Times New Roman", Times, serif' },
+    { label: 'Georgia', value: 'Georgia, "Times New Roman", Times, serif' },
+    { label: 'Verdana', value: 'Verdana, Arial, sans-serif' },
+    { label: 'Tahoma', value: 'Tahoma, Verdana, sans-serif' },
+    { label: 'Trebuchet MS', value: '"Trebuchet MS", Arial, sans-serif' },
+    { label: 'Outfit', value: 'Outfit, Roboto, Helvetica, Arial, sans-serif' },
+    { label: 'Open Sans', value: 'Open Sans, Roboto, Helvetica, Arial, sans-serif' },
   ]
+
+  const emailAttributes = getEmailAttributes(email)
 
   return (
     <FieldGroup className="p-4">
       <Field>
         <Label>
-          Content area width:
+          Content area width
           <Nbsp />
-          <span className="font-bold text-blue-500">
-            {email.width.endsWith('px') ? email.width : `${email.width}px`}
-          </span>
         </Label>
 
-        <Range
+        <NumberInput
           className="w-full"
           min={480}
           max={900}
-          value={parseInt(email.width)}
-          onChange={(e) => handleChange({ width: e.target.value })}
+          value={parseInt(emailAttributes.width ?? '600')}
+          onChange={(e) => handleChange({ width: `${e}` })}
         />
       </Field>
       <Field>
-        <Label>Default background color</Label>
-        <ColorInput value={email.bgColor} onChange={(bgColor) => handleChange({ bgColor })} />
+        <Label>Background color</Label>
+        <ColorInput
+          value={emailAttributes.backgroundColor}
+          onChange={(backgroundColor) => handleChange({ backgroundColor })}
+        />
       </Field>
       <Field>
         <Label>Default text color</Label>
-        <ColorInput value={email.color} onChange={(color) => handleChange({ color })} />
+        <ColorInput value={emailAttributes.color} onChange={(color) => handleChange({ color })} />
       </Field>
       <Field>
         <Label>Default link color</Label>
-        <ColorInput value={email.linkColor} onChange={(linkColor) => handleChange({ linkColor })} />
+        <ColorInput value={emailAttributes.linkColor} onChange={(linkColor) => handleChange({ linkColor })} />
       </Field>
       <Field>
-        <Label>Default row background color</Label>
-        <ColorInput value={email.rowBgColor} onChange={(rowBgColor) => handleChange({ rowBgColor })} />
+        <Label>Row background color</Label>
+        <ColorInput
+          value={emailAttributes.rowBackgroundColor}
+          onChange={(rowBackgroundColor) => handleChange({ rowBackgroundColor })}
+        />
       </Field>
       <Field>
         <Label>Font family</Label>
         <Select
-          value={email.fontFamily?.split(',')[0].replace(/['"]/g, '')}
+          value={emailAttributes.fontFamily?.split(',')[0].replace(/['"]/g, '')}
           onChange={(e) => {
             const selectedFont = fontFamilies.find((f) => f.label === e.target.value)
             handleChange({ fontFamily: selectedFont?.value || e.target.value })
@@ -92,6 +92,17 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
               {fontFamily.label}
             </option>
           ))}
+        </Select>
+      </Field>
+      <Field>
+        <Label>Variant</Label>
+        <Select
+          value={emailAttributes.styleVariant}
+          onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
+        >
+          <option value="default">Default</option>
+          <option value="outline">Outline</option>
+          <option value="floating">Floating</option>
         </Select>
       </Field>
       {company && (

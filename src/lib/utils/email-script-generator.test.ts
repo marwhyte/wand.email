@@ -3,8 +3,11 @@ jest.mock('@/lib/utils/image-service', () => ({
   resolveImageSrc: jest.fn().mockResolvedValue('https://example.com/mock-image.jpg'),
 }))
 
+import {
+  turbotaxTemplate,
+  turbotaxTemplateScript,
+} from '@/app/components/email-workspace/templates/marketing/turbotax-template'
 import { testingTemplateComplex } from '@/app/components/email-workspace/templates/testing-template-complex'
-import { turbotaxTemplate, turbotaxTemplateScript } from '@/app/components/email-workspace/templates/turbotax-template'
 import { createEmail } from './email-helpers'
 import { generateEmailScript } from './email-script-generator'
 import { parseEmailScript } from './email-script-parser'
@@ -102,15 +105,15 @@ describe('Email Script Generator', () => {
     const generatedScript = generateEmailScript(originalEmail)
 
     // Parse the generated script back to an email structure
-    const parsedRows = parseEmailScript(generatedScript)
+    const parsedRows = parseEmailScript(generatedScript, originalEmail)
     const parsedEmail = createEmail(
       parsedRows,
-      originalEmail.color,
-      originalEmail.linkColor,
-      originalEmail.fontFamily,
-      originalEmail.bgColor,
-      originalEmail.rowBgColor,
-      originalEmail.width
+      originalEmail.color ?? '#000000',
+      originalEmail.linkColor ?? '#0066cc',
+      originalEmail.fontFamily ?? 'Arial, sans-serif',
+      originalEmail.backgroundColor ?? '#f7f7f7',
+      originalEmail.rowBackgroundColor ?? '#f7f7f7',
+      originalEmail.width ?? '600'
     )
 
     // Compare the structures without ids
@@ -130,14 +133,18 @@ describe('Email Script Generator', () => {
 
   it('should handle complex templates in both directions', () => {
     // Parse the original script to get an email structure
-    const parsedRows = parseEmailScript(testingTemplateComplex)
+    const parsedRows = parseEmailScript(testingTemplateComplex, {
+      id: '1',
+      rows: [],
+    })
+
     const originalEmail = createEmail(
       parsedRows,
       '#333333', // color
       '#0066cc', // linkColor
       'Arial, sans-serif', // fontFamily
-      '#f7f7f7', // bgColor
-      '#f7f7f7', // rowBgColor
+      '#f7f7f7', // backgroundColor
+      '#f7f7f7', // rowBackgroundColor
       '600' // width
     )
 
@@ -145,15 +152,15 @@ describe('Email Script Generator', () => {
     const generatedScript = generateEmailScript(originalEmail)
 
     // Parse the generated script back to an email structure
-    const reparsedRows = parseEmailScript(generatedScript)
+    const reparsedRows = parseEmailScript(generatedScript, originalEmail)
     const reparsedEmail = createEmail(
       reparsedRows,
-      originalEmail.color,
-      originalEmail.linkColor,
-      originalEmail.fontFamily,
-      originalEmail.bgColor,
-      originalEmail.rowBgColor,
-      originalEmail.width
+      originalEmail.color ?? '#000000',
+      originalEmail.linkColor ?? '#0066cc',
+      originalEmail.fontFamily ?? 'Arial, sans-serif',
+      originalEmail.backgroundColor ?? '#f7f7f7',
+      originalEmail.rowBackgroundColor ?? '#f7f7f7',
+      originalEmail.width ?? '600'
     )
 
     // Compare the structures without ids

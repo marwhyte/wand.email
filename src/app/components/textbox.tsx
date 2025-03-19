@@ -1,6 +1,7 @@
 'use client'
 
 import { useEmailStore } from '@/lib/stores/emailStore'
+import { getEmailAttributes } from '@/lib/utils/attributes'
 import { BoldIcon, ItalicIcon, LinkIcon, LinkSlashIcon, UnderlineIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import Color from '@tiptap/extension-color'
 import Link from '@tiptap/extension-link'
@@ -50,6 +51,8 @@ export default function Textbox({
     }
   }, [showLinkInput])
 
+  const emailAttributes = getEmailAttributes(email)
+
   const editor = useEditor({
     editorProps: {
       attributes: {
@@ -81,7 +84,7 @@ export default function Textbox({
         HTMLAttributes: {
           class: 'text-blue-600 underline hover:text-blue-800',
           rel: 'noopener noreferrer',
-          style: `color: ${email?.linkColor ?? '#2563eb'};`,
+          style: `color: ${emailAttributes.linkColor ?? '#2563eb'};`,
         },
         validate: (url) => {
           try {

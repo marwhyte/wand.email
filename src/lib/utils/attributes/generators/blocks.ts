@@ -25,6 +25,7 @@ import {
   getAdditionalSurveyStyles,
   getAdditionalTextStyles,
 } from '../defaults/blocks'
+import { getEmailAttributes } from './layout'
 
 export type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
 
@@ -38,7 +39,7 @@ export function generateTextProps(
     style: {
       ...applyPaddingAttributes(block.attributes),
       ...applyTextAttributes(block.attributes),
-      ...getAdditionalTextStyles(block, parentRow),
+      ...getAdditionalTextStyles(block, parentRow, email),
     },
   }
 }
@@ -46,14 +47,14 @@ export function generateTextProps(
 export function generateHeadingProps(
   block: HeadingBlock,
   parentRow: RowBlock,
-  mobileView = false
+  email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Heading>> {
   return {
     as: block.attributes.level,
     style: {
       ...applyPaddingAttributes(block.attributes),
       ...applyTextAttributes(block.attributes),
-      ...getAdditionalHeadingStyles(block, parentRow),
+      ...getAdditionalHeadingStyles(block, parentRow, email),
       marginBlockStart: 0,
       marginBlockEnd: 0,
     },
@@ -63,6 +64,7 @@ export function generateHeadingProps(
 export function generateImageProps(
   block: ImageBlock,
   parentRow: RowBlock,
+  email: Email | null,
   company: Company | null
 ): OmitChildren<React.ComponentProps<typeof Img>> {
   const src = getImgSrc(block.attributes.src, company)
@@ -72,7 +74,7 @@ export function generateImageProps(
     alt: block.attributes.alt,
     style: {
       ...applyPaddingAttributes(block.attributes),
-      ...getAdditionalImageStyles(block, parentRow, company),
+      ...getAdditionalImageStyles(block, parentRow, email, company),
     },
   }
 
@@ -83,12 +85,12 @@ export function generateButtonProps(
   block: ButtonBlock,
   parentRow: RowBlock,
   company: Company | null,
-  mobileView = false
+  email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Button>> {
   const style = {
     ...applyPaddingAttributes(block.attributes),
     ...applyTextAttributes(block.attributes),
-    ...getAdditionalButtonStyles(block, parentRow, company),
+    ...getAdditionalButtonStyles(block, parentRow, email, company),
   }
 
   return {
@@ -108,11 +110,12 @@ export function generateLinkProps(
   const mergedAttributes: React.ComponentProps<typeof Link>['style'] = {
     ...applyPaddingAttributes(block.attributes),
     ...applyTextAttributes(block.attributes),
-    ...getAdditionalLinkStyles(block, parentRow),
+    ...getAdditionalLinkStyles(block, parentRow, email),
   }
 
   if (email && !mergedAttributes.color) {
-    mergedAttributes.color = email.linkColor
+    const emailAttributes = getEmailAttributes(email)
+    mergedAttributes.color = emailAttributes.linkColor
   }
 
   return {
@@ -126,37 +129,39 @@ export function generateLinkProps(
 export function generateDividerProps(
   block: DividerBlock,
   parentRow: RowBlock,
-  mobileView = false
+  email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Hr>> {
   return {
     style: {
-      ...getAdditionalDividerStyles(block, parentRow),
+      ...getAdditionalDividerStyles(block, parentRow, email),
     },
   }
 }
 
 export function generateSocialsProps(
   block: SocialsBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Section>> {
   return {
     align: block.attributes.align ?? 'center',
     style: {
       ...applyPaddingAttributes(block.attributes),
-      ...getAdditionalSocialsStyles(block, parentRow),
+      ...getAdditionalSocialsStyles(block, parentRow, email),
     },
   }
 }
 
 export function generateSurveyProps(
   block: SurveyBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Section>> {
   return {
     color: block.attributes.color ?? '#4F46E5',
     style: {
       ...applyPaddingAttributes(block.attributes),
-      ...getAdditionalSurveyStyles(block, parentRow),
+      ...getAdditionalSurveyStyles(block, parentRow, email),
     },
   }
 }
@@ -188,19 +193,19 @@ export function getBlockAttributes<T extends EmailBlock>(
     case 'text':
       return generateTextProps(block as TextBlock, parentRow, mobileView, email) as any
     case 'heading':
-      return generateHeadingProps(block as HeadingBlock, parentRow, mobileView) as any
+      return generateHeadingProps(block as HeadingBlock, parentRow, email) as any
     case 'image':
-      return generateImageProps(block as ImageBlock, parentRow, company) as any
+      return generateImageProps(block as ImageBlock, parentRow, email, company) as any
     case 'button':
-      return generateButtonProps(block as ButtonBlock, parentRow, company, mobileView) as any
+      return generateButtonProps(block as ButtonBlock, parentRow, company, email) as any
     case 'link':
       return generateLinkProps(block as LinkBlock, parentRow, mobileView, email) as any
     case 'divider':
-      return generateDividerProps(block as DividerBlock, parentRow, mobileView) as any
+      return generateDividerProps(block as DividerBlock, parentRow, email) as any
     case 'survey':
-      return generateSurveyProps(block as SurveyBlock, parentRow) as any
+      return generateSurveyProps(block as SurveyBlock, parentRow, email) as any
     case 'socials':
-      return generateSocialsProps(block as SocialsBlock, parentRow) as any
+      return generateSocialsProps(block as SocialsBlock, parentRow, email) as any
     default:
       return {} as never
   }

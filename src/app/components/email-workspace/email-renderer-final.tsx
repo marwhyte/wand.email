@@ -2,8 +2,10 @@ import { Company } from '@/lib/database/types'
 import {
   generateBodyProps,
   generateColumnProps,
+  generateContentProps,
   generateRowProps,
   getBlockAttributes,
+  getEmailAttributes,
   getRowAttributes,
   OmitChildren,
 } from '@/lib/utils/attributes'
@@ -12,9 +14,9 @@ import {
   Button,
   Column,
   Container,
+  Font,
   Head,
   Heading,
-  Hr,
   Html,
   Img,
   Link,
@@ -76,13 +78,26 @@ const RenderBlockFinal = ({
   }
 
   const content = (() => {
+    const emailAttributes = getEmailAttributes(email)
+
+    const options = {
+      replace: (domNode: any) => {
+        if (domNode.name === 'a' && (!domNode.attribs.style || !domNode.attribs.style.includes('color'))) {
+          domNode.attribs.style = `color: ${emailAttributes.linkColor ?? '#0066CC'};`
+          return domNode
+        }
+      },
+    }
+
     switch (block.type) {
       case 'text':
         const textProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Text>>
-        return <Text {...textProps}>{parse(block.attributes.content)}</Text>
+
+        return <Text {...textProps}>{parse(block.attributes.content, options)}</Text>
       case 'heading':
         const headingProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Heading>>
-        return <Heading {...headingProps}>{parse(block.attributes.content)}</Heading>
+
+        return <Heading {...headingProps}>{parse(block.attributes.content, options)}</Heading>
       case 'image':
         const imageProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Img>>
         // Extract align property and remaining props
@@ -129,13 +144,33 @@ const RenderBlockFinal = ({
           </div>
         )
       case 'divider':
-        const dividerProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Hr>>
-        const { style: dividerStyle, ...attributes } = dividerProps as any
-        return <Hr {...attributes} style={{ ...dividerStyle }} />
+        return (
+          <table
+            border={0}
+            cellPadding="0"
+            cellSpacing="0"
+            role="presentation"
+            width="100%"
+            // @ts-ignore
+            style={{ msoTableLspace: '0pt', msoTableRspace: '0pt' }}
+          >
+            <tr>
+              <td
+                style={{
+                  fontSize: '1px',
+                  lineHeight: '1px',
+                  borderTop: `${restStyle.borderWidth} ${restStyle.borderStyle} ${restStyle.borderColor}`,
+                }}
+              >
+                <span style={{ wordBreak: 'break-word' }}>&#8202;</span>
+              </td>
+            </tr>
+          </table>
+        )
       case 'socials':
-        return <EmailSocials isEditing={false} block={block} parentRow={parentRow} />
+        return <EmailSocials isEditing={false} block={block} parentRow={parentRow} email={email} />
       case 'survey':
-        return <EmailSurvey block={block} parentRow={parentRow} />
+        return <EmailSurvey block={block} parentRow={parentRow} email={email} />
       default:
         return null
     }
@@ -159,11 +194,12 @@ const RenderBlockFinal = ({
 }
 
 const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; company: Company | null }) => {
+  const emailAttributes = getEmailAttributes(email)
   const rowAttributes = getRowAttributes(row, email)
   const columnSpacing = rowAttributes?.columnSpacing || 0
   const numColumns = row.columns.length
   const numSpacers = numColumns - 1
-  const totalSpacerWidth = ((columnSpacing * numSpacers) / 600) * 100
+  const totalSpacerWidth = ((columnSpacing * numSpacers) / Number(emailAttributes.width)) * 100
   const columnWidth = (100 - totalSpacerWidth) / numColumns
 
   const renderColumnContent = (column: ColumnBlock) =>
@@ -173,7 +209,29 @@ const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; c
 
   const renderSpacer = (index: number) =>
     columnSpacing > 0 &&
-    index < row.columns.length - 1 && <Column className="spacer-column" style={{ width: `${columnSpacing}px` }} />
+    index < row.columns.length - 1 && (
+      <Column
+        className="spacer-column gap"
+        style={{
+          width: `${columnSpacing}px`,
+          verticalAlign: 'top',
+          fontWeight: 400,
+          textAlign: 'left',
+        }}
+      >
+        <table
+          width={columnSpacing}
+          height={columnSpacing}
+          style={{
+            // @ts-ignore - MSO properties for Outlook compatibility
+            msoTableLspace: '0pt',
+            msoTableRspace: '0pt',
+            width: `${columnSpacing}px`,
+            height: `${columnSpacing}px`,
+          }}
+        />
+      </Column>
+    )
 
   return (
     <Row
@@ -201,36 +259,36 @@ const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; c
   )
 }
 
-export const EmailContent = ({ email, company }: { email: Email; company: Company | null }) => {
+const RenderRowSpacer = ({ height }: { height: number }) => {
   return (
-    <Container
-      width={email.width}
+    <Row
       style={{
-        backgroundColor: email.bgColor,
-        color: email.color,
-        maxWidth: '100%',
-        margin: '0 auto',
-        width: `${email.width}px`,
         // @ts-ignore - MSO properties for Outlook compatibility
-        msoTableLspace: '0pts',
-        // @ts-ignore - MSO properties for Outlook compatibility
-        msoTableRspace: '0pts',
+        msoTableLspace: '0pt',
+        msoTableRspace: '0pt',
       }}
     >
-      {email.rows.map((row) => (
-        // <Container
-        //   key={row.id}
-        //   {...generateContainerProps(row, email)}
-        //   style={{
-        //     ...generateContainerProps(row, email).style,
-        //     // @ts-ignore - MSO properties for Outlook compatibility
-        //     msoTableLspace: '0pts',
-        //     // @ts-ignore - MSO properties for Outlook compatibility
-        //     msoTableRspace: '0pts',
-        //   }}
-        // >
-        <RenderColumns row={row} email={email} company={company} key={row.id} />
-        // </Container>
+      <Column style={{ padding: 0 }}>
+        <div style={{ height: `${height}px`, lineHeight: `${height}px`, fontSize: '1px' }}>&#8202;</div>
+      </Column>
+    </Row>
+  )
+}
+
+export const EmailContent = ({ email, company }: { email: Email; company: Company | null }) => {
+  const emailAttributes = getEmailAttributes(email)
+  return (
+    <Container {...generateContentProps(email)}>
+      {email.rows.map((row, index) => (
+        <React.Fragment key={row.id}>
+          <RenderColumns row={row} email={email} company={company} />
+          {index < email.rows.length - 1 &&
+            emailAttributes.styleVariant === 'outline' &&
+            row.attributes.type !== 'header' &&
+            row.attributes.type !== 'footer' &&
+            email.rows[index + 1].attributes.type !== 'header' &&
+            email.rows[index + 1].attributes.type !== 'footer' && <RenderRowSpacer height={20} />}
+        </React.Fragment>
       ))}
     </Container>
   )
@@ -242,6 +300,26 @@ const EmailRendererFinal = ({ email, company }: Props) => {
   return (
     <Html>
       <Head>
+        {email.fontFamily?.includes('Outfit') && (
+          <Font
+            fontFamily="Outfit"
+            fallbackFontFamily="Arial"
+            webFont={{
+              url: 'https://fonts.gstatic.com/s/outfit/v11/QGYvz_MVcBeNP4NJtEtqUYLknw.woff2',
+              format: 'woff2',
+            }}
+          />
+        )}
+        {email.fontFamily?.includes('Open Sans') && (
+          <Font
+            fontFamily="Open Sans"
+            fallbackFontFamily="Arial"
+            webFont={{
+              url: 'https://fonts.gstatic.com/s/opensans/v40/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2',
+              format: 'woff2',
+            }}
+          />
+        )}
         <style>{`
           p, h1, h2, h3, h3, h4, h5 {
             margin: 0 !important;
@@ -319,7 +397,7 @@ const EmailRendererFinal = ({ email, company }: Props) => {
         `}</style>
       </Head>
       <Body {...generateBodyProps(email)}>
-        <Preview>{email.preview}</Preview>
+        <Preview>{email.preview ?? 'Preview'}</Preview>
         <EmailContent email={email} company={company} />
       </Body>
     </Html>

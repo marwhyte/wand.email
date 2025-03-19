@@ -1,13 +1,15 @@
 import { auth } from '@/auth'
 import type { Metadata } from 'next'
 import { SessionProvider } from 'next-auth/react'
-import { Inter } from 'next/font/google'
+import { Inter, Open_Sans, Outfit } from 'next/font/google'
 
 import { fetchUser } from './actions'
 import PlanProvider from './components/payment/plan-provider'
 import './globals.css'
 
 const inter = Inter({ subsets: ['latin'] })
+const outfit = Outfit({ subsets: ['latin'] })
+const openSans = Open_Sans({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
@@ -37,7 +39,7 @@ export default async function RootLayout({
         <link rel="preconnect" href="https://rsms.me/" />
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
       </head>
-      <body className={inter.className + ' h-full'}>
+      <body className={`${inter.className} h-full`}>
         <main>
           <SessionProvider session={session}>
             <PlanProvider fetchUser={fetchUser} plan={initialUser?.plan}>

@@ -66,7 +66,7 @@ export function ChatInput({
             minHeight: TEXTAREA_MIN_HEIGHT,
             maxHeight: TEXTAREA_MAX_HEIGHT,
           }}
-          placeholder="Describe your perfect email"
+          placeholder={'Describe your perfect email'}
           translate="no"
         />
         <SendButton

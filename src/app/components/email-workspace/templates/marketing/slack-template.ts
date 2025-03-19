@@ -1,7 +1,7 @@
 import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
-import { Email } from '../types'
+import { Email } from '../../types'
 
 export const slackTemplateScript = `
 <EMAIL name="Slack Template" backgroundColor=#f8f4f0 linkColor=#611f69>
@@ -73,7 +73,7 @@ export const slackTemplateScript = `
       IMAGE width=100 src="${getPhotoUrl('slack-logo.png', 'slack')}" alt="Slack Logo"
     }
     COLUMN width=50 align=right {
-      SOCIALS folder="socials-dark-gray" socialLinks=[{"icon":"facebook","url":"https://www.facebook.com","title":"Facebook","alt":"Facebook"},{"icon":"linkedin","url":"https://www.linkedin.com","title":"LinkedIn","alt":"LinkedIn"},{"icon":"youtube","url":"https://www.youtube.com","title":"YouTube","alt":"YouTube"},{"icon":"instagram","url":"https://www.instagram.com","title":"Instagram","alt":"Instagram"}]
+      SOCIALS folder="socials-dark-gray" links=[{"icon":"facebook","url":"https://www.facebook.com","title":"Facebook","alt":"Facebook"},{"icon":"linkedin","url":"https://www.linkedin.com","title":"LinkedIn","alt":"LinkedIn"},{"icon":"youtube","url":"https://www.youtube.com","title":"YouTube","alt":"YouTube"},{"icon":"instagram","url":"https://www.instagram.com","title":"Instagram","alt":"Instagram"}]
       ]
     }
   }
@@ -88,6 +88,6 @@ export const slackTemplateScript = `
 `
 
 export const slackTemplate = (): Email => {
-  const rows = parseEmailScript(slackTemplateScript)
+  const rows = parseEmailScript(slackTemplateScript, { id: '123', rows: [] })
   return createEmail(rows, '#333333', '#333333', 'Lato, Arial, sans-serif', '#ffffff', '500')
 }

@@ -1,16 +1,19 @@
 import { generateSocialsProps } from '@/lib/utils/attributes/generators/blocks'
 import { getPhotoUrl } from '@/lib/utils/misc'
-import { RowBlock, SocialsBlock } from '../types'
+import { Email, RowBlock, SocialsBlock } from '../types'
 
 type Props = {
   block: SocialsBlock
   isEditing?: boolean
   parentRow: RowBlock
+  email: Email | null
 }
 
-const EmailSocials = ({ block, isEditing = true, parentRow }: Props) => {
-  const socialProps = generateSocialsProps(block, parentRow)
+const EmailSocials = ({ block, isEditing = true, parentRow, email }: Props) => {
+  const socialProps = generateSocialsProps(block, parentRow, email)
   const { align } = socialProps
+
+  console.log(block.attributes, 'this')
 
   return (
     // @ts-expect-error
@@ -29,7 +32,7 @@ const EmailSocials = ({ block, isEditing = true, parentRow }: Props) => {
       >
         <tbody>
           <tr>
-            {block.attributes.socialLinks.map((social) => (
+            {block.attributes.links.map((social) => (
               <td
                 key={social.url === '/' || social.url === '#' ? Math.random() : social.url}
                 style={{ padding: '0 4px' }}

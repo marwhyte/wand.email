@@ -1,20 +1,19 @@
 import { useChatStore } from '@/lib/stores/chatStore'
-import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateButtonProps } from '@/lib/utils/attributes'
 import { Button } from '@react-email/components'
 import parse from 'html-react-parser'
-import { ButtonBlock, RowBlock } from '../types'
+import { ButtonBlock, Email, RowBlock } from '../types'
 
 type Props = {
   block: ButtonBlock
   parentRow: RowBlock
+  email: Email | null
 }
 
-export default function EmailButton({ block, parentRow }: Props) {
-  const { mobileView } = useMobileViewStore()
+export default function EmailButton({ block, parentRow, email }: Props) {
   const { company } = useChatStore()
 
-  const buttonProps = generateButtonProps(block, parentRow, company, mobileView)
+  const buttonProps = generateButtonProps(block, parentRow, company, email)
 
   // Extract align and style properties
   // @ts-expect-error

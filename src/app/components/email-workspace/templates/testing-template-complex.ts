@@ -1,12 +1,12 @@
 export const testingTemplateComplex = `
 <EMAIL preview="Testing Template Complex" backgroundColor=#f7f7f7 rowBackgroundColor=#f7f7f7 linkColor=#0066cc fontFamily="Arial, sans-serif" width=600 color=#333333>
-  ROW type=header variant=modern backgroundColor=#ffffff borderColor=#dddddd borderRadius=5 borderStyle=solid borderWidth=1 columnSpacing=10 hideOnMobile=false stackOnMobile=true verticalAlign=middle padding=20 {
+  ROW type=header backgroundColor=#ffffff borderColor=#dddddd borderRadius=5 borderStyle=solid borderWidth=1 columnSpacing=10 hideOnMobile=false stackOnMobile=true verticalAlign=middle padding=20 {
     COLUMN width=30% {
       IMAGE src="logo.png" alt="Company Logo" align=left padding=10 borderRadius=5 width=120
     }
     COLUMN width=70% {
       HEADING level=h2 content=<p>Welcome to Our Newsletter</p> color=#333333 fontWeight=bold fontSize=24 fontFamily="Arial, sans-serif" letterSpacing=0.5 lineHeight=1.2 textAlign=right padding=10
-      SOCIALS align=right folder=socials-color padding=10 socialLinks=[{"icon":"facebook","url":"https://facebook.com","title":"Facebook","alt":"Facebook"},{"icon":"instagram","url":"https://instagram.com","title":"Instagram","alt":"Instagram"},{"icon":"linkedin","url":"https://linkedin.com","title":"LinkedIn","alt":"LinkedIn"}]
+      SOCIALS align=right folder=socials-color padding=10 links=[{"icon":"facebook","url":"https://facebook.com","title":"Facebook","alt":"Facebook"},{"icon":"instagram","url":"https://instagram.com","title":"Instagram","alt":"Instagram"},{"icon":"linkedin","url":"https://linkedin.com","title":"LinkedIn","alt":"LinkedIn"}]
     }
   }
   
@@ -38,7 +38,7 @@ export const testingTemplateComplex = `
     }
   }
   
-  ROW type=gallery variant=cards backgroundColor=#f9f9f9 padding=30 borderRadius=5 {
+  ROW type=gallery backgroundColor=#f9f9f9 padding=30 borderRadius=5 {
     COLUMN width=33% {
       IMAGE src="product1.jpg" alt="Product 1" width=100% borderRadius=8 padding=0,0,10,0
       HEADING level=h4 content=<p>Product One</p> color=#333333 fontWeight=bold fontSize=18 textAlign=center padding=5,0
@@ -67,11 +67,11 @@ export const testingTemplateComplex = `
     }
   }
 
-  ROW type=footer variant=modern backgroundColor=#333333 padding=30 borderRadius=5 {
+  ROW type=footer backgroundColor=#333333 padding=30 borderRadius=5 {
     COLUMN width=50% {
       IMAGE src="footer-logo.png" alt="Company Logo" width=120 padding=0,0,15,0
       TEXT content=<p>123 Business Street<br>City, State 12345<br>Phone: (123) 456-7890</p> color=#ffffff fontSize=14 lineHeight=1.5 padding=0,0,15,0
-      SOCIALS align=left folder=socials-white padding=0,0,15,0 socialLinks=[{"icon":"facebook","url":"https://facebook.com","title":"Facebook","alt":"Facebook"},{"icon":"instagram","url":"https://instagram.com","title":"Instagram","alt":"Instagram"},{"icon":"x","url":"https://x.com","title":"X","alt":"X"}]
+      SOCIALS align=left folder=socials-white padding=0,0,15,0 links=[{"icon":"facebook","url":"https://facebook.com","title":"Facebook","alt":"Facebook"},{"icon":"instagram","url":"https://instagram.com","title":"Instagram","alt":"Instagram"},{"icon":"x","url":"https://x.com","title":"X","alt":"X"}]
     }
     COLUMN width=50% {
       HEADING level=h4 content=<p>Quick Links</p> color=#ffffff fontWeight=bold fontSize=16 padding=0,0,10,0

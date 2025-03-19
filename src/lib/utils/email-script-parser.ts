@@ -4,10 +4,8 @@ import {
   ColumnBlockAttributes,
   COMMON_SOCIAL_ICONS,
   ComponentType,
-  ComponentVariant,
   DividerBlockAttributes,
   Email,
-  FOLDER_SPECIFIC_ICONS,
   HeadingBlockAttributes,
   ImageBlockAttributes,
   LinkBlockAttributes,
@@ -34,7 +32,7 @@ type BlockType = keyof BlockParserMap
 // ===== Helper Functions =====
 function parsePadding(padding: string | undefined): Record<string, string> {
   if (!padding) {
-    return {} // Return empty object instead of zero values
+    return {} // Return empty object when padding is undefined
   }
 
   const values: string[] = padding.split(',').map((p) => `${p}px`)
@@ -43,36 +41,28 @@ function parsePadding(padding: string | undefined): Record<string, string> {
   // Handle different value counts according to CSS shorthand rules
   switch (values.length) {
     case 1: // All sides
-      if (values[0] !== '0px') {
-        result.paddingTop = values[0]
-        result.paddingRight = values[0]
-        result.paddingBottom = values[0]
-        result.paddingLeft = values[0]
-      }
+      result.paddingTop = values[0]
+      result.paddingRight = values[0]
+      result.paddingBottom = values[0]
+      result.paddingLeft = values[0]
       break
     case 2: // Vertical, Horizontal
-      if (values[0] !== '0px') {
-        result.paddingTop = values[0]
-        result.paddingBottom = values[0]
-      }
-      if (values[1] !== '0px') {
-        result.paddingRight = values[1]
-        result.paddingLeft = values[1]
-      }
+      result.paddingTop = values[0]
+      result.paddingBottom = values[0]
+      result.paddingRight = values[1]
+      result.paddingLeft = values[1]
       break
     case 3: // Top, Horizontal, Bottom
-      if (values[0] !== '0px') result.paddingTop = values[0]
-      if (values[1] !== '0px') {
-        result.paddingRight = values[1]
-        result.paddingLeft = values[1]
-      }
-      if (values[2] !== '0px') result.paddingBottom = values[2]
+      result.paddingTop = values[0]
+      result.paddingRight = values[1]
+      result.paddingLeft = values[1]
+      result.paddingBottom = values[2]
       break
     case 4: // Top, Right, Bottom, Left
-      if (values[0] !== '0px') result.paddingTop = values[0]
-      if (values[1] !== '0px') result.paddingRight = values[1]
-      if (values[2] !== '0px') result.paddingBottom = values[2]
-      if (values[3] !== '0px') result.paddingLeft = values[3]
+      result.paddingTop = values[0]
+      result.paddingRight = values[1]
+      result.paddingBottom = values[2]
+      result.paddingLeft = values[3]
       break
   }
 
@@ -133,11 +123,15 @@ function isSocialIconFolder(value: string | undefined): value is SocialIconFolde
 
 function isSocialIconName(value: string | undefined): value is SocialIconName {
   // Get all possible values by combining common icons and folder-specific icons
-  const validIcons = new Set([
-    ...Object.keys(COMMON_SOCIAL_ICONS),
-    ...Object.values(FOLDER_SPECIFIC_ICONS).flatMap((icons) => Object.keys(icons)),
-  ])
-  return typeof value === 'string' && validIcons.has(value as SocialIconName)
+  const validIcons = new Set(
+    [
+      ...Object.keys(COMMON_SOCIAL_ICONS),
+      'twitter', // Add Twitter/X as valid option
+      'x', // Support both names
+    ].map((icon) => icon.toLowerCase())
+  )
+
+  return typeof value === 'string' && validIcons.has(value.toLowerCase())
 }
 
 // ===== Base Attribute Parsers =====
@@ -240,7 +234,7 @@ function parseAttributes(attrString: string): RawAttributes {
     attrString = attrString.replace(contentMatch[0], '')
   }
 
-  // Special handling for socialLinks - match both quoted and unquoted keys
+  // Special handling for links - match both quoted and unquoted keys
   const jsonMatch = attrString.match(/(\w+)=(\[[\s\S]*?\])/)
   if (jsonMatch) {
     const [fullMatch, key, jsonValue] = jsonMatch
@@ -310,7 +304,6 @@ const parseRowAttributes: AttributeParser<RowBlockAttributes> = (raw) => {
   if ('borderWidth' in raw) attrs.borderWidth = ensurePx(raw.borderWidth)
   if ('columnSpacing' in raw) attrs.columnSpacing = Number(raw.columnSpacing)
   if ('type' in raw) attrs.type = raw.type as ComponentType
-  if ('variant' in raw) attrs.variant = raw.variant as ComponentVariant<ComponentType>
   if ('verticalAlign' in raw && isVerticalAlign(raw.verticalAlign)) attrs.verticalAlign = raw.verticalAlign
 
   // Boolean fields need special handling
@@ -405,12 +398,13 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
     ...handlePadding(raw),
     align: isAlign(raw.align) ? raw.align : undefined,
     folder: isSocialIconFolder(raw.folder) ? raw.folder : 'socials-color',
-    socialLinks: [],
+    links: [],
   }
 
   // Parse social links from raw attributes
   try {
-    const jsonStr = raw.socialLinks?.trim() || '[]'
+    const jsonStr = raw.links?.trim() || '[]'
+    console.log('Parsing social links from:', jsonStr) // Debug log
 
     // Validate JSON string format
     if (!jsonStr.startsWith('[') || !jsonStr.endsWith(']')) {
@@ -419,25 +413,25 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
     }
 
     const rawLinks = JSON.parse(jsonStr)
+    console.log('Parsed links:', rawLinks) // Debug log
 
     if (Array.isArray(rawLinks)) {
-      for (const link of rawLinks) {
-        if (isSocialIconName(link.icon)) {
-          attrs.socialLinks.push({
-            icon: link.icon,
-            url: link.url || '',
-            title: link.title || '',
-            alt: link.alt || '',
-          })
-        }
-      }
+      attrs.links = rawLinks
+        .filter((link) => isSocialIconName(link.icon))
+        .map((link) => ({
+          icon: link.icon.toLowerCase(), // Normalize to lowercase
+          url: link.url || '',
+          title: link.title || '',
+          alt: link.alt || '',
+        }))
     }
   } catch (e) {
     console.error('Failed to parse social links:', e)
-    console.debug('Raw socialLinks value:', raw.socialLinks)
-    console.debug('socialLinks type:', typeof raw.socialLinks)
+    console.debug('Raw links value:', raw.links)
+    console.debug('links type:', typeof raw.links)
   }
 
+  console.log('Final socials attrs:', attrs) // Debug log
   return attrs
 }
 
@@ -537,16 +531,29 @@ async function processRows(rows: any[]): Promise<any[]> {
 }
 
 // ===== Main Parser Functions =====
-export function parseEmailScript(script: string): RowBlock[] {
+export function parseEmailScript(script: string, email: Email): Email {
   const rows: RowBlock[] = []
   const lines = script.trim().split('\n')
   let currentRow: RowBlock | null = null
   let currentColumn: ColumnBlock | null = null
   let depth = 0
 
+  // Initialize email attributes
+  const emailAttributes: Partial<Email> = {}
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
     if (!line) continue
+
+    // Handle email start
+    if (line.startsWith('<EMAIL')) {
+      const emailMatch = line.match(/<EMAIL\s*([^>]*)>/)
+      if (!emailMatch) continue
+
+      const emailAttrs = parseAttributes(emailMatch[1])
+      Object.assign(emailAttributes, emailAttrs)
+      continue
+    }
 
     // Handle row start
     if (line.startsWith('ROW')) {
@@ -619,7 +626,8 @@ export function parseEmailScript(script: string): RowBlock[] {
           createBlock('divider', '', blockParsers.divider(attrs), currentColumn)
           break
         case 'socials':
-          createBlock('socials', '', blockParsers.socials(attrs), currentColumn)
+          const socialAttrs = blockParsers.socials(attrs)
+          createBlock('socials', '', socialAttrs, currentColumn)
           break
         case 'survey':
           createBlock('survey', '', blockParsers.survey(attrs), currentColumn)
@@ -638,12 +646,18 @@ export function parseEmailScript(script: string): RowBlock[] {
     }
   }
 
-  return rows
+  // Return the email object with parsed attributes and rows
+  return {
+    ...email,
+    ...emailAttributes,
+    rows,
+  }
 }
 
 export async function processEmailImages(email: Email): Promise<Email> {
   return {
     ...email,
+
     rows: await processRows(email.rows),
   }
 }

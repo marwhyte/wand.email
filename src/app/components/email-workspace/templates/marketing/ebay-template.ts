@@ -3,7 +3,7 @@ import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
 
 export const ebayTemplateScript = `
-<EMAIL name="Back-to-School Email" preview="Ace back-to-school season with these deals!" fontFamily="Arial, sans-serif" width=600 linkColor=#000000 color=#000000 bgColor=#FFFFFF>
+<EMAIL name="Back-to-School Email" preview="Ace back-to-school season with these deals!" fontFamily="Arial, sans-serif" width=600 linkColor=#000000 color=#000000 backgroundColor=#FFFFFF>
   ROW type=header {
     COLUMN {
       IMAGE src=${getPhotoUrl('ebaylogo.png', 'ebay')} alt="eBay Logo"
@@ -111,7 +111,7 @@ export const ebayTemplateScript = `
     COLUMN {
       IMAGE src=${getPhotoUrl('ebaylogo.png', 'ebay')} alt="eBay Logo"
       HEADING content=<p>Connect with us</p> level=h4
-      SOCIALS folder=socials-dark-gray socialLinks=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
+      SOCIALS folder=socials-dark-gray links=[{ icon: "facebook", url: "https://www.facebook.com/ebay", title: "Facebook", alt: "Facebook" }, { icon: "x", url: "https://twitter.com/ebay", title: "X", alt: "X" }, { icon: "instagram", url: "https://www.instagram.com/ebay", title: "Instagram", alt: "Instagram" }]
       TEXT content=<p><a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.</p>
       TEXT content=<p>If you have a question, <a href="/">contact us</a>. eBay I‌nc., 2‌025 H‌amilton A‌venue, S‌an J‌ose, C‌A 9‌5125, U‌nited S‌tates</p>
       TEXT content=<p>© 1995-2024 eBay Inc. or its affiliates</p>
@@ -120,4 +120,8 @@ export const ebayTemplateScript = `
 </EMAIL>
 `
 
-export const ebayTemplate = createEmail(parseEmailScript(ebayTemplateScript), '#000000', '#000000')
+export const ebayTemplate = createEmail(
+  parseEmailScript(ebayTemplateScript, { id: '123', rows: [] }),
+  '#000000',
+  '#000000'
+)

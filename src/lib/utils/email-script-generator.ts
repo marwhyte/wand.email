@@ -91,8 +91,8 @@ function stringifyAttributes(attributes: Record<string, any>): string {
       continue
     }
 
-    if (key === 'socialLinks') {
-      result.push(`socialLinks=${JSON.stringify(value)}`)
+    if (key === 'links') {
+      result.push(`links=${JSON.stringify(value)}`)
       continue
     }
 
@@ -156,11 +156,11 @@ function generateBlock(block: EmailBlock, indent: number = 2): string {
   }
 
   // Special handling for social links to ensure proper JSON formatting
-  if (block.type === 'socials' && 'socialLinks' in attrsObj) {
-    const links = attrsObj.socialLinks
+  if (block.type === 'socials' && 'links' in attrsObj) {
+    const links = attrsObj.links
     if (Array.isArray(links)) {
       // Store as array of objects, not as JSON string
-      attrsObj.socialLinks = links.map((link) => ({
+      attrsObj.links = links.map((link) => ({
         icon: link.icon,
         url: link.url || '',
         title: link.title || '',
@@ -227,13 +227,12 @@ export function generateEmailScript(email: Email): string {
 
   // Create attributes object with all properties in alphabetical order
   const emailAttrs = stringifyAttributes({
-    backgroundColor: email.bgColor,
-    color: email.color,
-    fontFamily: email.fontFamily,
-    linkColor: email.linkColor,
-    rowBackgroundColor: email.rowBgColor,
-    width: email.width,
-    // Only include preview if it exists and is not empty
+    ...(email.backgroundColor && { backgroundColor: email.backgroundColor }),
+    ...(email.color && { color: email.color }),
+    ...(email.fontFamily && { fontFamily: email.fontFamily }),
+    ...(email.linkColor && { linkColor: email.linkColor }),
+    ...(email.rowBackgroundColor && { rowBackgroundColor: email.rowBackgroundColor }),
+    ...(email.width && { width: email.width }),
     ...(email.preview ? { preview: email.preview } : {}),
   })
 

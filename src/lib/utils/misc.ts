@@ -1,4 +1,3 @@
-import { blankTemplate } from '@/app/components/email-workspace/templates/blank-template'
 import { Email } from '@/app/components/email-workspace/types'
 import { Message } from '@ai-sdk/react'
 import { v4 as uuidv4 } from 'uuid'
@@ -17,6 +16,24 @@ export function shouldUseDarkText(backgroundColor: string) {
   // Use dark text if background is light (luminance > 0.5)
   return luminance > 0.5
 }
+
+// export const renderSocialIcons = () => {
+//   return FOLDERS.map(({ name, title }) => (
+//     <div key={name} className="flex flex-col items-center gap-8">
+//       <p className="mx-2 text-xs">{title}</p>
+//       {Object.entries(COMMON_SOCIAL_ICONS).map(([platform]) => (
+//         <div key={`${name}-${platform}`} className="flex flex-col items-center gap-4">
+//           <img
+//             key={`${name}-${platform}`}
+//             src={getPhotoUrl(COMMON_SOCIAL_ICONS[platform as keyof typeof COMMON_SOCIAL_ICONS], name)}
+//             alt={`${title} ${platform} icon`}
+//             className="m-2 h-8 w-8"
+//           />
+//         </div>
+//       ))}
+//     </div>
+//   ))
+// }
 
 export function ensurePx(value: string): string {
   // If value already has px or % suffix, return as is
@@ -78,11 +95,12 @@ export function getEmailFromMessage(email: Email | null, message: Message) {
     const emailRegex = /<EMAIL\s+[^>]*>([\s\S]*?)<\/EMAIL>/i
     const emailMatch = message.content.match(emailRegex)
 
-    if (emailMatch) {
+    if (emailMatch && email) {
       const emailString = emailMatch[1]
+      const emailReturn = parseEmailScript(emailString, email)
       const emailObject: Email = {
-        ...(email || blankTemplate()),
-        rows: parseEmailScript(emailString),
+        ...emailReturn,
+        id: email?.id ?? uuidv4(),
       }
 
       return emailObject

@@ -14,8 +14,8 @@ export const blankTemplate = (): Email => {
     width: '600',
     color: '#000000',
     linkColor: '#3b82f6',
-    bgColor: '#FFFFFF',
-    rowBgColor: '#FFFFFF',
+    backgroundColor: '#FFFFFF',
+    rowBackgroundColor: '#FFFFFF',
     rows: [],
   }
 }

@@ -1,7 +1,7 @@
 import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
-import { Email } from '../types'
+import { Email } from '../../types'
 
 export const turbotaxTemplateScript = `
 <EMAIL backgroundColor=#dfdfd8 color=#333333 fontFamily="Lato, Arial, sans-serif" linkColor=#205ea3 rowBackgroundColor=#fcfcfc width=600>
@@ -77,6 +77,6 @@ ROW backgroundColor=#fcfcfc padding=32,16 {
 `
 
 export const turbotaxTemplate = (): Email => {
-  const rows = parseEmailScript(turbotaxTemplateScript)
+  const rows = parseEmailScript(turbotaxTemplateScript, { id: '123', rows: [] })
   return createEmail(rows, '#333333', '#205ea3', 'Lato, Arial, sans-serif', '#dfdfd8', '#fcfcfc', '600')
 }

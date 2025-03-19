@@ -1,7 +1,7 @@
 import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { getPhotoUrl } from '@/lib/utils/misc'
-import { Email } from '../types'
+import { Email } from '../../types'
 
 export const stripeTemplateScript = `
 <EMAIL name="Stripe Template" backgroundColor=#0a2540 linkColor=#635BFF>
@@ -87,7 +87,7 @@ export const stripeTemplateScript = `
       IMAGE src="${getPhotoUrl('stripe-logo-slate.png', 'stripe')}" alt="Stripe" width=60
     }
     COLUMN width=50% align=right {
-      SOCIALS folder="stripe" socialLinks=[{"icon":"twitter","url":"https://twitter.com/stripe","title":"Twitter","alt":"Twitter"},{"icon":"linkedin","url":"https://linkedin.com/company/stripe","title":"LinkedIn","alt":"LinkedIn"},{"icon":"facebook","url":"https://facebook.com/stripe","title":"Facebook","alt":"Facebook"},{"icon":"github","url":"https://github.com/stripe","title":"GitHub","alt":"GitHub"}]
+      SOCIALS folder="stripe" links=[{"icon":"twitter","url":"https://twitter.com/stripe","title":"Twitter","alt":"Twitter"},{"icon":"linkedin","url":"https://linkedin.com/company/stripe","title":"LinkedIn","alt":"LinkedIn"},{"icon":"facebook","url":"https://facebook.com/stripe","title":"Facebook","alt":"Facebook"},{"icon":"github","url":"https://github.com/stripe","title":"GitHub","alt":"GitHub"}]
     }
   }
 
@@ -103,6 +103,9 @@ export const stripeTemplateScript = `
 `
 
 export const stripeTemplate = (): Email => {
-  const rows = parseEmailScript(stripeTemplateScript)
+  const rows = parseEmailScript(stripeTemplateScript, {
+    id: '1',
+    rows: [],
+  } as Email)
   return createEmail(rows, '#0a2540', '#635BFF', 'Arial, sans-serif', 'transparent')
 }

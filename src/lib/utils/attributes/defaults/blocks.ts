@@ -9,6 +9,7 @@ import type {
   SurveyBlock,
   TextBlock,
 } from '@/app/components/email-workspace/types'
+import { Email } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
 import { ensurePx, shouldUseDarkText } from '../../misc'
@@ -16,7 +17,8 @@ import { getRowTypeBlockDefaults } from './rowTypeBlocks'
 
 export const getAdditionalTextStyles = (
   textBlock: TextBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  email: Email | null
 ): React.ComponentProps<typeof Text>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Text>['style'] = {
     textAlign: 'left',
@@ -32,8 +34,7 @@ export const getAdditionalTextStyles = (
     letterSpacing: 'normal',
   }
 
-  const rowTypeDefaults =
-    (getRowTypeBlockDefaults(textBlock, parentRow) as React.ComponentProps<typeof Text>['style']) || {}
+  const rowTypeDefaults = getRowTypeBlockDefaults(textBlock, email, parentRow) || {}
 
   const { content, ...styleAttributes } = textBlock.attributes
 
@@ -46,7 +47,8 @@ export const getAdditionalTextStyles = (
 
 export const getAdditionalHeadingStyles = (
   headingBlock: HeadingBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  email: Email | null
 ): React.ComponentProps<typeof Heading>['style'] => {
   const defaultHeadingSizes = {
     h1: '48px',
@@ -68,8 +70,7 @@ export const getAdditionalHeadingStyles = (
     fontSize: defaultHeadingSizes[headingBlock.attributes.level as keyof typeof defaultHeadingSizes] ?? '16px',
   }
 
-  const rowTypeDefaults =
-    (getRowTypeBlockDefaults(headingBlock, parentRow) as React.ComponentProps<typeof Heading>['style']) || {}
+  const rowTypeDefaults = getRowTypeBlockDefaults(headingBlock, email, parentRow) || {}
 
   const { level, content, ...styleAttributes } = headingBlock.attributes
 
@@ -83,6 +84,7 @@ export const getAdditionalHeadingStyles = (
 export const getAdditionalImageStyles = (
   imageBlock: ImageBlock,
   parentRow: RowBlock,
+  email: Email | null,
   company: Company | null
 ): React.ComponentProps<typeof Img>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Img>['style'] = {
@@ -91,8 +93,7 @@ export const getAdditionalImageStyles = (
     width: '100%',
   }
 
-  const rowTypeDefaults =
-    (getRowTypeBlockDefaults(imageBlock, parentRow, company) as React.ComponentProps<typeof Img>['style']) || {}
+  const rowTypeDefaults = getRowTypeBlockDefaults(imageBlock, email, parentRow, company)
 
   const { src, alt, ...styleAttributes } = imageBlock.attributes
 
@@ -106,6 +107,7 @@ export const getAdditionalImageStyles = (
 export const getAdditionalButtonStyles = (
   buttonBlock: ButtonBlock,
   parentRow: RowBlock,
+  email: Email | null,
   company: Company | null
 ): React.ComponentProps<typeof Button>['style'] => {
   const baseDefaults = {
@@ -124,8 +126,7 @@ export const getAdditionalButtonStyles = (
     cursor: 'pointer',
   }
 
-  const rowTypeDefaults =
-    (getRowTypeBlockDefaults(buttonBlock, parentRow) as React.ComponentProps<typeof Button>['style']) || {}
+  const rowTypeDefaults = getRowTypeBlockDefaults(buttonBlock, email, parentRow) || {}
 
   const {
     href,
@@ -163,7 +164,7 @@ export const getAdditionalButtonStyles = (
         borderBottom: '0px solid transparent',
       }
 
-  const backgroundColor = styleAttributes.backgroundColor || company?.primary_color || '#000000'
+  const backgroundColor = styleAttributes.backgroundColor || company?.primary_color || '#3b82f6'
   const color = styleAttributes.backgroundColor
     ? styleAttributes.color
     : company?.primary_color
@@ -185,7 +186,8 @@ export const getAdditionalButtonStyles = (
 
 export const getAdditionalLinkStyles = (
   linkBlock: LinkBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  email: Email | null
 ): React.ComponentProps<typeof Link>['style'] => {
   const baseDefaults = {
     paddingTop: '10px',
@@ -198,8 +200,7 @@ export const getAdditionalLinkStyles = (
     cursor: 'pointer',
   }
 
-  const rowTypeDefaults =
-    (getRowTypeBlockDefaults(linkBlock, parentRow) as React.ComponentProps<typeof Link>['style']) || {}
+  const rowTypeDefaults = getRowTypeBlockDefaults(linkBlock, email, parentRow) || {}
 
   const { href, align, content, ...styleAttributes } = linkBlock.attributes
 
@@ -212,7 +213,8 @@ export const getAdditionalLinkStyles = (
 
 export const getAdditionalDividerStyles = (
   dividerBlock: DividerBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  email: Email | null
 ): React.ComponentProps<typeof Hr>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Hr>['style'] = {
     borderStyle: 'solid',
@@ -225,8 +227,7 @@ export const getAdditionalDividerStyles = (
     paddingBottom: '24px',
   }
 
-  const rowTypeDefaults =
-    (getRowTypeBlockDefaults(dividerBlock, parentRow) as React.ComponentProps<typeof Hr>['style']) || {}
+  const rowTypeDefaults = getRowTypeBlockDefaults(dividerBlock, email, parentRow) || {}
 
   // Extract padding values from attributes to apply to margins
   const { ...otherAttributes } = dividerBlock.attributes
@@ -241,7 +242,8 @@ export const getAdditionalDividerStyles = (
 
 export const getAdditionalSocialsStyles = (
   socialsBlock: SocialsBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  email: Email | null
 ): React.ComponentProps<typeof Section>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Section>['style'] = {
     paddingTop: '10px',
@@ -250,8 +252,7 @@ export const getAdditionalSocialsStyles = (
     paddingLeft: '10px',
   }
 
-  const rowTypeDefaults =
-    (getRowTypeBlockDefaults(socialsBlock, parentRow) as React.ComponentProps<typeof Section>['style']) || {}
+  const rowTypeDefaults = getRowTypeBlockDefaults(socialsBlock, email, parentRow) || {}
 
   const { align, ...styleAttributes } = socialsBlock.attributes
 
@@ -264,12 +265,15 @@ export const getAdditionalSocialsStyles = (
 
 export const getAdditionalSurveyStyles = (
   surveyBlock: SurveyBlock,
-  parentRow: RowBlock
+  parentRow: RowBlock,
+  email: Email | null
 ): React.ComponentProps<typeof Section>['style'] => {
-  const baseDefaults: React.ComponentProps<typeof Section>['style'] = {}
+  const baseDefaults: React.ComponentProps<typeof Section>['style'] = {
+    paddingTop: '10px',
+    paddingBottom: '10px',
+  }
 
-  const rowTypeDefaults =
-    (getRowTypeBlockDefaults(surveyBlock, parentRow) as React.ComponentProps<typeof Section>['style']) || {}
+  const rowTypeDefaults = getRowTypeBlockDefaults(surveyBlock, email, parentRow) || {}
 
   // Create a copy of attributes without 'kind', 'question', and 'links' properties
   const { kind, question, links, ...styleAttributes } = surveyBlock.attributes

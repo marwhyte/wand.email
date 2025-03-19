@@ -10,7 +10,7 @@ import { useState } from 'react'
 import { IconButton } from '../icon-button'
 import {
   COMMON_SOCIAL_ICONS,
-  FOLDER_SPECIFIC_ICONS,
+  FOLDERS,
   SocialIconFolders,
   SocialIconName,
   SocialsBlock,
@@ -23,22 +23,19 @@ interface SocialIconsEditorProps {
 }
 
 const SocialsEditor = ({ block, onChange }: SocialIconsEditorProps) => {
-  const socialLinks = block.attributes.socialLinks
+  const links = block.attributes.links
   const iconFolder = block.attributes.folder
-  const validIcons = new Set([
-    ...Object.keys(COMMON_SOCIAL_ICONS),
-    ...Object.values(FOLDER_SPECIFIC_ICONS).flatMap((icons) => Object.keys(icons)),
-  ])
+  const validIcons = new Set([...Object.keys(COMMON_SOCIAL_ICONS)])
 
   const [showAdvanced, setShowAdvanced] = useState<{ [key: string]: boolean }>({})
 
   const handleSocialLinkChange = (index: number, field: string, value: string) => {
-    const updatedLinks = [...socialLinks]
+    const updatedLinks = [...links]
     updatedLinks[index] = {
       ...updatedLinks[index],
       [field]: value,
     }
-    onChange({ ...block.attributes, socialLinks: updatedLinks })
+    onChange({ ...block.attributes, links: updatedLinks })
   }
 
   const handleAddSocial = (iconTitle: SocialIconName) => {
@@ -48,12 +45,12 @@ const SocialsEditor = ({ block, onChange }: SocialIconsEditorProps) => {
       alt: `Follow us on ${iconTitle}`,
       url: '/',
     }
-    onChange({ ...block.attributes, socialLinks: [...socialLinks, newSocial] })
+    onChange({ ...block.attributes, links: [...links, newSocial] })
   }
 
   const handleDeleteSocial = (index: number) => {
-    const updatedLinks = socialLinks.filter((_, i) => i !== index)
-    onChange({ ...block.attributes, socialLinks: updatedLinks })
+    const updatedLinks = links.filter((_, i) => i !== index)
+    onChange({ ...block.attributes, links: updatedLinks })
   }
 
   return (
@@ -64,20 +61,15 @@ const SocialsEditor = ({ block, onChange }: SocialIconsEditorProps) => {
           value={iconFolder}
           onChange={(e) => onChange({ ...block.attributes, folder: e.target.value as SocialIconFolders })}
         >
-          <option value="socials-blue">Blue</option>
-          <option value="socials-color">Color</option>
-          <option value="socials-dark-gray">Dark Gray</option>
-          <option value="socials-dark-round">Dark Round</option>
-          <option value="socials-dark">Dark</option>
-          <option value="socials-outline-black">Outline Black</option>
-          <option value="socials-outline-color">Outline Color</option>
-          <option value="socials-outline-gray">Outline Gray</option>
-          <option value="socials-outline-white">Outline White</option>
-          <option value="socials-white">White</option>
+          {FOLDERS.map(({ name, title }) => (
+            <option key={name} value={name}>
+              {title}
+            </option>
+          ))}
         </Select>
       </Field>
 
-      {socialLinks.map((link, index) => (
+      {links.map((link, index) => (
         <div key={index} className="rounded-lg border border-zinc-200 p-4 dark:border-zinc-800">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -86,7 +78,7 @@ const SocialsEditor = ({ block, onChange }: SocialIconsEditorProps) => {
                 alt={link.alt}
                 className="h-6 w-6"
               />
-              <IconButton onClick={() => handleDeleteSocial(index)} disabled={socialLinks.length === 1}>
+              <IconButton onClick={() => handleDeleteSocial(index)} disabled={links.length === 1}>
                 <TrashIcon className="h-4 w-4 text-red-500" />
               </IconButton>
             </div>

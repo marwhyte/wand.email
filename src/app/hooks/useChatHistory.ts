@@ -2,6 +2,7 @@ import { Chat, Company } from '@/lib/database/types'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useEffect } from 'react'
+import { transactionalOutlineGoogleTemplate } from '../components/email-workspace/templates/transactional/outline-google'
 
 type Props = {
   chat?: Chat
@@ -15,7 +16,7 @@ export function useChatHistory({ chat, chatId, company }: Props) {
 
   useEffect(() => {
     if (chat) {
-      setEmail(chat.email ?? undefined)
+      setEmail(transactionalOutlineGoogleTemplate() ?? undefined)
       setTitle(chat.title)
     } else {
       setEmail(undefined)

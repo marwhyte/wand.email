@@ -1,15 +1,16 @@
 import { generateSurveyProps } from '@/lib/utils/attributes'
 import { getPhotoUrl } from '@/lib/utils/misc'
 import { Button, Column, Row, Section, Text } from '@react-email/components'
-import { RowBlock, SurveyBlock } from '../types'
+import { Email, RowBlock, SurveyBlock } from '../types'
 
 type Props = {
   block: SurveyBlock
   parentRow: RowBlock
+  email: Email | null
 }
 
-const EmailSurvey = ({ block, parentRow }: Props) => {
-  const { color } = generateSurveyProps(block, parentRow)
+const EmailSurvey = ({ block, parentRow, email }: Props) => {
+  const { color } = generateSurveyProps(block, parentRow, email)
 
   if (block.attributes.kind === 'yes-no') {
     return (

@@ -339,34 +339,36 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                       <AutoScroller input={input} />
                       <Messages
                         ref={messageRef}
-                        className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col pb-6"
+                        className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col pb-3"
                         messages={messages}
                         isStreaming={isLoading}
                       />
                     </StickToBottom.Content>
                     <ScrollToBottom textareaHeight={textareaHeight} />
 
-                    <ChatInput
-                      textareaRef={textareaRef}
-                      input={input}
-                      isStreaming={isLoading}
-                      enhancingPrompt={enhancingPrompt}
-                      promptEnhanced={promptEnhanced}
-                      sendMessage={sendMessage}
-                      handleInputChange={(event) => {
-                        handleInputChange?.(event)
-                        if (textareaRef?.current) {
-                          setTextareaHeight(textareaRef.current.scrollHeight)
-                        }
-                      }}
-                      handleStop={abort}
-                      enhancePrompt={() => {
-                        enhancePrompt(input, (input) => {
-                          setInput(input)
-                          scrollTextArea()
-                        })
-                      }}
-                    />
+                    <div className="px-4">
+                      <ChatInput
+                        textareaRef={textareaRef}
+                        input={input}
+                        isStreaming={isLoading}
+                        enhancingPrompt={enhancingPrompt}
+                        promptEnhanced={promptEnhanced}
+                        sendMessage={sendMessage}
+                        handleInputChange={(event) => {
+                          handleInputChange?.(event)
+                          if (textareaRef?.current) {
+                            setTextareaHeight(textareaRef.current.scrollHeight)
+                          }
+                        }}
+                        handleStop={abort}
+                        enhancePrompt={() => {
+                          enhancePrompt(input, (input) => {
+                            setInput(input)
+                            scrollTextArea()
+                          })
+                        }}
+                      />
+                    </div>
                   </StickToBottom>
                 </div>
                 {!chatStarted && (

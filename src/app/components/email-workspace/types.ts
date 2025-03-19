@@ -1,3 +1,42 @@
+export const FOLDERS: { name: SocialIconFolders; title: string }[] = [
+  {
+    name: 'socials-blue',
+    title: 'Blue',
+  },
+  {
+    name: 'socials-color',
+    title: 'Color',
+  },
+  {
+    name: 'socials-dark-gray',
+    title: 'Dark Gray',
+  },
+  {
+    name: 'socials-dark-round',
+    title: 'Dark Round',
+  },
+  {
+    name: 'socials-dark',
+    title: 'Dark',
+  },
+  {
+    name: 'socials-outline-color',
+    title: 'Outline Color',
+  },
+  {
+    name: 'socials-outline-gray',
+    title: 'Outline Gray',
+  },
+  {
+    name: 'socials-outline-white',
+    title: 'Outline White',
+  },
+  {
+    name: 'socials-white',
+    title: 'White',
+  },
+]
+
 export const componentLibrary = {
   header: {
     example: `
@@ -7,7 +46,6 @@ export const componentLibrary = {
         }
       }
     `,
-    variants: ['simple', 'modern', 'elegant'],
     allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   footer: {
@@ -16,14 +54,13 @@ export const componentLibrary = {
         COLUMN {
           LOGO src="logo" alt="Logo"
           TEXT content=<p>Company Name</p>
-          SOCIALS folder=socials-color socialLinks=[{"icon": "facebook", "url": "#"}, {"icon": "x", "url": "#"}, {"icon": "instagram", "url": "#"}]
+          SOCIALS folder=socials-color links=[{"icon": "facebook", "url": "#"}, {"icon": "x", "url": "#"}, {"icon": "instagram", "url": "#"}]
           TEXT content=<p>123 Main Street Anytown, CA 12345<br>United States</p>
           TEXT content=<p>mail@company.com</p>
           TEXT content=<p>© 2024 Company Name. All rights reserved.</p>
         }
       }
     `,
-    variants: ['simple', 'modern', 'elegant'],
     allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   gallery: {
@@ -39,7 +76,6 @@ export const componentLibrary = {
         }
       }
     `,
-    variants: ['list', 'cards', 'magazine'],
     allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
   },
 } as const
@@ -106,19 +142,8 @@ export const blockLibrary = {
   SOCIALS: {
     attributes: {
       align: ['left', 'center', 'right'],
-      folder: [
-        'socials-blue',
-        'socials-color',
-        'socials-dark-gray',
-        'socials-dark-round',
-        'socials-dark',
-        'socials-outline-black',
-        'socials-outline-color',
-        'socials-outline-gray',
-        'socials-outline-white',
-        'socials-white',
-      ],
-      socialLinks: ['[{"icon": "facebook", "url": "#"}, {"icon": "x", "url": "#"}, {"icon": "instagram", "url": "#"}]'],
+      folder: FOLDERS.map((folder) => folder.name),
+      links: ['[{"icon": "facebook", "url": "#"}, {"icon": "x", "url": "#"}, {"icon": "instagram", "url": "#"}]'],
       padding: ['10,0,10,0'],
     },
   },
@@ -147,22 +172,23 @@ export const blockLibrary = {
 // Type for component types
 export type ComponentType = keyof typeof componentLibrary
 
-// Type for variants based on component type
-export type ComponentVariant<T extends ComponentType> = (typeof componentLibrary)[T]['variants'][number]
-
 // Type for allowed blocks based on component type
 export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T]['allowedBlocks'][number]
 
+export type EmailStyleVariant = 'default' | 'outline' | 'floating'
+export type EmailType = 'welcome-series' | 'e-commerce' | 'invite' | 'transactional' | 'newsletter' | 'invoice' | 'cart'
 export type Email = {
-  bgColor: string
-  color: string
-  fontFamily: string
+  backgroundColor?: string
+  color?: string
+  fontFamily?: string
   id: string
-  linkColor: string
-  preview: string
-  rowBgColor: string
+  linkColor?: string
+  preview?: string
+  rowBackgroundColor?: string
   rows: RowBlock[]
-  width: string
+  width?: string
+  styleVariant?: EmailStyleVariant
+  type?: EmailType
 }
 
 export type TemplateTypes =
@@ -303,7 +329,6 @@ export type RowBlockAttributes = PaddingAttributes & {
   hideOnMobile?: boolean
   stackOnMobile?: boolean
   type?: ComponentType
-  variant?: ComponentVariant<ComponentType>
   verticalAlign?: 'top' | 'middle' | 'bottom'
 }
 
@@ -354,7 +379,7 @@ export type LinkBlockAttributes = TextAttributes &
 export type SocialsBlockAttributes = PaddingAttributes & {
   align?: 'left' | 'center' | 'right'
   folder: SocialIconFolders
-  socialLinks: {
+  links: {
     alt: string
     icon: SocialIconName
     title: string
@@ -472,148 +497,145 @@ export const COMMON_SOCIAL_ICONS = {
 } as const
 
 // Additional icons specific to each folder
-export const FOLDER_SPECIFIC_ICONS = {
-  'socials-blue': {
-    'amazon-music': 'amazon-music.png',
-    behance: 'behance.png',
-    box: 'box.png',
-    calendly: 'calendly.png',
-    etsy: 'etsy.png',
-    imo: 'imo.png',
-    itunes: 'itunes.png',
-    notion: 'notion.png',
-    paypal: 'paypal.png',
-    skype: 'skype.png',
-    soundcloud: 'soundcloud.png',
-    square: 'square.png',
-    streeteasy: 'streeteasy.png',
-    venmo: 'venmo.png',
-    wechat: 'wechat.png',
-    yelp: 'yelp.png',
-  },
-  'socials-color': {
-    'amazon-music': 'amazon-music.png',
-    behance: 'behance.png',
-    box: 'box.png',
-    calendly: 'calendly.png',
-    etsy: 'etsy.png',
-    imo: 'imo.png',
-    itunes: 'itunes.png',
-    notion: 'notion.png',
-    paypal: 'paypal.png',
-    skype: 'skype.png',
-    soundcloud: 'soundcloud.png',
-    square: 'square.png',
-    streeteasy: 'streeteasy.png',
-    venmo: 'venmo.png',
-    wechat: 'wechat.png',
-    yelp: 'yelp.png',
-  },
-  'socials-dark-gray': {
-    'amazon-music': 'amazon-music.png',
-    behance: 'behance.png',
-    box: 'box.png',
-    calendly: 'calendly.png',
-    etsy: 'etsy.png',
-    imo: 'imo.png',
-    itunes: 'itunes.png',
-    notion: 'notion.png',
-    paypal: 'paypal.png',
-    skype: 'skype.png',
-    soundcloud: 'soundcloud.png',
-    square: 'square.png',
-    streeteasy: 'streeteasy.png',
-    venmo: 'venmo.png',
-    wechat: 'wechat.png',
-    yelp: 'yelp.png',
-  },
-  'socials-dark': {
-    'amazon-music': 'amazon-music.png',
-    behance: 'behance.png',
-    box: 'box.png',
-    calendly: 'calendly.png',
-    etsy: 'etsy.png',
-    imo: 'imo.png',
-    itunes: 'itunes.png',
-    notion: 'notion.png',
-    paypal: 'paypal.png',
-    skype: 'skype.png',
-    soundcloud: 'soundcloud.png',
-    square: 'square.png',
-    streeteasy: 'streeteasy.png',
-    venmo: 'venmo.png',
-    wechat: 'wechat.png',
-    yelp: 'yelp.png',
-  },
-  'socials-outline-black': {
-    tumblr: 'tumblr.png',
-  },
-  'socials-outline-color': {
-    'amazon-music': 'amazon-music.png',
-    behance: 'behance.png',
-    box: 'box.png',
-    calendly: 'calendly.png',
-    etsy: 'etsy.png',
-    imo: 'imo.png',
-    itunes: 'itunes.png',
-    notion: 'notion.png',
-    paypal: 'paypal.png',
-    skype: 'skype.png',
-    soundcloud: 'soundcloud.png',
-    square: 'square.png',
-    streeteasy: 'streeteasy.png',
-    venmo: 'venmo.png',
-    wechat: 'wechat.png',
-    yelp: 'yelp.png',
-  },
-  'socials-outline-gray': {
-    tumblr: 'tumblr.png',
-  },
-  'socials-outline-white': {
-    tumblr: 'tumblr.png',
-  },
-  'socials-white': {
-    'amazon-music': 'amazon-music.png',
-    behance: 'behance.png',
-    box: 'box.png',
-    calendly: 'calendly.png',
-    etsy: 'etsy.png',
-    imo: 'imo.png',
-    itunes: 'itunes.png',
-    notion: 'notion.png',
-    paypal: 'paypal.png',
-    skype: 'skype.png',
-    soundcloud: 'soundcloud.png',
-    square: 'square.png',
-    streeteasy: 'streeteasy.png',
-    venmo: 'venmo.png',
-    wechat: 'wechat.png',
-    yelp: 'yelp.png',
-  },
-  'socials-dark-round': {
-    'amazon-music': 'amazon-music.png',
-    behance: 'behance.png',
-    box: 'box.png',
-    calendly: 'calendly.png',
-    etsy: 'etsy.png',
-    imo: 'imo.png',
-    itunes: 'itunes.png',
-    notion: 'notion.png',
-    paypal: 'paypal.png',
-    skype: 'skype.png',
-    soundcloud: 'soundcloud.png',
-    square: 'square.png',
-    streeteasy: 'streeteasy.png',
-    venmo: 'venmo.png',
-    wechat: 'wechat.png',
-    yelp: 'yelp.png',
-  },
-} as const
+// export const FOLDER_SPECIFIC_ICONS = {
+//   'socials-blue': {
+//     'amazon-music': 'amazon-music.png',
+//     behance: 'behance.png',
+//     box: 'box.png',
+//     calendly: 'calendly.png',
+//     etsy: 'etsy.png',
+//     imo: 'imo.png',
+//     itunes: 'itunes.png',
+//     notion: 'notion.png',
+//     paypal: 'paypal.png',
+//     skype: 'skype.png',
+//     soundcloud: 'soundcloud.png',
+//     square: 'square.png',
+//     streeteasy: 'streeteasy.png',
+//     venmo: 'venmo.png',
+//     wechat: 'wechat.png',
+//     yelp: 'yelp.png',
+//   },
+//   'socials-color': {
+//     'amazon-music': 'amazon-music.png',
+//     behance: 'behance.png',
+//     box: 'box.png',
+//     calendly: 'calendly.png',
+//     etsy: 'etsy.png',
+//     imo: 'imo.png',
+//     itunes: 'itunes.png',
+//     notion: 'notion.png',
+//     paypal: 'paypal.png',
+//     skype: 'skype.png',
+//     soundcloud: 'soundcloud.png',
+//     square: 'square.png',
+//     streeteasy: 'streeteasy.png',
+//     venmo: 'venmo.png',
+//     wechat: 'wechat.png',
+//     yelp: 'yelp.png',
+//   },
+//   'socials-dark-gray': {
+//     'amazon-music': 'amazon-music.png',
+//     behance: 'behance.png',
+//     box: 'box.png',
+//     calendly: 'calendly.png',
+//     etsy: 'etsy.png',
+//     imo: 'imo.png',
+//     itunes: 'itunes.png',
+//     notion: 'notion.png',
+//     paypal: 'paypal.png',
+//     skype: 'skype.png',
+//     soundcloud: 'soundcloud.png',
+//     square: 'square.png',
+//     streeteasy: 'streeteasy.png',
+//     venmo: 'venmo.png',
+//     wechat: 'wechat.png',
+//     yelp: 'yelp.png',
+//   },
+//   'socials-dark': {
+//     'amazon-music': 'amazon-music.png',
+//     behance: 'behance.png',
+//     box: 'box.png',
+//     calendly: 'calendly.png',
+//     etsy: 'etsy.png',
+//     imo: 'imo.png',
+//     itunes: 'itunes.png',
+//     notion: 'notion.png',
+//     paypal: 'paypal.png',
+//     skype: 'skype.png',
+//     soundcloud: 'soundcloud.png',
+//     square: 'square.png',
+//     streeteasy: 'streeteasy.png',
+//     venmo: 'venmo.png',
+//     wechat: 'wechat.png',
+//     yelp: 'yelp.png',
+//   },
+//   'socials-outline-color': {
+//     'amazon-music': 'amazon-music.png',
+//     behance: 'behance.png',
+//     box: 'box.png',
+//     calendly: 'calendly.png',
+//     etsy: 'etsy.png',
+//     imo: 'imo.png',
+//     itunes: 'itunes.png',
+//     notion: 'notion.png',
+//     paypal: 'paypal.png',
+//     skype: 'skype.png',
+//     soundcloud: 'soundcloud.png',
+//     square: 'square.png',
+//     streeteasy: 'streeteasy.png',
+//     venmo: 'venmo.png',
+//     wechat: 'wechat.png',
+//     yelp: 'yelp.png',
+//   },
+//   'socials-outline-gray': {
+//     tumblr: 'tumblr.png',
+//   },
+//   'socials-outline-white': {
+//     tumblr: 'tumblr.png',
+//   },
+//   'socials-white': {
+//     'amazon-music': 'amazon-music.png',
+//     behance: 'behance.png',
+//     box: 'box.png',
+//     calendly: 'calendly.png',
+//     etsy: 'etsy.png',
+//     imo: 'imo.png',
+//     itunes: 'itunes.png',
+//     notion: 'notion.png',
+//     paypal: 'paypal.png',
+//     skype: 'skype.png',
+//     soundcloud: 'soundcloud.png',
+//     square: 'square.png',
+//     streeteasy: 'streeteasy.png',
+//     venmo: 'venmo.png',
+//     wechat: 'wechat.png',
+//     yelp: 'yelp.png',
+//   },
+//   'socials-dark-round': {
+//     'amazon-music': 'amazon-music.png',
+//     behance: 'behance.png',
+//     box: 'box.png',
+//     calendly: 'calendly.png',
+//     etsy: 'etsy.png',
+//     imo: 'imo.png',
+//     itunes: 'itunes.png',
+//     notion: 'notion.png',
+//     paypal: 'paypal.png',
+//     skype: 'skype.png',
+//     soundcloud: 'soundcloud.png',
+//     square: 'square.png',
+//     streeteasy: 'streeteasy.png',
+//     venmo: 'venmo.png',
+//     wechat: 'wechat.png',
+//     yelp: 'yelp.png',
+//   },
+// } as const
 
-// Combine common and specific icons for each folder
-export const SOCIAL_ICONS: Record<SocialIconFolders, Partial<Record<SocialIconName, string>>> = Object.fromEntries(
-  Object.entries(FOLDER_SPECIFIC_ICONS).map(([folder, specificIcons]) => [
-    folder,
-    { ...COMMON_SOCIAL_ICONS, ...specificIcons },
-  ])
-) as Record<SocialIconFolders, Partial<Record<SocialIconName, string>>>
+// // Combine common and specific icons for each folder
+// export const SOCIAL_ICONS: Record<SocialIconFolders, Partial<Record<SocialIconName, string>>> = Object.fromEntries(
+//   Object.entries(FOLDER_SPECIFIC_ICONS).map(([folder, specificIcons]) => [
+//     folder,
+//     { ...COMMON_SOCIAL_ICONS, ...specificIcons },
+//   ])
+// ) as Record<SocialIconFolders, Partial<Record<SocialIconName, string>>>

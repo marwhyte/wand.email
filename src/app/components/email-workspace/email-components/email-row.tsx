@@ -1,6 +1,6 @@
 import DragLine from '@/app/components/drag-line'
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { generateRowProps, getRowAttributes } from '@/lib/utils/attributes'
+import { generateRowProps, getEmailAttributes, getRowAttributes } from '@/lib/utils/attributes'
 import { classNames } from '@/lib/utils/misc'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { Container, Row } from '@react-email/components'
@@ -46,6 +46,7 @@ export default function EmailRow({
   const ref = useRef<HTMLDivElement>(null)
   const { currentBlock, setCurrentBlock, email } = useEmailStore()
   const [isChildHovered, setIsChildHovered] = useState(false)
+  const emailAttributes = getEmailAttributes(email)
 
   const [{ isDraggingRow }, drag, preview] = useDrag({
     type: 'row',
@@ -165,11 +166,11 @@ export default function EmailRow({
       {/* Wrap the content in a relative div */}
       <div className="relative" style={{ zIndex: 2 }}>
         <Container
-          bgcolor={email?.bgColor}
-          width={mobileView ? '360' : `${email?.width}`}
+          bgcolor={emailAttributes.backgroundColor}
+          width={mobileView ? '360' : `${emailAttributes.width}`}
           className={rowAttributes.hideOnMobile && mobileView ? 'hidden' : undefined}
           style={{
-            backgroundColor: email?.bgColor,
+            backgroundColor: emailAttributes.backgroundColor,
           }}
         >
           {/* Simplified row rendering that matches email-renderer-final.tsx approach */}
@@ -179,7 +180,7 @@ export default function EmailRow({
           >
             {row.columns.map((column, index) => {
               // Convert pixel spacing to percentage of total width
-              const emailWidth = Number(email?.width || 600)
+              const emailWidth = Number(emailAttributes.width)
               const totalSpacerWidthPercent =
                 rowAttributes.columnSpacing && rowAttributes.columnSpacing > 0
                   ? ((rowAttributes.columnSpacing * (row.columns.length - 1)) / emailWidth) * 100

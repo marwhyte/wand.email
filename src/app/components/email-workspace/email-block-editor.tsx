@@ -240,7 +240,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 <div className="flex gap-2">
                   <div className="w-[106px]">
                     <Select
-                      value={block.attributes?.borderStyle || 'solid'}
+                      value={processedAttributes.style?.borderStyle || 'solid'}
                       onChange={(e) => onChange({ borderStyle: e.target.value as 'solid' | 'dashed' | 'dotted' })}
                     >
                       <option value="solid">Solid</option>
@@ -252,13 +252,15 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                     min={0}
                     max={30}
                     value={
-                      block.attributes?.borderWidth ? safeParseInt(block.attributes?.borderWidth.replace('px', '')) : 0
+                      processedAttributes.style?.borderWidth
+                        ? safeParseInt(String(processedAttributes.style?.borderWidth).replace('px', ''))
+                        : 0
                     }
                     onChange={(value) => onChange({ borderWidth: `${value}px` })}
                   />
 
                   <ColorInput
-                    value={block.attributes?.borderColor || ''}
+                    value={processedAttributes.style?.borderColor || ''}
                     onChange={(e) => onChange({ borderColor: e })}
                   />
                 </div>

@@ -1,6 +1,5 @@
 export const maxDuration = 60
 
-import { blankTemplate } from '@/app/components/email-workspace/templates/blank-template'
 import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
 import { createChat, getChat, updateChat } from '@/lib/database/queries/chats'
@@ -35,7 +34,7 @@ export async function POST(request: Request) {
     const chat = await getChat(id)
 
     if (!chat) {
-      const email = { ...blankTemplate() }
+      const email = { id: uuidv4(), rows: [] }
 
       await createChat({ messages, email, companyId, id })
     } else {

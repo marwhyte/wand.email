@@ -124,7 +124,7 @@ export function getReactEmailCode(company: Company | null, email: Email | null) 
           </Head>
           <Preview>${email.preview}</Preview>
           <Body ${stringifyProps(generateBodyProps(email))}>
-            <Container width={"${email.width}"} style={{ backgroundColor: "${email.bgColor}", color: "${email.color}", maxWidth: "100%", margin: "0 auto", width: "${email.width}px", msoTableLspace: "0pts", msoTableRspace: "0pts" }}>
+            <Container width={"${email.width}"} style={{ backgroundColor: "${email.backgroundColor}", color: "${email.color}", maxWidth: "100%", margin: "0 auto", width: "${email.width}px", msoTableLspace: "0pts", msoTableRspace: "0pts" }}>
               ${email.rows
                 .map((row) => {
                   const rowAttributes = getRowAttributes(row, email)

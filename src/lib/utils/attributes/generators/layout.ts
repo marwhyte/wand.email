@@ -1,14 +1,17 @@
-import type { ColumnBlock, Email, RowBlock, RowBlockAttributes } from '@/app/components/email-workspace/types'
+import type { ColumnBlock, Email, EmailStyleVariant, RowBlock } from '@/app/components/email-workspace/types'
 import type { Body, Column, Container, Row } from '@react-email/components'
-import { ensurePx } from '../../misc'
 import { applyPaddingAttributes } from '../common'
-import { getRowTypeBlockDefaults } from '../defaults/rowTypeBlocks'
-import { getTypeDefaults } from '../defaults/rowTypes'
-import { variantDefaults } from '../defaults/variants'
+import {
+  getAdditionalColumnStyles,
+  getAdditionalContentStyles,
+  getAdditionalEmailStyles,
+  getAdditionalRowStyles,
+  getTypeDefaults,
+} from '../defaults'
 
 type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
 
-export function getDefaultRowAttributes(row: RowBlock): Partial<RowBlock['attributes']> {
+export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> => {
   const baseRowDefaults: Partial<RowBlock['attributes']> = {
     paddingLeft: '16px',
     paddingRight: '16px',
@@ -16,49 +19,34 @@ export function getDefaultRowAttributes(row: RowBlock): Partial<RowBlock['attrib
     columnSpacing: 12,
   }
 
-  return {
-    ...baseRowDefaults,
-    ...(row.attributes.variant ? variantDefaults[row.attributes.variant] : {}),
-    ...(row.attributes.type ? getTypeDefaults(row) : {}),
+  if (email?.styleVariant === 'outline' && row.attributes.type !== 'header' && row.attributes.type !== 'footer') {
+    baseRowDefaults.borderWidth = '1px'
+    baseRowDefaults.borderColor = '#dadce0'
+    baseRowDefaults.borderStyle = 'solid'
+    baseRowDefaults.borderRadius = '8px'
+    baseRowDefaults.paddingBottom = '12px'
   }
-}
 
-export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> => {
-  const defaultAttributes = getDefaultRowAttributes(row)
+  const defaultAttributes = {
+    ...baseRowDefaults,
+    ...getTypeDefaults(row, email),
+  }
+
   const mergedAttributes = { ...defaultAttributes, ...row.attributes }
 
   if (email && !mergedAttributes.backgroundColor) {
-    mergedAttributes.backgroundColor = email.rowBgColor ?? '#ffffff'
+    const emailAttributes = getEmailAttributes(email)
+    mergedAttributes.backgroundColor = emailAttributes.rowBackgroundColor ?? '#ffffff'
   }
 
   return mergedAttributes
 }
 
-export function generateContainerProps(
-  row: RowBlock,
-  email: Email
-): OmitChildren<React.ComponentProps<typeof Container>> {
-  const rowAttributes = getRowAttributes(row, email)
-
-  return {
-    className: rowAttributes.hideOnMobile ? 'mobile_hide' : 'row-content',
-    style: {},
-    width: email.width,
-  }
-}
-
 export function generateRowProps(row: RowBlock, email: Email | null): OmitChildren<React.ComponentProps<typeof Row>> {
   const mergedAttributes = getRowAttributes(row, email)
+  const emailAttributes = getEmailAttributes(email)
 
-  const borderStyles =
-    mergedAttributes.borderWidth && mergedAttributes.borderColor
-      ? {
-          borderLeft: `${ensurePx(mergedAttributes.borderWidth)} ${mergedAttributes.borderStyle || 'solid'} ${mergedAttributes.borderColor}`,
-          borderRight: `${ensurePx(mergedAttributes.borderWidth)} ${mergedAttributes.borderStyle || 'solid'} ${mergedAttributes.borderColor}`,
-          borderTop: `${ensurePx(mergedAttributes.borderWidth)} ${mergedAttributes.borderStyle || 'solid'} ${mergedAttributes.borderColor}`,
-          borderBottom: `${ensurePx(mergedAttributes.borderWidth)} ${mergedAttributes.borderStyle || 'solid'} ${mergedAttributes.borderColor}`,
-        }
-      : {}
+  const width = emailAttributes.width ? `${emailAttributes.width}px` : '100%'
 
   return {
     className: `row-content${mergedAttributes.stackOnMobile ? ' stack' : ''}${
@@ -67,9 +55,25 @@ export function generateRowProps(row: RowBlock, email: Email | null): OmitChildr
     style: {
       ...applyPaddingAttributes(mergedAttributes),
       ...getAdditionalRowStyles(mergedAttributes),
-      ...borderStyles,
+      width,
+      maxWidth: width,
     },
-    bgcolor: mergedAttributes.backgroundColor ?? 'transparent',
+    align: 'center',
+    bgcolor: mergedAttributes.backgroundColor ?? '#ffffff',
+    width,
+  }
+}
+
+export function generateContainerProps(
+  row: RowBlock,
+  email: Email
+): OmitChildren<React.ComponentProps<typeof Container>> {
+  const rowAttributes = getRowAttributes(row, email)
+  const emailAttributes = getEmailAttributes(email)
+  return {
+    className: rowAttributes.hideOnMobile ? 'mobile_hide' : 'row-content',
+    style: {},
+    width: emailAttributes.width,
   }
 }
 
@@ -78,44 +82,105 @@ export function generateColumnProps(
   row: RowBlock,
   email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Column>> {
-  const rowAttributes = getRowAttributes(row, email)
-
   // Get column-specific defaults based on row type
-  const rowTypeDefaults = getRowTypeBlockDefaults(column, row)
-
-  let style: React.CSSProperties = {
-    ...(rowTypeDefaults as React.CSSProperties),
-    width: column.width ?? '100%',
+  const defaultColumnAttributes: Partial<ColumnBlock['attributes']> = {
+    width: '100%',
     wordBreak: 'break-word',
-    verticalAlign: rowAttributes.verticalAlign ?? 'top',
+    verticalAlign: 'top',
   }
 
+  const mergedAttributes = { ...defaultColumnAttributes, ...column.attributes }
+
   return {
-    style,
+    style: {
+      ...getAdditionalColumnStyles(mergedAttributes, row),
+    },
     className: 'column',
   }
 }
 
-export function generateBodyProps(
-  email: Email,
-  skipBackgroundColor = false
-): OmitChildren<React.ComponentProps<typeof Body>> {
+type EmailAttributes = {
+  backgroundColor: string
+  color: string
+  fontFamily: string
+  linkColor: string
+  rowBackgroundColor: string
+  width: string
+  styleVariant: EmailStyleVariant
+}
+
+export function getEmailAttributes(email: Email | null): EmailAttributes {
+  const defaultAttributes: EmailAttributes = {
+    backgroundColor: '#f4f4f4',
+    color: '#000000',
+    fontFamily: 'Arial, sans-serif',
+    linkColor: '#3b82f6',
+    rowBackgroundColor: '#FFFFFF',
+    width: '600',
+    styleVariant: 'floating',
+  }
+
+  if (email?.styleVariant === 'outline') {
+    defaultAttributes.backgroundColor = '#ffffff'
+    defaultAttributes.color = '#2d2d2d'
+    defaultAttributes.fontFamily = 'Open Sans, Roboto, Helvetica, Arial, sans-serif'
+  }
+
+  if (email?.styleVariant === 'default') {
+    defaultAttributes.backgroundColor = '#ffffff'
+  }
+
+  if (email?.styleVariant === 'floating') {
+    defaultAttributes.backgroundColor = '#f4f4f4'
+  }
+
+  return {
+    ...defaultAttributes,
+    ...(email && Object.fromEntries(Object.entries(email).filter(([_, value]) => value !== undefined))),
+  }
+}
+
+export function generateBodyProps(email: Email): OmitChildren<React.ComponentProps<typeof Body>> {
+  const emailAttributes = getEmailAttributes(email)
+
   return {
     style: {
-      margin: 0,
-      backgroundColor: skipBackgroundColor ? undefined : email.bgColor,
-      color: email.color,
-      fontFamily: email.fontFamily,
+      ...getAdditionalEmailStyles(emailAttributes),
     },
   }
 }
 
-function getAdditionalRowStyles(attributes: RowBlockAttributes): React.CSSProperties {
-  const styles: React.CSSProperties = {}
-
-  if (attributes.borderRadius) {
-    styles.borderRadius = attributes.borderRadius
+export function generateContentProps(email: Email): OmitChildren<React.ComponentProps<typeof Container>> {
+  const emailAttributes = getEmailAttributes(email)
+  const defaultStyles: React.CSSProperties = {
+    color: '#000000',
+    fontFamily: 'Arial, sans-serif',
+    maxWidth: '100%',
+    width: '100%',
+    margin: '0 auto',
+    // @ts-ignore - MSO properties for Outlook compatibility
+    msoTableLspace: '0pts',
+    // @ts-ignore - MSO properties for Outlook compatibility
+    msoTableRspace: '0pts',
   }
 
-  return styles
+  if (emailAttributes.styleVariant === 'outline') {
+    defaultStyles.paddingTop = '20px'
+  }
+
+  if (emailAttributes.styleVariant === 'floating') {
+    defaultStyles.paddingTop = '20px'
+  }
+
+  return {
+    width: '100%',
+    border: 0,
+    cellPadding: '0',
+    cellSpacing: '0',
+    role: 'presentation',
+    style: {
+      ...defaultStyles,
+      ...getAdditionalContentStyles(emailAttributes),
+    },
+  }
 }

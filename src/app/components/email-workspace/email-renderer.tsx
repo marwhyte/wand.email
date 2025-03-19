@@ -4,10 +4,10 @@ import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { createNewBlock } from '@/lib/data/templates'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
-import { generateBodyProps } from '@/lib/utils/attributes'
-import { useCallback, useState } from 'react'
+import { generateBodyProps, generateContentProps, getEmailAttributes } from '@/lib/utils/attributes'
+import React, { useCallback, useState } from 'react'
 import { useDrop } from 'react-dnd'
-import { v4 as uuidv4 } from 'uuid' // Make sure to import uuid
+import { v4 as uuidv4 } from 'uuid'
 import EmailRow from './email-components/email-row'
 import { ColumnBlock, Email, EmailBlockType, RowBlock } from './types'
 
@@ -278,47 +278,51 @@ const EmailRenderer = ({ email }: Props) => {
     }),
   })
 
+  const emailAttributes = getEmailAttributes(email)
+
   return (
     <div className="w-full min-w-0 overflow-x-auto overflow-y-auto pt-4">
       {/* @ts-ignore */}
-      <div
-        {...generateBodyProps(email, true)}
-        className="mx-auto"
-        style={{
-          backgroundColor: email.bgColor,
-          color: email.color,
-        }}
-      >
-        {email.rows.length > 0 ? (
-          <>
-            {email.rows.map((row) => (
-              <EmailRow
-                key={row.id}
-                row={row}
-                moveRow={moveRow}
-                mobileView={mobileView}
-                dropLine={dropLine}
-                onHover={handleHover}
-                onDragEnd={handleDragEnd}
-                dropTarget={dropTarget}
-                setDropTarget={setDropTarget}
-                onBlockDrop={handleBlockDrop}
-                addRow={addRow}
-              />
-            ))}
-          </>
-        ) : (
-          <div
-            // @ts-ignore
-            ref={drop}
-            className={`flex h-64 items-center justify-center rounded-lg border-2 border-dashed transition-colors duration-200 ${isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
-            style={{ maxWidth: '600px', margin: '0 auto' }}
-          >
-            <p className={`text-lg ${isOver ? 'text-blue-500' : 'text-gray-500'}`}>
-              {isOver ? 'Drop here' : 'Drag your first row or block here'}
-            </p>
-          </div>
-        )}
+      <div {...generateBodyProps(email)} className="mx-auto">
+        <div {...generateContentProps(email)}>
+          {email.rows.length > 0 ? (
+            <>
+              {email.rows.map((row, index) => (
+                <React.Fragment key={row.id}>
+                  <EmailRow
+                    row={row}
+                    moveRow={moveRow}
+                    mobileView={mobileView}
+                    dropLine={dropLine}
+                    onHover={handleHover}
+                    onDragEnd={handleDragEnd}
+                    dropTarget={dropTarget}
+                    setDropTarget={setDropTarget}
+                    onBlockDrop={handleBlockDrop}
+                    addRow={addRow}
+                  />
+                  {index < email.rows.length - 1 &&
+                    emailAttributes.styleVariant === 'outline' &&
+                    row.attributes.type !== 'header' &&
+                    row.attributes.type !== 'footer' &&
+                    email.rows[index + 1].attributes.type !== 'header' &&
+                    email.rows[index + 1].attributes.type !== 'footer' && <div style={{ height: '20px' }} />}
+                </React.Fragment>
+              ))}
+            </>
+          ) : (
+            <div
+              // @ts-ignore
+              ref={drop}
+              className={`flex h-64 items-center justify-center rounded-lg border-2 border-dashed transition-colors duration-200 ${isOver ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}
+              style={{ maxWidth: '600px', margin: '0 auto' }}
+            >
+              <p className={`text-lg ${isOver ? 'text-blue-500' : 'text-gray-500'}`}>
+                {isOver ? 'Drop here' : 'Drag your first row or block here'}
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

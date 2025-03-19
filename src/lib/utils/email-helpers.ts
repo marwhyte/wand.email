@@ -10,6 +10,10 @@ export const createBlock = (type: EmailBlockType, content: string, attrs = {}, c
     attributes: attrs,
   } as EmailBlock
 
+  if (type === 'socials') {
+    console.log(block, 'block')
+  }
+
   column.blocks.push(block)
   return block
 }
@@ -37,21 +41,21 @@ export const createRow = (attrs = {}): RowBlock => ({
 })
 
 export const createEmail = (
-  rows: RowBlock[],
-  color: string,
-  linkColor: string,
-  fontFamily = 'Arial',
-  bgColor = '#ffffff',
-  rowBgColor = '#ffffff',
-  width = '600'
+  email: Email,
+  color?: string,
+  linkColor?: string,
+  fontFamily?: string,
+  backgroundColor?: string,
+  rowBackgroundColor?: string,
+  width?: string
 ): Email => ({
-  id: uuidv4(),
-  rows,
   color,
   linkColor,
   fontFamily,
-  bgColor,
-  rowBgColor,
+  backgroundColor,
+  rowBackgroundColor,
   width,
   preview: '',
+  ...email,
+  id: uuidv4(),
 })

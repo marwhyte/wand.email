@@ -18,7 +18,7 @@ const SurveyEditor = ({ block, onChange }: Props) => {
     row.columns.some((column) => column.blocks.some((b) => b.id === block.id))
   ) as RowBlock
 
-  const processedAttributes = generateSurveyProps(block, parentRow)
+  const processedAttributes = generateSurveyProps(block, parentRow, email)
 
   const handleLinkChange = (type: 'yes-no' | 'rating', key: string, value: string) => {
     const newLinks = {
