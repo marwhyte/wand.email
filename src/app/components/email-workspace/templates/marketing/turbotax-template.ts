@@ -23,10 +23,11 @@ ROW backgroundColor=#fcfcfc hideOnMobile=true padding=0,16,30,16 {
   }
   COLUMN {
     LINK color=#393a3d fontSize=14 fontWeight=bold href="#" content=<p>Sign in</p> align=center
+    TABLE rows=[[<p><strong>S&P 500</strong></p>,<p><strong>5,615</strong></p>,<p><span style=\"color: rgb(179, 25, 25)\">-1.07%</span></p>],[<p><strong>Nasdaq</strong></p>,<p><strong>17,504</strong></p>,<p><span style=\"color: rgb(179, 25, 25)\">-1.27%</span></p>]]
   }
 }
 
-ROW verticalAlign=middle backgroundColor=#EAEAE3 padding=14,16,14,16 {
+ROW verticalAlign=middle backgroundColor=#EAEAE3 padding=14,16 {
   COLUMN width=16.67% {
     IMAGE alt="Status Flag" src="${getPhotoUrl('flag.png', 'turbotax')}" width=100%
   }

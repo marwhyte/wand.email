@@ -9,8 +9,10 @@ import type {
   RowBlock,
   SocialsBlock,
   SurveyBlock,
+  TableBlock,
   TextBlock,
 } from '@/app/components/email-workspace/types'
+import { Table } from '@/app/components/table'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
 import { getImgSrc } from '../../misc'
@@ -23,6 +25,7 @@ import {
   getAdditionalLinkStyles,
   getAdditionalSocialsStyles,
   getAdditionalSurveyStyles,
+  getAdditionalTableStyles,
   getAdditionalTextStyles,
 } from '../defaults/blocks'
 import { getEmailAttributes } from './layout'
@@ -104,7 +107,6 @@ export function generateButtonProps(
 export function generateLinkProps(
   block: LinkBlock,
   parentRow: RowBlock,
-  mobileView = false,
   email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Link>> {
   const mergedAttributes: React.ComponentProps<typeof Link>['style'] = {
@@ -166,6 +168,19 @@ export function generateSurveyProps(
   }
 }
 
+export function generateTableProps(
+  block: TableBlock,
+  parentRow: RowBlock,
+  email: Email | null
+): OmitChildren<React.ComponentProps<typeof Table>> {
+  return {
+    style: {
+      ...applyPaddingAttributes(block.attributes),
+      ...getAdditionalTableStyles(block, parentRow, email),
+    },
+  }
+}
+
 export function getBlockAttributes<T extends EmailBlock>(
   block: T,
   parentRow: RowBlock,
@@ -199,13 +214,15 @@ export function getBlockAttributes<T extends EmailBlock>(
     case 'button':
       return generateButtonProps(block as ButtonBlock, parentRow, company, email) as any
     case 'link':
-      return generateLinkProps(block as LinkBlock, parentRow, mobileView, email) as any
+      return generateLinkProps(block as LinkBlock, parentRow, email) as any
     case 'divider':
       return generateDividerProps(block as DividerBlock, parentRow, email) as any
     case 'survey':
       return generateSurveyProps(block as SurveyBlock, parentRow, email) as any
     case 'socials':
       return generateSocialsProps(block as SocialsBlock, parentRow, email) as any
+    case 'table':
+      return generateTableProps(block as TableBlock, parentRow, email) as any
     default:
       return {} as never
   }

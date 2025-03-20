@@ -155,6 +155,14 @@ export const blockLibrary = {
       padding: ['10,0,10,0'],
     },
   },
+  TABLE: {
+    attributes: {
+      align: ['left', 'center', 'right'],
+      rows: [
+        '[<p>S&P 500</p>,<p>5,599</p>,<p>+0.49%</p>],[<p>Nasdaq</p>,<p>12,345</p>,<p>+0.49%</p>],[<p>Dow</p>,<p>23,456</p>,<p>+0.49%</p>]',
+      ],
+    },
+  },
   TEXT: {
     attributes: {
       textAlign: ['left', 'center', 'right'],
@@ -230,6 +238,7 @@ export type EmailBlock =
   | ImageBlock
   | LinkBlock
   | SocialsBlock
+  | TableBlock
   | SurveyBlock
   | TextBlock
 
@@ -292,6 +301,12 @@ export type SurveyBlock = {
   id: string
   type: 'survey'
   attributes: SurveyBlockAttributes
+}
+
+export type TableBlock = {
+  id: string
+  type: 'table'
+  attributes: TableBlockAttributes
 }
 
 export type TextBlock = {
@@ -406,6 +421,9 @@ export type SurveyBlockAttributes = PaddingAttributes & {
   question: string
 }
 
+export type TableBlockAttributes = PaddingAttributes & {
+  rows: string[][]
+}
 export type TextBlockAttributes = TextAttributes &
   PaddingAttributes & {
     textAlign?: 'left' | 'center' | 'right'

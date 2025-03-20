@@ -16,6 +16,7 @@ import {
   SocialIconName,
   SocialsBlockAttributes,
   SurveyBlockAttributes,
+  TableBlockAttributes,
   TextAttributes,
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
@@ -234,6 +235,15 @@ function parseAttributes(attrString: string): RawAttributes {
     attrString = attrString.replace(contentMatch[0], '')
   }
 
+  // Special handling for complex JSON arrays (like table rows)
+  // This needs to happen before other attribute parsing
+  const complexJsonMatch = attrString.match(/(\w+)=(\[[\s\S]*?\])(?=\s+\w+=|\s*$)/)
+  if (complexJsonMatch) {
+    const [fullMatch, key, jsonValue] = complexJsonMatch
+    attrs[key] = jsonValue
+    attrString = attrString.replace(fullMatch, '')
+  }
+
   // Special handling for links - match both quoted and unquoted keys
   const jsonMatch = attrString.match(/(\w+)=(\[[\s\S]*?\])/)
   if (jsonMatch) {
@@ -404,7 +414,6 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
   // Parse social links from raw attributes
   try {
     const jsonStr = raw.links?.trim() || '[]'
-    console.log('Parsing social links from:', jsonStr) // Debug log
 
     // Validate JSON string format
     if (!jsonStr.startsWith('[') || !jsonStr.endsWith(']')) {
@@ -413,7 +422,6 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
     }
 
     const rawLinks = JSON.parse(jsonStr)
-    console.log('Parsed links:', rawLinks) // Debug log
 
     if (Array.isArray(rawLinks)) {
       attrs.links = rawLinks
@@ -431,7 +439,6 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
     console.debug('links type:', typeof raw.links)
   }
 
-  console.log('Final socials attrs:', attrs) // Debug log
   return attrs
 }
 
@@ -457,6 +464,54 @@ const parseTextAttributes: AttributeParser<TextBlockAttributes> = (raw) => {
   return attrs
 }
 
+const parseTableAttributes: AttributeParser<TableBlockAttributes> = (raw) => {
+  const attrs: TableBlockAttributes = {
+    ...handlePadding(raw),
+    rows: [],
+  }
+
+  if (raw.rows) {
+    try {
+      // First, normalize the JSON string to handle HTML content
+      let rowsStr = raw.rows.trim()
+
+      // Try direct JSON parsing first
+      try {
+        const rowsData = JSON.parse(rowsStr)
+        if (Array.isArray(rowsData) && rowsData.every((row) => Array.isArray(row))) {
+          attrs.rows = rowsData
+        }
+      } catch (jsonError) {
+        // If direct parsing fails, extract HTML content with <p> tags
+        // Match the overall structure of rows
+        const rowsRegex = /\[\[(.*)\]\]/s
+        const rowsMatch = rowsStr.match(rowsRegex)
+
+        if (rowsMatch) {
+          // Split into individual rows
+          const rowsContent = rowsMatch[1]
+          const rowStrings = rowsContent.split('],[')
+
+          // Process each row
+          const parsedRows = rowStrings.map((rowStr) => {
+            // Extract all <p> tags in this row
+            const pTagRegex = /<p>.*?<\/p>/g
+            const cells = rowStr.match(pTagRegex) || []
+            return cells
+          })
+
+          attrs.rows = parsedRows
+        }
+      }
+    } catch (e) {
+      console.error('Failed to parse table rows:', e)
+      console.debug('Raw rows value:', raw.rows)
+    }
+  }
+
+  return attrs
+}
+
 // ===== Parser Registry =====
 const blockParsers = {
   heading: parseHeadingAttributes,
@@ -467,6 +522,7 @@ const blockParsers = {
   divider: parseDividerAttributes,
   socials: parseSocialsAttributes,
   survey: parseSurveyAttributes,
+  table: parseTableAttributes,
 } as const
 
 // ===== Image Processing Helpers =====
@@ -631,6 +687,9 @@ export function parseEmailScript(script: string, email: Email): Email {
           break
         case 'survey':
           createBlock('survey', '', blockParsers.survey(attrs), currentColumn)
+          break
+        case 'table':
+          createBlock('table', '', blockParsers.table(attrs), currentColumn)
           break
       }
     }

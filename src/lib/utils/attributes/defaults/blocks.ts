@@ -7,6 +7,7 @@ import type {
   RowBlock,
   SocialsBlock,
   SurveyBlock,
+  TableBlock,
   TextBlock,
 } from '@/app/components/email-workspace/types'
 import { Email } from '@/app/components/email-workspace/types'
@@ -277,6 +278,33 @@ export const getAdditionalSurveyStyles = (
 
   // Create a copy of attributes without 'kind', 'question', and 'links' properties
   const { kind, question, links, ...styleAttributes } = surveyBlock.attributes
+
+  return {
+    ...baseDefaults,
+    ...rowTypeDefaults,
+    ...styleAttributes,
+  }
+}
+
+export const getAdditionalTableStyles = (
+  tableBlock: TableBlock,
+  parentRow: RowBlock,
+  email: Email | null
+): React.ComponentProps<'table'>['style'] => {
+  const baseDefaults: React.ComponentProps<'table'>['style'] = {
+    // @ts-expect-error
+    msoTableLspace: '0pt',
+    msoTableRspace: '0pt',
+    borderCollapse: 'collapse',
+    width: '100%',
+    tableLayout: 'fixed',
+    direction: 'ltr',
+    backgroundColor: 'transparent',
+  }
+
+  const rowTypeDefaults = getRowTypeBlockDefaults(tableBlock, email, parentRow) || {}
+
+  const { rows, ...styleAttributes } = tableBlock.attributes
 
   return {
     ...baseDefaults,

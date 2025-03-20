@@ -20,7 +20,7 @@ input {
 
 
 table {
-    border-collapse: separate !important;
+    border-collapse: separate;
 }
 
 .bg-checkerboard {

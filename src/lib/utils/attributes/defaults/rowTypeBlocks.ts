@@ -241,6 +241,7 @@ export function getRowTypeBlockDefaults(
 
     case 'text':
     case 'button':
+    case 'table':
       break
   }
 

@@ -26,6 +26,7 @@ import {
 } from '@react-email/components'
 import parse from 'html-react-parser'
 import React from 'react'
+import { Table } from '../table'
 import EmailSocials from './email-components/email-socials'
 import EmailSurvey from './email-components/email-survey'
 import { ColumnBlock, Email, EmailBlock, RowBlock } from './types'
@@ -171,6 +172,32 @@ const RenderBlockFinal = ({
         return <EmailSocials isEditing={false} block={block} parentRow={parentRow} email={email} />
       case 'survey':
         return <EmailSurvey block={block} parentRow={parentRow} email={email} />
+      case 'table':
+        const tableProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Table>>
+        return (
+          <table style={{ ...restStyle }} {...tableProps}>
+            {block.attributes.rows.map((row, rowIndex) => (
+              <tr key={rowIndex}>
+                {row.map((cell, cellIndex) => (
+                  <td
+                    width={`${100 / row.length}%`}
+                    key={cellIndex}
+                    style={{
+                      padding: '10px',
+                      wordBreak: 'break-word',
+                      borderTop: '1px solid #dddddd',
+                      borderRight: '1px solid #dddddd',
+                      borderBottom: '1px solid #dddddd',
+                      borderLeft: '1px solid #dddddd',
+                    }}
+                  >
+                    {parse(cell)}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </table>
+        )
       default:
         return null
     }

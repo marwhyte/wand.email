@@ -24,6 +24,7 @@ import {
   RowBlock,
   RowBlockAttributes,
   SocialsBlockAttributes,
+  TableBlockAttributes,
   TextAttributes,
   TextBlockAttributes,
 } from './types'
@@ -53,6 +54,7 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
         | ImageBlockAttributes
         | ButtonBlockAttributes
         | SocialsBlockAttributes
+        | TableBlockAttributes
       >
     ) => {
       if (currentBlock) {

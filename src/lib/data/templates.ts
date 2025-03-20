@@ -8,6 +8,7 @@ import {
   LinkBlock,
   SocialsBlock,
   SurveyBlock,
+  TableBlock,
   TemplateTypes,
   TextBlock,
 } from '@/app/components/email-workspace/types'
@@ -191,6 +192,21 @@ export function createNewBlock<T extends EmailBlockType>(type: T): Extract<Email
         attributes: {
           content: `I'm a new link block`,
           href: '#',
+        },
+      }
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'table': {
+      const block: TableBlock = {
+        ...baseBlock,
+        type: 'table',
+        attributes: {
+          rows: [
+            ['Add text', '', ''],
+            ['', '', ''],
+            ['', '', ''],
+          ],
         },
       }
       return block as Extract<EmailBlock, { type: T }>

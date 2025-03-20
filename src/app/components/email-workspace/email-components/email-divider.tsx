@@ -1,43 +1,10 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { generateDividerProps, getEmailAttributes } from '@/lib/utils/attributes'
-import React from 'react'
 import { DividerBlock, RowBlock } from '../types'
 
 type Props = {
   block: DividerBlock
   parentRow: RowBlock
-}
-
-type EmailDividerWithoutPaddingProps = {
-  attributes: React.CSSProperties
-}
-
-export const EmailDividerWithoutPadding = ({ attributes }: EmailDividerWithoutPaddingProps) => {
-  return (
-    <table
-      border={0}
-      cellPadding="0"
-      cellSpacing="0"
-      role="presentation"
-      width="100%"
-      // @ts-ignore
-      style={{ msoTableLspace: '0pt', msoTableRspace: '0pt' }}
-    >
-      <tr>
-        <td
-          style={{
-            fontSize: '1px',
-            lineHeight: '1px',
-            borderTop: `${attributes.borderWidth ?? '1'}px ${attributes.borderStyle ?? 'solid'} ${
-              attributes.borderColor ?? '#dddddd'
-            }`,
-          }}
-        >
-          <span style={{ wordBreak: 'break-word' }}>&#8202;</span>
-        </td>
-      </tr>
-    </table>
-  )
 }
 
 export default function EmailDivider({ block, parentRow }: Props) {

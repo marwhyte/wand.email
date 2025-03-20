@@ -6,7 +6,7 @@ export const newsletterOutlineStocktwitsTemplateScript = `
 <EMAIL styleVariant=outline type=newsletter>
     ROW type=header {
         COLUMN {
-            TEXT textAlign=right fontSize=12 content=<p>March 12, 2025 <a href="/">Read Online</a></p>
+            TEXT textAlign=right fontSize=12 content=<p>March 12, 2025 | <a href="/">Read Online</a></p>
             IMAGE src="logo" alt="Company Logo"
             SOCIALS folder=socials-dark-gray links=[{"icon":"x","url":"#","title":"X","alt":"X"},{"icon":"facebook","url":"#","title":"Facebook","alt":"Facebook"},{"icon":"instagram","url":"#","title":"Instagram","alt":"Instagram"}]
         }
@@ -22,7 +22,9 @@ export const newsletterOutlineStocktwitsTemplateScript = `
             TEXT content=<p>Here’s the S&P 500 heatmap. 5 of 11 sectors closed green, with technology (+1.57%) leading and consumer staples (-2.17%) lagging.</p>
             IMAGE src="https://ci3.googleusercontent.com/meips/ADKq_NaORb_WFPb7ZoIjMzoph5UdpEkXbChJQGttLCrp5sG36bcCmI_Y9NnKXbi-MYMQU03GmbPrrYRuVyimxaz-yQuoLilQXC3SFzGhClkP-o3nPjq4EBF_ymj_canpVKpN6K1hgoobQR_W62xKOU4_PgKxX4_pLLxV3JFNIVO-T6O9JY5Hpo9yhdNlWZG4AO23e0COxGQtzcRZ9OU6nBYxdRRS0hCRM0RaTCq7sXSj7pnQDeBNcVlxotW6MmWCkkMCyOfA84g=s0-d-e1-ft#https://media.beehiiv.com/cdn-cgi/image/fit=scale-down,format=auto,onerror=redirect,quality=80/uploads/asset/file/f4f74218-b37d-424a-92b1-74d397d7337d/image.png?t=1741822743"
             TEXT content=<p>Source: <a href="/">Finviz</a></p>
-            TEXT content=<p>And here are the closing prices:
+            TEXT content=<p>And here are the closing prices:</p>
+            TABLE rows=[[<p><strong>S&P 500</strong></p>,<p><strong>5,615</strong></p>,<p><span style="color: rgb(179, 25, 25)">-1.07%</span></p>],[<p><strong>Nasdaq</strong></p>,<p><strong>17,504</strong></p>,<p><span style="color: rgb(179, 25, 25)">-1.27%</span></p>]]
+
 
         }
     }

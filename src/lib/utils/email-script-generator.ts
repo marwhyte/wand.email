@@ -96,6 +96,40 @@ function stringifyAttributes(attributes: Record<string, any>): string {
       continue
     }
 
+    if (key === 'rows') {
+      // Format rows as a nested array with <p> tags around each cell
+      if (Array.isArray(value) && value.every((row) => Array.isArray(row))) {
+        const formattedRows = value.map((row) =>
+          row.map((cell) => {
+            // If the cell already has <p> tags, use it as is
+            if (typeof cell === 'string' && cell.startsWith('<p>') && cell.endsWith('</p>')) {
+              return cell
+            }
+            // Otherwise, wrap the cell content in <p> tags
+            return `<p>${cell}</p>`
+          })
+        )
+
+        // Convert to the expected string format: [[<p>cell1</p>,<p>cell2</p>],[<p>cell3</p>,<p>cell4</p>]]
+        let rowsStr = JSON.stringify(formattedRows)
+          .replace(/"/g, '') // Remove quotes around the HTML tags
+          .replace(/\\\\/g, '\\') // Fix escaped backslashes
+          .replace(/\\n/g, '\\n') // Preserve newlines
+
+        // Fix style attributes - replace \\" with " for HTML attributes
+        rowsStr = rowsStr.replace(/style=\\([^\\]+)\\>/g, 'style="$1">')
+
+        // Fix any remaining escaped quotes in HTML attributes
+        rowsStr = rowsStr.replace(/\\"/g, '"')
+
+        result.push(`rows=${rowsStr}`)
+      } else {
+        // Fallback to standard JSON for other formats
+        result.push(`rows=${JSON.stringify(value)}`)
+      }
+      continue
+    }
+
     // Format the value
     let formattedValue = value
     if (typeof value === 'string') {

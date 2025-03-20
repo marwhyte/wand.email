@@ -1,5 +1,4 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { generateLinkProps } from '@/lib/utils/attributes'
 import { Link } from '@react-email/components'
 import parse from 'html-react-parser'
@@ -12,9 +11,8 @@ type Props = {
 
 export default function EmailLink({ block, parentRow }: Props) {
   const { email } = useEmailStore()
-  const { mobileView } = useMobileViewStore()
 
-  const linkProps = generateLinkProps(block, parentRow, mobileView, email)
+  const linkProps = generateLinkProps(block, parentRow, email)
 
   // Extract align and style properties
   // @ts-expect-error

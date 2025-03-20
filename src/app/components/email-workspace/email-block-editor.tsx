@@ -15,6 +15,7 @@ import { useMemo } from 'react'
 import { Select } from '../select'
 import SocialsEditor from './socials-editor'
 import SurveyEditor from './survey-editor'
+import TableEditor from './table-editor'
 import {
   ButtonBlock,
   ButtonBlockAttributes,
@@ -25,15 +26,15 @@ import {
   ImageBlockAttributes,
   LinkBlock,
   PaddingAttributes,
-  RowBlock,
   RowBlockAttributes,
   SocialsBlock,
   SocialsBlockAttributes,
   SurveyBlock,
   SurveyBlockAttributes,
+  TableBlock,
+  TableBlockAttributes,
   TextAttributes,
   TextBlock,
-  TextBlockAttributes,
 } from './types'
 
 enum Options {
@@ -53,18 +54,26 @@ enum Options {
 }
 
 type EmailBlockEditorProps = {
-  block: TextBlock | SocialsBlock | ImageBlock | ButtonBlock | SurveyBlock | LinkBlock | HeadingBlock | DividerBlock
+  block:
+    | TextBlock
+    | SocialsBlock
+    | ImageBlock
+    | ButtonBlock
+    | SurveyBlock
+    | LinkBlock
+    | HeadingBlock
+    | DividerBlock
+    | TableBlock
   onChange: (
     attributes: Partial<
       | PaddingAttributes
       | TextAttributes
-      | TextBlockAttributes
-      | SocialsBlockAttributes
       | SurveyBlockAttributes
       | ImageBlockAttributes
       | ButtonBlockAttributes
       | SocialsBlockAttributes
       | HeadingBlockAttributes
+      | TableBlockAttributes
     >
   ) => void
 }
@@ -75,9 +84,9 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
   const { company } = useChatStore()
   const parentRow = email?.rows.find((row) =>
     row.columns.some((column) => column.blocks.some((b) => b.id === block.id))
-  ) as RowBlock
+  )
 
-  const processedAttributes = getBlockAttributes(block, parentRow, false, company, email)
+  const processedAttributes = parentRow ? getBlockAttributes(block, parentRow, false, company, email) : {}
 
   const blockPadding = useMemo(() => {
     return {
@@ -123,6 +132,8 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         return [Options.PADDING, Options.ALIGN]
       case 'survey':
         return [Options.PADDING]
+      case 'table':
+        return [Options.PADDING]
       default:
         return []
     }
@@ -148,6 +159,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
           <FieldGroup>
             {block.type === 'survey' && <SurveyEditor block={block} onChange={onChange} />}
             {block.type === 'socials' && <SocialsEditor block={block} onChange={onChange} />}
+            {block.type === 'table' && <TableEditor block={block} onChange={onChange} />}
             {options.includes(Options.HEADING_LEVEL) && block.type === 'heading' && (
               <Field>
                 <Label>Heading Level</Label>

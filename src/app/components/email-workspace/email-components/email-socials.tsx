@@ -13,8 +13,6 @@ const EmailSocials = ({ block, isEditing = true, parentRow, email }: Props) => {
   const socialProps = generateSocialsProps(block, parentRow, email)
   const { align } = socialProps
 
-  console.log(block.attributes, 'this')
-
   return (
     // @ts-expect-error
     <div align={align}>

@@ -7,6 +7,7 @@ import EmailImage from './email-components/email-image'
 import EmailLink from './email-components/email-link'
 import EmailSocials from './email-components/email-socials'
 import EmailSurvey from './email-components/email-survey'
+import EmailTable from './email-components/email-table'
 import EmailText from './email-components/email-text'
 import { EmailBlock, RowBlock } from './types'
 
@@ -65,6 +66,9 @@ const RenderBlock = ({ block, parentRow }: Props) => {
         <EmailSurvey block={block} parentRow={parentRow} email={email} />
       </div>
     )
+  }
+  if (block.type === 'table') {
+    return <EmailTable block={block} parentRow={parentRow} />
   }
 
   return null
