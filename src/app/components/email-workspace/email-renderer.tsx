@@ -4,7 +4,7 @@ import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { createNewBlock } from '@/lib/data/templates'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
-import { generateBodyProps, generateContentProps, getEmailAttributes } from '@/lib/utils/attributes'
+import { getBodyProps, getContentProps, getEmailAttributes } from '@/lib/utils/attributes'
 import React, { useCallback, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import { v4 as uuidv4 } from 'uuid'
@@ -280,11 +280,13 @@ const EmailRenderer = ({ email }: Props) => {
 
   const emailAttributes = getEmailAttributes(email)
 
+  console.log('body', getBodyProps(email))
+
   return (
     <div className="w-full min-w-0 overflow-x-auto overflow-y-auto pt-4">
       {/* @ts-ignore */}
-      <div {...generateBodyProps(email)} className="mx-auto">
-        <div {...generateContentProps(email)}>
+      <div {...getBodyProps(email)} className="mx-auto">
+        <div {...getContentProps(email)}>
           {email.rows.length > 0 ? (
             <>
               {email.rows.map((row, index) => (

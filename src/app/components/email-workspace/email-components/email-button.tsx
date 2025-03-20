@@ -1,5 +1,6 @@
 import { useChatStore } from '@/lib/stores/chatStore'
-import { generateButtonProps } from '@/lib/utils/attributes'
+import { getButtonProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { Button } from '@react-email/components'
 import parse from 'html-react-parser'
 import { ButtonBlock, Email, RowBlock } from '../types'
@@ -13,11 +14,9 @@ type Props = {
 export default function EmailButton({ block, parentRow, email }: Props) {
   const { company } = useChatStore()
 
-  const buttonProps = generateButtonProps(block, parentRow, company, email)
+  const buttonProps = getButtonProps(block, parentRow, company, email)
 
-  // Extract align and style properties
-  // @ts-expect-error
-  const { align, style, ...buttonPropsWithoutAlignAndStyle } = buttonProps
+  const { style, ...restButtonProps } = buttonProps
 
   const {
     padding,
@@ -49,11 +48,13 @@ export default function EmailButton({ block, parentRow, email }: Props) {
     paddingLeft: marginLeft,
   }
 
+  const buttonAttributes = getBlockAttributes(block, parentRow, email)
+
   return (
-    // @ts-expect-error
-    <div align={align} style={divStyle}>
-      <Button {...buttonPropsWithoutAlignAndStyle} style={buttonStyle} href={undefined}>
-        {parse(block.attributes.content)}
+    // @ts-expect-error align is not a valid prop for the div
+    <div align={buttonAttributes.align} style={divStyle}>
+      <Button {...restButtonProps} style={buttonStyle} href={undefined}>
+        {parse(buttonAttributes.content)}
       </Button>
     </div>
   )

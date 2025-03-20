@@ -4,27 +4,32 @@ import { Field, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import { Switch, SwitchField } from '@/app/components/switch'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { getPhotoUrl } from '@/lib/utils/misc'
 import { TrashIcon } from '@heroicons/react/24/solid'
 import { useState } from 'react'
 import { IconButton } from '../icon-button'
 import {
   COMMON_SOCIAL_ICONS,
+  Email,
   FOLDERS,
+  RowBlock,
   SocialIconFolders,
   SocialIconName,
   SocialsBlock,
   SocialsBlockAttributes,
 } from './types'
-
 interface SocialIconsEditorProps {
   block: SocialsBlock
   onChange: (socials: SocialsBlockAttributes) => void
+  parentRow: RowBlock
+  email: Email
 }
 
-const SocialsEditor = ({ block, onChange }: SocialIconsEditorProps) => {
-  const links = block.attributes.links
-  const iconFolder = block.attributes.folder
+const SocialsEditor = ({ block, onChange, parentRow, email }: SocialIconsEditorProps) => {
+  const socialsAttributes = getBlockAttributes(block, parentRow, email)
+  const links = socialsAttributes.links
+  const iconFolder = socialsAttributes.folder
   const validIcons = new Set([...Object.keys(COMMON_SOCIAL_ICONS)])
 
   const [showAdvanced, setShowAdvanced] = useState<{ [key: string]: boolean }>({})

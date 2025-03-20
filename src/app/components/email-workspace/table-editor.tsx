@@ -1,17 +1,21 @@
 import { useTableStore } from '@/lib/stores/tableStore'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { useEffect, useState } from 'react'
 import { Field, FieldGroup, Label } from '../fieldset'
 import { NumberInput } from '../input'
 import Textbox from '../textbox'
-import { TableBlock, TableBlockAttributes } from './types'
+import { Email, RowBlock, TableBlock, TableBlockAttributes } from './types'
 
 interface TableEditorProps {
   block: TableBlock
   onChange: (block: TableBlockAttributes) => void
+  parentRow: RowBlock
+  email: Email
 }
 
-export default function TableEditor({ block, onChange }: TableEditorProps) {
-  const [table, setTable] = useState(block.attributes.rows)
+export default function TableEditor({ block, onChange, parentRow, email }: TableEditorProps) {
+  const tableAttributes = getBlockAttributes(block, parentRow, email)
+  const [table, setTable] = useState(tableAttributes.rows)
   const { selectedCell, setSelectedCell, setSelectedCellValue, selectedCellValue } = useTableStore()
 
   useEffect(() => {

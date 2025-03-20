@@ -9,7 +9,8 @@ import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { getBlockAttributes } from '@/lib/utils/attributes'
+import { getBlockProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { capitalizeFirstLetter, isValidHttpUrl, safeParseInt } from '@/lib/utils/misc'
 import { useMemo } from 'react'
 import { Select } from '../select'
@@ -86,7 +87,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
     row.columns.some((column) => column.blocks.some((b) => b.id === block.id))
   )
 
-  const processedAttributes = parentRow ? getBlockAttributes(block, parentRow, false, company, email) : {}
+  const processedAttributes = parentRow ? getBlockProps(block, parentRow, company, email) : {}
 
   const blockPadding = useMemo(() => {
     return {
@@ -141,15 +142,21 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
 
   const options = optionsForItem()
 
+  if (!parentRow) {
+    return null
+  }
+
+  const blockAttributes = getBlockAttributes(block, parentRow, email)
+
   return (
     <div className="flex flex-col gap-4">
-      {options.includes(Options.TEXT) && 'content' in block.attributes && (
+      {options.includes(Options.TEXT) && 'content' in blockAttributes && (
         <Textbox
           autofocus
           preventNewlines={block.type !== 'text'}
           hideToolbar={block.type === 'link' || block.type === 'button'}
           key={`textbox-${block.id}`}
-          value={block.attributes.content || ''}
+          value={blockAttributes.content || ''}
           onChange={(value: string) => onChange({ content: value })}
         />
       )}
@@ -158,14 +165,18 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         <Disclosure title={`${capitalizeFirstLetter(block.type)} Attributes`} defaultOpen>
           <FieldGroup>
             {block.type === 'survey' && <SurveyEditor block={block} onChange={onChange} />}
-            {block.type === 'socials' && <SocialsEditor block={block} onChange={onChange} />}
-            {block.type === 'table' && <TableEditor block={block} onChange={onChange} />}
+            {block.type === 'socials' && email && (
+              <SocialsEditor parentRow={parentRow} email={email} block={block} onChange={onChange} />
+            )}
+            {block.type === 'table' && email && (
+              <TableEditor parentRow={parentRow} email={email} block={block} onChange={onChange} />
+            )}
             {options.includes(Options.HEADING_LEVEL) && block.type === 'heading' && (
               <Field>
                 <Label>Heading Level</Label>
                 <div className="ml-auto w-24">
                   <Select
-                    value={block.attributes.level || 'h2'}
+                    value={getBlockAttributes(block, parentRow, email).level || 'h2'}
                     onChange={(e) => onChange({ level: e.target.value as 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' })}
                   >
                     <option value="h1">H1</option>
@@ -211,7 +222,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 <Field labelPosition="top">
                   <Label>Alt Text</Label>
                   <Input
-                    value={block.attributes.alt || ''}
+                    value={getBlockAttributes(block, parentRow, email).alt || ''}
                     onChange={(e) => onChange({ alt: e.target.value })}
                     placeholder="Describe the image for accessibility"
                   />

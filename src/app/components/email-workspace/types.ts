@@ -78,6 +78,18 @@ export const componentLibrary = {
     `,
     allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
   },
+  list: {
+    example: `
+      ROW type=list {
+        COLUMN {
+          TEXT content=<p>List Item 1</p>
+          TEXT content=<p>List Item 2</p>
+          TEXT content=<p>List Item 3</p>
+        }
+      }
+    `,
+    allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
+  },
 } as const
 
 export const blockLibrary = {
@@ -184,7 +196,15 @@ export type ComponentType = keyof typeof componentLibrary
 export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T]['allowedBlocks'][number]
 
 export type EmailStyleVariant = 'default' | 'outline' | 'floating'
-export type EmailType = 'welcome-series' | 'e-commerce' | 'invite' | 'transactional' | 'newsletter' | 'invoice' | 'cart'
+export type EmailType =
+  | 'default'
+  | 'welcome-series'
+  | 'e-commerce'
+  | 'invite'
+  | 'transactional'
+  | 'newsletter'
+  | 'invoice'
+  | 'cart'
 export type Email = {
   backgroundColor?: string
   color?: string

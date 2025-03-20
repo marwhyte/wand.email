@@ -1,5 +1,6 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { generateLinkProps } from '@/lib/utils/attributes'
+import { getLinkProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { Link } from '@react-email/components'
 import parse from 'html-react-parser'
 import { LinkBlock, RowBlock } from '../types'
@@ -12,16 +13,13 @@ type Props = {
 export default function EmailLink({ block, parentRow }: Props) {
   const { email } = useEmailStore()
 
-  const linkProps = generateLinkProps(block, parentRow, email)
+  const linkProps = getLinkProps(block, parentRow, email)
+  const linkAttributes = getBlockAttributes(block, parentRow, email)
 
-  // Extract align and style properties
-  // @ts-expect-error
-  const { align, style, ...linkPropsWithoutAlignAndStyle } = linkProps
+  const { style, ...restLinkProps } = linkProps
 
-  // Extract padding-related styles for the div
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
 
-  // Create div style with padding properties and align
   const divStyle = {
     padding,
     paddingTop,
@@ -31,10 +29,10 @@ export default function EmailLink({ block, parentRow }: Props) {
   }
 
   return (
-    // @ts-expect-error
-    <div align={align} style={divStyle}>
-      <Link {...linkPropsWithoutAlignAndStyle} style={restStyles} href={undefined}>
-        {parse(block.attributes.content)}
+    // @ts-expect-error align is not a valid prop for the div
+    <div align={linkAttributes.align} style={divStyle}>
+      <Link {...restLinkProps} style={restStyles} href={undefined}>
+        {parse(linkAttributes.content)}
       </Link>
     </div>
   )

@@ -1,6 +1,7 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useTableStore } from '@/lib/stores/tableStore'
-import { generateTableProps, getEmailAttributes } from '@/lib/utils/attributes'
+import { getTableProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import parse from 'html-react-parser'
 import { useEffect } from 'react'
 import { RowBlock, TableBlock } from '../types'
@@ -12,9 +13,8 @@ type Props = {
 export default function EmailTable({ block, parentRow }: Props) {
   const { email, currentBlock } = useEmailStore()
   const { selectedCell, setSelectedCell, selectedCellValue, setSelectedCellValue } = useTableStore()
-  const emailAttributes = getEmailAttributes(email)
-  const attributes = generateTableProps(block, parentRow, email)
-
+  const tableProps = getTableProps(block, parentRow, email)
+  const tableAttributes = getBlockAttributes(block, parentRow, email)
   useEffect(() => {
     if (currentBlock?.id !== block.id) {
       setSelectedCell(null)
@@ -22,10 +22,9 @@ export default function EmailTable({ block, parentRow }: Props) {
     }
   }, [currentBlock?.id])
 
-  const { style, ...restAttributes } = attributes
+  const { style, ...restProps } = tableProps
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
 
-  // Combine padding values
   const divStyles = {
     padding,
     paddingTop,
@@ -36,9 +35,9 @@ export default function EmailTable({ block, parentRow }: Props) {
 
   return (
     <div style={divStyles}>
-      <table style={{ ...restStyles }} {...restAttributes}>
+      <table style={{ ...restStyles }} {...restProps}>
         <tbody>
-          {block.attributes.rows.map((row, rowIndex) => (
+          {tableAttributes.rows.map((row, rowIndex) => (
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) => (
                 <td

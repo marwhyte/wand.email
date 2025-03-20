@@ -1,5 +1,5 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { generateDividerProps, getEmailAttributes } from '@/lib/utils/attributes'
+import { getDividerProps } from '@/lib/utils/attributes'
 import { DividerBlock, RowBlock } from '../types'
 
 type Props = {
@@ -9,13 +9,11 @@ type Props = {
 
 export default function EmailDivider({ block, parentRow }: Props) {
   const { email } = useEmailStore()
-  const emailAttributes = getEmailAttributes(email)
-  const attributes = generateDividerProps(block, parentRow, email)
+  const dividerProps = getDividerProps(block, parentRow, email)
 
-  const { style, ...restAttributes } = attributes as any
+  const { style, ...restProps } = dividerProps
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
 
-  // Combine padding values
   const divStyle = {
     padding,
     paddingTop,
@@ -34,6 +32,7 @@ export default function EmailDivider({ block, parentRow }: Props) {
         width="100%"
         // @ts-ignore
         style={{ msoTableLspace: '0pt', msoTableRspace: '0pt' }}
+        {...restProps}
       >
         <tbody>
           <tr>

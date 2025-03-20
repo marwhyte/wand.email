@@ -1,5 +1,5 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { generateSocialsProps, generateSurveyProps } from '@/lib/utils/attributes'
+import { getSocialsProps, getSurveyProps } from '@/lib/utils/attributes'
 import EmailButton from './email-components/email-button'
 import EmailDivider from './email-components/email-divider'
 import EmailHeading from './email-components/email-heading'
@@ -38,7 +38,7 @@ const RenderBlock = ({ block, parentRow }: Props) => {
     return <EmailDivider block={block} parentRow={parentRow} />
   }
   if (block.type === 'socials') {
-    const attributes = generateSocialsProps(block, parentRow, email)
+    const attributes = getSocialsProps(block, parentRow, email)
     return (
       <div
         style={{
@@ -53,7 +53,7 @@ const RenderBlock = ({ block, parentRow }: Props) => {
     )
   }
   if (block.type === 'survey') {
-    const attributes = generateSurveyProps(block, parentRow, email)
+    const attributes = getSurveyProps(block, parentRow, email)
     return (
       <div
         style={{

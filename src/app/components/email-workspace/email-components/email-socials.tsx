@@ -1,4 +1,5 @@
-import { generateSocialsProps } from '@/lib/utils/attributes/generators/blocks'
+import { getSocialsProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { getPhotoUrl } from '@/lib/utils/misc'
 import { Email, RowBlock, SocialsBlock } from '../types'
 
@@ -10,12 +11,23 @@ type Props = {
 }
 
 const EmailSocials = ({ block, isEditing = true, parentRow, email }: Props) => {
-  const socialProps = generateSocialsProps(block, parentRow, email)
-  const { align } = socialProps
+  const socialProps = getSocialsProps(block, parentRow, email)
+  const { style, ...restSocialProps } = socialProps
+  const socialAttributes = getBlockAttributes(block, parentRow, email)
+
+  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
+
+  const divStyle = {
+    padding,
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
+  }
 
   return (
-    // @ts-expect-error
-    <div align={align}>
+    // @ts-expect-error align is not a valid prop for the div
+    <div align={socialAttributes.align} style={divStyle}>
       <table
         border={0}
         cellPadding="0"
@@ -23,21 +35,23 @@ const EmailSocials = ({ block, isEditing = true, parentRow, email }: Props) => {
         role="presentation"
         style={{
           display: 'inline-block',
-          // @ts-expect-error
+          // @ts-expect-error msoTableLspace and msoTableRspace are not valid props for the table
           msoTableLspace: '0pt',
           msoTableRspace: '0pt',
+          ...restStyles,
         }}
+        {...restSocialProps}
       >
         <tbody>
           <tr>
-            {block.attributes.links.map((social) => (
+            {socialAttributes.links.map((social) => (
               <td
                 key={social.url === '/' || social.url === '#' ? Math.random() : social.url}
                 style={{ padding: '0 4px' }}
               >
                 <a href={isEditing ? undefined : social.url} target="_blank">
                   <img
-                    src={getPhotoUrl(`${social.icon}.png`, block.attributes.folder)}
+                    src={getPhotoUrl(`${social.icon}.png`, socialAttributes.folder)}
                     width="24"
                     height="auto"
                     alt={social.alt}

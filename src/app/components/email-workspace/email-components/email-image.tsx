@@ -1,7 +1,8 @@
 import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { getBlockAttributes } from '@/lib/utils/attributes'
+import { getImageProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import Image from 'next/image'
 import FileUploader from '../../file-uploader'
 import { ImageBlock, RowBlock } from '../types'
@@ -40,7 +41,9 @@ export default function EmailImage({ block, parentRow }: Props) {
     setCurrentBlock(updatedBlock)
   }
 
-  if (!block.attributes.src) {
+  const imageAttributes = getBlockAttributes(block, parentRow, email)
+
+  if (!imageAttributes.src) {
     return (
       <div
         style={{ marginTop: 10, marginBottom: 10 }}
@@ -52,16 +55,12 @@ export default function EmailImage({ block, parentRow }: Props) {
     )
   }
 
-  const attributes = getBlockAttributes(block, parentRow, false, company, email)
+  const imageProps = getImageProps(block, parentRow, email, company)
 
-  // Extract align and style properties
-  // @ts-expect-error
-  const { align, style, ...imageAttributes } = attributes
+  const { style, ...restImageProps } = imageProps
 
-  // Extract padding-related styles for the div
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
 
-  // Create div style with padding properties
   const divStyle = {
     padding,
     paddingTop,
@@ -71,9 +70,9 @@ export default function EmailImage({ block, parentRow }: Props) {
   }
 
   return (
-    // @ts-expect-error
-    <div align={align} style={divStyle}>
-      <img {...imageAttributes} style={restStyles} />
+    // @ts-expect-error align is not a valid prop for the div
+    <div align={imageAttributes.align} style={divStyle}>
+      <img {...restImageProps} style={restStyles} />
     </div>
   )
 }

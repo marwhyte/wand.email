@@ -1,4 +1,5 @@
-import { generateSurveyProps } from '@/lib/utils/attributes'
+import { getSurveyProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { getPhotoUrl } from '@/lib/utils/misc'
 import { Button, Column, Row, Section, Text } from '@react-email/components'
 import { Email, RowBlock, SurveyBlock } from '../types'
@@ -10,11 +11,16 @@ type Props = {
 }
 
 const EmailSurvey = ({ block, parentRow, email }: Props) => {
-  const { color } = generateSurveyProps(block, parentRow, email)
+  const surveyProps = getSurveyProps(block, parentRow, email)
+  const surveyAttributes = getBlockAttributes(block, parentRow, email)
+  const { style, ...restProps } = surveyProps
+  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
+
+  const { color } = surveyAttributes
 
   if (block.attributes.kind === 'yes-no') {
     return (
-      <Section>
+      <Section {...restProps} style={restStyles}>
         <Text
           style={{
             margin: 0,
@@ -54,7 +60,7 @@ const EmailSurvey = ({ block, parentRow, email }: Props) => {
 
   if (block.attributes.kind === 'rating') {
     return (
-      <Section>
+      <Section {...restProps} style={restStyles}>
         <Text
           style={{
             fontSize: '16px',

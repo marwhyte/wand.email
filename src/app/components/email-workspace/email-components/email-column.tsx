@@ -1,6 +1,6 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
-import { generateColumnProps } from '@/lib/utils/attributes'
+import { getColumnProps } from '@/lib/utils/attributes'
 import { ArrowDownCircleIcon, ArrowUpCircleIcon } from '@heroicons/react/20/solid'
 import { Column } from '@react-email/components'
 import React, { useRef } from 'react'
@@ -68,8 +68,8 @@ export default function EmailColumn({
 
   return (
     <Column
-      {...generateColumnProps(column, row, email)}
-      className={`${generateColumnProps(column, row, email).className || ''} ${mobileView ? 'mobile-forced-full-width' : ''} ${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
+      {...getColumnProps(column, row, email)}
+      className={`${getColumnProps(column, row, email).className || ''} ${mobileView ? 'mobile-forced-full-width' : ''} ${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
       // @ts-ignore
       ref={drop}

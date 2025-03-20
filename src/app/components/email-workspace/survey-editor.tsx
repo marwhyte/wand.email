@@ -1,5 +1,6 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { generateSurveyProps } from '@/lib/utils/attributes'
+import { getSurveyProps } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { isValidHttpUrl } from '@/lib/utils/misc'
 import { Checkbox, CheckboxField, CheckboxGroup } from '../checkbox'
 import { ColorInput } from '../color-input'
@@ -18,13 +19,13 @@ const SurveyEditor = ({ block, onChange }: Props) => {
     row.columns.some((column) => column.blocks.some((b) => b.id === block.id))
   ) as RowBlock
 
-  const processedAttributes = generateSurveyProps(block, parentRow, email)
+  const processedAttributes = getSurveyProps(block, parentRow, email)
 
   const handleLinkChange = (type: 'yes-no' | 'rating', key: string, value: string) => {
     const newLinks = {
-      ...block.attributes.links,
+      ...surveyAttributes.links,
       [type]: {
-        ...(block.attributes.links?.[type] ?? {}),
+        ...(surveyAttributes.links?.[type] ?? {}),
         [key]: value,
       },
     } as SurveyBlockAttributes['links']
@@ -33,11 +34,13 @@ const SurveyEditor = ({ block, onChange }: Props) => {
     })
   }
 
+  const surveyAttributes = getBlockAttributes(block, parentRow, email)
+
   const getLink = (type: 'yes-no' | 'rating', key: string): string => {
     if (type === 'yes-no') {
-      return block.attributes.links?.['yes-no']?.[key as 'yes' | 'no'] ?? '/'
+      return surveyAttributes.links?.['yes-no']?.[key as 'yes' | 'no'] ?? '/'
     } else {
-      return block.attributes.links?.['rating']?.[key as '1' | '2' | '3' | '4' | '5'] ?? '/'
+      return surveyAttributes.links?.['rating']?.[key as '1' | '2' | '3' | '4' | '5'] ?? '/'
     }
   }
 
@@ -47,11 +50,11 @@ const SurveyEditor = ({ block, onChange }: Props) => {
         <Label>Survey Type</Label>
         <CheckboxGroup className="mt-2">
           <CheckboxField>
-            <Checkbox checked={block.attributes.kind === 'yes-no'} onChange={() => onChange({ kind: 'yes-no' })} />
+            <Checkbox checked={surveyAttributes.kind === 'yes-no'} onChange={() => onChange({ kind: 'yes-no' })} />
             <Label>Yes/No Question</Label>
           </CheckboxField>
           <CheckboxField>
-            <Checkbox checked={block.attributes.kind === 'rating'} onChange={() => onChange({ kind: 'rating' })} />
+            <Checkbox checked={surveyAttributes.kind === 'rating'} onChange={() => onChange({ kind: 'rating' })} />
             <Label>Rating Question</Label>
           </CheckboxField>
         </CheckboxGroup>
@@ -60,13 +63,13 @@ const SurveyEditor = ({ block, onChange }: Props) => {
       <Field labelPosition="top">
         <Label>Question</Label>
         <Input
-          value={block.attributes.question}
+          value={surveyAttributes.question}
           onChange={(e) => onChange({ question: e.target.value })}
           placeholder="Enter your survey question"
         />
       </Field>
 
-      {block.attributes.kind === 'yes-no' && (
+      {surveyAttributes.kind === 'yes-no' && (
         <>
           <Field labelPosition="top">
             <Label>Yes Button Link</Label>
@@ -105,7 +108,7 @@ const SurveyEditor = ({ block, onChange }: Props) => {
         </>
       )}
 
-      {block.attributes.kind === 'rating' && (
+      {surveyAttributes.kind === 'rating' && (
         <>
           {[1, 2, 3, 4, 5].map((num) => (
             <Field labelPosition="top" key={num}>

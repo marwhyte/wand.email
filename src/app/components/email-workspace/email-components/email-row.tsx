@@ -1,6 +1,6 @@
 import DragLine from '@/app/components/drag-line'
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { generateRowProps, getEmailAttributes, getRowAttributes } from '@/lib/utils/attributes'
+import { getEmailAttributes, getRowAttributes, getRowProps } from '@/lib/utils/attributes'
 import { classNames } from '@/lib/utils/misc'
 import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
 import { Container, Row } from '@react-email/components'
@@ -174,10 +174,7 @@ export default function EmailRow({
           }}
         >
           {/* Simplified row rendering that matches email-renderer-final.tsx approach */}
-          <Row
-            {...generateRowProps(row, email)}
-            className={mobileView && rowAttributes.stackOnMobile ? 'stack' : undefined}
-          >
+          <Row {...getRowProps(row, email)} className={mobileView && rowAttributes.stackOnMobile ? 'stack' : undefined}>
             {row.columns.map((column, index) => {
               // Convert pixel spacing to percentage of total width
               const emailWidth = Number(emailAttributes.width)

@@ -1,11 +1,11 @@
 import { renderToString } from 'react-dom/server'
 import {
-  generateBodyProps,
-  generateColumnProps,
-  generateContainerProps,
-  generateRowProps,
-  getBlockAttributes,
+  getBlockProps,
+  getBodyProps,
+  getColumnProps,
+  getContainerProps,
   getRowAttributes,
+  getRowProps,
 } from './attributes'
 
 import { Email, EmailBlock, RowBlock } from '@/app/components/email-workspace/types'
@@ -19,7 +19,7 @@ const stringifyProps = (props: Record<string, any>) => {
 }
 
 const renderBlock = (block: EmailBlock, parentRow: RowBlock, company: Company | null, email: Email | null) => {
-  const props = getBlockAttributes(block, parentRow, false, company, email)
+  const props = getBlockProps(block, parentRow, company, email)
   const propsString = stringifyProps(props)
 
   switch (block.type) {
@@ -123,7 +123,7 @@ export function getReactEmailCode(company: Company | null, email: Email | null) 
             \`}</style>
           </Head>
           <Preview>${email.preview}</Preview>
-          <Body ${stringifyProps(generateBodyProps(email))}>
+          <Body ${stringifyProps(getBodyProps(email))}>
             <Container width={"${email.width}"} style={{ backgroundColor: "${email.backgroundColor}", color: "${email.color}", maxWidth: "100%", margin: "0 auto", width: "${email.width}px", msoTableLspace: "0pts", msoTableRspace: "0pts" }}>
               ${email.rows
                 .map((row) => {
@@ -141,18 +141,18 @@ export function getReactEmailCode(company: Company | null, email: Email | null) 
                   return `
                 <Container
                   key="${row.id}"
-                  ${stringifyProps(generateContainerProps(row, email))}
+                  ${stringifyProps(getContainerProps(row, email))}
                   style={{
-                    ...${JSON.stringify(generateContainerProps(row, email).style)},
+                    ...${JSON.stringify(getContainerProps(row, email).style)},
                     msoTableLspace: "0pts",
                     msoTableRspace: "0pts"
                   }}
                 >
                   <Row 
-                    ${stringifyProps(generateRowProps(row, email))}
+                    ${stringifyProps(getRowProps(row, email))}
                     className="${combinedClassName || undefined}"
                     style={{
-                      ...${JSON.stringify(generateRowProps(row, email).style)},
+                      ...${JSON.stringify(getRowProps(row, email).style)},
                       msoTableLspace: "0pts",
                       msoTableRspace: "0pts"
                     }}
@@ -162,9 +162,9 @@ export function getReactEmailCode(company: Company | null, email: Email | null) 
                         (column, index) => `
                       <React.Fragment key="${column.id}">
                         <Column
-                          ${stringifyProps(generateColumnProps(column, row, email))}
+                          ${stringifyProps(getColumnProps(column, row, email))}
                           style={{
-                            ...${JSON.stringify(generateColumnProps(column, row, email).style)},
+                            ...${JSON.stringify(getColumnProps(column, row, email).style)},
                             width: "${columnWidth}%"
                           }}
                         >

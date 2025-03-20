@@ -1,14 +1,15 @@
 import { Company } from '@/lib/database/types'
 import {
-  generateBodyProps,
-  generateColumnProps,
-  generateContentProps,
-  generateRowProps,
-  getBlockAttributes,
+  getBlockProps,
+  getBodyProps,
+  getColumnProps,
+  getContentProps,
   getEmailAttributes,
   getRowAttributes,
+  getRowProps,
   OmitChildren,
 } from '@/lib/utils/attributes'
+import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import {
   Body,
   Button,
@@ -47,7 +48,7 @@ const RenderBlockFinal = ({
   email: Email | null
   company: Company | null
 }) => {
-  const blockProps = getBlockAttributes(block, parentRow, false, company, email)
+  const blockProps = getBlockProps(block, parentRow, company, email)
   const style = blockProps?.style || {}
   const { paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyle } = style
 
@@ -93,18 +94,18 @@ const RenderBlockFinal = ({
     switch (block.type) {
       case 'text':
         const textProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Text>>
-
-        return <Text {...textProps}>{parse(block.attributes.content, options)}</Text>
+        const textAttributes = getBlockAttributes(block, parentRow, email)
+        return <Text {...textProps}>{parse(textAttributes.content, options)}</Text>
       case 'heading':
         const headingProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Heading>>
-
-        return <Heading {...headingProps}>{parse(block.attributes.content, options)}</Heading>
+        const headingAttributes = getBlockAttributes(block, parentRow, email)
+        return <Heading {...headingProps}>{parse(headingAttributes.content, options)}</Heading>
       case 'image':
         const imageProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Img>>
         // Extract align property and remaining props
         const { align: imageAlign, ...imageRemainingProps } = imageProps as any
         return (
-          // @ts-expect-error
+          // @ts-expect-error align is not a valid prop for the div
           <div align={imageAlign}>
             <Img {...imageRemainingProps} />
           </div>
@@ -126,11 +127,12 @@ const RenderBlockFinal = ({
           paddingLeft: marginLeft,
         }
 
+        const buttonAttributes = getBlockAttributes(block, parentRow, email)
         return (
           // @ts-expect-error
           <div align={buttonAlign}>
             <Button {...buttonRemainingProps} style={buttonStyle}>
-              {parse(block.attributes.content)}
+              {parse(buttonAttributes.content)}
             </Button>
           </div>
         )
@@ -138,10 +140,11 @@ const RenderBlockFinal = ({
         const linkProps = { ...blockProps, style: restStyle }
         // Extract align property and remaining props
         const { align: linkAlign, ...linkRemainingProps } = linkProps as any
+        const linkAttributes = getBlockAttributes(block, parentRow, email)
         return (
           // @ts-expect-error
           <div align={linkAlign}>
-            <Link {...linkRemainingProps}>{parse(block.attributes.content)}</Link>
+            <Link {...linkRemainingProps}>{parse(linkAttributes.content)}</Link>
           </div>
         )
       case 'divider':
@@ -174,9 +177,10 @@ const RenderBlockFinal = ({
         return <EmailSurvey block={block} parentRow={parentRow} email={email} />
       case 'table':
         const tableProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Table>>
+        const tableAttributes = getBlockAttributes(block, parentRow, email)
         return (
           <table style={{ ...restStyle }} {...tableProps}>
-            {block.attributes.rows.map((row, rowIndex) => (
+            {tableAttributes.rows.map((row, rowIndex) => (
               <tr key={rowIndex}>
                 {row.map((cell, cellIndex) => (
                   <td
@@ -262,9 +266,9 @@ const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; c
 
   return (
     <Row
-      {...generateRowProps(row, email)}
+      {...getRowProps(row, email)}
       style={{
-        ...generateRowProps(row, email).style,
+        ...getRowProps(row, email).style,
         // @ts-ignore - MSO properties for Outlook compatibility
         msoTableLspace: '0pts',
         // @ts-ignore - MSO properties for Outlook compatibility
@@ -274,8 +278,8 @@ const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; c
       {row.columns.map((column, index) => (
         <React.Fragment key={column.id}>
           <Column
-            {...generateColumnProps(column, row, email)}
-            style={{ ...generateColumnProps(column, row, email).style, width: `${columnWidth}%` }}
+            {...getColumnProps(column, row, email)}
+            style={{ ...getColumnProps(column, row, email).style, width: `${columnWidth}%` }}
           >
             {renderColumnContent(column)}
           </Column>
@@ -305,18 +309,20 @@ const RenderRowSpacer = ({ height }: { height: number }) => {
 export const EmailContent = ({ email, company }: { email: Email; company: Company | null }) => {
   const emailAttributes = getEmailAttributes(email)
   return (
-    <Container {...generateContentProps(email)}>
-      {email.rows.map((row, index) => (
-        <React.Fragment key={row.id}>
-          <RenderColumns row={row} email={email} company={company} />
-          {index < email.rows.length - 1 &&
-            emailAttributes.styleVariant === 'outline' &&
-            row.attributes.type !== 'header' &&
-            row.attributes.type !== 'footer' &&
-            email.rows[index + 1].attributes.type !== 'header' &&
-            email.rows[index + 1].attributes.type !== 'footer' && <RenderRowSpacer height={20} />}
-        </React.Fragment>
-      ))}
+    <Container {...getContentProps(email)}>
+      {email.rows.map((row, index) => {
+        return (
+          <React.Fragment key={row.id}>
+            <RenderColumns row={row} email={email} company={company} />
+            {index < email.rows.length - 1 &&
+              emailAttributes.styleVariant === 'outline' &&
+              row.attributes.type !== 'header' &&
+              row.attributes.type !== 'footer' &&
+              email.rows[index + 1].attributes.type !== 'header' &&
+              email.rows[index + 1].attributes.type !== 'footer' && <RenderRowSpacer height={20} />}
+          </React.Fragment>
+        )
+      })}
     </Container>
   )
 }
@@ -423,7 +429,7 @@ const EmailRendererFinal = ({ email, company }: Props) => {
           }
         `}</style>
       </Head>
-      <Body {...generateBodyProps(email)}>
+      <Body {...getBodyProps(email)}>
         <Preview>{email.preview ?? 'Preview'}</Preview>
         <EmailContent email={email} company={company} />
       </Body>

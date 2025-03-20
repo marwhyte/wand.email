@@ -14,7 +14,7 @@ import { Email } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
 import { ensurePx, shouldUseDarkText } from '../../misc'
-import { getRowTypeBlockDefaults } from './rowTypeBlocks'
+import { getBlockCSSProperties } from './rowTypeBlocks'
 
 export const getAdditionalTextStyles = (
   textBlock: TextBlock,
@@ -35,7 +35,7 @@ export const getAdditionalTextStyles = (
     letterSpacing: 'normal',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(textBlock, email, parentRow) || {}
+  const rowTypeDefaults = getBlockCSSProperties(textBlock, email, parentRow) || {}
 
   const { content, ...styleAttributes } = textBlock.attributes
 
@@ -71,7 +71,7 @@ export const getAdditionalHeadingStyles = (
     fontSize: defaultHeadingSizes[headingBlock.attributes.level as keyof typeof defaultHeadingSizes] ?? '16px',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(headingBlock, email, parentRow) || {}
+  const rowTypeDefaults = getBlockCSSProperties(headingBlock, email, parentRow) || {}
 
   const { level, content, ...styleAttributes } = headingBlock.attributes
 
@@ -94,7 +94,7 @@ export const getAdditionalImageStyles = (
     width: '100%',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(imageBlock, email, parentRow, company)
+  const rowTypeDefaults = getBlockCSSProperties(imageBlock, email, parentRow, company)
 
   const { src, alt, ...styleAttributes } = imageBlock.attributes
 
@@ -127,7 +127,7 @@ export const getAdditionalButtonStyles = (
     cursor: 'pointer',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(buttonBlock, email, parentRow) || {}
+  const rowTypeDefaults = getBlockCSSProperties(buttonBlock, email, parentRow) || {}
 
   const {
     href,
@@ -201,7 +201,7 @@ export const getAdditionalLinkStyles = (
     cursor: 'pointer',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(linkBlock, email, parentRow) || {}
+  const rowTypeDefaults = getBlockCSSProperties(linkBlock, email, parentRow) || {}
 
   const { href, align, content, ...styleAttributes } = linkBlock.attributes
 
@@ -228,7 +228,7 @@ export const getAdditionalDividerStyles = (
     paddingBottom: '24px',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(dividerBlock, email, parentRow) || {}
+  const rowTypeDefaults = getBlockCSSProperties(dividerBlock, email, parentRow) || {}
 
   // Extract padding values from attributes to apply to margins
   const { ...otherAttributes } = dividerBlock.attributes
@@ -253,9 +253,9 @@ export const getAdditionalSocialsStyles = (
     paddingLeft: '10px',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(socialsBlock, email, parentRow) || {}
+  const rowTypeDefaults = getBlockCSSProperties(socialsBlock, email, parentRow) || {}
 
-  const { align, ...styleAttributes } = socialsBlock.attributes
+  const { align, folder, links, ...styleAttributes } = socialsBlock.attributes
 
   return {
     ...baseDefaults,
@@ -274,10 +274,10 @@ export const getAdditionalSurveyStyles = (
     paddingBottom: '10px',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(surveyBlock, email, parentRow) || {}
+  const rowTypeDefaults = getBlockCSSProperties(surveyBlock, email, parentRow) || {}
 
   // Create a copy of attributes without 'kind', 'question', and 'links' properties
-  const { kind, question, links, ...styleAttributes } = surveyBlock.attributes
+  const { kind, question, links, color, ...styleAttributes } = surveyBlock.attributes
 
   return {
     ...baseDefaults,
@@ -302,7 +302,7 @@ export const getAdditionalTableStyles = (
     backgroundColor: 'transparent',
   }
 
-  const rowTypeDefaults = getRowTypeBlockDefaults(tableBlock, email, parentRow) || {}
+  const rowTypeDefaults = getBlockCSSProperties(tableBlock, email, parentRow) || {}
 
   const { rows, ...styleAttributes } = tableBlock.attributes
 

@@ -275,7 +275,7 @@ export default function RowEditor({
               <div className="flex gap-2">
                 <div className="w-[106px]">
                   <Select
-                    value={row.attributes?.borderStyle || 'solid'}
+                    value={rowAttributes.borderStyle || 'solid'}
                     onChange={(e) =>
                       handleRowBorderChange('borderStyle', e.target.value as 'solid' | 'dashed' | 'dotted')
                     }
@@ -288,12 +288,12 @@ export default function RowEditor({
                 <NumberInput
                   min={0}
                   max={30}
-                  value={row.attributes?.borderWidth ? safeParseInt(row.attributes?.borderWidth.replace('px', '')) : 0}
+                  value={rowAttributes.borderWidth ? safeParseInt(rowAttributes.borderWidth.replace('px', '')) : 0}
                   onChange={(value) => handleRowBorderChange('borderWidth', `${value}px`)}
                 />
 
                 <ColorInput
-                  value={row.attributes?.borderColor || ''}
+                  value={rowAttributes.borderColor || ''}
                   onChange={(e) => handleRowBorderChange('borderColor', e)}
                 />
               </div>
