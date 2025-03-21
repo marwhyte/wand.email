@@ -7,6 +7,7 @@ import type {
   HeadingBlock,
   ImageBlock,
   LinkBlock,
+  ListBlock,
   RowBlock,
   SocialsBlock,
   SurveyBlock,
@@ -29,7 +30,7 @@ import type {
   Text,
 } from '@react-email/components'
 import { getImgSrc } from '../misc'
-import { getBlockAttributes } from './attributes'
+import { getBlockAttributes, getEmailAttributes, getRowAttributes } from './attributes'
 import { applyPaddingAttributes, applyTextAttributes } from './common'
 import {
   getAdditionalButtonStyles,
@@ -37,6 +38,7 @@ import {
   getAdditionalHeadingStyles,
   getAdditionalImageStyles,
   getAdditionalLinkStyles,
+  getAdditionalListStyles,
   getAdditionalSocialsStyles,
   getAdditionalSurveyStyles,
   getAdditionalTableStyles,
@@ -48,7 +50,6 @@ import {
   getAdditionalEmailStyles,
   getAdditionalRowStyles,
 } from './defaults/layout'
-import { getEmailAttributes, getRowAttributes } from './generators/layout'
 
 export type OmitChildren<T> = Omit<T, 'children' | 'ref' | 'onToggle'>
 
@@ -147,6 +148,20 @@ export function getLinkProps(
   }
 }
 
+export function getListProps(
+  block: ListBlock,
+  parentRow: RowBlock,
+  email: Email | null
+): OmitChildren<React.ComponentProps<typeof Section>> {
+  const listAttributes = getBlockAttributes(block, parentRow, email)
+  return {
+    style: {
+      ...applyPaddingAttributes(listAttributes),
+      ...getAdditionalListStyles(block, parentRow, email),
+    },
+  }
+}
+
 export function getSocialsProps(
   block: SocialsBlock,
   parentRow: RowBlock,
@@ -219,11 +234,13 @@ export function getBlockProps<T extends EmailBlock>(
           ? ReturnType<typeof getLinkProps>
           : T extends DividerBlock
             ? ReturnType<typeof getDividerProps>
-            : T extends SurveyBlock
-              ? ReturnType<typeof getSurveyProps>
-              : T extends SocialsBlock
-                ? ReturnType<typeof getSocialsProps>
-                : never {
+            : T extends ListBlock
+              ? ReturnType<typeof getListProps>
+              : T extends SurveyBlock
+                ? ReturnType<typeof getSurveyProps>
+                : T extends SocialsBlock
+                  ? ReturnType<typeof getSocialsProps>
+                  : never {
   switch (block.type) {
     case 'text':
       return getTextProps(block as TextBlock, parentRow, email) as any
@@ -243,6 +260,8 @@ export function getBlockProps<T extends EmailBlock>(
       return getSocialsProps(block as SocialsBlock, parentRow, email) as any
     case 'table':
       return getTableProps(block as TableBlock, parentRow, email) as any
+    case 'list':
+      return getListProps(block as ListBlock, parentRow, email) as any
     default:
       return {} as never
   }

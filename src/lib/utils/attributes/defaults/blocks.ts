@@ -4,6 +4,7 @@ import type {
   HeadingBlock,
   ImageBlock,
   LinkBlock,
+  ListBlock,
   RowBlock,
   SocialsBlock,
   SurveyBlock,
@@ -238,6 +239,29 @@ export const getAdditionalDividerStyles = (
     ...rowTypeDefaults,
     ...otherAttributes,
     borderTop: 'none',
+  }
+}
+
+export const getAdditionalListStyles = (
+  listBlock: ListBlock,
+  parentRow: RowBlock,
+  email: Email | null
+): React.ComponentProps<typeof Section>['style'] => {
+  const baseDefaults: React.ComponentProps<typeof Section>['style'] = {
+    paddingTop: '5px',
+    paddingRight: '0px',
+    paddingBottom: '5px',
+    paddingLeft: '0px',
+  }
+
+  const rowTypeDefaults = getBlockCSSProperties(listBlock, email, parentRow) || {}
+
+  const { items, icons, listStyle, ...styleAttributes } = listBlock.attributes
+
+  return {
+    ...baseDefaults,
+    ...rowTypeDefaults,
+    ...styleAttributes,
   }
 }
 

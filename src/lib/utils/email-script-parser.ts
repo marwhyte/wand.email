@@ -9,6 +9,7 @@ import {
   HeadingBlockAttributes,
   ImageBlockAttributes,
   LinkBlockAttributes,
+  ListBlockAttributes,
   PaddingAttributes,
   RowBlock,
   RowBlockAttributes,
@@ -512,6 +513,97 @@ const parseTableAttributes: AttributeParser<TableBlockAttributes> = (raw) => {
   return attrs
 }
 
+const parseListAttributes: AttributeParser<ListBlockAttributes> = (raw) => {
+  const attrs: ListBlockAttributes = {
+    ...handlePadding(raw),
+    items: [],
+    listStyle: 'bullet',
+  }
+
+  // Parse items from raw attributes
+  try {
+    if (raw.items) {
+      const itemsStr = raw.items.trim()
+
+      // Handle items with <p> tags
+      if (itemsStr.includes('<p>')) {
+        // Extract content from <p> tags
+        const pTagRegex = /<p>(.*?)<\/p>/g
+        const matches = [...itemsStr.matchAll(pTagRegex)]
+
+        if (matches.length > 0) {
+          attrs.items = matches.map((match) => match[1])
+        }
+      }
+      // Handle JSON array format
+      else if (itemsStr.startsWith('[') && itemsStr.endsWith(']')) {
+        // Try to parse as JSON
+        try {
+          const rawItems = JSON.parse(itemsStr)
+
+          if (Array.isArray(rawItems)) {
+            // Check if items in array contain <p> tags
+            attrs.items = rawItems.map((item) => {
+              const match = String(item).match(/<p>(.*?)<\/p>/)
+              return match ? match[1] : String(item)
+            })
+          }
+        } catch {
+          // If JSON parsing fails, fall back to comma splitting
+          attrs.items = itemsStr.split(',').map((item) => {
+            const match = item.match(/<p>(.*?)<\/p>/)
+            return match ? match[1].trim() : item.trim()
+          })
+        }
+      }
+      // Handle comma-separated format
+      else {
+        attrs.items = itemsStr.split(',').map((item) => item.trim())
+      }
+    }
+  } catch (e) {
+    console.error('Failed to parse list items:', e)
+    console.debug('Raw items value:', raw.items)
+  }
+
+  // Set list style (defaults to bullet)
+  if (raw.listStyle && ['bullet', 'number', 'icon'].includes(raw.listStyle)) {
+    attrs.listStyle = raw.listStyle as ListBlockAttributes['listStyle']
+  }
+
+  // Handle icons if present and listStyle is icon
+  if (raw.icons && attrs.listStyle === 'icon') {
+    try {
+      const iconStr = raw.icons.trim()
+
+      // Check if it's a valid JSON array format
+      if (iconStr.startsWith('[') && iconStr.endsWith(']')) {
+        try {
+          // Try parsing as JSON first
+          const rawIcons = JSON.parse(iconStr)
+
+          if (Array.isArray(rawIcons)) {
+            attrs.icons = rawIcons.map((icon) => String(icon))
+          }
+        } catch (jsonError) {
+          // If JSON parsing fails, treat it as a comma-separated list
+          // Remove the brackets first if present
+          const cleanedStr = iconStr.replace(/^\[|\]$/g, '')
+          attrs.icons = cleanedStr.split(',').map((icon) => icon.trim())
+        }
+      } else {
+        // If not JSON format, just split by comma
+        attrs.icons = iconStr.split(',').map((icon) => icon.trim())
+      }
+    } catch (e) {
+      console.error('Failed to parse list icons:', e)
+      console.debug('Raw icons value:', raw.icons)
+    }
+  }
+
+  return attrs
+}
+
 // ===== Parser Registry =====
 const blockParsers = {
   heading: parseHeadingAttributes,
@@ -523,6 +615,7 @@ const blockParsers = {
   socials: parseSocialsAttributes,
   survey: parseSurveyAttributes,
   table: parseTableAttributes,
+  list: parseListAttributes,
 } as const
 
 // ===== Image Processing Helpers =====
@@ -690,6 +783,9 @@ export function parseEmailScript(script: string, email: Email): Email {
           break
         case 'table':
           createBlock('table', '', blockParsers.table(attrs), currentColumn)
+          break
+        case 'list':
+          createBlock('list', '', blockParsers.list(attrs), currentColumn)
           break
       }
     }

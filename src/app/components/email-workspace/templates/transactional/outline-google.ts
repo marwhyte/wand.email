@@ -29,6 +29,5 @@ export const transactionalOutlineGoogleTemplateScript = `
 export const transactionalOutlineGoogleTemplate = (): Email => {
   const email = parseEmailScript(transactionalOutlineGoogleTemplateScript, { id: '123', rows: [] })
 
-  console.log(email, 'email')
   return createEmail(email)
 }

@@ -1,6 +1,6 @@
 import type { RowBlock } from '@/app/components/email-workspace/types'
 import { Email } from '@/app/components/email-workspace/types'
-import { getEmailAttributes } from '../generators'
+import { getEmailAttributes } from '../attributes'
 
 type RowStyleModifier = Partial<RowBlock['attributes']>
 type VariantRowStyles = Record<string, RowStyleModifier>
@@ -22,16 +22,80 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
       paddingRight: '20px',
     },
   },
+  floating: {
+    header: {},
+    footer: {},
+    gallery: {},
+    default: {
+      paddingBottom: '20px',
+    },
+  },
+  default: {
+    default: {
+      paddingBottom: '40px',
+    },
+  },
 
   // Add more variants as needed
 }
 
+// Add email type-specific row styles
+export const emailTypeRowDefaults: Record<string, VariantRowStyles> = {
+  newsletter: {
+    header: {},
+    footer: {},
+    default: {},
+  },
+  marketing: {
+    header: {},
+    footer: {},
+    default: {},
+  },
+  transactional: {
+    header: {
+      paddingTop: '20px',
+      paddingBottom: '20px',
+    },
+    footer: {
+      paddingTop: '32px',
+      paddingBottom: '32px',
+    },
+    default: {},
+  },
+}
+
+// Add combination-specific row styles
+export const combinedTypeVariantDefaults: Record<string, Record<string, VariantRowStyles>> = {
+  outline: {
+    newsletter: {
+      header: {},
+      footer: {
+        paddingTop: '8px',
+      },
+      default: {
+        paddingLeft: '18px',
+        paddingRight: '18px',
+        paddingTop: '18px',
+        paddingBottom: '8px',
+      },
+    },
+    // Add other email types for outline variant if needed
+    marketing: {},
+    transactional: {},
+  },
+  // Add other variants if needed
+  floating: {
+    newsletter: {},
+  },
+}
+
 export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> {
   const emailAttributes = getEmailAttributes(email)
+  const rowAttributes = row.attributes
 
   // Get base styles for the row type
   const baseStyles = (() => {
-    switch (row.attributes.type) {
+    switch (rowAttributes.type) {
       case 'header': {
         return {
           paddingTop: '24px',
@@ -40,7 +104,7 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       }
       case 'footer': {
         return {
-          paddingTop: '40px',
+          paddingTop: '20px',
           paddingBottom: '48px',
           backgroundColor: '#f4f4f4',
         }
@@ -70,14 +134,29 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
     }
   })()
 
-  // Get variant-specific styles, treating undefined type as 'default'
+  // Get variant-specific styles
   const variantStyles = emailAttributes?.styleVariant
-    ? variantRowDefaults[emailAttributes.styleVariant]?.[row.attributes.type || 'default'] || {}
+    ? variantRowDefaults[emailAttributes.styleVariant]?.[rowAttributes.type || 'default'] || {}
     : {}
 
-  // Merge styles with variant styles taking priority
+  // Get email type-specific styles
+  const emailTypeStyles = emailAttributes?.type
+    ? emailTypeRowDefaults[emailAttributes.type]?.[rowAttributes.type || 'default'] || {}
+    : {}
+
+  // Get combined variant and email type specific styles
+  const combinedStyles =
+    emailAttributes?.styleVariant && emailAttributes?.type
+      ? combinedTypeVariantDefaults[emailAttributes.styleVariant]?.[emailAttributes.type]?.[
+          rowAttributes.type || 'default'
+        ] || {}
+      : {}
+
+  // Merge styles with priority: base < email type < variant < combined
   return {
     ...baseStyles,
+    ...emailTypeStyles,
     ...variantStyles,
+    ...combinedStyles,
   }
 }

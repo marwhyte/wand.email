@@ -1,10 +1,11 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { getSocialsProps, getSurveyProps } from '@/lib/utils/attributes'
+import { getListProps, getSocialsProps, getSurveyProps } from '@/lib/utils/attributes'
 import EmailButton from './email-components/email-button'
 import EmailDivider from './email-components/email-divider'
 import EmailHeading from './email-components/email-heading'
 import EmailImage from './email-components/email-image'
 import EmailLink from './email-components/email-link'
+import EmailList from './email-components/email-list'
 import EmailSocials from './email-components/email-socials'
 import EmailSurvey from './email-components/email-survey'
 import EmailTable from './email-components/email-table'
@@ -33,6 +34,21 @@ const RenderBlock = ({ block, parentRow }: Props) => {
   }
   if (block.type === 'link') {
     return <EmailLink block={block} parentRow={parentRow} />
+  }
+  if (block.type === 'list') {
+    const attributes = getListProps(block, parentRow, email)
+    return (
+      <div
+        style={{
+          paddingTop: attributes.style?.paddingTop,
+          paddingLeft: attributes.style?.paddingLeft,
+          paddingRight: attributes.style?.paddingRight,
+          paddingBottom: attributes.style?.paddingBottom,
+        }}
+      >
+        <EmailList block={block} parentRow={parentRow} email={email} />
+      </div>
+    )
   }
   if (block.type === 'divider') {
     return <EmailDivider block={block} parentRow={parentRow} />

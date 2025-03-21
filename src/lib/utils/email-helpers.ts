@@ -10,10 +10,6 @@ export const createBlock = (type: EmailBlockType, content: string, attrs = {}, c
     attributes: attrs,
   } as EmailBlock
 
-  if (type === 'socials') {
-    console.log(block, 'block')
-  }
-
   column.blocks.push(block)
   return block
 }

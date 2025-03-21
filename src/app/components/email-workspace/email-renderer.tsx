@@ -280,8 +280,6 @@ const EmailRenderer = ({ email }: Props) => {
 
   const emailAttributes = getEmailAttributes(email)
 
-  console.log('body', getBodyProps(email))
-
   return (
     <div className="w-full min-w-0 overflow-x-auto overflow-y-auto pt-4">
       {/* @ts-ignore */}

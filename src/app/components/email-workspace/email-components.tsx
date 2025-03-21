@@ -6,6 +6,7 @@ import {
   DocumentTextIcon,
   H1Icon,
   LinkIcon,
+  ListBulletIcon,
   PhotoIcon,
   QuestionMarkCircleIcon,
   TableCellsIcon,
@@ -23,6 +24,7 @@ export default function EmailComponents() {
     'link',
     'heading',
     'divider',
+    'list',
     'socials',
     'survey',
     'table',
@@ -38,6 +40,8 @@ export default function EmailComponents() {
         return <ArrowTopRightOnSquareIcon className="h-10 w-10" />
       case 'link':
         return <LinkIcon className="h-10 w-10" />
+      case 'list':
+        return <ListBulletIcon className="h-10 w-10" />
       case 'heading':
         return <H1Icon className="h-10 w-10" />
       case 'divider':

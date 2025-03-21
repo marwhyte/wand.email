@@ -6,6 +6,7 @@ import {
   HeadingBlock,
   ImageBlock,
   LinkBlock,
+  ListBlock,
   SocialsBlock,
   SurveyBlock,
   TableBlock,
@@ -207,6 +208,18 @@ export function createNewBlock<T extends EmailBlockType>(type: T): Extract<Email
             ['', '', ''],
             ['', '', ''],
           ],
+        },
+      }
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'list': {
+      const block: ListBlock = {
+        ...baseBlock,
+        type: 'list',
+        attributes: {
+          items: ['Item 1', 'Item 2', 'Item 3'],
+          listStyle: 'bullet',
         },
       }
       return block as Extract<EmailBlock, { type: T }>

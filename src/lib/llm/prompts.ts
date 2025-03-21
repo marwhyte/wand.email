@@ -7,6 +7,9 @@ const generateComponentLibraryDocs = () => {
 
   for (const [type, config] of Object.entries(componentLibrary)) {
     docs.push(`${type.toUpperCase()}:`)
+    if ('note' in config && config.note) {
+      docs.push(`- note: ${config.note}\n`)
+    }
     docs.push(`- allowed blocks: ${config.allowedBlocks.join(', ')}\n`)
     docs.push(`- example: ${config.example}\n`)
   }

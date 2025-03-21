@@ -8,6 +8,7 @@ import type {
   HeadingBlockAttributes,
   ImageBlockAttributes,
   LinkBlockAttributes,
+  ListBlockAttributes,
   RowBlock,
   SocialsBlockAttributes,
   SurveyBlockAttributes,
@@ -17,7 +18,7 @@ import type {
 import { Company } from '@/lib/database/types'
 import React from 'react'
 import { getImgSrc } from '../../misc'
-import { getEmailAttributes } from '../generators/layout'
+import { getEmailAttributes } from '../attributes'
 
 type BlockAttributeMap = {
   text: TextBlockAttributes
@@ -30,6 +31,7 @@ type BlockAttributeMap = {
   column: ColumnBlockAttributes
   survey: SurveyBlockAttributes
   table: TableBlockAttributes
+  list: ListBlockAttributes
 }
 
 type BlockStyleModifier = {
@@ -43,6 +45,7 @@ type BlockStyleModifier = {
   button?: Partial<ButtonBlockAttributes>
   column?: Partial<ColumnBlockAttributes>
   survey?: Partial<SurveyBlockAttributes>
+  list?: Partial<ListBlockAttributes>
 }
 
 type VariantBlockStyles = Record<string, BlockStyleModifier>
@@ -76,10 +79,7 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
         fontSize: '14px',
         color: '#4184f3',
       },
-      socials: {
-        align: 'right',
-        paddingBottom: '0px',
-      },
+      socials: {},
     },
     h1: {
       heading: {
@@ -98,21 +98,51 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
       },
     },
   },
+  default: {
+    h1: {
+      heading: {
+        color: '#0a2540',
+        fontSize: '48px',
+      },
+    },
+    h2: {
+      heading: {
+        color: '#0a2540',
+        fontSize: '32px',
+      },
+    },
+    h3: {
+      heading: {
+        color: '#2e3a55',
+        fontSize: '20px',
+      },
+    },
+    h4: {},
+  },
 }
 
 // Add email type-specific styles
 export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
   newsletter: {
     default: {
-      heading: {},
-      text: {},
+      heading: {
+        textAlign: 'left',
+      },
+      text: {
+        textAlign: 'left',
+      },
       button: {},
     },
     header: {
       heading: {},
     },
     footer: {
-      text: {},
+      heading: {
+        textAlign: 'center',
+      },
+      text: {
+        textAlign: 'center',
+      },
     },
   },
   marketing: {
@@ -173,6 +203,33 @@ export const rowTypeBlockDefaults: Record<string, BlockStyleModifier> = {
     link: {
       align: 'center',
     },
+    socials: {
+      paddingBottom: '0px',
+    },
+  },
+}
+
+// Add combination-specific block styles
+export const combinedTypeBlockDefaults: Record<string, Record<string, VariantBlockStyles>> = {
+  outline: {
+    newsletter: {
+      header: {
+        socials: {
+          paddingBottom: '0px',
+          paddingTop: '0px',
+          paddingLeft: '0px',
+          paddingRight: '0px',
+          align: 'right',
+        },
+      },
+      footer: {},
+      default: {},
+    },
+    marketing: {},
+    transactional: {},
+  },
+  floating: {
+    newsletter: {},
   },
 }
 
@@ -225,10 +282,10 @@ function getMergedStyleDefaults(
   // Merge styles with priority: base < email type < variant < row-specific
   return {
     ...baseDefaults,
-    ...emailTypeStyles,
-    ...rowTypeEmailTypeStyles,
     ...variantStyles,
     ...rowTypeVariantStyles,
+    ...emailTypeStyles,
+    ...rowTypeEmailTypeStyles,
   }
 }
 
@@ -298,6 +355,32 @@ function getBlockSpecificOverrides(
   return {}
 }
 
+// Helper function to get merged styles
+function getMergedStyles(
+  block: EmailBlock | ColumnBlock,
+  email: Email | null,
+  parentRow: RowBlock,
+  company?: Company | null
+) {
+  const mergedDefaults = getMergedStyleDefaults(block, email, parentRow, company)
+  const specificOverrides = getBlockSpecificOverrides(block, parentRow, company)
+  const emailAttributes = getEmailAttributes(email)
+
+  // Get combined variant and email type specific styles
+  const combinedStyles =
+    emailAttributes?.styleVariant && emailAttributes?.type
+      ? combinedTypeBlockDefaults[emailAttributes.styleVariant]?.[emailAttributes.type]?.[
+          parentRow.attributes.type || 'default'
+        ]?.[block.type as keyof BlockStyleModifier] || {}
+      : {}
+
+  return {
+    ...mergedDefaults,
+    ...specificOverrides[block.type as keyof BlockStyleModifier],
+    ...combinedStyles,
+  }
+}
+
 // Main function to get CSS properties
 export function getBlockCSSProperties(
   block: EmailBlock | ColumnBlock,
@@ -305,13 +388,7 @@ export function getBlockCSSProperties(
   parentRow: RowBlock,
   company?: Company | null
 ): React.CSSProperties {
-  const mergedDefaults = getMergedStyleDefaults(block, email, parentRow, company)
-  const specificOverrides = getBlockSpecificOverrides(block, parentRow, company)
-
-  return {
-    ...mergedDefaults,
-    ...specificOverrides[block.type as keyof BlockStyleModifier],
-  } as React.CSSProperties
+  return getMergedStyles(block, email, parentRow, company) as React.CSSProperties
 }
 
 // Function to get block attributes
@@ -321,11 +398,5 @@ export function getBlockDefaultAttributes<T extends keyof BlockStyleModifier>(
   parentRow: RowBlock,
   company?: Company | null
 ): Partial<BlockAttributeMap[T]> {
-  const mergedDefaults = getMergedStyleDefaults(block, email, parentRow, company)
-  const specificOverrides = getBlockSpecificOverrides(block, parentRow, company)
-
-  return {
-    ...mergedDefaults,
-    ...specificOverrides[block.type as keyof BlockStyleModifier],
-  } as Partial<BlockAttributeMap[T]>
+  return getMergedStyles(block, email, parentRow, company) as Partial<BlockAttributeMap[T]>
 }

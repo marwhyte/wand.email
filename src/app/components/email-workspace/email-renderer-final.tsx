@@ -28,6 +28,7 @@ import {
 import parse from 'html-react-parser'
 import React from 'react'
 import { Table } from '../table'
+import EmailList from './email-components/email-list'
 import EmailSocials from './email-components/email-socials'
 import EmailSurvey from './email-components/email-survey'
 import { ColumnBlock, Email, EmailBlock, RowBlock } from './types'
@@ -175,6 +176,8 @@ const RenderBlockFinal = ({
         return <EmailSocials isEditing={false} block={block} parentRow={parentRow} email={email} />
       case 'survey':
         return <EmailSurvey block={block} parentRow={parentRow} email={email} />
+      case 'list':
+        return <EmailList block={block} parentRow={parentRow} email={email} />
       case 'table':
         const tableProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Table>>
         const tableAttributes = getBlockAttributes(block, parentRow, email)

@@ -22,6 +22,7 @@ import {
   ImageBlockAttributes,
   PaddingAttributes,
   RowBlock,
+  ListBlockAttributes,
   RowBlockAttributes,
   SocialsBlockAttributes,
   TableBlockAttributes,
@@ -55,6 +56,7 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
         | ButtonBlockAttributes
         | SocialsBlockAttributes
         | TableBlockAttributes
+        | ListBlockAttributes
       >
     ) => {
       if (currentBlock) {

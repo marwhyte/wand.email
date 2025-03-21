@@ -171,6 +171,7 @@ export default function EmailRow({
           className={rowAttributes.hideOnMobile && mobileView ? 'hidden' : undefined}
           style={{
             backgroundColor: emailAttributes.backgroundColor,
+            width: emailAttributes.width,
           }}
         >
           {/* Simplified row rendering that matches email-renderer-final.tsx approach */}

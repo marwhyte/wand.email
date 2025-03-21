@@ -14,6 +14,7 @@ import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { capitalizeFirstLetter, isValidHttpUrl, safeParseInt } from '@/lib/utils/misc'
 import { useMemo } from 'react'
 import { Select } from '../select'
+import ListEditor from './list-editor'
 import SocialsEditor from './socials-editor'
 import SurveyEditor from './survey-editor'
 import TableEditor from './table-editor'
@@ -21,11 +22,14 @@ import {
   ButtonBlock,
   ButtonBlockAttributes,
   DividerBlock,
+  DividerBlockAttributes,
   HeadingBlock,
   HeadingBlockAttributes,
   ImageBlock,
   ImageBlockAttributes,
   LinkBlock,
+  ListBlock,
+  ListBlockAttributes,
   PaddingAttributes,
   RowBlockAttributes,
   SocialsBlock,
@@ -65,6 +69,7 @@ type EmailBlockEditorProps = {
     | HeadingBlock
     | DividerBlock
     | TableBlock
+    | ListBlock
   onChange: (
     attributes: Partial<
       | PaddingAttributes
@@ -75,6 +80,8 @@ type EmailBlockEditorProps = {
       | SocialsBlockAttributes
       | HeadingBlockAttributes
       | TableBlockAttributes
+      | ListBlockAttributes
+      | DividerBlockAttributes
     >
   ) => void
 }
@@ -135,6 +142,8 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         return [Options.PADDING]
       case 'table':
         return [Options.PADDING]
+      case 'list':
+        return [Options.PADDING]
       default:
         return []
     }
@@ -153,7 +162,6 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
       {options.includes(Options.TEXT) && 'content' in blockAttributes && (
         <Textbox
           autofocus
-          preventNewlines={block.type !== 'text'}
           hideToolbar={block.type === 'link' || block.type === 'button'}
           key={`textbox-${block.id}`}
           value={blockAttributes.content || ''}
@@ -170,6 +178,9 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
             )}
             {block.type === 'table' && email && (
               <TableEditor parentRow={parentRow} email={email} block={block} onChange={onChange} />
+            )}
+            {block.type === 'list' && email && (
+              <ListEditor parentRow={parentRow} block={block} onChange={onChange} email={email} />
             )}
             {options.includes(Options.HEADING_LEVEL) && block.type === 'heading' && (
               <Field>

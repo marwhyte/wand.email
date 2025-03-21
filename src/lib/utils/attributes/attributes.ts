@@ -13,6 +13,8 @@ import type {
   ImageBlockAttributes,
   LinkBlock,
   LinkBlockAttributes,
+  ListBlock,
+  ListBlockAttributes,
   RowBlock,
   SocialsBlock,
   SocialsBlockAttributes,
@@ -82,6 +84,8 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
     type: 'default',
   }
 
+  console.log(email?.styleVariant, 'email?.styleVariant')
+
   if (email?.styleVariant === 'outline') {
     defaultAttributes.backgroundColor = '#ffffff'
     defaultAttributes.color = '#2d2d2d'
@@ -90,6 +94,7 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
 
   if (email?.styleVariant === 'default') {
     defaultAttributes.backgroundColor = '#ffffff'
+    defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
   }
 
   if (email?.styleVariant === 'floating') {
@@ -208,7 +213,15 @@ export function getTableAttributes(block: TableBlock, parentRow: RowBlock, email
   }
 }
 
-// Main function to get any block's attributes with proper type inference
+export function getListAttributes(block: ListBlock, parentRow: RowBlock, email: Email | null): ListBlockAttributes {
+  const defaults = getBlockDefaultAttributes(block, email, parentRow)
+  return {
+    ...defaults,
+    ...block.attributes,
+    listStyle: block.attributes.listStyle ?? defaults.listStyle ?? 'bullet',
+    items: block.attributes.items ?? defaults.items ?? [],
+  }
+}
 export function getBlockAttributes<T extends EmailBlock>(
   block: T,
   parentRow: RowBlock,
@@ -234,6 +247,8 @@ export function getBlockAttributes<T extends EmailBlock>(
       return getSocialsAttributes(block, parentRow, email)
     case 'table':
       return getTableAttributes(block, parentRow, email)
+    case 'list':
+      return getListAttributes(block, parentRow, email)
     default:
       return {} as never
   }

@@ -22,6 +22,9 @@ ROW backgroundColor=#fcfcfc hideOnMobile=true padding=0,16,30,16 {
     LINK color=#393a3d fontSize=14 fontWeight=bold href="#" content=<p>Podcast</p> align=center
   }
   COLUMN {
+    LIST items=[<p>Sign in</p>] listStyle=icon
+    LIST items=[<p>Test</p>,<p>Another Test, hi</p>] listStyle=bullet
+    LIST items=[<p>Test</p>,<p>Another Test, hi</p>,<p>Another Test, hi</p>] listStyle=icon icons=[rocket,water_drop,bolt]
     LINK color=#393a3d fontSize=14 fontWeight=bold href="#" content=<p>Sign in</p> align=center
     TABLE rows=[[<p><strong>S&P 500</strong></p>,<p><strong>5,615</strong></p>,<p><span style=\"color: rgb(179, 25, 25)\">-1.07%</span></p>],[<p><strong>Nasdaq</strong></p>,<p><strong>17,504</strong></p>,<p><span style=\"color: rgb(179, 25, 25)\">-1.27%</span></p>]]
   }

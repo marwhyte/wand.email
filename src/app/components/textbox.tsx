@@ -23,7 +23,7 @@ export default function Textbox({
   value,
   onChange,
   hideToolbar = false,
-  preventNewlines = false,
+  preventNewlines = true,
   autofocus = false,
 }: Props) {
   const [linkUrl, setLinkUrl] = useState('')
@@ -31,6 +31,7 @@ export default function Textbox({
   const [showLinkInput, setShowLinkInput] = useState(false)
   const [isEditingLink, setIsEditingLink] = useState(false)
   const linkInputRef = useRef<HTMLDivElement>(null)
+  const [editorPosition, setEditorPosition] = useState({ top: 0, left: 0, width: 300 })
 
   // Add click outside handler
   useEffect(() => {
@@ -60,18 +61,22 @@ export default function Textbox({
       },
       handleKeyDown: preventNewlines
         ? (view, event) => {
-            // Prevent Enter key from creating new lines
+            // Prevent Enter key and Shift+Enter from creating new lines
             if (event.key === 'Enter') {
-              return true // Return true to indicate the event was handled
+              return true
             }
-            return false // Let other key events pass through
+            return false
           }
         : undefined,
     },
     immediatelyRender: false,
     autofocus: autofocus,
     extensions: [
-      StarterKit,
+      StarterKit.configure({
+        bulletList: false,
+        orderedList: false,
+        listItem: false,
+      }),
       Underline,
       TextStyle,
       Color,
@@ -115,6 +120,18 @@ export default function Textbox({
       }
     },
   })
+
+  // Update editor position when link input is shown
+  useEffect(() => {
+    if (showLinkInput && editor) {
+      const rect = editor.view.dom.getBoundingClientRect()
+      setEditorPosition({
+        top: rect.top + window.scrollY,
+        left: rect.left,
+        width: rect.width,
+      })
+    }
+  }, [showLinkInput])
 
   const setLink = () => {
     if (!editor) return
@@ -234,11 +251,18 @@ export default function Textbox({
         </div>
       )}
 
-      <div className="relative">
+      <div>
         {showLinkInput && (
           <div
             ref={linkInputRef}
-            className="absolute left-2 right-2 top-2 z-10 rounded-md border border-gray-200 bg-white p-3 shadow-lg"
+            className="absolute z-100 rounded-md border border-gray-200 bg-white p-3 shadow-lg"
+            style={{
+              width: Math.min(300, editorPosition.width - 20) + 'px',
+              position: 'absolute',
+              zIndex: 1000,
+              top: editorPosition.top + 'px',
+              left: editorPosition.left + 'px',
+            }}
           >
             <div className="mb-2 text-sm font-medium text-gray-700">{isEditingLink ? 'Edit Link' : 'Add Link'}</div>
             <div className="flex">
@@ -269,7 +293,7 @@ export default function Textbox({
         <EditorContent
           autoFocus
           editor={editor}
-          className="max-w-none p-2 focus-visible:outline-none [&_a:hover]:text-blue-800 [&_a]:text-blue-600"
+          className="min-h-[100px] max-w-none p-2 focus-visible:outline-none [&_a:hover]:text-blue-800 [&_a]:text-blue-600"
         />
       </div>
     </div>

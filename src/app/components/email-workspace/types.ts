@@ -78,18 +78,6 @@ export const componentLibrary = {
     `,
     allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
   },
-  list: {
-    example: `
-      ROW type=list {
-        COLUMN {
-          TEXT content=<p>List Item 1</p>
-          TEXT content=<p>List Item 2</p>
-          TEXT content=<p>List Item 3</p>
-        }
-      }
-    `,
-    allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
-  },
 } as const
 
 export const blockLibrary = {
@@ -149,6 +137,15 @@ export const blockLibrary = {
       fontWeight: ['normal', 'bold'],
       fontSize: ['16'],
       padding: ['5,0,5,0'],
+    },
+  },
+  LIST: {
+    note: 'Icons should be the same length as the content array. You can use any icon in material icons. Pick icons that are relevant to the content.',
+    attributes: {
+      items: ['[<p>Be Fast</p>,<p>Be Flexible</p>,<p>Be Future-Proof</p>]'],
+      icons: ['["bolt", "water_drop", "rocket"]'],
+      padding: ['10,0,10,0'],
+      listStyle: ['bullet', 'number', 'icon'],
     },
   },
   SOCIALS: {
@@ -257,11 +254,11 @@ export type EmailBlock =
   | HeadingBlock
   | ImageBlock
   | LinkBlock
+  | ListBlock
   | SocialsBlock
   | TableBlock
   | SurveyBlock
   | TextBlock
-
 export type EmailBlockType = EmailBlock['type']
 
 // ===== Structural Blocks =====
@@ -309,6 +306,12 @@ export type LinkBlock = {
   id: string
   type: 'link'
   attributes: LinkBlockAttributes
+}
+
+export type ListBlock = {
+  id: string
+  type: 'list'
+  attributes: ListBlockAttributes
 }
 
 export type SocialsBlock = {
@@ -410,6 +413,12 @@ export type LinkBlockAttributes = TextAttributes &
     align?: 'left' | 'center' | 'right'
     href: string
   }
+
+export type ListBlockAttributes = PaddingAttributes & {
+  items: string[]
+  icons?: string[]
+  listStyle: 'bullet' | 'number' | 'icon'
+}
 
 export type SocialsBlockAttributes = PaddingAttributes & {
   align?: 'left' | 'center' | 'right'

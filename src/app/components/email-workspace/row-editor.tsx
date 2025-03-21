@@ -302,12 +302,10 @@ export default function RowEditor({
             <Field>
               <Label>Rounded Corners</Label>
               <div className="flex items-center gap-2">
-                <Input
-                  type="number"
-                  value={rowAttributes.borderRadius?.replace('px', '') || ''}
-                  onChange={(e) => handleRowBorderChange('borderRadius', `${e.target.value}px`)}
+                <NumberInput
+                  value={rowAttributes.borderRadius ? parseInt(rowAttributes.borderRadius.replace('px', '')) : 0}
+                  onChange={(e) => handleRowBorderChange('borderRadius', `${e}px`)}
                 />
-                <span className="text-sm text-gray-500">px</span>
               </div>
             </Field>
           </FieldGroup>

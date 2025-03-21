@@ -96,6 +96,43 @@ function stringifyAttributes(attributes: Record<string, any>): string {
       continue
     }
 
+    // Special handling for list items
+    if (key === 'items' && Array.isArray(value)) {
+      // Format items with <p> tags around each item
+      const formattedItems = value.map((item) => {
+        // If the item already has <p> tags, use it as is
+        if (typeof item === 'string' && item.startsWith('<p>') && item.endsWith('</p>')) {
+          return item
+        }
+        // Otherwise, wrap the item in <p> tags
+        return `<p>${item}</p>`
+      })
+
+      // Join without quotes, similar to rows handling
+      let itemsStr = JSON.stringify(formattedItems)
+        .replace(/"/g, '') // Remove quotes around the HTML tags
+        .replace(/\\\\/g, '\\') // Fix escaped backslashes
+        .replace(/\\n/g, '\\n') // Preserve newlines
+
+      // Fix style attributes in case there are any
+      itemsStr = itemsStr.replace(/style=\\([^\\]+)\\>/g, 'style="$1">')
+
+      // Fix any remaining escaped quotes in HTML attributes
+      itemsStr = itemsStr.replace(/\\"/g, '"')
+
+      result.push(`items=${itemsStr}`)
+      continue
+    }
+
+    // Handle icons for icon list style
+    if (key === 'icons' && Array.isArray(value)) {
+      // For simplicity, just join the array with commas and wrap in brackets
+      // No need for full JSON stringification
+      const iconsStr = value.join(',')
+      result.push(`icons=[${iconsStr}]`)
+      continue
+    }
+
     if (key === 'rows') {
       // Format rows as a nested array with <p> tags around each cell
       if (Array.isArray(value) && value.every((row) => Array.isArray(row))) {
@@ -186,6 +223,22 @@ function generateBlock(block: EmailBlock, indent: number = 2): string {
     // For heading blocks, convert text to content
     if ('content' in attrsObj) {
       attrsObj.content = attrsObj.content.replace(/<p>([^]*?)<\/p>/, '$1').trim()
+    }
+  }
+
+  // Special handling for list blocks to ensure items are formatted correctly
+  if (block.type === 'list' && 'items' in attrsObj) {
+    const items = attrsObj.items
+    if (Array.isArray(items)) {
+      // Make sure each item is properly formatted (the stringifyAttributes function
+      // will handle wrapping them in <p> tags)
+      attrsObj.items = items.map((item) => {
+        // Strip <p> tags if they exist so we don't double-wrap
+        if (typeof item === 'string' && item.startsWith('<p>') && item.endsWith('</p>')) {
+          return item.slice(3, -4)
+        }
+        return item
+      })
     }
   }
 
