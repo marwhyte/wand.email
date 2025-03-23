@@ -135,7 +135,7 @@ const SurveyEditor = ({ block, onChange }: Props) => {
       <Field>
         <Label>Color (optional)</Label>
         <div>
-          <ColorInput value={processedAttributes.color} onChange={(color) => onChange({ color })} />
+          <ColorInput value={surveyAttributes.color} onChange={(color) => onChange({ color })} />
         </div>
       </Field>
     </FieldGroup>

@@ -181,9 +181,9 @@ export function getSurveyAttributes(
 ): SurveyBlockAttributes {
   const defaults = getBlockDefaultAttributes(block, email, parentRow)
   return {
-    color: '#4F46E5',
     ...defaults,
     ...block.attributes,
+    color: block.attributes.color ?? defaults.color ?? '#4F46E5',
   }
 }
 

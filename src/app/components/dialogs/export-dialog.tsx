@@ -5,23 +5,66 @@ import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getReactEmailCode } from '@/lib/utils/code-generation'
 import { ChevronLeftIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
-import { CodeBlock, CodeInline, dracula, render } from '@react-email/components'
+import { CodeBlock, dracula, render } from '@react-email/components'
 import { useCallback, useState } from 'react'
 import AlertBox from '../alert-box'
 import { Button } from '../button'
 import ButtonCard from '../button-card'
 import EmailRendererFinal from '../email-workspace/email-renderer-final'
-import { Heading } from '../heading'
-import Nbsp from '../nbsp'
 import Notification from '../notification'
-import { Steps } from '../steps'
-import { Strong, Text, TextLink } from '../text'
+import { Text } from '../text'
 import { Dialog, DialogBody, DialogTitle } from './dialog'
 
 type Props = {
   open: boolean
   onClose: () => void
   monthlyExportCount: number | null
+}
+
+function formatHTML(html: string): string {
+  let formatted = ''
+  let indentLevel = 0
+  let inTag = false
+  let inContent = false
+
+  for (let i = 0; i < html.length; i++) {
+    const char = html[i]
+
+    if (char === '<' && html[i + 1] !== '/') {
+      if (inContent) {
+        formatted += '\n' + '  '.repeat(indentLevel)
+        inContent = false
+      }
+
+      formatted += '\n' + '  '.repeat(indentLevel)
+      formatted += char
+      inTag = true
+      indentLevel++
+    } else if (char === '<' && html[i + 1] === '/') {
+      indentLevel--
+      if (inContent) {
+        formatted += '\n' + '  '.repeat(indentLevel)
+        inContent = false
+      } else {
+        formatted += '\n' + '  '.repeat(indentLevel)
+      }
+      formatted += char
+      inTag = true
+    } else if (char === '>') {
+      formatted += char
+      inTag = false
+
+      let j = i + 1
+      while (j < html.length && html[j].trim() === '') j++
+      if (j < html.length && html[j] !== '<') {
+        inContent = true
+      }
+    } else {
+      formatted += char
+    }
+  }
+
+  return formatted
 }
 
 const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
@@ -40,7 +83,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
     setExportType(type)
   }
 
-  const htmlEmailCode = open ? render(EmailRendererFinal({ email: email, company: company })) : ''
+  const htmlEmailCode = open ? formatHTML(render(EmailRendererFinal({ email: email, company: company }))) : ''
   const reactEmailCode = open ? getReactEmailCode(company, email) : ''
 
   const handleCopyReact = useCallback(async () => {
@@ -92,7 +135,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           </div>
         </DialogTitle>
         <DialogBody>
-          {exportType === null && (
+          {/* {exportType === null && (
             <div className="m mb-4">
               <Text className="text-sm">
                 With these options, images are hosted by SentSwiftly. <Strong>Charges may apply.</Strong>
@@ -102,8 +145,8 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                 </TextLink>
               </Text>
             </div>
-          )}
-          {exportType === 'react' && (
+          )} */}
+          {/* {exportType === 'react' && (
             <div>
               <Steps onFinish={onClose} steps={[{ name: 'Install' }, { name: 'Create' }, { name: 'Integrate' }]}>
                 {(currentStep) => {
@@ -191,15 +234,43 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                 }}
               </Steps>
             </div>
-          )}
+          )} */}
           {exportType === 'html' && (
             <div>
-              <CodeBlock theme={dracula} lineNumbers language="html" code={htmlEmailCode} />
+              <div className="relative">
+                <div className="absolute bottom-2 right-2 mt-4 text-end">
+                  <Button
+                    color="light"
+                    onClick={() => {
+                      try {
+                        navigator.clipboard.writeText(htmlEmailCode)
+                        setNotificationMessage('HTML copied to clipboard')
+                        setNotificationStatus('success')
+                      } catch (err) {
+                        console.error('Failed to copy HTML: ', err)
+                        setNotificationMessage('Failed to copy HTML')
+                        setNotificationStatus('failure')
+                      }
+                    }}
+                  >
+                    Copy HTML Code
+                  </Button>
+                </div>
+                <div className="rounded border border-gray-700 bg-gray-900">
+                  <CodeBlock
+                    style={{ maxHeight: '400px', overflow: 'auto' }}
+                    theme={dracula}
+                    lineNumbers
+                    language="html"
+                    code={htmlEmailCode}
+                  />
+                </div>
+              </div>
             </div>
           )}
           {exportType === null && (
             <>
-              <ButtonCard
+              {/* <ButtonCard
                 icon="/react.svg"
                 title="React Code"
                 description="Export as React code using react-email"
@@ -207,7 +278,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                   handleExport('react')
                 }}
                 disabled={!canExport}
-              />
+              /> */}
               <ButtonCard
                 icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
                 title="HTML Code"
