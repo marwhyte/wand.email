@@ -59,7 +59,6 @@ export async function POST(request: Request) {
         console.log('error', error)
       },
       onFinish: async ({ text: content, finishReason }) => {
-        console.log('finished woopie', content)
         messages.push({
           id: assistantMessageId,
           role: 'assistant',

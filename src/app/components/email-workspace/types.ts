@@ -40,42 +40,46 @@ export const FOLDERS: { name: SocialIconFolders; title: string }[] = [
 export const componentLibrary = {
   header: {
     example: `
-      ROW type=header {
-        COLUMN {
-          LOGO src="logo" alt="Logo"
-        }
-      }
+      <ROW type="header">
+        <COLUMN>
+          <IMAGE src="logo" alt="Logo" />
+        </COLUMN>
+      </ROW>
     `,
     allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   footer: {
     note: 'The footer should always have a logo, social media links, and address unless otherwise specified.',
     example: `
-      ROW type=footer {
-        COLUMN {
-          LOGO src="logo" alt="Logo"
-          TEXT content=<p>Company Name</p>
-          SOCIALS folder=socials-color links=[{"icon":"facebook","url":"#"},{"icon":"x","url":"#"},{"icon":"instagram","url":"#"}]
-          TEXT content=<p>123 Main Street Anytown, CA 12345<br>United States</p>
-          TEXT content=<p>mail@company.com</p>
-          TEXT content=<p>© 2024 Company Name. All rights reserved.</p>
-        }
-      }
+      <ROW type="footer">
+        <COLUMN>
+          <IMAGE src="logo" alt="Logo" />
+          <TEXT>Company Name</TEXT>
+          <SOCIALS folder="socials-color">
+            <SOCIAL icon="facebook" url="#" title="Facebook" alt="Facebook" />
+            <SOCIAL icon="x" url="#" title="X" alt="X" />
+            <SOCIAL icon="instagram" url="#" title="Instagram" alt="Instagram" />
+          </SOCIALS>
+          <TEXT>123 Main Street Anytown, CA 12345<br>United States</TEXT>
+          <TEXT>mail@company.com</TEXT>
+          <TEXT>© 2024 Company Name. All rights reserved.</TEXT>
+        </COLUMN>
+      </ROW>
     `,
     allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   gallery: {
     example: `
-      ROW type=gallery {
-        COLUMN {
-          IMAGE src="pexels:bed in a room" alt="Bed in room"
-        }
-        COLUMN {
-          HEADING content=<p>Deck out your dorm</p> level=h2
-          TEXT content=<p>Own your space with decor, home essentials, and more.</p>
-          BUTTON content=<p>Start designing</p> href="/"
-        }
-      }
+      <ROW type="gallery">
+        <COLUMN>
+          <IMAGE src="pexels:bed in a room" alt="Bed in room" />
+        </COLUMN>
+        <COLUMN>
+          <HEADING level="h2">Deck out your dorm</HEADING>
+          <TEXT>Own your space with decor, home essentials, and more.</TEXT>
+          <BUTTON href="/">Start designing</BUTTON>
+        </COLUMN>
+      </ROW>
     `,
     allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
   },
@@ -92,11 +96,10 @@ export const blockLibrary = {
       borderWidth: ['1'],
       contentPadding: ['10,0,10,0'],
       color: ['#ffffff'],
-      content: ['<p>Click Here</p>'],
       fontWeight: ['normal', 'bold'],
       fontSize: ['16'],
       padding: ['10,0,10,0'],
-      href: ['"#"'],
+      href: ['#'],
     },
   },
   DIVIDER: {
@@ -112,7 +115,6 @@ export const blockLibrary = {
       level: ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'],
       textAlign: ['left', 'center', 'right'],
       color: ['#000000'],
-      content: ['<p>Heading Text</p>'],
       fontWeight: ['bold'],
       fontSize: ['18'],
       lineHeight: ['1.2'],
@@ -123,9 +125,9 @@ export const blockLibrary = {
     note: 'Use pexels:keywords to search for images on pexels.com. Use logo to use the company logo. Use https://images.pexels.com/photos/example.png to use a placeholder image.',
     attributes: {
       align: ['left', 'center', 'right'],
-      alt: ['"Image description"'],
+      alt: ['Image description'],
       borderRadius: ['8'],
-      src: ['"logo"', '"pexels:keywords"', '"https://images.pexels.com/photos/example.png"'],
+      src: ['logo', 'pexels:keywords', 'https://images.pexels.com/photos/example.png'],
       width: ['100%', '50%'],
       padding: ['10,0,10,0'],
     },
@@ -133,29 +135,34 @@ export const blockLibrary = {
   LINK: {
     attributes: {
       align: ['left', 'center', 'right'],
-      href: ['"#"'],
+      href: ['#'],
       color: ['#0000FF'],
-      content: ['<p>Click here</p>'],
       fontWeight: ['normal', 'bold'],
       fontSize: ['16'],
       padding: ['5,0,5,0'],
     },
   },
   LIST: {
-    note: 'Icons should be the same length as the content array. You can use any icon in material icons. Pick icons that are relevant to the content.',
+    note: 'Use LI elements to define list items. Pick icons that are relevant to the content.',
     attributes: {
-      items: ['[<p>Be Fast</p>,<p>Be Flexible</p>,<p>Be Future-Proof</p>]'],
-      // icons: ['["bolt", "water_drop", "rocket"]'],
       padding: ['10,0,10,0'],
-      type: ['ul', 'ol'],
+      type: ['ul', 'ol', 'icon'],
     },
   },
   SOCIALS: {
+    note: 'Use SOCIAL child elements to define individual social icons.',
     attributes: {
       align: ['left', 'center', 'right'],
       folder: FOLDERS.map((folder) => folder.name),
-      links: ['[{"icon": "facebook", "url": "#"}, {"icon": "x", "url": "#"}, {"icon": "instagram", "url": "#"}]'],
       padding: ['10,0,10,0'],
+    },
+  },
+  SOCIAL: {
+    attributes: {
+      icon: ['facebook', 'x', 'instagram', 'linkedin', 'youtube'],
+      url: ['#'],
+      title: ['Facebook', 'X', 'Instagram'],
+      alt: ['Facebook', 'X', 'Instagram'],
     },
   },
   SURVEY: {
@@ -167,18 +174,16 @@ export const blockLibrary = {
     },
   },
   TABLE: {
+    note: 'Use TR elements for rows and TD elements for cells within the table.',
     attributes: {
       align: ['left', 'center', 'right'],
-      rows: [
-        '[<p>S&P 500</p>,<p>5,599</p>,<p>+0.49%</p>],[<p>Nasdaq</p>,<p>12,345</p>,<p>+0.49%</p>],[<p>Dow</p>,<p>23,456</p>,<p>+0.49%</p>]',
-      ],
+      padding: ['10,0,10,0'],
     },
   },
   TEXT: {
     attributes: {
       textAlign: ['left', 'center', 'right'],
       color: ['#000000'],
-      content: ['<p>Your text content goes here.</p>'],
       fontWeight: ['normal', 'bold'],
       fontSize: ['16'],
       lineHeight: ['1.5'],

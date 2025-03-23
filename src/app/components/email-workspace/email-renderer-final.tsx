@@ -103,18 +103,19 @@ const RenderBlockFinal = ({
         return <Heading {...headingProps}>{parse(headingAttributes.content, options)}</Heading>
       case 'image':
         const imageProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Img>>
-        // Extract align property and remaining props
-        const { align: imageAlign, ...imageRemainingProps } = imageProps as any
+        const imageAttributes = getBlockAttributes(block, parentRow, email)
+        const imageAlign = imageAttributes.align
+
         return (
           // @ts-expect-error align is not a valid prop for the div
           <div align={imageAlign}>
-            <Img {...imageRemainingProps} />
+            <Img {...imageProps} />
           </div>
         )
       case 'button':
         const buttonProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Button>>
-        // Extract align property and remaining props
-        const { align: buttonAlign, ...buttonRemainingProps } = buttonProps as any
+        const buttonAttributes = getBlockAttributes(block, parentRow, email)
+        const buttonAlign = buttonAttributes.align
 
         // Extract margin values from style and remove them
         const { marginTop, marginRight, marginBottom, marginLeft, ...styleWithoutMargins } = restStyle
@@ -128,24 +129,22 @@ const RenderBlockFinal = ({
           paddingLeft: marginLeft,
         }
 
-        const buttonAttributes = getBlockAttributes(block, parentRow, email)
         return (
           // @ts-expect-error
           <div align={buttonAlign}>
-            <Button {...buttonRemainingProps} style={buttonStyle}>
+            <Button {...buttonProps} style={buttonStyle}>
               {parse(buttonAttributes.content)}
             </Button>
           </div>
         )
       case 'link':
-        const linkProps = { ...blockProps, style: restStyle }
-        // Extract align property and remaining props
-        const { align: linkAlign, ...linkRemainingProps } = linkProps as any
+        const linkProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Link>>
         const linkAttributes = getBlockAttributes(block, parentRow, email)
+        const linkAlign = linkAttributes.align
         return (
           // @ts-expect-error
           <div align={linkAlign}>
-            <Link {...linkRemainingProps}>{parse(linkAttributes.content)}</Link>
+            <Link {...linkProps}>{parse(linkAttributes.content)}</Link>
           </div>
         )
       case 'divider':

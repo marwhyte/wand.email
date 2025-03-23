@@ -412,34 +412,35 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
     links: [],
   }
 
-  // Parse social links from raw attributes
-  try {
-    const jsonStr = raw.links?.trim() || '[]'
+  // Parse social links from raw attributes - only if the links attribute exists
+  if (raw.links) {
+    try {
+      const jsonStr = raw.links.trim()
 
-    // Validate JSON string format
-    if (!jsonStr.startsWith('[') || !jsonStr.endsWith(']')) {
-      console.error('Invalid JSON array format:', jsonStr)
-      throw new Error('Invalid JSON array format')
+      // Try to parse the JSON, but don't throw if it fails
+      try {
+        const rawLinks = JSON.parse(jsonStr)
+
+        if (Array.isArray(rawLinks)) {
+          attrs.links = rawLinks
+            .filter((link) => isSocialIconName(link.icon))
+            .map((link) => ({
+              // Handle twitter -> x conversion
+              icon: link.icon.toLowerCase() === 'twitter' ? 'x' : link.icon.toLowerCase(),
+              url: link.url || '',
+              title: link.title || '',
+              alt: link.alt || '',
+            }))
+        }
+      } catch (jsonError) {
+        console.warn('Could not parse social links as JSON, will use child SOCIAL elements instead')
+      }
+    } catch (e) {
+      console.warn('Failed to process social links attribute')
+      console.debug('Raw links value:', raw.links)
     }
-
-    const rawLinks = JSON.parse(jsonStr)
-
-    if (Array.isArray(rawLinks)) {
-      attrs.links = rawLinks
-        .filter((link) => isSocialIconName(link.icon))
-        .map((link) => ({
-          // Handle twitter -> x conversion
-          icon: link.icon.toLowerCase() === 'twitter' ? 'x' : link.icon.toLowerCase(),
-          url: link.url || '',
-          title: link.title || '',
-          alt: link.alt || '',
-        }))
-    }
-  } catch (e) {
-    console.error('Failed to parse social links:', e)
-    console.debug('Raw links value:', raw.links)
-    console.debug('links type:', typeof raw.links)
   }
+  // If no links attribute, that's fine - we'll let the SOCIAL child elements handling take over
 
   return attrs
 }
@@ -567,12 +568,19 @@ const parseListAttributes: AttributeParser<ListBlockAttributes> = (raw) => {
     console.debug('Raw items value:', raw.items)
   }
 
-  // Set list style (defaults to bullet)
-  if (raw.listStyle && ['bullet', 'number', 'icon'].includes(raw.listStyle)) {
-    attrs.type = raw.listStyle as ListBlockAttributes['type']
+  // FIRST: Check if type is directly specified (this should take precedence)
+  if (raw.type && ['ul', 'ol', 'icon'].includes(raw.type)) {
+    attrs.type = raw.type as ListBlockAttributes['type']
+  }
+  // SECOND: If listStyle is specified, map it to the correct type
+  else if (raw.listStyle) {
+    // Map listStyle values to correct type values
+    if (raw.listStyle === 'bullet') attrs.type = 'ul'
+    else if (raw.listStyle === 'number') attrs.type = 'ol'
+    else if (raw.listStyle === 'icon') attrs.type = 'icon'
   }
 
-  // Handle icons if present and listStyle is icon
+  // Handle icons if present and type is icon
   if (raw.icons && attrs.type === 'icon') {
     try {
       const iconStr = raw.icons.trim()
@@ -644,8 +652,6 @@ function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 's
 async function processBlocks(blocks: any[], row: RowBlock): Promise<any[]> {
   const orientation = determineImageOrientation(row)
 
-  console.log('orientation', orientation)
-
   return Promise.all(
     blocks.map(async (block) => {
       if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
@@ -690,6 +696,11 @@ export function parseEmailScript(script: string, email: Email | null): Email {
   let currentColumn: ColumnBlock | null = null
   let depth = 0
 
+  // Counters for debugging
+  let textBlockCount = 0
+  let buttonBlockCount = 0
+  let headingBlockCount = 0
+
   // Initialize email attributes
   const emailAttributes: Partial<Email> = {}
 
@@ -708,12 +719,11 @@ export function parseEmailScript(script: string, email: Email | null): Email {
     }
 
     // Handle row start
-    if (line.startsWith('ROW')) {
-      const rowMatch = line.match(/ROW\s*([^{]*)\{?/)
+    if (line.startsWith('<ROW')) {
+      const rowMatch = line.match(/<ROW\s*([^>]*)>/)
       if (!rowMatch) continue
 
       const rowAttrs = parseAttributes(rowMatch[1])
-
       currentRow = createRow(parseRowAttributes(rowAttrs))
       rows.push(currentRow)
       depth++
@@ -721,10 +731,10 @@ export function parseEmailScript(script: string, email: Email | null): Email {
     }
 
     // Handle column start
-    if (line.startsWith('COLUMN')) {
+    if (line.startsWith('<COLUMN')) {
       if (!currentRow) continue
 
-      const columnMatch = line.match(/COLUMN\s*([^{]*)\{?/)
+      const columnMatch = line.match(/<COLUMN\s*([^>]*)>/)
       if (!columnMatch) continue
 
       const columnAttrs = parseAttributes(columnMatch[1])
@@ -752,27 +762,355 @@ export function parseEmailScript(script: string, email: Email | null): Email {
       continue
     }
 
-    // Handle block definitions
-    const match = line.match(/(\w+)(?:\s+(.+))?/) // Made the attributes part optional
-    if (match && currentColumn) {
-      const [, blockType, blockDef = ''] = match // Provide default empty string for blockDef
+    // Handle closing tags
+    if (line.startsWith('</ROW>')) {
+      depth--
+      currentRow = null
+      currentColumn = null
+      continue
+    }
+
+    if (line.startsWith('</COLUMN>')) {
+      depth--
+      currentColumn = null
+      continue
+    }
+
+    // Handle LIST component specially to capture LI elements
+    if (line.startsWith('<LIST') && currentColumn) {
+      // Use a more permissive regex that matches both <LIST> and <LIST attributes>
+      let attrMatch = line.match(/<LIST(?:\s+([^>]*))?>/)
+      let attrs: RawAttributes = {}
+
+      if (attrMatch && attrMatch[1]) {
+        // Only parse attributes if there's content between tag name and >
+        attrs = parseAttributes(attrMatch[1])
+      }
+
+      const items: string[] = []
+
+      // Check if this is a self-closing LIST tag (items attribute provided directly)
+      if (line.endsWith('/>') || attrs.items) {
+        // The existing parser will handle this case
+        createBlock('list', '', blockParsers.list(attrs), currentColumn)
+        continue
+      }
+
+      // If not self-closing, collect all LI elements until </LIST>
+      let j = i + 1
+      let foundClosingTag = false
+      while (j < lines.length && !lines[j].trim().startsWith('</LIST>')) {
+        const currentLine = lines[j].trim()
+
+        // Match LI element - either self-contained on one line or spanning multiple lines
+        if (currentLine.startsWith('<LI>')) {
+          // Check if opening and closing tags are on same line
+          const singleLineLiMatch = currentLine.match(/<LI>(.*?)<\/LI>/)
+
+          if (singleLineLiMatch) {
+            // Single line LI
+            items.push(singleLineLiMatch[1].trim())
+          } else {
+            // Multi-line LI - collect content until </LI>
+            let liContent = ''
+
+            // Extract any content after the opening tag
+            const openingTagEndPos = currentLine.indexOf('>')
+            if (openingTagEndPos !== -1 && openingTagEndPos < currentLine.length - 1) {
+              liContent = currentLine.substring(openingTagEndPos + 1).trim()
+            }
+
+            let k = j + 1
+            let foundLiClosingTag = false
+            while (k < lines.length && !lines[k].trim().includes('</LI>')) {
+              liContent += (liContent ? ' ' : '') + lines[k].trim()
+              k++
+            }
+
+            // Handle the closing tag line if found
+            if (k < lines.length) {
+              const closingLine = lines[k].trim()
+              foundLiClosingTag = true
+              const closingTagPos = closingLine.indexOf('</LI>')
+
+              if (closingTagPos > 0) {
+                // Add content before closing tag
+                const contentBeforeClosing = closingLine.substring(0, closingTagPos).trim()
+                liContent += (liContent ? ' ' : '') + contentBeforeClosing
+              }
+
+              j = k // Skip to the line with closing tag
+            }
+
+            items.push(liContent.trim())
+          }
+        }
+
+        j++
+      }
+
+      // Skip to the line with closing LIST tag
+      i = j
+
+      // Convert items array to JSON string format for the parser
+      attrs.items = JSON.stringify(items)
+
+      // Now use the blockParser which will handle converting from string to string[]
+      createBlock('list', '', blockParsers.list(attrs), currentColumn)
+      continue
+    }
+
+    // Handle TABLE component specially to capture TR/TD elements
+    if (line.startsWith('<TABLE') && currentColumn) {
+      const attrMatch = line.match(/<TABLE\s*([^>]*)>/)
+      if (!attrMatch) continue
+
+      const attrs = parseAttributes(attrMatch[1])
+
+      // Check if this is a self-closing TABLE tag (rows attribute provided directly)
+      if (line.endsWith('/>') || attrs.rows) {
+        // The existing parser will handle this case
+        createBlock('table', '', blockParsers.table(attrs), currentColumn)
+        continue
+      }
+
+      // If not self-closing, collect all TR/TD elements until </TABLE>
+      const tableRows: string[][] = []
+      let currentRowData: string[] = []
+
+      let j = i + 1
+      while (j < lines.length && !lines[j].trim().startsWith('</TABLE>')) {
+        const currentLine = lines[j].trim()
+
+        // Handle row start
+        if (currentLine.startsWith('<TR>')) {
+          // Start a new row
+          currentRowData = []
+        }
+
+        // Handle row end - add the row to our table data
+        else if (currentLine.startsWith('</TR>')) {
+          if (currentRowData.length > 0) {
+            tableRows.push([...currentRowData])
+          }
+        }
+
+        // Handle cell content - can be on single line or multiple lines
+        else if (currentLine.startsWith('<TD>')) {
+          // Check if TD is self-contained on one line
+          const singleLineTdMatch = currentLine.match(/<TD>(.*?)<\/TD>/)
+
+          if (singleLineTdMatch) {
+            // Single line TD
+            currentRowData.push(singleLineTdMatch[1].trim())
+          } else {
+            // Multi-line TD - collect content until </TD>
+            let cellContent = ''
+
+            // Extract any content after the opening tag
+            const openingTagEndPos = currentLine.indexOf('>')
+            if (openingTagEndPos !== -1 && openingTagEndPos < currentLine.length - 1) {
+              cellContent = currentLine.substring(openingTagEndPos + 1).trim()
+            }
+
+            let k = j + 1
+            while (k < lines.length && !lines[k].trim().includes('</TD>')) {
+              cellContent += (cellContent ? ' ' : '') + lines[k].trim()
+              k++
+            }
+
+            // Handle the closing tag line if found
+            if (k < lines.length) {
+              const closingLine = lines[k].trim()
+              const closingTagPos = closingLine.indexOf('</TD>')
+
+              if (closingTagPos > 0) {
+                // Add content before closing tag
+                cellContent += (cellContent ? ' ' : '') + closingLine.substring(0, closingTagPos).trim()
+              }
+
+              j = k // Skip to the line with closing tag
+            }
+
+            currentRowData.push(cellContent.trim())
+          }
+        }
+
+        j++
+      }
+
+      // Skip to the line with closing TABLE tag
+      i = j
+
+      // Set the rows attribute to the collected table data
+      attrs.rows = JSON.stringify(tableRows)
+
+      // Create the table block
+      createBlock('table', '', blockParsers.table(attrs), currentColumn)
+      continue
+    }
+
+    // Handle LINK, TEXT, BUTTON, HEADING specially to capture content between tags
+    if (
+      (line.startsWith('<LINK') ||
+        line.startsWith('<TEXT') ||
+        line.startsWith('<BUTTON') ||
+        line.startsWith('<HEADING')) &&
+      currentColumn
+    ) {
+      const tagName = line.match(/<(\w+)/)?.[1]?.toLowerCase()
+
+      // If no tag name found, skip this line
+      if (!tagName) {
+        continue
+      }
+
+      // Modified to handle tags without attributes
+      // This regex now handles both cases: <TAG attributes> and <TAG>
+      let attrMatch = line.match(/<\w+(\s+[^>]*)?>/)
+      let attrs: RawAttributes = {}
+
+      if (attrMatch && attrMatch[1] && attrMatch[1].trim()) {
+        // Only parse attributes if there's actual content between tag name and >
+        attrs = parseAttributes(attrMatch[1])
+      }
+
+      // Check if the opening and closing tags are on the same line
+      const singleLinePattern = new RegExp(`<${tagName.toUpperCase()}[^>]*>(.*?)</${tagName.toUpperCase()}>`)
+      const singleLineMatch = line.match(singleLinePattern)
+
+      let content = ''
+
+      if (singleLineMatch) {
+        // If opening and closing tags are on the same line, extract content directly
+        content = singleLineMatch[1].trim()
+      } else {
+        // Multi-line content - start by checking if there's content after the opening tag
+        const openingTagEnd = line.indexOf('>') + 1
+        if (openingTagEnd < line.length) {
+          content = line.substring(openingTagEnd).trim()
+        }
+
+        // Continue to next line
+        let j = i + 1
+        let closingTagFound = false
+
+        while (j < lines.length && !closingTagFound) {
+          const currentLine = lines[j].trim()
+          const closingTagIndex = currentLine.indexOf(`</${tagName.toUpperCase()}>`)
+
+          if (closingTagIndex !== -1) {
+            // Found closing tag - add content up to that point
+            if (closingTagIndex > 0) {
+              const lineContentBeforeClosing = currentLine.substring(0, closingTagIndex).trim()
+              content += (content && lineContentBeforeClosing ? ' ' : '') + lineContentBeforeClosing
+            }
+            closingTagFound = true
+          } else {
+            // No closing tag on this line - add entire line
+            content += (content && currentLine ? ' ' : '') + currentLine
+          }
+
+          j++
+        }
+
+        // Update index to point to the line after the closing tag
+        if (closingTagFound) {
+          i = j - 1 // Set i to the line with closing tag (j-1 because the loop will increment i)
+        }
+      }
+
+      // Create the block with the extracted content
+      switch (tagName) {
+        case 'link':
+          attrs.content = content
+          createBlock('link', content, blockParsers.link(attrs), currentColumn)
+          break
+        case 'text':
+          attrs.content = content
+          textBlockCount++
+          createBlock('text', content, blockParsers.text(attrs), currentColumn)
+          break
+        case 'button':
+          attrs.content = content
+          buttonBlockCount++
+          createBlock('button', content, blockParsers.button(attrs), currentColumn)
+          break
+        case 'heading':
+          attrs.content = content
+          headingBlockCount++
+          createBlock('heading', content, blockParsers.heading(attrs), currentColumn)
+          break
+      }
+
+      continue
+    }
+
+    // Handle SOCIALS component specially to capture SOCIAL elements
+    if (line.startsWith('<SOCIALS') && currentColumn) {
+      const attrMatch = line.match(/<SOCIALS\s*([^>]*)>/)
+      if (!attrMatch) continue
+
+      const attrs = parseAttributes(attrMatch[1])
+
+      // Check if this is a self-closing SOCIALS tag (links attribute provided directly)
+      if (line.endsWith('/>') || attrs.links) {
+        // The existing parser will handle this case
+        const socialAttrs = blockParsers.socials(attrs)
+        createBlock('socials', '', socialAttrs, currentColumn)
+        continue
+      }
+
+      // If not self-closing, collect all SOCIAL elements until </SOCIALS>
+      const socialLinks: Array<{ icon: string; url: string; title: string; alt: string }> = []
+
+      let j = i + 1
+      while (j < lines.length && !lines[j].trim().startsWith('</SOCIALS>')) {
+        const currentLine = lines[j].trim()
+
+        // Handle SOCIAL element - must be self-closing
+        if (currentLine.startsWith('<SOCIAL')) {
+          const socialMatch = currentLine.match(/<SOCIAL\s+([^>]*)(?:\/>|>)/)
+
+          if (socialMatch) {
+            const socialAttrs = parseAttributes(socialMatch[1])
+
+            // Only process if we have an icon
+            if (socialAttrs.icon) {
+              socialLinks.push({
+                icon: socialAttrs.icon,
+                url: socialAttrs.url || '#',
+                title: socialAttrs.title || socialAttrs.icon.charAt(0).toUpperCase() + socialAttrs.icon.slice(1),
+                alt: socialAttrs.alt || socialAttrs.title || socialAttrs.icon,
+              })
+            }
+          }
+        }
+
+        j++
+      }
+
+      // Skip to the line with closing SOCIALS tag
+      i = j
+
+      // Set the links attribute to the collected social links
+      attrs.links = JSON.stringify(socialLinks)
+
+      // Create the socials block
+      const socialAttrs = blockParsers.socials(attrs)
+      createBlock('socials', '', socialAttrs, currentColumn)
+      continue
+    }
+
+    // Handle other block types (self-closing tags)
+    const blockMatch = line.match(/<(\w+)\s*([^>]*)>/)
+    if (blockMatch && currentColumn) {
+      const [, blockType, blockDef = ''] = blockMatch
       const attrs = parseAttributes(blockDef)
 
       switch (blockType.toLowerCase() as BlockType) {
-        case 'heading':
-          createBlock('heading', attrs.text || '', blockParsers.heading(attrs), currentColumn)
-          break
-        case 'text':
-          createBlock('text', attrs.text || '', blockParsers.text(attrs), currentColumn)
-          break
-        case 'button':
-          createBlock('button', attrs.text || '', blockParsers.button(attrs), currentColumn)
-          break
         case 'image':
           createBlock('image', '', blockParsers.image(attrs), currentColumn)
-          break
-        case 'link':
-          createBlock('link', attrs.text || '', blockParsers.link(attrs), currentColumn)
           break
         case 'divider':
           createBlock('divider', '', blockParsers.divider(attrs), currentColumn)
@@ -792,19 +1130,8 @@ export function parseEmailScript(script: string, email: Email | null): Email {
           break
       }
     }
-
-    // Handle closing braces
-    if (line === '}') {
-      depth--
-      if (depth === 0) {
-        currentRow = null
-      } else if (depth === 1) {
-        currentColumn = null
-      }
-    }
   }
 
-  // Return the email object with parsed attributes and rows
   return {
     ...email,
     ...emailAttributes,
@@ -818,5 +1145,47 @@ export async function processEmailImages(email: Email): Promise<Email> {
     ...email,
 
     rows: await processRows(email.rows),
+  }
+}
+
+// Helper function to parse list items from attribute value
+function parseListItems(itemsStr: string): string[] {
+  if (!itemsStr) return []
+
+  try {
+    // Try parsing as JSON array
+    if (itemsStr.startsWith('[') && itemsStr.endsWith(']')) {
+      try {
+        const rawItems = JSON.parse(itemsStr)
+        if (Array.isArray(rawItems)) {
+          return rawItems.map((item) => String(item).trim())
+        }
+      } catch (e) {
+        // If JSON parsing fails, try to clean up the string
+        const cleanStr = itemsStr
+          .replace(/^\[|\]$/g, '') // Remove outer brackets
+          .replace(/'/g, '"') // Replace single quotes with double quotes
+
+        try {
+          // Try parsing again with fixed quotes
+          const rawItems = JSON.parse(`[${cleanStr}]`)
+          if (Array.isArray(rawItems)) {
+            return rawItems.map((item) => String(item).trim())
+          }
+        } catch {
+          // If that also fails, split by comma
+          return cleanStr
+            .split(',')
+            .map((item) => item.trim())
+            .map((item) => item.replace(/^['"]|['"]$/g, '')) // Remove quotes from each item
+        }
+      }
+    }
+
+    // Handle comma-separated format
+    return itemsStr.split(',').map((item) => item.trim())
+  } catch (e) {
+    console.error('Failed to parse list items:', e)
+    return []
   }
 }

@@ -55,8 +55,6 @@ export async function streamText(
   // Determine email type from user message if not provided
   let detectedEmailType = emailType
 
-  console.log('detectedEmailType1', detectedEmailType)
-
   if (!detectedEmailType && messages.length > 0) {
     // Find the first user message
     const firstUserMessage = messages.find((msg) => msg.role === 'user')
@@ -118,8 +116,6 @@ export async function streamText(
       : provider === 'anthropic'
         ? anthropic('claude-3-haiku-20240307')
         : google('gemini-2.0-flash-001')
-
-  console.log('gets here')
 
   return _streamText({
     experimental_generateMessageId: () => {

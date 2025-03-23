@@ -4,43 +4,59 @@ import { getPhotoUrl } from '@/lib/utils/misc'
 import { Email } from '../../types'
 
 export const defaultNikeVerificationTemplateScript = (useImage: boolean) => `
-<EMAIL type=transactional styleVariant=default>
-  ROW type=header {
-    COLUMN {
-      IMAGE src=${useImage ? getPhotoUrl('nike-logo.png', 'nike-verification') : 'logo'} alt="Nike logo"
-    }
-  }
+<EMAIL type="transactional" styleVariant="default">
+  <ROW type="header">
+    <COLUMN>
+      <IMAGE src="${useImage ? getPhotoUrl('nike-logo.png', 'nike-verification') : 'logo'}" alt="Nike logo" />
+    </COLUMN>
+  </ROW>
   
-  ROW {
-    COLUMN {
-      HEADING content=<p>Your Nike Member profile code</p> level=h1
-      TEXT content=<p>Here's the one-time verification code you requested:</p>
-    }
-  }
+  <ROW>
+    <COLUMN>
+      <HEADING level="h1">
+        Your Nike Member profile code
+      </HEADING>
+      <TEXT>
+        Here's the one-time verification code you requested:
+      </TEXT>
+    </COLUMN>
+  </ROW>
   
-  ROW {
-    COLUMN {
-      DIVIDER
-      HEADING content=<p>17586839</p> textAlign=center
-      DIVIDER
-    }
-  }
+  <ROW>
+    <COLUMN>
+      <DIVIDER />
+      <HEADING textAlign="center">
+        17586839
+      </HEADING>
+      <DIVIDER />
+    </COLUMN>
+  </ROW>
   
-  ROW {
-    COLUMN {
-      HEADING content=<p>This code expires after 15 minutes.</p> level=h3
-      TEXT content=<p>If you've already received this code or don't need it anymore, ignore this email.</p>
-    }
-  }
+  <ROW>
+    <COLUMN>
+      <HEADING level="h3">
+        This code expires after 15 minutes.
+      </HEADING>
+      <TEXT>
+        If you've already received this code or don't need it anymore, ignore this email.
+      </TEXT>
+    </COLUMN>
+  </ROW>
   
-  ROW type=footer {
-    COLUMN {
-      LINK content=<p>Nike.com</p> href="https://www.nike.com" color=#000000 fontSize=24 fontWeight=bold
-      DIVIDER
-      TEXT content=<p>© 2024 <strong>Nike</strong>, Inc. All Rights Reserved<br>One Bowerman Drive, Beaverton, Oregon 97005</p>
-      TEXT content=<p><a href="/">Privacy Policy</a>  &nbsp;&nbsp; <a href="/">Get Help</a></p>
-    }
-  }
+  <ROW type="footer">
+    <COLUMN>
+      <LINK href="https://www.nike.com" color="#000000" fontSize="24" fontWeight="bold">
+        Nike.com
+      </LINK>
+      <DIVIDER />
+      <TEXT>
+        © 2024 <strong>Nike</strong>, Inc. All Rights Reserved<br>One Bowerman Drive, Beaverton, Oregon 97005
+      </TEXT>
+      <TEXT>
+        <a href="/">Privacy Policy</a>  &nbsp;&nbsp; <a href="/">Get Help</a>
+      </TEXT>
+    </COLUMN>
+  </ROW>
 </EMAIL>
 `
 

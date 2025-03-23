@@ -92,7 +92,7 @@ export const getAdditionalImageStyles = (
 ): React.ComponentProps<typeof Img>['style'] => {
   const baseDefaults: React.ComponentProps<typeof Img>['style'] = {
     objectFit: 'contain',
-    borderRadius: '16px',
+    borderRadius: imageBlock.attributes.src != 'logo' ? '16px' : undefined,
     width: '100%',
   }
 

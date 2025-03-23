@@ -94,23 +94,24 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
     row.columns.some((column) => column.blocks.some((b) => b.id === block.id))
   )
 
-  const processedAttributes = parentRow ? getBlockProps(block, parentRow, company, email) : {}
+  const processedProps = parentRow ? getBlockProps(block, parentRow, company, email) : {}
+  const processedAttributes = parentRow ? getBlockAttributes(block, parentRow, email) : {}
 
   const blockPadding = useMemo(() => {
     return {
-      top: String(processedAttributes.style?.paddingTop) ?? String(processedAttributes.style?.padding) ?? '0px',
-      right: String(processedAttributes.style?.paddingRight) ?? String(processedAttributes.style?.padding) ?? '0px',
-      bottom: String(processedAttributes.style?.paddingBottom) ?? String(processedAttributes.style?.padding) ?? '0px',
-      left: String(processedAttributes.style?.paddingLeft) ?? String(processedAttributes.style?.padding) ?? '0px',
+      top: String(processedProps.style?.paddingTop) ?? String(processedProps.style?.padding) ?? '0px',
+      right: String(processedProps.style?.paddingRight) ?? String(processedProps.style?.padding) ?? '0px',
+      bottom: String(processedProps.style?.paddingBottom) ?? String(processedProps.style?.padding) ?? '0px',
+      left: String(processedProps.style?.paddingLeft) ?? String(processedProps.style?.padding) ?? '0px',
     }
   }, [block])
 
   const contentPadding = useMemo(() => {
     return {
-      top: String(processedAttributes.style?.marginTop) ?? '0px',
-      right: String(processedAttributes.style?.marginRight) ?? '0px',
-      bottom: String(processedAttributes.style?.marginBottom) ?? '0px',
-      left: String(processedAttributes.style?.marginLeft) ?? '0px',
+      top: String(processedProps.style?.marginTop) ?? '0px',
+      right: String(processedProps.style?.marginRight) ?? '0px',
+      bottom: String(processedProps.style?.marginBottom) ?? '0px',
+      left: String(processedProps.style?.marginLeft) ?? '0px',
     }
   }, [block])
 
@@ -200,16 +201,16 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 </div>
               </Field>
             )}
-            {options.includes(Options.HREF) && 'href' in processedAttributes && (
+            {options.includes(Options.HREF) && 'href' in processedProps && (
               <Field labelPosition="top">
                 <Label>Link URL</Label>
                 <Input
                   pattern="https?://.*"
                   title="Please enter a valid link"
-                  invalid={!isValidHttpUrl(processedAttributes.href || '')}
-                  error={!isValidHttpUrl(processedAttributes.href || '') ? 'Please enter a valid link' : undefined}
+                  invalid={!isValidHttpUrl(processedProps.href || '')}
+                  error={!isValidHttpUrl(processedProps.href || '') ? 'Please enter a valid link' : undefined}
                   type="url"
-                  value={processedAttributes.href || ''}
+                  value={processedProps.href || ''}
                   onChange={(e) => onChange({ href: e.target.value })}
                   placeholder="https://example.com"
                 />
@@ -219,7 +220,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
               <Field>
                 <Label>Background Color</Label>
                 <ColorInput
-                  value={processedAttributes.style?.backgroundColor || '#ffffff'}
+                  value={processedProps.style?.backgroundColor || '#ffffff'}
                   onChange={(value) => onChange({ backgroundColor: value })}
                 />
               </Field>
@@ -260,7 +261,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                   key={`width-${block.id}`}
                   min={1}
                   max={100}
-                  value={parseInt(String(processedAttributes.style?.width).replace(/[%px]/g, '') || '100')}
+                  value={parseInt(String(processedProps.style?.width).replace(/[%px]/g, '') || '100')}
                   onChange={(value) => {
                     onChange({ width: `${Math.min(100, Math.max(0, value))}%` })
                   }}
@@ -274,7 +275,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 <div className="flex gap-2">
                   <div className="w-[106px]">
                     <Select
-                      value={processedAttributes.style?.borderStyle || 'solid'}
+                      value={processedProps.style?.borderStyle || 'solid'}
                       onChange={(e) => onChange({ borderStyle: e.target.value as 'solid' | 'dashed' | 'dotted' })}
                     >
                       <option value="solid">Solid</option>
@@ -286,15 +287,15 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                     min={0}
                     max={30}
                     value={
-                      processedAttributes.style?.borderWidth
-                        ? safeParseInt(String(processedAttributes.style?.borderWidth).replace('px', ''))
+                      processedProps.style?.borderWidth
+                        ? safeParseInt(String(processedProps.style?.borderWidth).replace('px', ''))
                         : 0
                     }
                     onChange={(value) => onChange({ borderWidth: `${value}px` })}
                   />
 
                   <ColorInput
-                    value={processedAttributes.style?.borderColor || ''}
+                    value={processedProps.style?.borderColor || ''}
                     onChange={(e) => onChange({ borderColor: e })}
                   />
                 </div>
@@ -306,7 +307,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 <NumberInput
                   min={0}
                   max={200}
-                  value={safeParseInt(String(processedAttributes.style?.borderRadius).replace('px', '')) || 0}
+                  value={safeParseInt(String(processedProps.style?.borderRadius).replace('px', '')) || 0}
                   onChange={(value) => onChange({ borderRadius: `${value}px` })}
                 />
               </Field>
@@ -323,7 +324,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 className="ml-auto"
                 min={1}
                 max={144}
-                value={safeParseInt(String(processedAttributes.style?.fontSize).replace('px', '')) || 16}
+                value={safeParseInt(String(processedProps.style?.fontSize).replace('px', '')) || 16}
                 onChange={(value) => onChange({ fontSize: `${value}px` })}
               />
             </Field>
@@ -332,7 +333,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
               <Label>Font Weight</Label>
               <div className="ml-auto w-24">
                 <Select
-                  value={processedAttributes.style?.fontWeight || 'normal'}
+                  value={processedProps.style?.fontWeight || 'normal'}
                   onChange={(e) => onChange({ fontWeight: e.target.value as 'normal' | 'bold' })}
                 >
                   <option value="normal">Normal</option>
@@ -348,9 +349,9 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 min={0}
                 max={100}
                 value={
-                  processedAttributes.style?.letterSpacing === 'normal'
+                  processedProps.style?.letterSpacing === 'normal'
                     ? 0
-                    : safeParseInt(String(processedAttributes.style?.letterSpacing).replace('px', '')) || 0
+                    : safeParseInt(String(processedProps.style?.letterSpacing).replace('px', '')) || 0
                 }
                 onChange={(value) => onChange({ letterSpacing: value === 0 ? 'normal' : `${value}px` })}
               />
@@ -361,13 +362,13 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
               <div className="ml-auto w-24">
                 <Select
                   value={
-                    processedAttributes.style?.lineHeight === '120%'
+                    processedProps.style?.lineHeight === '120%'
                       ? 'small'
-                      : processedAttributes.style?.lineHeight === '150%'
+                      : processedProps.style?.lineHeight === '150%'
                         ? 'medium'
-                        : processedAttributes.style?.lineHeight === '180%'
+                        : processedProps.style?.lineHeight === '180%'
                           ? 'large'
-                          : processedAttributes.style?.lineHeight === '200%'
+                          : processedProps.style?.lineHeight === '200%'
                             ? 'extra-large'
                             : 'medium'
                   }
@@ -391,7 +392,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
             <Field>
               <Label>Text Color</Label>
               <ColorInput
-                value={processedAttributes.style?.color || '#000000'}
+                value={processedProps.style?.color || '#000000'}
                 onChange={(value) => onChange({ color: value })}
               />
             </Field>
@@ -401,7 +402,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 <Label>Text Alignment</Label>
                 <div className="ml-auto w-24">
                   <Select
-                    value={processedAttributes.style?.textAlign || 'left'}
+                    value={processedProps.style?.textAlign || 'left'}
                     onChange={(e) => onChange({ textAlign: e.target.value as 'left' | 'center' | 'right' })}
                   >
                     <option value="left">Left</option>
