@@ -14,7 +14,6 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
     footer: {
       backgroundColor: '#ffffff',
     },
-    gallery: {},
     default: {
       borderWidth: '1px',
       borderColor: '#dadce0',
@@ -152,22 +151,45 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
   })()
 
   // Get variant-specific styles
-  const variantStyles = emailAttributes?.styleVariant
-    ? variantRowDefaults[emailAttributes.styleVariant]?.[rowAttributes.type || 'default'] || {}
-    : {}
+  const variantStyles = (() => {
+    if (!emailAttributes?.styleVariant) return {}
+
+    const variant = emailAttributes.styleVariant
+    const rowType = rowAttributes.type || 'default'
+
+    // If there's a specific style for this row type in the variant, use it
+    // Otherwise fall back to the 'default' style for this variant
+    return variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}
+  })()
 
   // Get email type-specific styles
-  const emailTypeStyles = emailAttributes?.type
-    ? emailTypeRowDefaults[emailAttributes.type]?.[rowAttributes.type || 'default'] || {}
-    : {}
+  const emailTypeStyles = (() => {
+    if (!emailAttributes?.type) return {}
+
+    const emailType = emailAttributes.type
+    const rowType = rowAttributes.type || 'default'
+
+    // If there's a specific style for this row type in the email type, use it
+    // Otherwise fall back to the 'default' style for this email type
+    return emailTypeRowDefaults[emailType]?.[rowType] || emailTypeRowDefaults[emailType]?.['default'] || {}
+  })()
 
   // Get combined variant and email type specific styles
-  const combinedStyles =
-    emailAttributes?.styleVariant && emailAttributes?.type
-      ? combinedTypeVariantDefaults[emailAttributes.styleVariant]?.[emailAttributes.type]?.[
-          rowAttributes.type || 'default'
-        ] || {}
-      : {}
+  const combinedStyles = (() => {
+    if (!emailAttributes?.styleVariant || !emailAttributes?.type) return {}
+
+    const variant = emailAttributes.styleVariant
+    const emailType = emailAttributes.type
+    const rowType = rowAttributes.type || 'default'
+
+    // Look for specific style for this combination
+    // First try the specific row type, then fall back to 'default' if not found
+    return (
+      combinedTypeVariantDefaults[variant]?.[emailType]?.[rowType] ||
+      combinedTypeVariantDefaults[variant]?.[emailType]?.['default'] ||
+      {}
+    )
+  })()
 
   // Merge styles with priority: base < email type < variant < combined
   return {
