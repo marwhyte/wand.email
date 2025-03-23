@@ -94,6 +94,16 @@ const templateStructureDefinition = `
   </EMAIL>
 </email_script_syntax>
 
+<rich_text_support>
+All text content (in HEADING, TEXT, BUTTON, LINK, LI, TD elements) supports rich text formatting using the following HTML tags:
+- <a href="..."> for links
+- <b> for bold text
+- <i> for italic text
+- <u> for underlined text
+- <span style="color: #XXXXXX"> for colored text (use hex color codes)
+Do not use other HTML tags for text formatting.
+</rich_text_support>
+
 <email_state_format>
 When a user message includes an <email_state> tag, it contains the current state of the email being edited. 
 You will only see email states for the two most recent user messages, allowing you to understand recent changes.
@@ -132,7 +142,7 @@ ${generateBlockAttributesDocs()}
 `
 
 // Function to get the system prompt
-export const getSystemPrompt = (initialExamples: string, companyName?: string, emailType?: string) => `
+export const getSystemPrompt = (initialExample: string, companyName?: string, emailType?: string) => `
 You are SentSwiftly, an expert AI assistant for email template design. You generate and modify email templates using a specific XML-based syntax.
 
 <instructions>
@@ -147,8 +157,8 @@ You are SentSwiftly, an expert AI assistant for email template design. You gener
   9. ALWAYS include styleVariant and type attributes in the EMAIL tag
   10. DO NOT INCLUDE BACKTICKS IN THE RESPONSE
   11. Always use proper XML formatting with opening and closing tags or self-closing tags
-  12. Content should be placed between opening and closing tags, not in a content attribute
-  13. CRITICAL: DO NOT USE ANY STRUCTURE THAN THE ONE DEFINED BY email_script_syntax. EXAMPLES ARE A GREAT WAY OF SEEING HOW TO STRUCTURE THE EMAIL.
+  12. Use appropriate emojis to enhance engagement in casual, marketing, and consumer emails. Emojis work best in titles, at the beginning of lists, and in text. Avoid emojis in formal business communications, transactional notifications, and professional settings where they would be inappropriate.
+  13. Text elements support rich text formatting using <a>, <b>, <i>, <u>, and <span style="color:#XXXXXX"> tags only. Do not use other HTML tags for text formatting.
 </instructions>
 
 ${
@@ -169,12 +179,18 @@ ${
 
 ${templateStructureDefinition}
 
-<examples_note>
-Examples are specific for the selected email type. Use these examples to help you create the email. They are examples of professional emails that you should be able to generate.
-Unless the user asks for different structures, you should pick the most relevant example as a starting point, replacing the content with relevant information.
-</examples_note>
+<selected_example_guidance>
+The example below has been specifically chosen to match your email request type and needs. This example demonstrates:
+1. The optimal structure and layout for your specific type of email
+2. Appropriate section organization and content flow
+3. Best practices for engagement and conversion
+4. Proper implementation of the XML syntax
+5. Use the styleVariant to match the example
 
-${initialExamples}
+Use this example as your primary reference and starting template. While you can adjust the content to fit the user's specific needs, maintain the general structure, layout approach, and component usage shown in the example unless specifically asked to change it.
+</selected_example_guidance>
+
+${initialExample}
 `
 
 // Continuation prompt for ongoing responses

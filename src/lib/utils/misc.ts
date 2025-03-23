@@ -1,8 +1,10 @@
 import { Email } from '@/app/components/email-workspace/types'
 import { Message } from '@ai-sdk/react'
+import parse from 'html-react-parser'
 import { v4 as uuidv4 } from 'uuid'
 import { Company } from '../database/types'
 import { parseEmailScript } from './email-script-parser'
+
 export function shouldUseDarkText(backgroundColor: string) {
   // Convert hex to RGB
   const hex = backgroundColor.replace('#', '')
@@ -85,6 +87,19 @@ export function getPhotoUrl(name: string, template: string) {
 
 export function getImgFromKey(imageKey: string, thumbnail = false) {
   return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${imageKey}`
+}
+
+export const parseText = (text: string, linkColor: string) => {
+  const options = {
+    replace: (domNode: any) => {
+      if (domNode.name === 'a' && (!domNode.attribs.style || !domNode.attribs.style.includes('color'))) {
+        domNode.attribs.style = `color: ${linkColor};`
+        return domNode
+      }
+    },
+  }
+
+  return parse(text, options)
 }
 
 export function getEmailFromMessage(email: Email | null, message: Message) {

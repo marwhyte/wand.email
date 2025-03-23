@@ -19,26 +19,136 @@ export type StreamingOptions = Omit<Parameters<typeof _streamText>[0], 'model' |
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google'
 
-const examplesByType: Record<EmailType, string[]> = {
+// Define descriptions for each example to help the model pick the most appropriate one
+type ExampleWithDescription = {
+  template: string
+  description: string
+}
+
+const examplesByType: Record<EmailType, ExampleWithDescription[]> = {
   'welcome-series': [],
-  ecommerce: [ebayEcommerceExample],
+  ecommerce: [
+    {
+      template: ebayEcommerceExample,
+      description:
+        'Promotional ecommerce email with multiple product categories, visual merchandising galleries, and several call-to-action buttons to drive sales',
+    },
+  ],
   invite: [],
-  transactional: [nikeTransactionalExample, googleTransactionalExample],
-  newsletter: [stripeNewsletterExample, stocktwitsNewsletterExample],
+  transactional: [
+    {
+      template: nikeTransactionalExample,
+      description:
+        'Clean, minimalist verification code email with prominent display of numeric code and expiration information',
+    },
+    {
+      template: googleTransactionalExample,
+      description: 'Security alert notification email with device login details and verification action button',
+    },
+  ],
+  newsletter: [
+    {
+      template: stripeNewsletterExample,
+      description:
+        'Professional B2B newsletter featuring company achievements, industry recognition, and upcoming events with multiple call-to-action buttons',
+    },
+    {
+      template: stocktwitsNewsletterExample,
+      description:
+        'Data-driven financial market newsletter with stock updates, performance metrics, charts, and expert insights in a conversational format',
+    },
+  ],
   invoice: [],
   cart: [],
   default: [],
 }
 
-// Function to get examples based on email type
-export function getExamplesByType(emailType: EmailType) {
-  const examples: string[] = examplesByType[emailType] || examplesByType['default']
+// Function to get a single example based on email type and user request
+export async function getRelevantExample(userMessage: string): Promise<{ emailType: EmailType; example: string }> {
+  try {
+    // Prepare descriptions of all examples for the model to choose from
+    const exampleDescriptions = Object.entries(examplesByType)
+      .flatMap(([type, examples]) =>
+        examples.map((ex) => ({
+          type: type as EmailType,
+          description: ex.description,
+          template: ex.template,
+        }))
+      )
+      .filter((item) => item.description) // Only include examples with descriptions
 
-  return `
-  <examples_for_email_type>
-    ${examples.join('\n')}
-  </examples_for_email_type>
-  `
+    // If no examples with descriptions, return default
+    if (exampleDescriptions.length === 0) {
+      return {
+        emailType: 'ecommerce',
+        example: ebayEcommerceExample,
+      }
+    }
+
+    // Create a prompt for the model to analyze
+    const descriptionsText = exampleDescriptions
+      .map((item, index) => `${index + 1}. ${item.type} - ${item.description}`)
+      .join('\n')
+
+    const { text } = await generateText({
+      model: google('gemini-2.0-flash-001'),
+      system: `You are analyzing a user's email creation request to determine:
+      1. The most appropriate email TYPE from: ${emailTypes.join(', ')}
+      2. The most relevant EXAMPLE TEMPLATE based on the descriptions below:
+      
+      ${descriptionsText}
+      
+      Respond in a strict JSON format with two fields:
+      {
+        "emailType": "the email type name",
+        "exampleIndex": number (1-based index from the list above)
+      }
+      
+      Choose the example that best matches the user's intent. Return ONLY this JSON object, nothing else.`,
+      prompt: userMessage,
+    })
+
+    // Parse the response
+    const match = text.match(/\{[\s\S]*\}/)
+    if (!match) {
+      throw new Error('Could not parse model response')
+    }
+
+    const result = JSON.parse(match[0])
+
+    // Get the selected example
+    if (result.exampleIndex > 0 && result.exampleIndex <= exampleDescriptions.length) {
+      const selectedExample = exampleDescriptions[result.exampleIndex - 1]
+      return {
+        emailType: result.emailType as EmailType,
+        example: selectedExample.template,
+      }
+    }
+
+    // Fallback to default if no valid example index
+    const foundType = result.emailType as EmailType
+    const examplesForType = examplesByType[foundType]
+
+    if (examplesForType && examplesForType.length > 0) {
+      return {
+        emailType: foundType,
+        example: examplesForType[0].template,
+      }
+    }
+
+    // Absolute fallback
+    return {
+      emailType: 'ecommerce',
+      example: ebayEcommerceExample,
+    }
+  } catch (error) {
+    console.error('Error selecting relevant example:', error)
+    // Default fallback
+    return {
+      emailType: 'ecommerce',
+      example: ebayEcommerceExample,
+    }
+  }
 }
 
 // Get the model provider from environment variable, default to 'google'
@@ -52,45 +162,39 @@ export async function streamText(
   assistantMessageId?: string,
   emailType?: EmailType
 ) {
-  // Determine email type from user message if not provided
-  let detectedEmailType = emailType
-
-  if (!detectedEmailType && messages.length > 0) {
-    // Find the first user message
-    const firstUserMessage = messages.find((msg) => msg.role === 'user')
-
-    if (firstUserMessage) {
-      try {
-        const { text } = await generateText({
-          model: google('gemini-2.0-flash-001'),
-          system: `You are analyzing a user request to determine what type of email they want to create.
-          Classify the request into one of the following email types: ${emailTypes.join(', ')}.
-          Respond with ONLY the email type, nothing else.`,
-          prompt: firstUserMessage.content,
-        })
-
-        const lowerText = text.toLowerCase()
-        const foundType = emailTypes.find((type) => lowerText.includes(type))
-
-        // Use the found type or default to 'default'
-        detectedEmailType = foundType || 'default'
-      } catch (error) {
-        console.error('Error detecting email type:', error)
-        detectedEmailType = 'default'
-      }
-    }
-  }
+  // Find the first user message
+  const firstUserMessage = messages.find((msg) => msg.role === 'user')
+  const userPrompt = firstUserMessage?.content || ''
 
   // Check if examples are already in messages
   const examplesInMessages = messages.some((msg) => msg.content.includes('<examples_for_email_type>'))
 
-  // Fetch examples at the start if email type is provided or detected
-  let initialExamples = ''
-  if (detectedEmailType && !examplesInMessages) {
-    initialExamples = getExamplesByType(detectedEmailType)
+  // Determine email type and relevant example in a single request
+  let detectedEmailType = emailType
+  let initialExample = ''
+
+  if (!examplesInMessages) {
+    try {
+      const { emailType: detectedType, example } = await getRelevantExample(userPrompt)
+      detectedEmailType = detectedType
+      initialExample = `
+      <examples_for_email_type>
+        ${example}
+      </examples_for_email_type>
+      `
+    } catch (error) {
+      console.error('Error getting relevant example:', error)
+      detectedEmailType = detectedEmailType || 'default'
+      // Fallback to eBay example if there's an error
+      initialExample = `
+      <examples_for_email_type>
+        ${ebayEcommerceExample}
+      </examples_for_email_type>
+      `
+    }
   }
 
-  const systemPrompt = getSystemPrompt(initialExamples, companyName, detectedEmailType)
+  const systemPrompt = getSystemPrompt(initialExample, companyName, detectedEmailType)
 
   // Process messages to only include email states from the 2 most recent user messages
   const processedMessages = messages.map((msg, index) => {
@@ -116,6 +220,8 @@ export async function streamText(
       : provider === 'anthropic'
         ? anthropic('claude-3-haiku-20240307')
         : google('gemini-2.0-flash-001')
+
+  console.log('systemPrompt', systemPrompt)
 
   return _streamText({
     experimental_generateMessageId: () => {

@@ -14,8 +14,8 @@ export const AssistantMessage = memo(({ content, message, messages }: AssistantM
   const cleanedContent = content
     .replace(/^```(?:.*?)\n([\s\S]*?)```$/m, '$1')
     .replace(/^`{1,3}(?:.*?)(?:\n|$)/, '') // Remove partial backticks at the beginning
-    .replace(/```xml\n([\s\S]*?)```/g, '$1') // Remove XML code blocks
-    .replace(/```(?:html|markup)\n([\s\S]*?)```/g, '$1') // Also handle html/markup blocks
+    .replace(/```xml\b(?:\n[\s\S]*?```|(?!\n[\s\S]*?```))/g, '') // Remove XML code blocks (complete or incomplete)
+    .replace(/```(?:html|markup)\b(?:\n[\s\S]*?```|(?!\n[\s\S]*?```))/g, '') // Also handle html/markup blocks (complete or incomplete)
 
   // Split content at first EMAIL tag - updated regex to not require name attribute
   const [beforeEmail, afterEmail] = cleanedContent.split(/<EMAIL\s*[^>]*>/)

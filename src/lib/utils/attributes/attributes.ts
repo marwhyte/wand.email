@@ -34,6 +34,7 @@ export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<Ro
   const baseRowDefaults: Partial<RowBlock['attributes']> = {
     paddingLeft: '16px',
     paddingRight: '16px',
+    paddingBottom: '16px',
     stackOnMobile: true,
     columnSpacing: 12,
   }
