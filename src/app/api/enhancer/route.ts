@@ -7,6 +7,7 @@ import { parseDataStreamPart, streamText } from 'ai'
 const encoder = new TextEncoder()
 const decoder = new TextDecoder()
 export async function POST(request: Request) {
+  console.log('Enhancer called')
   try {
     const { message } = (await request.json()) as { message: string }
     const content = stripIndents`

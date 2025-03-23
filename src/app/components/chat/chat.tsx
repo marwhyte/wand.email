@@ -130,7 +130,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
   const [showSignUpDialog, setShowSignUpDialog] = useState(false)
   const [stepType, setStepType] = useState<'login' | 'signup'>('signup')
   const [pendingAction, setPendingAction] = useState<{
-    type: 'send-message' | 'open-company-dialog'
+    type: 'send-message' | 'open-company-dialog' | 'enhance-prompt'
     messageInput?: string
   } | null>(null)
 
@@ -178,6 +178,11 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
           sendMessage(pendingAction.messageInput)
         } else if (pendingAction.type === 'open-company-dialog') {
           companyOpener.open()
+        } else if (pendingAction.type === 'enhance-prompt') {
+          enhancePrompt(input, (input) => {
+            setInput(input)
+            scrollTextArea()
+          })
         }
 
         // Clear pending action
@@ -390,6 +395,12 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                         }}
                         handleStop={abort}
                         enhancePrompt={() => {
+                          if (!session.data?.user?.id) {
+                            setPendingAction({ type: 'enhance-prompt', messageInput: input })
+                            setShowSignUpDialog(true)
+                            return
+                          }
+
                           enhancePrompt(input, (input) => {
                             setInput(input)
                             scrollTextArea()
