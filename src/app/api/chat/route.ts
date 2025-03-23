@@ -1,5 +1,6 @@
 export const maxDuration = 60
 
+import { EmailType } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
 import { createChat, getChat, updateChat } from '@/lib/database/queries/chats'
@@ -23,7 +24,9 @@ export async function POST(request: Request) {
       messages,
       companyName,
       companyId,
-    }: { id: string; messages: Message[]; companyName?: string; companyId?: string } = await request.json()
+      emailType,
+    }: { id: string; messages: Message[]; companyName?: string; companyId?: string; emailType?: EmailType } =
+      await request.json()
 
     const userMessage = getMostRecentUserMessage(messages)
 
@@ -52,8 +55,11 @@ export async function POST(request: Request) {
     let assistantMessageId = uuidv4()
 
     const options: StreamingOptions = {
-      toolChoice: 'none',
+      onError: (error) => {
+        console.log('error', error)
+      },
       onFinish: async ({ text: content, finishReason }) => {
+        console.log('finished woopie', content)
         messages.push({
           id: assistantMessageId,
           role: 'assistant',
@@ -84,13 +90,13 @@ export async function POST(request: Request) {
           content: CONTINUE_PROMPT,
         })
 
-        const result = await streamText(messages, options, companyName, DEFAULT_PROVIDER, assistantMessageId)
+        const result = await streamText(messages, options, companyName, DEFAULT_PROVIDER, assistantMessageId, emailType)
 
         return stream.switchSource(result.toDataStream())
       },
     }
 
-    const result = await streamText(messages, options, companyName, DEFAULT_PROVIDER, assistantMessageId)
+    const result = await streamText(messages, options, companyName, DEFAULT_PROVIDER, assistantMessageId, emailType)
 
     stream.switchSource(result.toDataStream())
 

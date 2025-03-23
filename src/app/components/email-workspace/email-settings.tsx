@@ -36,6 +36,7 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
     { label: 'Trebuchet MS', value: '"Trebuchet MS", Arial, sans-serif' },
     { label: 'Outfit', value: 'Outfit, Roboto, Helvetica, Arial, sans-serif' },
     { label: 'Open Sans', value: 'Open Sans, Roboto, Helvetica, Arial, sans-serif' },
+    { label: 'Montserrat', value: 'Montserrat, Arial, sans-serif' },
   ]
 
   const emailAttributes = getEmailAttributes(email)

@@ -10,6 +10,7 @@ type Props = {
   parentRow: RowBlock
   email: Email | null
 }
+
 const EmailList = ({ block, parentRow, email }: Props) => {
   const listAttributes = getBlockAttributes(block, parentRow, email)
   const emailAttributes = getEmailAttributes(email)
@@ -17,14 +18,6 @@ const EmailList = ({ block, parentRow, email }: Props) => {
   const { style, ...restListProps } = getListProps(block, parentRow, email)
 
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
-
-  const divStyle = {
-    padding,
-    paddingTop,
-    paddingRight,
-    paddingBottom,
-    paddingLeft,
-  }
 
   const options = {
     replace: (domNode: any) => {
@@ -36,57 +29,59 @@ const EmailList = ({ block, parentRow, email }: Props) => {
   }
 
   return (
-    <div style={divStyle} {...restListProps}>
-      <div style={{}}>
-        {listAttributes.listStyle === 'bullet' ? (
-          <ul
-            style={{
-              marginTop: 0,
-              marginBottom: 0,
-              listStyleType: 'disc',
-              ...restStyles,
-            }}
-          >
-            {listAttributes.items?.map((item, index) => (
-              <li key={index} style={{ marginTop: '5px', marginBottom: '5px', marginLeft: '0px', marginRight: '0px' }}>
-                {parse(item, options)}
-              </li>
-            ))}
-          </ul>
-        ) : listAttributes.listStyle === 'number' ? (
-          <ol
-            style={{
-              marginTop: 0,
-              marginBottom: 0,
-              listStyleType: 'decimal',
-              ...restStyles,
-            }}
-            start={1}
-          >
-            {listAttributes.items?.map((item, index) => (
-              <li key={index} style={{ marginTop: '5px', marginBottom: '5px', marginLeft: '0px', marginRight: '0px' }}>
-                {parse(item, options)}
-              </li>
-            ))}
-          </ol>
-        ) : (
-          <Section>
-            {listAttributes.items?.map((item, index) => (
-              <Row key={index}>
-                <Column>
+    <div {...restListProps}>
+      {listAttributes.type === 'ul' ? (
+        <ul
+          style={{
+            marginTop: 0,
+            marginBottom: 0,
+            listStyleType: 'disc',
+            ...restStyles,
+          }}
+        >
+          {listAttributes.items?.map((item, index) => (
+            <li key={index} style={{ marginTop: '5px', marginBottom: '5px', marginLeft: '0px', marginRight: '0px' }}>
+              {parse(item, options)}
+            </li>
+          ))}
+        </ul>
+      ) : listAttributes.type === 'ol' ? (
+        <ol
+          style={{
+            marginTop: 0,
+            marginBottom: 0,
+            listStyleType: 'decimal',
+            ...restStyles,
+          }}
+          start={1}
+        >
+          {listAttributes.items?.map((item, index) => (
+            <li key={index} style={{ marginTop: '5px', marginBottom: '5px', marginLeft: '0px', marginRight: '0px' }}>
+              {parse(item, options)}
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <Section style={{ paddingLeft: '0px' }}>
+          {listAttributes.items?.map((item, index, arr) => (
+            <div key={index}>
+              <Row>
+                <Column style={{ width: '24px', verticalAlign: 'top', paddingBottom: '10px' }}>
                   <img
-                    height={32}
-                    width={32}
-                    alt={listAttributes.icons?.[index] ?? 'Fallback icon'}
-                    src={getPhotoUrl(`${listAttributes.icons?.[index] ?? ''}.png`, 'icons-white')}
+                    height={24}
+                    width={24}
+                    alt={`Icon for item ${index + 1}`}
+                    src={getPhotoUrl(`${listAttributes.icons?.[index] ?? 'check'}.png`, 'icons-white')}
+                    style={{ display: 'block' }}
                   />
                 </Column>
-                <Column width="90%">{parse(item, options)}</Column>
+                <Column style={{ width: '8px', paddingBottom: '10px' }}></Column>
+                <Column style={{ paddingBottom: '10px' }}>{parse(item, options)}</Column>
               </Row>
-            ))}
-          </Section>
-        )}
-      </div>
+            </div>
+          ))}
+        </Section>
+      )}
     </div>
   )
 }

@@ -208,8 +208,8 @@ const EmailRenderer = ({ email }: Props) => {
       columns: widths.map((w) => ({
         id: uuidv4(),
         type: 'column',
-        width: w,
         attributes: {
+          width: w,
           align: 'center',
           paddingTop: '10px',
           paddingBottom: '10px',
@@ -255,9 +255,8 @@ const EmailRenderer = ({ email }: Props) => {
           {
             id: uuidv4(),
             type: 'column',
-            width: '100%',
             attributes: {
-              align: 'center',
+              width: '100%',
             },
             blocks: [createNewBlock(item.newBlockType)],
           },

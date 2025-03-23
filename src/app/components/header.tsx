@@ -3,6 +3,7 @@
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
+import { getEmailAttributes } from '@/lib/utils/attributes'
 import { classNames } from '@/lib/utils/misc'
 import {
   ArrowDownTrayIcon,
@@ -14,15 +15,23 @@ import {
 import { render } from '@react-email/components'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useOpener } from '../hooks'
+import { useEmailSave } from '../hooks/useEmailSave'
 import { Logo } from './Logo'
 import { Button } from './button'
 import ExportDialog from './dialogs/export-dialog'
 import PreviewDialog from './dialogs/preview-dialog'
 import EmailRendererFinal from './email-workspace/email-renderer-final'
+import { defaultEbayTemplate } from './email-workspace/templates/ecommerce/default-ebay-template'
+import { defaultStripeTemplate } from './email-workspace/templates/newsletter/default-stripe'
+import { outlineStocktwitsTemplate } from './email-workspace/templates/newsletter/outline-stocktwits'
+import { defaultNikeVerificationTemplate } from './email-workspace/templates/transactional/default-nike-verification'
+import { outlineGoogleTemplate } from './email-workspace/templates/transactional/outline-google'
+import { Email, EmailStyleVariant } from './email-workspace/types'
 import Loading from './loading'
 import Notification from './notification'
+import { Select } from './select'
 import { Tab, TabGroup, TabList } from './tab'
 
 type Props = {
@@ -33,9 +42,12 @@ type Props = {
 export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()
   const { email, setEmail } = useEmailStore()
+  const { chatId } = useChatStore()
+  const emailAttributes = getEmailAttributes(email)
   const { title, setTitle, company } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const saveEmail = useEmailSave(chatId)
 
   const exportOpener = useOpener()
   const previewOpener = useOpener()
@@ -47,11 +59,43 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
     { name: <DevicePhoneMobileIcon className="h-5 w-5" />, value: 'mobile' },
   ]
 
+  const handleChange = useCallback(
+    (attributes: Partial<Email>) => {
+      if (!email) return
+      const updatedEmail = { ...email, ...attributes }
+      saveEmail(updatedEmail)
+    },
+    [email]
+  )
+
   const handleDeviceChange = (index: number) => {
     const newValue: 'desktop' | 'mobile' = deviceOptions[index].value
     setMobileView?.(newValue === 'mobile')
     setSelectedDevice(newValue)
   }
+
+  const templates = [
+    {
+      name: 'Stocktwits',
+      value: outlineStocktwitsTemplate(),
+    },
+    {
+      name: 'Ebay',
+      value: defaultEbayTemplate,
+    },
+    {
+      name: 'Google',
+      value: outlineGoogleTemplate(),
+    },
+    {
+      name: 'Stripe',
+      value: defaultStripeTemplate(),
+    },
+    {
+      name: 'Nike Verification',
+      value: defaultNikeVerificationTemplate(),
+    },
+  ]
 
   const sendTestEmail = async () => {
     if (!session?.data?.user?.email || !email) return
@@ -105,7 +149,32 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
 
         {email && session?.data?.user && (
           <div className="flex items-center space-x-4">
-            <TabGroup value={selectedDevice} className="flex justify-center" onChange={handleDeviceChange}>
+            {process.env.NODE_ENV === 'development' && (
+              <Select
+                value="current"
+                onChange={(e) => setEmail(templates.find((template) => template.name === e.target.value)?.value)}
+              >
+                <option value="current">Current</option>
+                {templates.map((template) => (
+                  <option key={template.name} value={template.name}>
+                    {template.name}
+                  </option>
+                ))}
+              </Select>
+            )}
+            <Select
+              value={emailAttributes.styleVariant}
+              onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
+            >
+              <option value="default">Default</option>
+              <option value="outline">Outline</option>
+              <option value="floating">Floating</option>
+            </Select>
+            <TabGroup
+              value={selectedDevice}
+              className="flex min-w-fit flex-nowrap justify-center"
+              onChange={handleDeviceChange}
+            >
               <TabList>
                 {deviceOptions.map((option) => (
                   <Tab selected={option.value === selectedDevice} key={option.value}>

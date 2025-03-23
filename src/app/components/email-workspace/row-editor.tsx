@@ -65,14 +65,14 @@ export default function RowEditor({
 
         if (adjustIndex >= 0 && adjustIndex < newColumns.length) {
           // Calculate total units of the two columns being adjusted
-          const activeColUnits = percentToUnits(newColumns[activeColumnIndex].width || '100')
-          const adjustColUnits = percentToUnits(newColumns[adjustIndex].width || '100')
+          const activeColUnits = percentToUnits(newColumns[activeColumnIndex].attributes.width || '100')
+          const adjustColUnits = percentToUnits(newColumns[adjustIndex].attributes.width || '100')
           const totalUnits = activeColUnits + adjustColUnits
 
           // Ensure minimum width of 2 units for each column
           if (newUnits >= 2 && totalUnits - newUnits >= 2) {
-            newColumns[activeColumnIndex].width = unitsToPercent(newUnits)
-            newColumns[adjustIndex].width = unitsToPercent(totalUnits - newUnits)
+            newColumns[activeColumnIndex].attributes.width = unitsToPercent(newUnits)
+            newColumns[adjustIndex].attributes.width = unitsToPercent(totalUnits - newUnits)
             onColumnWidthChange(newColumns)
           }
         }
@@ -91,8 +91,9 @@ export default function RowEditor({
       const newColumn: ColumnBlock = {
         id: uuidv4(),
         type: 'column',
-        width: unitsToPercent(2), // 2 units (out of 12)
-        attributes: {},
+        attributes: {
+          width: unitsToPercent(2), // 2 units (out of 12)
+        },
         blocks: [],
       }
 
@@ -100,18 +101,18 @@ export default function RowEditor({
       let spaceFound = false
 
       // Try to take space from the last column
-      const lastColUnits = percentToUnits(newColumns[newColumns.length - 1].width || '100')
+      const lastColUnits = percentToUnits(newColumns[newColumns.length - 1].attributes.width || '100')
       if (lastColUnits >= 3) {
-        newColumns[newColumns.length - 1].width = unitsToPercent(lastColUnits - 2)
+        newColumns[newColumns.length - 1].attributes.width = unitsToPercent(lastColUnits - 2)
         spaceFound = true
       }
 
       // If last column doesn't have enough space, check others
       if (!spaceFound) {
         for (let i = newColumns.length - 1; i >= 0; i--) {
-          const colUnits = percentToUnits(newColumns[i].width || '100')
+          const colUnits = percentToUnits(newColumns[i].attributes.width || '100')
           if (colUnits >= 3) {
-            newColumns[i].width = unitsToPercent(colUnits - 2)
+            newColumns[i].attributes.width = unitsToPercent(colUnits - 2)
             spaceFound = true
             break
           }
@@ -169,7 +170,7 @@ export default function RowEditor({
       const deletedColumn = row.columns.find((col) => col.id === columnId)
 
       if (deletedColumn) {
-        const unitsToDistribute = percentToUnits(deletedColumn.width || '100')
+        const unitsToDistribute = percentToUnits(deletedColumn.attributes.width || '100')
         const columnsToAdjust = newColumns.length
 
         // Calculate how to distribute the units
@@ -177,12 +178,12 @@ export default function RowEditor({
         const remainderUnits = unitsToDistribute % columnsToAdjust
 
         newColumns.forEach((col, index) => {
-          const currentUnits = percentToUnits(col.width || '100')
+          const currentUnits = percentToUnits(col.attributes.width || '100')
           let newUnits = currentUnits + baseUnits
           if (index === 0) {
             newUnits += remainderUnits
           }
-          col.width = unitsToPercent(newUnits)
+          col.attributes.width = unitsToPercent(newUnits)
         })
       }
 
@@ -338,14 +339,14 @@ export default function RowEditor({
                 <div
                   className={`relative z-10 flex flex-col items-center justify-center rounded-md border border-gray-300 ${selectedColumnId === column.id ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`}
                   style={{
-                    width: column.width,
+                    width: column.attributes.width,
                     margin: '0 2px',
                   }}
                   onClick={(e) => handleColumnClick(e, column.id)}
                 >
                   <div
                     className={`text-xs font-medium ${isDragging ? 'select-none' : ''}`}
-                  >{`${percentToUnits(column.width || '100')}`}</div>
+                  >{`${percentToUnits(column.attributes.width || '100')}`}</div>
                   {row.columns.length > 1 && (
                     <button
                       onClick={(e) => {

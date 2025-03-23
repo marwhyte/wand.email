@@ -314,9 +314,27 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
   return (
     <Container {...getContentProps(email)}>
       {email.rows.map((row, index) => {
+        // Add border radius for 'floating' style variant
+        const isFirstRow = index === 0
+        const isLastRow = index === email.rows.filter((r) => r.attributes.type !== 'footer').length - 1
+        const needsRounding = emailAttributes.styleVariant === 'floating'
+
+        // Create styles object for row wrapper if needed
+        const floatingStyles =
+          needsRounding && (isFirstRow || isLastRow)
+            ? {
+                style: {
+                  borderRadius: isFirstRow ? '8px 8px 0 0' : isLastRow ? '0 0 8px 8px' : undefined,
+                  overflow: 'hidden',
+                },
+              }
+            : {}
+
         return (
           <React.Fragment key={row.id}>
-            <RenderColumns row={row} email={email} company={company} />
+            <div {...floatingStyles}>
+              <RenderColumns row={row} email={email} company={company} />
+            </div>
             {index < email.rows.length - 1 &&
               emailAttributes.styleVariant === 'outline' &&
               row.attributes.type !== 'header' &&
@@ -352,6 +370,16 @@ const EmailRendererFinal = ({ email, company }: Props) => {
             fallbackFontFamily="Arial"
             webFont={{
               url: 'https://fonts.gstatic.com/s/opensans/v40/memvYaGs126MiZpBA-UvWbX2vVnXBbObj2OVTS-mu0SC55I.woff2',
+              format: 'woff2',
+            }}
+          />
+        )}
+        {email.fontFamily?.includes('Montserrat') && (
+          <Font
+            fontFamily="Montserrat"
+            fallbackFontFamily="Arial"
+            webFont={{
+              url: 'https://fonts.gstatic.com/s/montserrat/v29/JTUSjIg1_i6t8kCHKm459WlhyyTh89Y.woff2',
               format: 'woff2',
             }}
           />

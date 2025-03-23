@@ -268,7 +268,7 @@ function generateColumn(column: ColumnBlock, indent: number = 1): string {
   // Combine all attributes with width (only if provided)
   const allAttrs = {
     ...column.attributes,
-    ...(column.width && column.width !== '100%' && { width: column.width }),
+    ...(column.attributes.width && column.attributes.width !== '100%' && { width: column.attributes.width }),
   }
 
   // Remove undefined values
@@ -296,7 +296,8 @@ function generateRow(row: RowBlock): string {
   const attrsStr = attrs ? ` ${attrs}` : ''
 
   // Check if all columns have the same width
-  const allSameWidth = row.columns.length > 0 && row.columns.every((col) => col.width === row.columns[0].width)
+  const allSameWidth =
+    row.columns.length > 0 && row.columns.every((col) => col.attributes.width === row.columns[0].attributes.width)
 
   // Generate columns, omitting width if they're all the same
   const columns = row.columns
@@ -321,6 +322,8 @@ export function generateEmailScript(email: Email): string {
     ...(email.rowBackgroundColor && { rowBackgroundColor: email.rowBackgroundColor }),
     ...(email.width && { width: email.width }),
     ...(email.preview ? { preview: email.preview } : {}),
+    ...(email.type && { type: email.type }),
+    ...(email.styleVariant && { styleVariant: email.styleVariant }),
   })
 
   return `<EMAIL ${emailAttrs}>\n${rows}\n</EMAIL>`

@@ -21,10 +21,10 @@ import {
   TextAttributes,
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
+import { v4 } from 'uuid'
 import { createBlock, createColumn, createRow } from './email-helpers'
 import { resolveImageSrc } from './image-service'
 import { ensurePx } from './misc'
-
 // ===== Base Parser Types =====
 type RawAttributes = Record<string, string>
 type AttributeParser<T> = (raw: RawAttributes) => T
@@ -428,7 +428,8 @@ const parseSocialsAttributes: AttributeParser<SocialsBlockAttributes> = (raw) =>
       attrs.links = rawLinks
         .filter((link) => isSocialIconName(link.icon))
         .map((link) => ({
-          icon: link.icon.toLowerCase(), // Normalize to lowercase
+          // Handle twitter -> x conversion
+          icon: link.icon.toLowerCase() === 'twitter' ? 'x' : link.icon.toLowerCase(),
           url: link.url || '',
           title: link.title || '',
           alt: link.alt || '',
@@ -517,7 +518,7 @@ const parseListAttributes: AttributeParser<ListBlockAttributes> = (raw) => {
   const attrs: ListBlockAttributes = {
     ...handlePadding(raw),
     items: [],
-    listStyle: 'bullet',
+    type: 'ul',
   }
 
   // Parse items from raw attributes
@@ -568,11 +569,11 @@ const parseListAttributes: AttributeParser<ListBlockAttributes> = (raw) => {
 
   // Set list style (defaults to bullet)
   if (raw.listStyle && ['bullet', 'number', 'icon'].includes(raw.listStyle)) {
-    attrs.listStyle = raw.listStyle as ListBlockAttributes['listStyle']
+    attrs.type = raw.listStyle as ListBlockAttributes['type']
   }
 
   // Handle icons if present and listStyle is icon
-  if (raw.icons && attrs.listStyle === 'icon') {
+  if (raw.icons && attrs.type === 'icon') {
     try {
       const iconStr = raw.icons.trim()
 
@@ -643,11 +644,13 @@ function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 's
 async function processBlocks(blocks: any[], row: RowBlock): Promise<any[]> {
   const orientation = determineImageOrientation(row)
 
+  console.log('orientation', orientation)
+
   return Promise.all(
     blocks.map(async (block) => {
       if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
         // Resolve the image source with determined orientation
-        const resolvedSrc = await resolveImageSrc(block.attributes.src, orientation)
+        const resolvedSrc = await resolveImageSrc(block.attributes.src, 'landscape')
         return {
           ...block,
           attributes: {
@@ -680,7 +683,7 @@ async function processRows(rows: any[]): Promise<any[]> {
 }
 
 // ===== Main Parser Functions =====
-export function parseEmailScript(script: string, email: Email): Email {
+export function parseEmailScript(script: string, email: Email | null): Email {
   const rows: RowBlock[] = []
   const lines = script.trim().split('\n')
   let currentRow: RowBlock | null = null
@@ -736,7 +739,7 @@ export function parseEmailScript(script: string, email: Email): Email {
 
         // Update existing columns to have even width
         currentRow.columns.forEach((col) => {
-          col.width = `${evenWidth}%`
+          col.attributes.width = `${evenWidth}%`
         })
       } else {
         // Use provided width
@@ -806,6 +809,7 @@ export function parseEmailScript(script: string, email: Email): Email {
     ...email,
     ...emailAttributes,
     rows,
+    id: email?.id || v4(),
   }
 }
 

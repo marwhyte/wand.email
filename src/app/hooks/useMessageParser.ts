@@ -76,6 +76,20 @@ export function useMessageParser(message: Message) {
         })
     } else {
       // Even if we couldn't process it, mark it as processed to avoid infinite loops
+      logger.warn(
+        `Failed to process email from message ${message.id}: ${
+          !emailObject ? 'No email object could be extracted' : 'No chatId available'
+        }`
+      )
+
+      // For debugging purposes, log message content that caused the processing failure
+      if (!emailObject) {
+        logger.debug('Message content that failed to process:', {
+          contentPreview: message.content,
+          hasEmailTags: message.content.includes('<EMAIL') && message.content.includes('</EMAIL>'),
+        })
+      }
+
       setProcessedMessageIds((prev) => new Set([...prev, message.id]))
     }
   }

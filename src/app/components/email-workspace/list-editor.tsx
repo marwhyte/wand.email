@@ -4,6 +4,7 @@ import parse from 'html-react-parser'
 import { useEffect, useState } from 'react'
 import { Button } from '../button'
 import { Field, FieldGroup, Label } from '../fieldset'
+import { Select } from '../select'
 import Textbox from '../textbox'
 import { Email, ListBlock, ListBlockAttributes, RowBlock } from './types'
 
@@ -114,6 +115,17 @@ const ListEditor = ({ block, parentRow, onChange, email }: ListEditorProps) => {
           />
         </Field>
       )}
+
+      <Field>
+        <Label>List Type</Label>
+        <Select
+          value={listAttributes.type}
+          onChange={(e) => onChange({ type: e.target.value as ListBlockAttributes['type'] })}
+        >
+          <option value="ul">Bullet</option>
+          <option value="ol">Number</option>
+        </Select>
+      </Field>
     </FieldGroup>
   )
 }

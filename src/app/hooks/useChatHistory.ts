@@ -2,7 +2,6 @@ import { Chat, Company } from '@/lib/database/types'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useEffect } from 'react'
-import { newsletterOutlineStocktwitsTemplate } from '../components/email-workspace/templates/newsletter/outline-stocktwits'
 
 type Props = {
   chat?: Chat
@@ -16,7 +15,7 @@ export function useChatHistory({ chat, chatId, company }: Props) {
 
   useEffect(() => {
     if (chat) {
-      setEmail(newsletterOutlineStocktwitsTemplate() ?? undefined)
+      setEmail(chat.email ?? undefined)
       setTitle(chat.title)
     } else {
       setEmail(undefined)

@@ -143,7 +143,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
       case 'table':
         return [Options.PADDING]
       case 'list':
-        return [Options.PADDING]
+        return [Options.TEXT_PROPERTIES, Options.PADDING]
       default:
         return []
     }

@@ -121,6 +121,7 @@ describe('Email Script Generator', () => {
 
   it('should generate equivalent script to the original template', () => {
     const email = turbotaxTemplate()
+    console.log('thistheemail', JSON.stringify(email, null, 2))
     const generatedScript = generateEmailScript(email)
 
     // Compare normalized versions of the scripts

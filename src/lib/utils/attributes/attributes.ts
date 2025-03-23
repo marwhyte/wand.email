@@ -38,14 +38,6 @@ export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<Ro
     columnSpacing: 12,
   }
 
-  if (email?.styleVariant === 'outline' && row.attributes.type !== 'header' && row.attributes.type !== 'footer') {
-    baseRowDefaults.borderWidth = '1px'
-    baseRowDefaults.borderColor = '#dadce0'
-    baseRowDefaults.borderStyle = 'solid'
-    baseRowDefaults.borderRadius = '8px'
-    baseRowDefaults.paddingBottom = '12px'
-  }
-
   const defaultAttributes = {
     ...baseRowDefaults,
     ...getTypeDefaults(row, email),
@@ -79,25 +71,28 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
     fontFamily: 'Arial, sans-serif',
     linkColor: '#3b82f6',
     rowBackgroundColor: '#FFFFFF',
-    width: '600',
-    styleVariant: 'floating',
-    type: 'default',
+    width: email?.type === 'transactional' ? '500' : '600',
+    styleVariant: email?.styleVariant ?? 'default',
+    type: email?.type ?? 'default',
   }
 
-  console.log(email?.styleVariant, 'email?.styleVariant')
-
-  if (email?.styleVariant === 'outline') {
+  if (defaultAttributes?.styleVariant === 'outline') {
     defaultAttributes.backgroundColor = '#ffffff'
     defaultAttributes.color = '#2d2d2d'
     defaultAttributes.fontFamily = 'Open Sans, Roboto, Helvetica, Arial, sans-serif'
   }
 
-  if (email?.styleVariant === 'default') {
+  if (defaultAttributes?.styleVariant === 'default') {
     defaultAttributes.backgroundColor = '#ffffff'
+  }
+
+  if (defaultAttributes.styleVariant === 'default' && defaultAttributes.type === 'ecommerce') {
+    defaultAttributes.fontFamily = 'Outfit, Roboto, Helvetica, Arial, sans-serif'
+  } else if (defaultAttributes.styleVariant === 'default') {
     defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
   }
 
-  if (email?.styleVariant === 'floating') {
+  if (defaultAttributes?.styleVariant === 'floating') {
     defaultAttributes.backgroundColor = '#f4f4f4'
   }
 
@@ -218,7 +213,7 @@ export function getListAttributes(block: ListBlock, parentRow: RowBlock, email: 
   return {
     ...defaults,
     ...block.attributes,
-    listStyle: block.attributes.listStyle ?? defaults.listStyle ?? 'bullet',
+    type: block.attributes.type ?? defaults.type ?? 'ul',
     items: block.attributes.items ?? defaults.items ?? [],
   }
 }

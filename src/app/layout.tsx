@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import type { Metadata } from 'next'
 import { SessionProvider } from 'next-auth/react'
-import { Inter, Open_Sans, Outfit } from 'next/font/google'
+import { Inter, Montserrat, Open_Sans, Outfit } from 'next/font/google'
 
 import { fetchUser } from './actions'
 import PlanProvider from './components/payment/plan-provider'
@@ -10,6 +10,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 const outfit = Outfit({ subsets: ['latin'] })
 const openSans = Open_Sans({ subsets: ['latin'] })
+const montserrat = Montserrat({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {

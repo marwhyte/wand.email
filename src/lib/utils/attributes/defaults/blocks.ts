@@ -15,6 +15,7 @@ import { Email } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
 import { ensurePx, shouldUseDarkText } from '../../misc'
+import { getButtonAttributes } from '../attributes'
 import { getBlockCSSProperties } from './rowTypeBlocks'
 
 export const getAdditionalTextStyles = (
@@ -67,7 +68,7 @@ export const getAdditionalHeadingStyles = (
     paddingBottom: '12px',
     paddingLeft: '0',
     fontWeight: 'bold',
-    lineHeight: '120%',
+    lineHeight: '100%',
     letterSpacing: 'normal',
     fontSize: defaultHeadingSizes[headingBlock.attributes.level as keyof typeof defaultHeadingSizes] ?? '16px',
   }
@@ -118,17 +119,18 @@ export const getAdditionalButtonStyles = (
     fontSize: '14px',
     borderRadius: '24px',
     paddingTop: '10px',
-    paddingRight: '14px',
+    paddingRight: '10px',
     paddingBottom: '10px',
-    paddingLeft: '14px',
+    paddingLeft: '10px',
     marginTop: '10px',
     marginBottom: '10px',
-    marginLeft: '10px',
-    marginRight: '10px',
+    marginLeft: '14px',
+    marginRight: '14px',
     cursor: 'pointer',
   }
 
   const rowTypeDefaults = getBlockCSSProperties(buttonBlock, email, parentRow) || {}
+  const buttonAttributes = getButtonAttributes(buttonBlock, parentRow, email, company)
 
   const {
     href,
@@ -137,6 +139,10 @@ export const getAdditionalButtonStyles = (
     borderStyle,
     align,
     content,
+    paddingLeft,
+    paddingRight,
+    paddingTop,
+    paddingBottom,
     contentPaddingBottom,
     contentPaddingLeft,
     contentPaddingRight,
@@ -146,10 +152,10 @@ export const getAdditionalButtonStyles = (
 
   // Apply directional content padding to margins if they exist
   const margins = {
-    marginTop: contentPaddingTop ?? baseDefaults.marginTop,
-    marginBottom: contentPaddingBottom ?? baseDefaults.marginBottom,
-    marginLeft: contentPaddingLeft ?? baseDefaults.marginLeft,
-    marginRight: contentPaddingRight ?? baseDefaults.marginRight,
+    marginTop: buttonAttributes.contentPaddingTop ?? baseDefaults.marginTop,
+    marginBottom: buttonAttributes.contentPaddingBottom ?? baseDefaults.marginBottom,
+    marginLeft: buttonAttributes.contentPaddingLeft ?? baseDefaults.marginLeft,
+    marginRight: buttonAttributes.contentPaddingRight ?? baseDefaults.marginRight,
   }
 
   const borderStyles = borderWidth
@@ -196,7 +202,6 @@ export const getAdditionalLinkStyles = (
     paddingRight: '0',
     paddingBottom: '10px',
     paddingLeft: '0',
-    textDecoration: 'underline',
     fontSize: '16px',
     fontWeight: 'normal',
     cursor: 'pointer',
@@ -223,8 +228,8 @@ export const getAdditionalDividerStyles = (
     borderWidth: '1px',
     borderColor: '#E0E0E0',
     padding: 0,
-    paddingLeft: '12px',
-    paddingRight: '12px',
+    paddingLeft: '0px',
+    paddingRight: '0px',
     paddingTop: '24px',
     paddingBottom: '24px',
   }
@@ -251,12 +256,12 @@ export const getAdditionalListStyles = (
     paddingTop: '5px',
     paddingRight: '0px',
     paddingBottom: '5px',
-    paddingLeft: '0px',
+    paddingLeft: listBlock.attributes.type === 'icon' ? '16px' : '40px',
   }
 
   const rowTypeDefaults = getBlockCSSProperties(listBlock, email, parentRow) || {}
 
-  const { items, icons, listStyle, ...styleAttributes } = listBlock.attributes
+  const { items, icons, type, ...styleAttributes } = listBlock.attributes
 
   return {
     ...baseDefaults,

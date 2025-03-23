@@ -16,6 +16,10 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
     },
     gallery: {},
     default: {
+      borderWidth: '1px',
+      borderColor: '#dadce0',
+      borderStyle: 'solid',
+      borderRadius: '8px',
       paddingTop: '40px',
       paddingBottom: '40px',
       paddingLeft: '20px',
@@ -24,16 +28,18 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
   },
   floating: {
     header: {},
-    footer: {},
+    footer: {
+      backgroundColor: '#f4f4f4',
+    },
     gallery: {},
     default: {
       paddingBottom: '20px',
+      paddingLeft: '40px',
+      paddingRight: '40px',
     },
   },
   default: {
-    default: {
-      paddingBottom: '40px',
-    },
+    default: {},
   },
 
   // Add more variants as needed
@@ -41,10 +47,24 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
 
 // Add email type-specific row styles
 export const emailTypeRowDefaults: Record<string, VariantRowStyles> = {
+  ecommerce: {
+    header: {},
+    footer: {},
+    gallery: {
+      paddingTop: '12px',
+      paddingBottom: '12px',
+    },
+    default: {
+      paddingTop: '12px',
+      paddingBottom: '12px',
+    },
+  },
   newsletter: {
     header: {},
     footer: {},
-    default: {},
+    default: {
+      paddingBottom: '40px',
+    },
   },
   marketing: {
     header: {},
@@ -110,10 +130,7 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
         }
       }
       case 'gallery': {
-        const defaults: Partial<RowBlock['attributes']> = {
-          paddingTop: '12px',
-          paddingBottom: '12px',
-        }
+        const defaults: Partial<RowBlock['attributes']> = {}
 
         if (row.columns.length === 2) {
           defaults.stackOnMobile = true

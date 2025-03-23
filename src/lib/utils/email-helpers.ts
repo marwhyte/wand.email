@@ -6,8 +6,9 @@ export const createBlock = (type: EmailBlockType, content: string, attrs = {}, c
   const block = {
     id: uuidv4(),
     type,
-    content,
-    attributes: attrs,
+    attributes: {
+      ...attrs,
+    },
   } as EmailBlock
 
   column.blocks.push(block)
@@ -15,11 +16,14 @@ export const createBlock = (type: EmailBlockType, content: string, attrs = {}, c
 }
 
 // Creates a column with a given number of grid columns and attributes. Accepts block array.
-export const createColumn = (blocks: any[], width = '100%', attrs = {}) => ({
+export const createColumn: (blocks: any[], width: string, attrs: Record<string, any>) => ColumnBlock = (
+  blocks: any[],
+  width = '100%',
+  attrs = {}
+) => ({
   id: uuidv4(),
   type: 'column' as const,
-  width,
-  attributes: attrs,
+  attributes: { ...attrs, width },
   blocks,
 })
 

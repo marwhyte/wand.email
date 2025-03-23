@@ -1,7 +1,5 @@
 import type {
   ButtonBlockAttributes,
-  ColumnBlock,
-  ColumnBlockAttributes,
   DividerBlockAttributes,
   Email,
   EmailBlock,
@@ -28,7 +26,6 @@ type BlockAttributeMap = {
   divider: DividerBlockAttributes
   socials: SocialsBlockAttributes
   button: ButtonBlockAttributes
-  column: ColumnBlockAttributes
   survey: SurveyBlockAttributes
   table: TableBlockAttributes
   list: ListBlockAttributes
@@ -43,7 +40,6 @@ type BlockStyleModifier = {
   divider?: Partial<DividerBlockAttributes>
   socials?: Partial<SocialsBlockAttributes>
   button?: Partial<ButtonBlockAttributes>
-  column?: Partial<ColumnBlockAttributes>
   survey?: Partial<SurveyBlockAttributes>
   list?: Partial<ListBlockAttributes>
 }
@@ -59,7 +55,6 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
       },
       text: {
         textAlign: 'center',
-        fontSize: '14px',
       },
       image: {
         align: 'center',
@@ -98,7 +93,43 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
       },
     },
   },
+  floating: {
+    footer: {
+      link: {
+        align: 'center',
+      },
+    },
+    default: {
+      link: {
+        align: 'left',
+      },
+      button: {
+        align: 'left',
+        paddingLeft: '0',
+        contentPaddingLeft: '24px',
+        contentPaddingRight: '24px',
+        fontWeight: 'bold',
+      },
+    },
+  },
   default: {
+    footer: {
+      link: {
+        align: 'center',
+      },
+    },
+    default: {
+      link: {
+        align: 'left',
+      },
+      button: {
+        align: 'left',
+        paddingLeft: '0',
+        contentPaddingLeft: '24px',
+        contentPaddingRight: '24px',
+        fontWeight: 'bold',
+      },
+    },
     h1: {
       heading: {
         color: '#0a2540',
@@ -123,15 +154,43 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
 
 // Add email type-specific styles
 export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
+  ecommerce: {
+    default: {
+      button: {
+        align: 'left',
+        paddingLeft: '0',
+        contentPaddingLeft: '24px',
+        contentPaddingRight: '24px',
+        fontWeight: 'bold',
+      },
+    },
+  },
   newsletter: {
     default: {
       heading: {
+        color: '#0a2540',
         textAlign: 'left',
+        paddingBottom: '10px',
+        paddingTop: '10px',
       },
       text: {
         textAlign: 'left',
+        fontSize: '16px',
+        color: '#3f4b66',
       },
-      button: {},
+      list: {
+        color: '#3f4b66',
+      },
+      button: {
+        backgroundColor: '#635bff',
+        fontWeight: 'bold',
+        paddingLeft: '0',
+        paddingRight: '0',
+        align: 'left',
+      },
+      image: {
+        paddingTop: '10px',
+      },
     },
     header: {
       heading: {},
@@ -141,6 +200,7 @@ export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
         textAlign: 'center',
       },
       text: {
+        fontSize: '12px',
         textAlign: 'center',
       },
     },
@@ -158,8 +218,20 @@ export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
   transactional: {
     default: {
       heading: {},
-      text: {},
+      text: {
+        fontSize: '14px',
+      },
       button: {},
+    },
+    h1: {
+      heading: {
+        fontSize: '28px',
+      },
+    },
+    h2: {
+      heading: {
+        fontSize: '24px',
+      },
     },
   },
 }
@@ -203,9 +275,7 @@ export const rowTypeBlockDefaults: Record<string, BlockStyleModifier> = {
     link: {
       align: 'center',
     },
-    socials: {
-      paddingBottom: '0px',
-    },
+    socials: {},
   },
 }
 
@@ -235,7 +305,7 @@ export const combinedTypeBlockDefaults: Record<string, Record<string, VariantBlo
 
 // Helper function to get merged style defaults
 function getMergedStyleDefaults(
-  block: EmailBlock | ColumnBlock,
+  block: EmailBlock,
   email: Email | null,
   parentRow: RowBlock,
   company?: Company | null
@@ -276,7 +346,9 @@ function getMergedStyleDefaults(
   if (block.type === 'heading' && emailAttributes?.styleVariant) {
     const headingLevel = block.attributes.level
     const levelSpecificStyles = variantBlockDefaults[emailAttributes.styleVariant]?.[headingLevel]?.heading || {}
+    const emailTypeLevelSpecificStyles = emailTypeBlockDefaults[emailAttributes.type]?.[headingLevel]?.heading || {}
     Object.assign(variantStyles, levelSpecificStyles)
+    Object.assign(variantStyles, emailTypeLevelSpecificStyles)
   }
 
   // Merge styles with priority: base < email type < variant < row-specific
@@ -286,12 +358,12 @@ function getMergedStyleDefaults(
     ...rowTypeVariantStyles,
     ...emailTypeStyles,
     ...rowTypeEmailTypeStyles,
-  }
+  } as BlockStyleModifier
 }
 
 // Function to get block-specific style overrides
 function getBlockSpecificOverrides(
-  block: EmailBlock | ColumnBlock,
+  block: EmailBlock,
   parentRow: RowBlock,
   company?: Company | null
 ): Partial<BlockStyleModifier> {
@@ -324,27 +396,6 @@ function getBlockSpecificOverrides(
       }
       break
 
-    case 'column':
-      if (parentRow.attributes.type === 'footer' && parentRow.columns.length === 1) {
-        return { column: { textAlign: 'center' } }
-      }
-      if (parentRow.attributes.type === 'gallery' && parentRow.columns.length === 2) {
-        const photoColumns = parentRow.columns.filter((col) => col.blocks.some((b) => b.type === 'image'))
-        if (photoColumns.length === 1) {
-          return { column: { verticalAlign: 'middle' } }
-        }
-      }
-      if (parentRow.attributes.type === 'header' && parentRow.columns.length === 2) {
-        const columnIndex = parentRow.columns.findIndex((col) => col.id === block.id)
-        return {
-          column: {
-            verticalAlign: 'middle',
-            textAlign: columnIndex === 1 ? 'right' : 'left',
-          },
-        }
-      }
-      break
-
     case 'heading':
       if (parentRow.attributes.type === 'footer' && parentRow.columns.length === 1) {
         return { heading: { textAlign: 'center' } }
@@ -356,12 +407,7 @@ function getBlockSpecificOverrides(
 }
 
 // Helper function to get merged styles
-function getMergedStyles(
-  block: EmailBlock | ColumnBlock,
-  email: Email | null,
-  parentRow: RowBlock,
-  company?: Company | null
-) {
+function getMergedStyles(block: EmailBlock, email: Email | null, parentRow: RowBlock, company?: Company | null) {
   const mergedDefaults = getMergedStyleDefaults(block, email, parentRow, company)
   const specificOverrides = getBlockSpecificOverrides(block, parentRow, company)
   const emailAttributes = getEmailAttributes(email)
@@ -383,7 +429,7 @@ function getMergedStyles(
 
 // Main function to get CSS properties
 export function getBlockCSSProperties(
-  block: EmailBlock | ColumnBlock,
+  block: EmailBlock,
   email: Email | null,
   parentRow: RowBlock,
   company?: Company | null
@@ -393,7 +439,7 @@ export function getBlockCSSProperties(
 
 // Function to get block attributes
 export function getBlockDefaultAttributes<T extends keyof BlockStyleModifier>(
-  block: { type: T } & (EmailBlock | ColumnBlock),
+  block: { type: T } & EmailBlock,
   email: Email | null,
   parentRow: RowBlock,
   company?: Company | null

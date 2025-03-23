@@ -69,6 +69,10 @@ export default function EmailColumn({
   return (
     <Column
       {...getColumnProps(column, row, email)}
+      style={{
+        ...getColumnProps(column, row, email).style,
+        width: column.attributes.width,
+      }}
       className={`${getColumnProps(column, row, email).className || ''} ${mobileView ? 'mobile-forced-full-width' : ''} ${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
       // @ts-ignore

@@ -92,17 +92,12 @@ export function getEmailFromMessage(email: Email | null, message: Message) {
   const hasCloseTag = message.content.includes('</EMAIL>')
 
   if (hasOpenTag && hasCloseTag) {
-    const emailRegex = /<EMAIL\s+[^>]*>([\s\S]*?)<\/EMAIL>/i
+    const emailRegex = /<EMAIL\s+[^>]*>[\s\S]*?<\/EMAIL>/i
     const emailMatch = message.content.match(emailRegex)
 
-    if (emailMatch && email) {
-      const emailString = emailMatch[1]
-      const emailReturn = parseEmailScript(emailString, email)
-      const emailObject: Email = {
-        ...emailReturn,
-        id: email?.id ?? uuidv4(),
-      }
-
+    if (emailMatch) {
+      const emailString = emailMatch[0] // This gets the entire match including tags
+      const emailObject = parseEmailScript(emailString, email)
       return emailObject
     }
   }

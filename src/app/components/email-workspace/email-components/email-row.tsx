@@ -115,6 +115,28 @@ export default function EmailRow({
 
   const rowAttributes = getRowAttributes(row, email)
 
+  // Add this function to determine the position of the row in the email
+  const getRowPosition = () => {
+    if (!email?.rows) return { isFirstRow: false, isLastRow: false }
+    const rowIndex = email.rows.findIndex((r) => r.id === row.id)
+    return {
+      isFirstRow: rowIndex === 0,
+      isLastRow: rowIndex === email.rows.filter((r) => r.attributes.type !== 'footer').length - 1,
+    }
+  }
+
+  const { isFirstRow, isLastRow } = getRowPosition()
+  const needsRounding = emailAttributes.styleVariant === 'floating'
+
+  // Define border radius styles
+  const borderRadiusStyle =
+    needsRounding && (isFirstRow || isLastRow)
+      ? {
+          borderRadius: isFirstRow ? '8px 8px 0 0' : isLastRow ? '0 0 8px 8px' : undefined,
+          overflow: 'hidden',
+        }
+      : {}
+
   return (
     <div onClick={handleRowOrColumnClick} ref={ref} className="group relative w-full px-4" style={{ opacity }}>
       {/* Outline pseudo-element */}
@@ -164,7 +186,7 @@ export default function EmailRow({
       </div>
 
       {/* Wrap the content in a relative div */}
-      <div className="relative" style={{ zIndex: 2 }}>
+      <div className="relative" style={{ zIndex: 2, ...borderRadiusStyle }}>
         <Container
           bgcolor={emailAttributes.backgroundColor}
           width={mobileView ? '360' : `${emailAttributes.width}`}
@@ -172,10 +194,19 @@ export default function EmailRow({
           style={{
             backgroundColor: emailAttributes.backgroundColor,
             width: emailAttributes.width,
+            maxWidth: emailAttributes.width,
+            ...borderRadiusStyle,
           }}
         >
           {/* Simplified row rendering that matches email-renderer-final.tsx approach */}
-          <Row {...getRowProps(row, email)} className={mobileView && rowAttributes.stackOnMobile ? 'stack' : undefined}>
+          <Row
+            {...getRowProps(row, email)}
+            style={{
+              ...getRowProps(row, email).style,
+              maxWidth: mobileView ? '360px' : undefined,
+            }}
+            className={mobileView && rowAttributes.stackOnMobile ? 'stack' : undefined}
+          >
             {row.columns.map((column, index) => {
               // Convert pixel spacing to percentage of total width
               const emailWidth = Number(emailAttributes.width)
@@ -186,16 +217,32 @@ export default function EmailRow({
 
               let adjustedWidth: string | undefined = undefined
               // Adjust column width by distributing the spacer width proportionally
-              if (column.width) {
-                const originalWidth = parseFloat(column.width)
-                const totalColumnsWidth = row.columns.reduce((sum, col) => sum + parseFloat(col.width || '100'), 0)
-                adjustedWidth = `${(originalWidth / totalColumnsWidth) * (100 - totalSpacerWidthPercent)}%`
+              if (column.attributes.width) {
+                const originalWidth = parseFloat(column.attributes.width)
+                const totalColumnsWidth = row.columns.reduce(
+                  (sum, col) => sum + parseFloat(col.attributes.width || '100'),
+                  0
+                )
+
+                // Only adjust width when not in mobile view or not stacking
+                if (!mobileView || !rowAttributes.stackOnMobile) {
+                  adjustedWidth = `${(originalWidth / totalColumnsWidth) * (100 - totalSpacerWidthPercent)}%`
+                } else {
+                  // In mobile view with stacking, use the original width
+                  adjustedWidth = column.attributes.width
+                }
               }
 
               return (
                 <React.Fragment key={column.id}>
                   <EmailColumn
-                    column={{ ...column, width: adjustedWidth }}
+                    column={{
+                      ...column,
+                      attributes: {
+                        ...column.attributes,
+                        width: mobileView && rowAttributes.stackOnMobile ? '100%' : adjustedWidth,
+                      },
+                    }}
                     row={row}
                     onBlockHover={(isHovered) => setIsChildHovered(isHovered)}
                     onBlockSelect={handleBlockSelect}

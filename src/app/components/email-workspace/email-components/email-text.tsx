@@ -19,7 +19,7 @@ export default function EmailText({ block, parentRow }: Props) {
   const options = {
     replace: (domNode: any) => {
       if (domNode.name === 'a' && (!domNode.attribs.style || !domNode.attribs.style.includes('color'))) {
-        domNode.attribs.style = `color: ${textAttributes.color};`
+        domNode.attribs.style = `color: ${emailAttributes.linkColor};`
         return domNode
       }
     },

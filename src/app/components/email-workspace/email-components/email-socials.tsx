@@ -17,17 +17,9 @@ const EmailSocials = ({ block, isEditing = true, parentRow, email }: Props) => {
 
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
 
-  const divStyle = {
-    padding,
-    paddingTop,
-    paddingRight,
-    paddingBottom,
-    paddingLeft,
-  }
-
   return (
     // @ts-expect-error align is not a valid prop for the div
-    <div align={socialAttributes.align} style={divStyle}>
+    <div align={socialAttributes.align}>
       <table
         border={0}
         cellPadding="0"

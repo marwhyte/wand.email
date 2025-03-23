@@ -307,11 +307,7 @@ export function getColumnProps(
   email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Column>> {
   // Get column-specific defaults based on row type
-  const defaultColumnAttributes: Partial<ColumnBlock['attributes']> = {
-    width: '100%',
-    wordBreak: 'break-word',
-    verticalAlign: 'top',
-  }
+  const defaultColumnAttributes: Partial<ColumnBlock['attributes']> = {}
 
   const mergedAttributes = { ...defaultColumnAttributes, ...column.attributes }
 

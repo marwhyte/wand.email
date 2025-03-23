@@ -81,6 +81,9 @@ function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
 }
 
 export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMessages, chat }: Props) {
+  // Add email store access
+  const { email } = useEmailStore()
+
   const { mutate } = useSWRConfig()
   const { setTitle, setCompany, company, title } = useChatStore()
   useChatHistory({ chat: chat, chatId: id, company: chatCompany })
@@ -97,6 +100,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
       id,
       companyName: company?.name,
       companyId: company?.id,
+      emailType: email?.type,
     },
     onFinish: () => {
       logger.debug('Finished streaming')
@@ -105,7 +109,9 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
     initialMessages,
   })
 
-  const latestAssistantMessage = messages.findLast((m) => m.role === 'assistant')
+  const messagesWithoutSystem = messages.filter((m) => m.role !== 'system')
+
+  const latestAssistantMessage = messagesWithoutSystem.findLast((m) => m.role === 'assistant')
   useMessageParser(latestAssistantMessage ?? { role: 'assistant', content: '', id: '' })
 
   const [generatingChangeLog, setGeneratingChangeLog] = useState(false)
@@ -146,9 +152,6 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
   // Prompt enhancement
   const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
-
-  // Add email store access
-  const { email } = useEmailStore()
 
   renderLogger.trace('Chat')
 
@@ -329,7 +332,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                   })}
                 >
                   <StickToBottom
-                    className={classNames('relative flex flex-col justify-end pb-6', {
+                    className={classNames('relative flex flex-col justify-end', {
                       'h-[calc(100vh-100px)]': chatStarted,
                     })}
                     resize="smooth"
@@ -340,7 +343,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                       <Messages
                         ref={messageRef}
                         className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col pb-3"
-                        messages={messages}
+                        messages={messagesWithoutSystem}
                         isStreaming={isLoading}
                       />
                     </StickToBottom.Content>

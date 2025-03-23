@@ -11,7 +11,11 @@ interface AssistantMessageProps {
 export const AssistantMessage = memo(({ content, message, messages }: AssistantMessageProps) => {
   // Remove triple backticks wrapping content if they exist
   // Also handle partial backticks at the beginning during streaming
-  const cleanedContent = content.replace(/^```(?:.*?)\n([\s\S]*?)```$/m, '$1').replace(/^`{1,3}(?:.*?)(?:\n|$)/, '') // Remove partial backticks at the beginning
+  const cleanedContent = content
+    .replace(/^```(?:.*?)\n([\s\S]*?)```$/m, '$1')
+    .replace(/^`{1,3}(?:.*?)(?:\n|$)/, '') // Remove partial backticks at the beginning
+    .replace(/```xml\n([\s\S]*?)```/g, '$1') // Remove XML code blocks
+    .replace(/```(?:html|markup)\n([\s\S]*?)```/g, '$1') // Also handle html/markup blocks
 
   // Split content at first EMAIL tag - updated regex to not require name attribute
   const [beforeEmail, afterEmail] = cleanedContent.split(/<EMAIL\s*[^>]*>/)

@@ -17,7 +17,14 @@ export function getAdditionalRowStyles(attributes: RowBlockAttributes): React.CS
 }
 
 export function getAdditionalColumnStyles(attributes: ColumnBlockAttributes, row: RowBlock): React.CSSProperties {
-  return {}
+  const { width, ...rest } = attributes
+  const styles: React.CSSProperties = { ...rest }
+
+  if (width) {
+    styles.width = `${width}%`
+  }
+
+  return styles
 }
 
 export function getAdditionalEmailStyles(attributes: Partial<Email>): React.CSSProperties {

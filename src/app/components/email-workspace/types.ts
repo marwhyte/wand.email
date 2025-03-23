@@ -49,12 +49,13 @@ export const componentLibrary = {
     allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   footer: {
+    note: 'The footer should always have a logo, social media links, and address unless otherwise specified.',
     example: `
       ROW type=footer {
         COLUMN {
           LOGO src="logo" alt="Logo"
           TEXT content=<p>Company Name</p>
-          SOCIALS folder=socials-color links=[{"icon": "facebook", "url": "#"}, {"icon": "x", "url": "#"}, {"icon": "instagram", "url": "#"}]
+          SOCIALS folder=socials-color links=[{"icon":"facebook","url":"#"},{"icon":"x","url":"#"},{"icon":"instagram","url":"#"}]
           TEXT content=<p>123 Main Street Anytown, CA 12345<br>United States</p>
           TEXT content=<p>mail@company.com</p>
           TEXT content=<p>© 2024 Company Name. All rights reserved.</p>
@@ -67,7 +68,7 @@ export const componentLibrary = {
     example: `
       ROW type=gallery {
         COLUMN {
-          IMAGE src="pexels:bed" alt="Bed in room"
+          IMAGE src="pexels:bed in a room" alt="Bed in room"
         }
         COLUMN {
           HEADING content=<p>Deck out your dorm</p> level=h2
@@ -119,11 +120,12 @@ export const blockLibrary = {
     },
   },
   IMAGE: {
+    note: 'Use pexels:keywords to search for images on pexels.com. Use logo to use the company logo. Use https://images.pexels.com/photos/example.png to use a placeholder image.',
     attributes: {
       align: ['left', 'center', 'right'],
       alt: ['"Image description"'],
       borderRadius: ['8'],
-      src: ['"logo"', '"pexels:keyword"', '"https://images.pexels.com/photos/example.png"'],
+      src: ['"logo"', '"pexels:keywords"', '"https://images.pexels.com/photos/example.png"'],
       width: ['100%', '50%'],
       padding: ['10,0,10,0'],
     },
@@ -143,9 +145,9 @@ export const blockLibrary = {
     note: 'Icons should be the same length as the content array. You can use any icon in material icons. Pick icons that are relevant to the content.',
     attributes: {
       items: ['[<p>Be Fast</p>,<p>Be Flexible</p>,<p>Be Future-Proof</p>]'],
-      icons: ['["bolt", "water_drop", "rocket"]'],
+      // icons: ['["bolt", "water_drop", "rocket"]'],
       padding: ['10,0,10,0'],
-      listStyle: ['bullet', 'number', 'icon'],
+      type: ['ul', 'ol'],
     },
   },
   SOCIALS: {
@@ -193,15 +195,27 @@ export type ComponentType = keyof typeof componentLibrary
 export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T]['allowedBlocks'][number]
 
 export type EmailStyleVariant = 'default' | 'outline' | 'floating'
+export const emailStyleVariants = ['default', 'outline', 'floating'] as const
 export type EmailType =
   | 'default'
   | 'welcome-series'
-  | 'e-commerce'
+  | 'ecommerce'
   | 'invite'
   | 'transactional'
   | 'newsletter'
   | 'invoice'
   | 'cart'
+export const emailTypes = [
+  'default',
+  'welcome-series',
+  'ecommerce',
+  'invite',
+  'transactional',
+  'newsletter',
+  'invoice',
+  'cart',
+] as const
+
 export type Email = {
   backgroundColor?: string
   color?: string
@@ -272,7 +286,6 @@ export type RowBlock = {
 export type ColumnBlock = {
   id: string
   type: 'column'
-  width?: string
   attributes: ColumnBlockAttributes
   blocks: EmailBlock[]
 }
@@ -370,7 +383,9 @@ export type RowBlockAttributes = PaddingAttributes & {
   verticalAlign?: 'top' | 'middle' | 'bottom'
 }
 
-export type ColumnBlockAttributes = {}
+export type ColumnBlockAttributes = {
+  width?: string
+}
 
 // ===== Block-Specific Attributes =====
 export type ButtonBlockAttributes = TextAttributes &
@@ -414,11 +429,12 @@ export type LinkBlockAttributes = TextAttributes &
     href: string
   }
 
-export type ListBlockAttributes = PaddingAttributes & {
-  items: string[]
-  icons?: string[]
-  listStyle: 'bullet' | 'number' | 'icon'
-}
+export type ListBlockAttributes = Omit<TextAttributes, 'content'> &
+  PaddingAttributes & {
+    items: string[]
+    icons?: string[]
+    type: 'ul' | 'ol' | 'icon'
+  }
 
 export type SocialsBlockAttributes = PaddingAttributes & {
   align?: 'left' | 'center' | 'right'

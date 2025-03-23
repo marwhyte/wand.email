@@ -219,7 +219,7 @@ export function createNewBlock<T extends EmailBlockType>(type: T): Extract<Email
         type: 'list',
         attributes: {
           items: ['Item 1', 'Item 2', 'Item 3'],
-          listStyle: 'bullet',
+          type: 'ul',
         },
       }
       return block as Extract<EmailBlock, { type: T }>

@@ -2,11 +2,11 @@ import { createEmail } from '@/lib/utils/email-helpers'
 import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { Email } from '../../types'
 
-export const transactionalOutlineGoogleTemplateScript = `
+export const outlineGoogleTemplateScript = (useImage: boolean) => `
 <EMAIL styleVariant=outline type=transactional width=500>
   ROW {
     COLUMN {
-      IMAGE src="logo" alt="Company Logo" width=30%
+      IMAGE src=${useImage ? 'logo' : 'logo'} alt="Company Logo" width=30%
       HEADING level=h1 content=<p>A new sign-in on Apple iPhone 15 Pro</p>
       TEXT content=<p>marcolwhyte@gmail.com</p>
       DIVIDER
@@ -26,8 +26,22 @@ export const transactionalOutlineGoogleTemplateScript = `
 </EMAIL>
 `
 
-export const transactionalOutlineGoogleTemplate = (): Email => {
-  const email = parseEmailScript(transactionalOutlineGoogleTemplateScript, { id: '123', rows: [] })
+export const googleTransactionalExample = `
+<example>
+  <user_query>Can you help me create an email for a Google account security alert?</user_query>
+
+  <assistant_response>
+  I'll create a Google account security alert email.
+
+  ${outlineGoogleTemplateScript(false)}
+
+  The template includes a clean header with the Google logo, a security alert message, and a footer with social media links and a copyright notice.
+  </assistant_response>
+</example>
+`
+
+export const outlineGoogleTemplate = (): Email => {
+  const email = parseEmailScript(outlineGoogleTemplateScript(true), { id: '123', rows: [] })
 
   return createEmail(email)
 }
