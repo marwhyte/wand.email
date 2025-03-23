@@ -143,7 +143,7 @@ export const blockLibrary = {
     },
   },
   LIST: {
-    note: "Use LI elements to define list items. If type is icon, pick an icon that is relevant to the content. You can use any icon from google's material symbols.",
+    note: "Use LI elements to define list items. If type is icon, pick an icon that is relevant to the content. You can use any icon from google's material symbols. The default icon is checkmark. Only use icons if it makes sense for the list item, if not default to ul.",
     attributes: {
       padding: ['10,0,10,0'],
       type: ['ul', 'ol', 'icon'],

@@ -101,7 +101,7 @@ export default function FileUploaderDialog({ opener, onUpload }: Props) {
                 id="file"
                 name="file"
                 type="file"
-                accept="image/*"
+                accept="image/jpeg, image/png, image/gif"
                 onChange={handleFileChange}
               />
               <Button color="purple" onClick={handleInputOpen}>
