@@ -16,8 +16,6 @@ export function BackgroundGradients({ inputDisabled }: Props) {
   // Use a single condition that persists the gradient
   const showGradient = !inputDisabled
 
-  return
-
   return (
     <AnimatePresence initial={false}>
       {showGradient && (

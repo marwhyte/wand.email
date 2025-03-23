@@ -15,9 +15,10 @@ type ComboBoxProps<T extends string = string> = {
   selected: ComboBoxOption<T> | null
   setSelected: (option: ComboBoxOption<T>) => void
   label?: string
+  filterFunction?: (query: string) => ComboBoxOption<T>[]
 }
 
-export default function ComboBox({ options, selected, setSelected, label }: ComboBoxProps) {
+export default function ComboBox({ options, selected, setSelected, label, filterFunction }: ComboBoxProps) {
   const [query, setQuery] = useState('')
   const [isActive, setIsActive] = useState(false)
   const [justSelected, setJustSelected] = useState(false)
@@ -31,8 +32,9 @@ export default function ComboBox({ options, selected, setSelected, label }: Comb
     }
   }, [justSelected])
 
-  const filteredOptions =
-    query === ''
+  const filteredOptions = filterFunction
+    ? filterFunction(query)
+    : query === ''
       ? options
       : options.filter(
           (option) =>

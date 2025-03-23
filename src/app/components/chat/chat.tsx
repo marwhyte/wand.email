@@ -25,6 +25,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { v4 as uuidv4 } from 'uuid'
+import { BackgroundGradients } from '../background-gradients'
 import { AuthDialog } from '../dialogs/auth-dialog'
 import CompanyDialog from '../dialogs/company-dialog'
 import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
@@ -301,8 +302,32 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
     setCompany(company)
   }
 
+  const examplePrompts = [
+    {
+      label: 'Welcome-series',
+      prompt: 'I want to create a welcome series for my new customers',
+    },
+    {
+      label: 'E-commerce',
+      prompt: 'I want to create an email for my ecommerce store',
+    },
+    {
+      label: 'Transactional',
+      prompt: 'I want to create a transactional email for my business',
+    },
+    {
+      label: 'Newsletter',
+      prompt: 'I want to create a newsletter for my business',
+    },
+    {
+      label: 'Invoice',
+      prompt: 'I want to create an invoice for my business',
+    },
+  ]
+
   return (
     <div className="mx-auto w-full">
+      <BackgroundGradients inputDisabled={chatStarted} />
       {session.data?.user?.id && <Menu />}
       <Header monthlyExportCount={monthlyExportCount} chatStarted={chatStarted} />
       <div className="flex flex-1">
@@ -374,6 +399,22 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                     </div>
                   </StickToBottom>
                 </div>
+                {!chatStarted && (
+                  <div id="examples" className="max-w-l relative mt-8 flex w-full justify-center gap-2">
+                    {examplePrompts.map((examplePrompt, index) => {
+                      return (
+                        <button
+                          key={index}
+                          className="group relative inline-flex h-9 items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow transition-colors hover:bg-gray-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 disabled:pointer-events-none disabled:opacity-50"
+                          onClick={() => sendMessage(examplePrompt.prompt)}
+                        >
+                          <div className="absolute inset-x-0 -top-px mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                          {examplePrompt.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                )}
                 {!chatStarted && (
                   <CompanySection
                     companies={companies}

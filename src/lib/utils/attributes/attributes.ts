@@ -216,6 +216,15 @@ export function getListAttributes(block: ListBlock, parentRow: RowBlock, email: 
     ...block.attributes,
     type: block.attributes.type ?? defaults.type ?? 'ul',
     items: block.attributes.items ?? defaults.items ?? [],
+    ...(block.attributes.type === 'icon'
+      ? {
+          icons: Array.isArray(block.attributes.icons)
+            ? block.attributes.icons.length > 0
+              ? block.attributes.icons
+              : Array(block.attributes.items?.length || defaults.items?.length || 0).fill('check')
+            : Array(block.attributes.items?.length || defaults.items?.length || 0).fill('check'),
+        }
+      : {}),
   }
 }
 export function getBlockAttributes<T extends EmailBlock>(

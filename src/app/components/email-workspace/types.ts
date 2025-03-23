@@ -143,10 +143,11 @@ export const blockLibrary = {
     },
   },
   LIST: {
-    note: 'Use LI elements to define list items. Pick icons that are relevant to the content.',
+    note: "Use LI elements to define list items. If type is icon, pick an icon that is relevant to the content. You can use any icon from google's material symbols.",
     attributes: {
       padding: ['10,0,10,0'],
       type: ['ul', 'ol', 'icon'],
+      icons: ['check'],
     },
   },
   SOCIALS: {

@@ -1,4 +1,3 @@
-import { BackgroundGradients } from '@/app/components/background-gradients'
 import { Chat } from '@/app/components/chat/chat'
 import { Footer } from '@/app/components/footer'
 import { auth } from '@/auth'
@@ -30,7 +29,6 @@ export default async function HomePage() {
 
   return (
     <div className="relative isolate flex min-h-screen flex-col">
-      <BackgroundGradients />
       <div className="flex h-full flex-1">
         <Chat key={id} initialMessages={[]} id={id} companies={companies} monthlyExportCount={monthlyExportCount} />
       </div>
