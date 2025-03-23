@@ -31,8 +31,8 @@ export async function createCheckoutSession(tier: string, anually: boolean, path
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_BASE}${path}&success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE}${path}&canceled=true`,
+      success_url: `${process.env.NEXT_PUBLIC_BASE}${path.startsWith('/') ? path : `/${path}`}&success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_BASE}${path.startsWith('/') ? path : `/${path}`}&canceled=true`,
       automatic_tax: { enabled: true },
     })
     return redirect(stripeSession.url!)
