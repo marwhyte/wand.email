@@ -137,7 +137,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
           className="-m-1.5 p-1.5"
         >
           <span className="sr-only">wand.email</span>
-          <Logo className="z-100" text={false} />
+          <Logo className="z-100" text />
         </Link>
 
         {title && <div className="absolute left-1/2 -translate-x-1/2 truncate font-medium">{title}</div>}

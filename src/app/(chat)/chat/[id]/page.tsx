@@ -38,7 +38,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
         <BackgroundGradients />
         <div className="flex h-full flex-1 flex-col items-center justify-center">
           <Logo className="mb-4" text={false} />
-          <h1 className="text-2xl font-bold">Wand.email is in beta. Please contact us to get access.</h1>
+          <h1 className="text-2xl font-bold">wand.email is in beta. Please contact us to get access.</h1>
         </div>
         <Footer />
       </div>

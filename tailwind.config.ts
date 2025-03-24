@@ -17,9 +17,7 @@ const config: Config = {
         'glow-gradient':
           'linear-gradient(to left, #ff5770, #e4428d, #c42da8, #9e16c3, #6501de, #9e16c3, #c42da8, #e4428d, #ff5770)',
       },
-      fontFamily: {
-        nextsunday: ['NextSunday', 'sans-serif'],
-      },
+
       colors: {
         google: {
           'text-gray': '#3c4043',

@@ -13,9 +13,7 @@ export function Logo({ text = true, textColor = 'dark', ...props }: LogoProps) {
     <div className="flex items-center gap-2">
       <Image src="/logo.svg" alt="wand.email" width={40} height={40} {...props} />
       {text && (
-        <Text
-          className={`pt-1 font-nextsunday !text-2xl font-bold ${textColor === 'dark' ? '!text-zinc-950' : '!text-white'}`}
-        >
+        <Text className={`pt-1 !text-2xl font-bold ${textColor === 'dark' ? '!text-zinc-950' : '!text-white'}`}>
           wand.email
         </Text>
       )}
