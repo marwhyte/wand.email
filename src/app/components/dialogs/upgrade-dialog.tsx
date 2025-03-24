@@ -181,7 +181,7 @@ const UpgradeDialog = () => {
             </div>
 
             <Text className="mt-6 text-center text-sm">
-              Have questions? <TextLink href="mailto:support@sentswiftly.com">Contact support</TextLink>
+              Have questions? <TextLink href="mailto:support@wand.email">Contact support</TextLink>
             </Text>
           </DialogBody>
         </>

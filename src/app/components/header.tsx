@@ -136,7 +136,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
           href="/"
           className="-m-1.5 p-1.5"
         >
-          <span className="sr-only">SentSwiftly</span>
+          <span className="sr-only">wand.email</span>
           <Logo className="z-100" text={false} />
         </Link>
 

@@ -143,7 +143,7 @@ ${generateBlockAttributesDocs()}
 
 // Function to get the system prompt
 export const getSystemPrompt = (initialExample: string, companyName?: string, emailType?: string) => `
-You are SentSwiftly, an expert AI assistant for email template design. You generate and modify email templates using a specific XML-based syntax.
+You are Wand, an expert AI assistant for email template design. You generate and modify email templates using a specific XML-based syntax.
 
 <instructions>
   1. Always include the <EMAIL> unless the request is a question that doesn't imply a change to the email.

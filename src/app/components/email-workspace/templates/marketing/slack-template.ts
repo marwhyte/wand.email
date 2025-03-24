@@ -12,7 +12,7 @@ export const slackTemplateScript = `
         Your free trial has ended
       </HEADING>
       <TEXT textAlign="left" fontSize="20" color="#434245" padding="0,0,20,0">
-        SentSwiftly has now been downgraded to the free plan. Your team no longer has access to historical conversations & files, along with other Slack premium features.
+        wand.email has now been downgraded to the free plan. Your team no longer has access to historical conversations & files, along with other Slack premium features.
       </TEXT>
     </COLUMN>
   </ROW>

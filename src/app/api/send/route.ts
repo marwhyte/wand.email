@@ -14,9 +14,9 @@ export const POST = async (request: NextRequest) => {
 
   try {
     const { data, error } = await resend.emails.send({
-      from: 'SentSwiftly <testing@sentswiftly.com>',
+      from: 'wand.email <testing@wand.email>',
       to: [email],
-      subject: 'Test from SentSwiftly',
+      subject: 'Test from wand.email',
       html: html,
     })
 

@@ -18,9 +18,9 @@ const frequencies = [
 const faqs = [
   {
     id: 1,
-    question: 'What is SentSwiftly?',
+    question: 'What is wand.email?',
     answer:
-      'SentSwiftly is an easy, drag-and-drop email builder that allows you to create beautiful emails in minutes, not hours. It integrates easily into most tech stacks, including html, react, and nextJS',
+      'wand.email is an easy, drag-and-drop email builder that allows you to create beautiful emails in minutes, not hours. It integrates easily into most tech stacks, including html, react, and nextJS',
   },
   {
     id: 2,
@@ -31,13 +31,13 @@ const faqs = [
   {
     id: 3,
     question: 'Can I cancel my subscription anytime?',
-    answer: 'Yes, SentSwiftly subscriptions are billed monthly or annually. You can cancel your subscription anytime.',
+    answer: 'Yes, wand.email subscriptions are billed monthly or annually. You can cancel your subscription anytime.',
   },
   {
     id: 4,
     question: 'Can I costumize the emails to look like they were built in-house?',
     answer:
-      'Yes, SentSwiftly allows you to costumize the emails on any plan to look like they were built in-house. You can use our drag-and-drop editor to add your own images, colors, and fonts.\n\n You can add your own logo',
+      'Yes, wand.email allows you to costumize the emails on any plan to look like they were built in-house. You can use our drag-and-drop editor to add your own images, colors, and fonts.\n\n You can add your own logo, and change the colors and fonts to match your brand.',
   },
   // More questions...
 ]
@@ -227,10 +227,7 @@ export default function PricingPage() {
               <p className="mt-6 text-base leading-7 text-gray-600">
                 Have a different question and can’t find the answer you’re looking for? Reach out to our support team by
                 <Nbsp />
-                <a
-                  href="mailto:support@sentswiftly.com"
-                  className="font-semibold text-indigo-600 hover:text-indigo-500"
-                >
+                <a href="mailto:support@wand.email" className="font-semibold text-indigo-600 hover:text-indigo-500">
                   sending us an email
                 </a>
                 <Nbsp />

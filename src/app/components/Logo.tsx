@@ -11,12 +11,12 @@ type LogoProps = Omit<React.ComponentPropsWithoutRef<typeof Image>, 'src' | 'alt
 export function Logo({ text = true, textColor = 'dark', ...props }: LogoProps) {
   return (
     <div className="flex items-center gap-2">
-      <Image src="/logo.svg" alt="SentSwiftly" width={40} height={40} {...props} />
+      <Image src="/logo.svg" alt="wand.email" width={40} height={40} {...props} />
       {text && (
         <Text
-          className={`font-nextsunday pt-1 !text-2xl font-bold ${textColor === 'dark' ? '!text-zinc-950' : '!text-white'}`}
+          className={`pt-1 font-nextsunday !text-2xl font-bold ${textColor === 'dark' ? '!text-zinc-950' : '!text-white'}`}
         >
-          SentSwiftly
+          wand.email
         </Text>
       )}
     </div>

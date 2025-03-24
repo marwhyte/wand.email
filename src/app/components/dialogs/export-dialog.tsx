@@ -138,9 +138,9 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           {/* {exportType === null && (
             <div className="m mb-4">
               <Text className="text-sm">
-                With these options, images are hosted by SentSwiftly. <Strong>Charges may apply.</Strong>
+                With these options, images are hosted by wand.email. <Strong>Charges may apply.</Strong>
                 <Nbsp />
-                <TextLink href="https://sentswiftly.com/image-hosting" target="_blank">
+                <TextLink href="https://wand.email/image-hosting" target="_blank">
                   Learn more
                 </TextLink>
               </Text>
