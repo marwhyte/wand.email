@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation'
 
+import { BackgroundGradients } from '@/app/components/background-gradients'
 import { Chat } from '@/app/components/chat/chat'
+import { Footer } from '@/app/components/footer'
+import { Logo } from '@/app/components/Logo'
 import { auth } from '@/auth'
 import { getChatWithMessages } from '@/lib/database/queries/chats'
 import { getCompanies, getCompany } from '@/lib/database/queries/companies'
@@ -26,6 +29,21 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   const monthlyExportCount = await getMonthlyExportCount()
   const companies = await getCompanies()
   const company = chat.company_id ? await getCompany(chat.company_id) : null
+
+  const isProduction = process.env.NODE_ENV === 'production'
+
+  if (isProduction) {
+    return (
+      <div className="relative isolate flex min-h-screen flex-col">
+        <BackgroundGradients />
+        <div className="flex h-full flex-1 flex-col items-center justify-center">
+          <Logo className="mb-4" text={false} />
+          <h1 className="text-2xl font-bold">Wand.email is in beta. Please contact us to get access.</h1>
+        </div>
+        <Footer />
+      </div>
+    )
+  }
 
   return (
     <>

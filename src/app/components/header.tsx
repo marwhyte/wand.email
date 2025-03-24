@@ -193,7 +193,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
           </div>
         )}
         {!session?.data?.user && (
-          <div className="flex items-center space-x-4">
+          <div className="hidden items-center space-x-4 md:flex">
             <Button color="white" href="/login">
               Log in
             </Button>
