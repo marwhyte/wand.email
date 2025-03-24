@@ -23,11 +23,6 @@ import { Button } from './button'
 import ExportDialog from './dialogs/export-dialog'
 import PreviewDialog from './dialogs/preview-dialog'
 import EmailRendererFinal from './email-workspace/email-renderer-final'
-import { defaultEbayTemplate } from './email-workspace/templates/ecommerce/default-ebay-template'
-import { defaultStripeTemplate } from './email-workspace/templates/newsletter/default-stripe'
-import { outlineStocktwitsTemplate } from './email-workspace/templates/newsletter/outline-stocktwits'
-import { defaultNikeVerificationTemplate } from './email-workspace/templates/transactional/default-nike-verification'
-import { outlineGoogleTemplate } from './email-workspace/templates/transactional/outline-google'
 import { Email, EmailStyleVariant } from './email-workspace/types'
 import Loading from './loading'
 import Notification from './notification'
@@ -74,28 +69,28 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
     setSelectedDevice(newValue)
   }
 
-  const templates = [
-    {
-      name: 'Stocktwits',
-      value: outlineStocktwitsTemplate(),
-    },
-    {
-      name: 'Ebay',
-      value: defaultEbayTemplate,
-    },
-    {
-      name: 'Google',
-      value: outlineGoogleTemplate(),
-    },
-    {
-      name: 'Stripe',
-      value: defaultStripeTemplate(),
-    },
-    {
-      name: 'Nike Verification',
-      value: defaultNikeVerificationTemplate(),
-    },
-  ]
+  // const templates = [
+  //   {
+  //     name: 'Stocktwits',
+  //     value: outlineStocktwitsTemplate(),
+  //   },
+  //   {
+  //     name: 'Ebay',
+  //     value: defaultEbayTemplate,
+  //   },
+  //   {
+  //     name: 'Google',
+  //     value: outlineGoogleTemplate(),
+  //   },
+  //   {
+  //     name: 'Stripe',
+  //     value: defaultStripeTemplate(),
+  //   },
+  //   {
+  //     name: 'Nike Verification',
+  //     value: defaultNikeVerificationTemplate(),
+  //   },
+  // ]
 
   const sendTestEmail = async () => {
     if (!session?.data?.user?.email || !email) return
@@ -149,27 +144,17 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
 
         {email && session?.data?.user && (
           <div className="flex items-center space-x-4">
-            {process.env.NODE_ENV === 'development' && (
+            <div className="flex items-center">
+              <span className="mr-1 text-xs text-gray-500">Style:</span>
               <Select
-                value="current"
-                onChange={(e) => setEmail(templates.find((template) => template.name === e.target.value)?.value)}
+                value={emailAttributes.styleVariant}
+                onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
               >
-                <option value="current">Current</option>
-                {templates.map((template) => (
-                  <option key={template.name} value={template.name}>
-                    {template.name}
-                  </option>
-                ))}
+                <option value="default">Default</option>
+                <option value="outline">Outline</option>
+                <option value="floating">Floating</option>
               </Select>
-            )}
-            <Select
-              value={emailAttributes.styleVariant}
-              onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
-            >
-              <option value="default">Default</option>
-              <option value="outline">Outline</option>
-              <option value="floating">Floating</option>
-            </Select>
+            </div>
             <TabGroup
               value={selectedDevice}
               className="flex min-w-fit flex-nowrap justify-center"

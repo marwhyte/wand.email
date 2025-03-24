@@ -12,8 +12,8 @@ export function Footer() {
     <footer className="flex items-center justify-end gap-4 px-4 py-4 text-sm text-gray-600">
       <SocialIcons />
 
-      <span>•</span>
-      <Link href="mailto:support@sentswiftly.com" className="hover:text-gray-900">
+      <span className="hidden md:inline">•</span>
+      <Link href="mailto:support@sentswiftly.com" className="hidden hover:text-gray-900 md:inline">
         Help Center
       </Link>
       <span>•</span>

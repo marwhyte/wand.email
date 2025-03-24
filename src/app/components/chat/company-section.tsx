@@ -25,7 +25,7 @@ export function CompanySection({
   return (
     <motion.div
       id="companyDetails"
-      className="relative mx-auto w-full"
+      className="relative mx-auto hidden w-full md:block"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}

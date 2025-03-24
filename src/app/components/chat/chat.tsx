@@ -18,7 +18,13 @@ import { classNames } from '@/lib/utils/misc'
 import { Message, useChat } from '@ai-sdk/react'
 import { Header } from '@components/header'
 import { Menu } from '@components/sidebar/menu'
-import { ArrowDownCircleIcon } from '@heroicons/react/24/solid'
+import {
+  ArrowDownCircleIcon,
+  DocumentTextIcon,
+  EnvelopeIcon,
+  NewspaperIcon,
+  ShoppingCartIcon,
+} from '@heroicons/react/24/solid'
 import { useAnimate } from 'framer-motion'
 import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
@@ -53,8 +59,15 @@ const TEXTAREA_MAX_HEIGHT = 200
 
 function AutoScroller({ input }: { input: string }) {
   const { isAtBottom, scrollToBottom } = useStickToBottomContext()
+  const initialRenderRef = useRef(true)
 
   useEffect(() => {
+    // Skip scrolling on initial render since StickToBottom handles it
+    if (initialRenderRef.current) {
+      initialRenderRef.current = false
+      return
+    }
+
     if (isAtBottom) {
       scrollToBottom()
     }
@@ -153,6 +166,9 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
   // Prompt enhancement
   const { enhancingPrompt, promptEnhanced, enhancePrompt, resetEnhancer } = usePromptEnhancer()
+
+  // Add a state for content loading
+  const [contentReady, setContentReady] = useState(false)
 
   renderLogger.trace('Chat')
 
@@ -309,26 +325,68 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
   const examplePrompts = [
     {
-      label: 'Welcome-series',
+      label: 'Welcome',
       prompt: 'I want to create a welcome series for my new customers',
+      icon: EnvelopeIcon,
     },
     {
       label: 'E-commerce',
       prompt: 'I want to create an email for my ecommerce store',
+      icon: ShoppingCartIcon,
     },
     {
       label: 'Transactional',
       prompt: 'I want to create a transactional email for my business',
+      icon: DocumentTextIcon,
     },
     {
       label: 'Newsletter',
       prompt: 'I want to create a newsletter for my business',
+      icon: NewspaperIcon,
     },
     {
-      label: 'Invoice',
+      label: 'Cart',
       prompt: 'I want to create an invoice for my business',
+      icon: ShoppingCartIcon,
     },
   ]
+
+  // A more reliable implementation of the text streaming function
+  const streamTextToInput = (text: string) => {
+    // Clear the input first
+    setInput('')
+
+    let fullText = ''
+    let currentIndex = 0
+
+    // Set up an interval to add characters one by one
+    const interval = setInterval(() => {
+      if (currentIndex < text.length) {
+        // Build the string directly without depending on previous state
+        fullText += text[currentIndex]
+        setInput(fullText)
+        currentIndex++
+      } else {
+        clearInterval(interval)
+        // Focus the textarea after streaming
+        textareaRef.current?.focus()
+      }
+    }, 15)
+  }
+
+  // Add an effect to delay showing content until positioning is complete
+  useEffect(() => {
+    if (initialMessages.length > 0) {
+      // Use a short timeout to ensure scroll positioning is complete
+      const timer = setTimeout(() => {
+        setContentReady(true)
+      }, 100)
+
+      return () => clearTimeout(timer)
+    } else {
+      setContentReady(true)
+    }
+  }, [initialMessages.length])
 
   return (
     <div className="mx-auto w-full">
@@ -346,13 +404,14 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
             <div
               className={classNames(`flex w-full justify-center`, {
                 '-mb-2': chatStarted,
-                'mt-[7vh]': !chatStarted,
+                'mt-[3vh] px-4 sm:mt-[7vh] sm:px-0': !chatStarted,
               })}
             >
               <div
                 className={classNames('flex shrink-0 flex-col', {
                   'border-r border-gray-200': chatStarted,
-                  'w-[370px] min-w-[370px] max-w-[370px]': chatStarted,
+                  'w-full sm:w-[370px] sm:min-w-[370px] sm:max-w-[370px]': chatStarted,
+                  'w-full max-w-[500px]': !chatStarted,
                 })}
               >
                 {!chatStarted && <ChatIntro />}
@@ -366,20 +425,22 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                       'h-[calc(100vh-100px)]': chatStarted,
                     })}
                     resize="smooth"
-                    initial="smooth"
+                    initial="instant"
                   >
                     <StickToBottom.Content className="relative flex-grow overflow-auto px-4 pt-4">
                       <AutoScroller input={input} />
-                      <Messages
-                        ref={messageRef}
-                        className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col pb-3"
-                        messages={messagesWithoutSystem}
-                        isStreaming={isLoading}
-                      />
+                      <div style={{ opacity: contentReady ? 1 : 0, transition: 'opacity 0.1s' }}>
+                        <Messages
+                          ref={messageRef}
+                          className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col pb-3"
+                          messages={messagesWithoutSystem}
+                          isStreaming={isLoading}
+                        />
+                      </div>
                     </StickToBottom.Content>
                     <ScrollToBottom textareaHeight={textareaHeight} />
 
-                    <div className="px-4">
+                    <div className="px-0 sm:px-4">
                       <ChatInput
                         textareaRef={textareaRef}
                         input={input}
@@ -411,15 +472,21 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                   </StickToBottom>
                 </div>
                 {!chatStarted && (
-                  <div id="examples" className="max-w-l relative mt-8 flex w-full justify-center gap-2">
+                  <div
+                    id="examples"
+                    className="max-w-l relative mt-8 flex w-full flex-wrap justify-center gap-2 px-0 sm:px-4"
+                  >
                     {examplePrompts.map((examplePrompt, index) => {
+                      const Icon = examplePrompt.icon
                       return (
                         <button
                           key={index}
-                          className="group relative inline-flex h-9 items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow transition-colors hover:bg-gray-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 disabled:pointer-events-none disabled:opacity-50"
-                          onClick={() => sendMessage(examplePrompt.prompt)}
+                          className="group relative mb-2 inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium shadow transition-colors hover:bg-gray-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 disabled:pointer-events-none disabled:opacity-50"
+                          style={{ color: 'rgb(82,82,82)' }}
+                          onClick={() => streamTextToInput(examplePrompt.prompt)}
                         >
                           <div className="absolute inset-x-0 -top-px mx-auto h-px w-3/4 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                          <Icon className="mr-1.5 h-3.5 w-3.5" style={{ color: 'rgb(82,82,82)' }} />
                           {examplePrompt.label}
                         </button>
                       )
