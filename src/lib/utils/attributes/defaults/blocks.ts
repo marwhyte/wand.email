@@ -172,11 +172,11 @@ export const getAdditionalButtonStyles = (
         borderBottom: '0px solid transparent',
       }
 
-  const backgroundColor = styleAttributes.backgroundColor || company?.primary_color || '#3b82f6'
+  const backgroundColor = styleAttributes.backgroundColor || company?.primaryColor || '#3b82f6'
   const color = styleAttributes.backgroundColor
     ? styleAttributes.color
-    : company?.primary_color
-      ? shouldUseDarkText(company.primary_color)
+    : company?.primaryColor
+      ? shouldUseDarkText(company.primaryColor)
         ? '#000000'
         : '#ffffff'
       : '#ffffff'

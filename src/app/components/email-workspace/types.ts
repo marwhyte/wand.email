@@ -200,8 +200,8 @@ export type ComponentType = keyof typeof componentLibrary
 // Type for allowed blocks based on component type
 export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T]['allowedBlocks'][number]
 
-export type EmailStyleVariant = 'default' | 'outline' | 'floating'
-export const emailStyleVariants = ['default', 'outline', 'floating'] as const
+export type EmailStyleVariant = 'default' | 'outline' | 'clear'
+export const emailStyleVariants = ['default', 'outline', 'clear'] as const
 export type EmailType =
   | 'default'
   | 'welcome-series'

@@ -25,11 +25,8 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
       paddingRight: '20px',
     },
   },
-  floating: {
+  default: {
     header: {},
-    footer: {
-      backgroundColor: '#f4f4f4',
-    },
     gallery: {},
     default: {
       paddingBottom: '20px',
@@ -37,7 +34,7 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
       paddingRight: '40px',
     },
   },
-  default: {
+  clear: {
     default: {},
   },
 
@@ -103,7 +100,7 @@ export const combinedTypeVariantDefaults: Record<string, Record<string, VariantR
     transactional: {},
   },
   // Add other variants if needed
-  floating: {
+  clear: {
     newsletter: {},
   },
 }
@@ -150,12 +147,21 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
     }
   })()
 
-  // Get variant-specific styles
+  // ... existing code ...
+
   const variantStyles = (() => {
     if (!emailAttributes?.styleVariant) return {}
 
     const variant = emailAttributes.styleVariant
     const rowType = rowAttributes.type || 'default'
+
+    // Special handling for default footer to use email background color
+    if (variant === 'default' && rowType === 'footer' && emailAttributes.backgroundColor) {
+      return {
+        ...variantRowDefaults[variant]?.[rowType],
+        backgroundColor: emailAttributes.backgroundColor,
+      }
+    }
 
     // If there's a specific style for this row type in the variant, use it
     // Otherwise fall back to the 'default' style for this variant

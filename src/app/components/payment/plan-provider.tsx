@@ -1,12 +1,12 @@
 'use client'
 
-import { Plan } from '@/lib/database/types'
+import { Plan, User } from '@/lib/database/types'
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 
 // Create the context
 const PlanContext = createContext<{
   plan: Plan | null | undefined
-  refetchUser: () => Promise<User | null | undefined>
+  refetchUser: () => Promise<Pick<User, 'id' | 'name' | 'plan' | 'email'> | null | undefined>
   upgradeDialogOpen: boolean
   setUpgradeDialogOpen: (open: boolean) => void
 } | null>(null)
@@ -20,15 +20,9 @@ export const usePlan = () => {
   return context
 }
 
-interface User {
-  id: string
-  email: string
-  plan: Plan | null
-}
-
 interface PlanProviderProps {
   children: ReactNode
-  fetchUser: () => Promise<User | null | undefined>
+  fetchUser: () => Promise<Pick<User, 'id' | 'name' | 'plan' | 'email'> | null | undefined>
   plan: Plan | null | undefined
 }
 

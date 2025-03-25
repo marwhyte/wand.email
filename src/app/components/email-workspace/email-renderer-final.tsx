@@ -316,7 +316,7 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
         // Add border radius for 'floating' style variant
         const isFirstRow = index === 0
         const isLastRow = index === email.rows.filter((r) => r.attributes.type !== 'footer').length - 1
-        const needsRounding = emailAttributes.styleVariant === 'floating'
+        const needsRounding = emailAttributes.styleVariant === 'default'
 
         // Create styles object for row wrapper if needed
         const floatingStyles =

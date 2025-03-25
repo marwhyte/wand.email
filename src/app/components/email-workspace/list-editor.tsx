@@ -65,8 +65,6 @@ const ListEditor = ({ block, parentRow, onChange, email }: ListEditorProps) => {
     onChange({ items: newItems })
   }
 
-  console.log(listAttributes)
-
   const handleSelectItem = (index: number) => {
     setSelectedItemIndex(index === selectedItemIndex ? null : index)
   }
@@ -91,8 +89,6 @@ const ListEditor = ({ block, parentRow, onChange, email }: ListEditorProps) => {
     setSelectedItemIndex(null)
   }, [block.id])
 
-  console.log(listAttributes)
-
   return (
     <FieldGroup>
       <Field labelPosition="top">
@@ -102,22 +98,25 @@ const ListEditor = ({ block, parentRow, onChange, email }: ListEditorProps) => {
             <div
               onClick={() => handleSelectItem(index)}
               key={index}
-              className={`flex min-h-[40px] cursor-pointer items-center gap-2 rounded p-2 ${
+              className={`relative flex min-h-[40px] cursor-pointer items-center gap-2 rounded p-2 ${
                 selectedItemIndex === index ? 'border border-purple-200 bg-purple-50' : 'hover:bg-gray-50'
               }`}
             >
               <div className="flex-grow overflow-hidden text-ellipsis">
                 {typeof item === 'string' && item.includes('<') ? parse(item, parseOptions) : item}
               </div>
-              <Button
-                size="small"
-                onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-                  e.stopPropagation() // Prevent triggering handleSelectItem
-                  handleDeleteItem(index)
-                }}
-              >
-                <TrashIcon className="h-5 w-5 text-red-500" />
-              </Button>
+              <div className="absolute -right-4 top-0 -translate-y-1/2">
+                <Button
+                  plain
+                  size="small"
+                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+                    e.stopPropagation() // Prevent triggering handleSelectItem
+                    handleDeleteItem(index)
+                  }}
+                >
+                  <TrashIcon className="h-5 w-5 !text-red-500" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>

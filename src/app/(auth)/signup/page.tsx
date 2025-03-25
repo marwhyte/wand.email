@@ -1,5 +1,4 @@
 import { Heading } from '@/app/components/heading'
-import RegistrationForm from '@/app/forms/registration-form'
 
 const SignupPage = () => {
   return (
@@ -10,7 +9,7 @@ const SignupPage = () => {
             <div className="mb-5">
               <Heading>Create your account</Heading>
             </div>
-            <RegistrationForm />
+            {/* <RegistrationForm /> */}
           </div>
         </div>
       </div>

@@ -1,21 +1,16 @@
 import Image from 'next/image'
-import { Text } from './text'
 
 type LogoProps = Omit<React.ComponentPropsWithoutRef<typeof Image>, 'src' | 'alt'> & {
-  src?: string
-  alt?: string
-  text?: boolean
-  textColor?: 'dark' | 'light'
+  icon?: boolean
 }
 
-export function Logo({ text = true, textColor = 'dark', ...props }: LogoProps) {
+export function Logo({ icon = false, ...props }: LogoProps) {
   return (
-    <div className="flex items-center gap-2">
-      <Image src="/logo.svg" alt="wand.email" width={40} height={40} {...props} />
-      {text && (
-        <Text className={`pt-1 !text-2xl font-bold ${textColor === 'dark' ? '!text-zinc-950' : '!text-white'}`}>
-          wand.email
-        </Text>
+    <div className="flex items-center gap-2 rounded-full bg-white">
+      {icon ? (
+        <Image src="/logo-icon.svg" alt="wand.email" width={35} height={35} {...props} />
+      ) : (
+        <Image src="/logo.svg" alt="wand.email" width={142} height={35} {...props} />
       )}
     </div>
   )

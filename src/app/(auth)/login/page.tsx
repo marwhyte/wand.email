@@ -1,5 +1,4 @@
 import { Heading } from '@/app/components/heading'
-import LoginForm from '@/app/forms/login-form'
 
 export default function LoginPage() {
   return (
@@ -10,7 +9,7 @@ export default function LoginPage() {
             <div className="mb-5">
               <Heading>Sign in to your account</Heading>
             </div>
-            <LoginForm />
+            {/* <LoginForm /> */}
           </div>
         </div>
       </div>

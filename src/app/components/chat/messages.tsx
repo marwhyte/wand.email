@@ -58,7 +58,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                         </div>
                       )
                     ) : (
-                      <Logo width={24} height={24} text={false} />
+                      <Logo width={24} height={24} icon />
                     )}
                   </div>
                   <div className="grid-col-1 grid w-full text-sm">

@@ -126,7 +126,7 @@ export default function EmailRow({
   }
 
   const { isFirstRow, isLastRow } = getRowPosition()
-  const needsRounding = emailAttributes.styleVariant === 'floating'
+  const needsRounding = emailAttributes.styleVariant === 'default'
 
   // Define border radius styles
   const borderRadiusStyle =

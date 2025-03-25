@@ -1,14 +1,16 @@
 import { Email } from '@/app/components/email-workspace/types'
-import { Generated } from 'kysely'
+import { Generated, GeneratedAlways } from 'kysely'
 
 export interface Database {
-  users: UserTable
-  projects: ProjectTable
-  exports: ExportTable
-  files: FileTable
-  chats: ChatTable
-  messages: MessageTable
-  companies: CompanyTable
+  Account: AccountTable
+  Chat: ChatTable
+  Company: CompanyTable
+  Export: ExportTable
+  File: FileTable
+  Message: MessageTable
+  Session: SessionTable
+  User: UserTable
+  VerificationToken: VerificationTokenTable
 }
 
 export type ExportType = 'react' | 'html'
@@ -16,114 +18,144 @@ export type ExportType = 'react' | 'html'
 export type Plan = 'free' | 'starter' | 'pro'
 export type BillingCycle = 'monthly' | 'yearly'
 
-export enum BusinessType {
-  ConsumerGoods = 'consumer_goods',
-  IndustrialGoods = 'industrial_goods',
-  FoodAndBeverage = 'food_and_beverage',
-  SupplementsAndPharmaceuticals = 'supplements_and_pharmaceuticals',
-  Restaurant = 'restaurant',
-  GeneralMerchandiseRetailer = 'general_merchandise_retailer',
-  WellnessAndFitnessServices = 'wellness_and_fitness_services',
-  HospitalityAndTravel = 'hospitality_and_travel',
-  EventsAndEntertainment = 'events_and_entertainment',
-  OtherPersonalServices = 'other_personal_services',
-  AgencyMarketingAndConsulting = 'agency_marketing_and_consulting',
-  FinancialAndInsurance = 'financial_and_insurance',
-  Healthcare = 'healthcare',
-  ProfessionalAndBusinessServices = 'professional_and_business_services',
-  MediaAndContent = 'media_and_content',
-  RealEstateAndConstruction = 'real_estate_and_construction',
-  SoftwareOrSaaS = 'software_or_saas',
-  Education = 'education',
-  NonProfit = 'non_profit',
-  GovernmentAndPublicAdministration = 'government_and_public_administration',
-  TelecommunicationsAndUtilities = 'telecommunications_and_utilities',
-  TransportationAndWarehousing = 'transportation_and_warehousing',
-  AgricultureForestryFishingAndHunting = 'agriculture_forestry_fishing_and_hunting',
+export interface AccountTable {
+  id: GeneratedAlways<string>
+  userId: string
+  type: string
+  provider: string
+  providerAccountId: string
+  refresh_token: string | null
+  access_token: string | null
+  expires_at: number | null
+  token_type: string | null
+  scope: string | null
+  id_token: string | null
+  session_state: string | null
+  createdAt: Generated<Date>
+  updatedAt: Generated<Date>
 }
 
-export interface UserTable {
-  google_id?: string
-  id: Generated<string>
-  name: string
-  email: string
-  created_at: Date
-  updated_at: Date
-  password?: string
-  plan: Plan
-  stripe_customer_id?: string
-  is_onboarded: boolean
+export type Account = Omit<AccountTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
 }
-
-export type User = Omit<UserTable, 'id'> & { id: string }
-
-export interface CompanyTable {
-  id: Generated<string>
-  name: string
-  primary_color: string | null
-  logo_file_id: string | null
-  user_id: string
-  created_at: Date
-}
-
-export type Company = Omit<CompanyTable, 'id'> & { id: string; logo_image_key?: string | null }
-export interface ProjectTable {
-  id: Generated<string>
-  deleted_at: Date | null
-  title: string
-  user_id: string
-  content: Email
-  created_at: Date
-  updated_at: Date
-}
-
-export type Project = Omit<ProjectTable, 'id'> & { id: string }
-
-export interface ExportTable {
-  id: Generated<string>
-  user_id: string
-  content: Email
-  type: ExportType
-  created_at: Date
-  updated_at: Date
-}
-
-export type Export = Omit<ExportTable, 'id'> & { id: string }
-
-export interface FileTable {
-  id: Generated<string>
-  file_name: string
-  image_key: string
-  user_id: string | null
-  created_at: Date
-  size_bytes: number
-  updated_at: Date
-}
-
-export type File = Omit<FileTable, 'id'> & { id: string }
 
 export interface ChatTable {
   id: Generated<string>
-  user_id: string
+  userId: string
   title: string
   email: Email | null
-  previous_email: Email | null
-  created_at: Date
-  updated_at: Date
-  deleted_at: Date | null
-  company_id: string | null
+  createdAt: GeneratedAlways<Date>
+  updatedAt: Generated<Date>
+  deletedAt: Date | null
+  companyId: string | null
 }
 
-export type Chat = Omit<ChatTable, 'id'> & { id: string }
+export type Chat = Omit<ChatTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface CompanyTable {
+  id: GeneratedAlways<string>
+  userId: string
+  name: string
+  primaryColor: string | null
+  logoFileId: string | null
+  createdAt: GeneratedAlways<Date>
+  updatedAt: Generated<Date>
+}
+
+export type Company = Omit<CompanyTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface ExportTable {
+  id: GeneratedAlways<string>
+  userId: string
+  content: Email
+  type: ExportType
+  createdAt: GeneratedAlways<Date>
+  updatedAt: Generated<Date>
+}
+
+export type Export = Omit<ExportTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface FileTable {
+  id: GeneratedAlways<string>
+  fileName: string
+  imageKey: string
+  userId: string | null
+  createdAt: GeneratedAlways<Date>
+  updatedAt: Generated<Date>
+  sizeBytes: number
+}
+
+export type File = Omit<FileTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
 
 export interface MessageTable {
-  id: Generated<string>
-  chat_id: string
+  id: GeneratedAlways<string>
+  chatId: string
   role: 'user' | 'assistant' | 'system' | 'data'
   content: string
-  created_at: Date
-  sequence: number
+  createdAt: GeneratedAlways<Date>
+  updatedAt: Generated<Date>
   email: Email | null
 }
 
-export type Message = Omit<MessageTable, 'id'> & { id: string }
+export type Message = Omit<MessageTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface SessionTable {
+  id: GeneratedAlways<string>
+  userId: string
+  sessionToken: string
+  expires: Date
+  createdAt: GeneratedAlways<Date>
+  updatedAt: Generated<Date>
+}
+
+export type Session = Omit<SessionTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface UserTable {
+  id: GeneratedAlways<string>
+  name: string | null
+  email: string
+  emailVerified: Date | null
+  image: string | null
+  plan: Plan
+  stripeCustomerId: string | null
+  createdAt: GeneratedAlways<Date>
+  updatedAt: Generated<Date>
+}
+
+export type User = Omit<UserTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
+}
+
+export interface VerificationTokenTable {
+  identifier: string
+  token: string
+  expires: Date
+}

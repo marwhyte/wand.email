@@ -15,8 +15,8 @@ export function shouldUseDarkText(backgroundColor: string) {
   // Calculate relative luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
 
-  // Use dark text if background is light (luminance > 0.5)
-  return luminance > 0.5
+  // Use dark text if background is light (luminance > 0.65)
+  return luminance > 0.65
 }
 
 // export const renderSocialIcons = () => {
@@ -63,22 +63,14 @@ export function capitalizeFirstLetter(string: string) {
 }
 
 type ObjectWithCreatedAt = {
-  created_at: Date
+  createdAt: Date
 }
 
 export const chunk = <T>(arr: T[], size: number): T[][] =>
   Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, i * size + size))
 
 export function sortByCreatedAt<T extends ObjectWithCreatedAt>(projects: T[]): T[] {
-  return projects.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime())
-}
-
-type ObjectWithSequence = {
-  sequence: number
-}
-
-export function sortBySequence<T extends ObjectWithSequence>(items: T[]): T[] {
-  return items.sort((a, b) => a.sequence - b.sequence)
+  return projects.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
 }
 
 export function getPhotoUrl(name: string, template: string) {
@@ -122,8 +114,8 @@ export function getEmailFromMessage(email: Email | null, message: Message) {
 
 export function getImgSrc(src: string, company?: Company | null) {
   return src === 'logo'
-    ? company?.logo_image_key
-      ? getImgFromKey(company.logo_image_key)
+    ? company?.logoFileId
+      ? getImgFromKey(company.logoFileId)
       : getImgFromKey('dummy-logo.png')
     : src
 }

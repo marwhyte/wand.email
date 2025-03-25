@@ -14,20 +14,20 @@ import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 import { Dialog, DialogTitle } from './dialog'
 
+type FormData = Omit<Company, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+
 interface CompanyDialogProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: (company: Company) => void
+  onSuccess: (company: FormData) => void
   company?: Company | null
 }
-
-type FormData = Omit<Company, 'id' | 'user_id' | 'created_at'>
 
 export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: CompanyDialogProps) {
   const [formData, setFormData] = useState<FormData>({
     name: '',
-    primary_color: '#000000',
-    logo_file_id: '',
+    primaryColor: '#000000',
+    logoFileId: '',
   })
   const [fileDetails, setFileDetails] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -42,16 +42,16 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
     } else {
       setFormData({
         name: '',
-        primary_color: '#000000',
-        logo_file_id: '',
+        primaryColor: '#000000',
+        logoFileId: '',
       })
     }
   }, [company])
 
   useEffect(() => {
     async function fetchFileDetails() {
-      if (formData.logo_file_id) {
-        const file = await getFile(formData.logo_file_id)
+      if (formData.logoFileId) {
+        const file = await getFile(formData.logoFileId)
         if (file) {
           setFileDetails(file)
         }
@@ -60,7 +60,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
       }
     }
     fetchFileDetails()
-  }, [formData.logo_file_id])
+  }, [formData.logoFileId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -74,7 +74,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
         return
       }
 
-      if (!formData.logo_file_id) {
+      if (!formData.logoFileId) {
         setFieldErrors((prev) => ({ ...prev, logo: 'Please upload a company logo' }))
         return
       }
@@ -82,8 +82,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
       if (company) {
         const updatedCompany = await updateCompany(company.id, {
           name: formData.name,
-          primaryColor: formData.primary_color ?? undefined,
-          logoFileId: formData.logo_file_id ?? undefined,
+          primaryColor: formData.primaryColor ?? undefined,
+          logoFileId: formData.logoFileId ?? undefined,
         })
         if (updatedCompany) {
           onSuccess(updatedCompany)
@@ -92,8 +92,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
       } else {
         const newCompany = await addCompany({
           name: formData.name,
-          primaryColor: formData.primary_color ?? undefined,
-          logoFileId: formData.logo_file_id ?? undefined,
+          primaryColor: formData.primaryColor ?? undefined,
+          logoFileId: formData.logoFileId ?? undefined,
         })
         if (newCompany) {
           onSuccess(newCompany)
@@ -132,24 +132,24 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
             <Label>Company Logo</Label>
             <LogoUploader
               onUpload={(file) => {
-                setFormData({ ...formData, logo_file_id: file.id })
+                setFormData({ ...formData, logoFileId: file.id })
                 setFileDetails(file)
               }}
             />
 
             {fieldErrors.logo && <Text className="mt-1 !text-sm !text-red-500">{fieldErrors.logo}</Text>}
-            {fileDetails?.image_key && (
+            {fileDetails?.imageKey && (
               <div className="mt-2 flex">
                 <div className="bg-checkerboard w-fit rounded-md p-2">
-                  <img className="h-12 w-auto" src={getImgFromKey(fileDetails?.image_key)} alt="Logo" />
+                  <img className="h-12 w-auto" src={getImgFromKey(fileDetails?.imageKey)} alt="Logo" />
                 </div>
                 <div className="ml-2">
                   <Text className="max-w-[200px] truncate !text-sm font-bold">
-                    {fileDetails?.file_name || formData.logo_file_id}
+                    {fileDetails?.fileName || formData.logoFileId}
                   </Text>
                   <div>
                     <Text className="!text-xs text-gray-500">
-                      {fileDetails?.size_bytes ? formatFileSize(fileDetails.size_bytes) : ''}
+                      {fileDetails?.sizeBytes ? formatFileSize(fileDetails.sizeBytes) : ''}
                     </Text>
                   </div>
                 </div>
@@ -163,8 +163,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
               showTransparent={false}
               className={clsx('mt-1')}
               id="primary_color"
-              value={formData.primary_color ?? undefined}
-              onChange={(value) => setFormData({ ...formData, primary_color: value })}
+              value={formData.primaryColor ?? undefined}
+              onChange={(value) => setFormData({ ...formData, primaryColor: value })}
             />
           </Field>
         </FieldGroup>

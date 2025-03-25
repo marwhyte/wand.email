@@ -18,5 +18,12 @@ export const PUBLIC_ROUTES = [
   '/api',
   '/pricing',
   '/google-signin',
+  '/api/auth/signin',
+  '/api/auth/signin/email',
+  '/api/auth/callback/email',
+  '/api/auth/csrf',
+  '/api/auth/signout',
+  '/api/auth/signin/resend',
+  '/api/auth/callback/resend',
 ]
 export const DEFAULT_REDIRECT = ROOT

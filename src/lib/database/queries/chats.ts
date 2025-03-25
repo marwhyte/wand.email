@@ -19,22 +19,18 @@ export async function createChat({
   companyId?: string | null
 }) {
   const session = await auth()
-  if (!session?.user?.id) {
-    throw new Error('User not authenticated')
-  }
 
   return await db.transaction().execute(async (trx) => {
-    // Create chat
+    if (!session?.user?.id) throw new Error('User not authenticated')
+
     const chat = await trx
-      .insertInto('chats')
+      .insertInto('Chat')
       .values({
         id,
-        user_id: session?.user?.id ?? '',
+        userId: session.user.id,
         title: title ?? '',
         email,
-        company_id: companyId,
-        created_at: new Date(),
-        updated_at: new Date(),
+        companyId: companyId,
       })
       .returningAll()
       .executeTakeFirst()
@@ -44,14 +40,12 @@ export async function createChat({
     // Insert messages
     if (messages.length > 0) {
       await trx
-        .insertInto('messages')
+        .insertInto('Message')
         .values(
           messages.map((msg, index) => ({
-            chat_id: chat.id,
+            chatId: chat.id,
             role: msg.role,
             content: msg.content,
-            sequence: index,
-            created_at: new Date(),
           }))
         )
         .execute()
@@ -69,27 +63,27 @@ export async function updateMessage(id: string, chatId: string, updates: { conte
 
   // Check if the message exists
   const message = await db
-    .selectFrom('messages')
+    .selectFrom('Message')
     .select('id')
     .where('id', '=', id)
-    .where('chat_id', '=', chatId)
+    .where('chatId', '=', chatId)
     .executeTakeFirst()
 
   if (updates.content !== undefined) {
     await db
-      .updateTable('messages')
+      .updateTable('Message')
       .set({ content: updates.content })
       .where('id', '=', id)
-      .where('chat_id', '=', chatId)
+      .where('chatId', '=', chatId)
       .execute()
   }
 
   if (updates.email !== undefined) {
     await db
-      .updateTable('messages')
+      .updateTable('Message')
       .set({ email: updates.email })
       .where('id', '=', id)
-      .where('chat_id', '=', chatId)
+      .where('chatId', '=', chatId)
       .execute()
   }
 }
@@ -97,10 +91,10 @@ export async function updateMessage(id: string, chatId: string, updates: { conte
 export async function deleteMessagesAfterId(id: string, chatId: string) {
   // Retrieve the created_at timestamp of the message with the given id
   const message = await db
-    .selectFrom('messages')
-    .select('created_at')
+    .selectFrom('Message')
+    .select('createdAt')
     .where('id', '=', id)
-    .where('chat_id', '=', chatId)
+    .where('chatId', '=', chatId)
     .executeTakeFirst()
 
   if (!message) {
@@ -108,19 +102,14 @@ export async function deleteMessagesAfterId(id: string, chatId: string) {
   }
 
   // Delete messages created after the retrieved timestamp
-  await db.deleteFrom('messages').where('created_at', '>', message.created_at).where('chat_id', '=', chatId).execute()
+  await db.deleteFrom('Message').where('createdAt', '>', message.createdAt).where('chatId', '=', chatId).execute()
 
-  return await db
-    .selectFrom('messages')
-    .selectAll()
-    .where('chat_id', '=', chatId)
-    .orderBy('created_at', 'asc')
-    .execute()
+  return await db.selectFrom('Message').selectAll().where('chatId', '=', chatId).orderBy('createdAt', 'asc').execute()
 }
 
 export async function updateChat(
   id: string,
-  updates: { messages?: Message[]; title?: string; email?: Email; previousEmail?: Email; parsed?: boolean }
+  updates: { messages?: Message[]; title?: string; email?: Email; parsed?: boolean }
 ) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -129,94 +118,76 @@ export async function updateChat(
 
   try {
     return await db.transaction().execute(async (trx) => {
-      // Update chat
+      if (!session?.user?.id) throw new Error('User not authenticated')
+
       if (updates.title !== undefined) {
         await trx
-          .updateTable('chats')
+          .updateTable('Chat')
           .set({
             title: updates.title,
-            updated_at: new Date(),
+            updatedAt: new Date(),
           })
           .where('id', '=', id)
-          .where('user_id', '=', session.user?.id ?? '')
+          .where('userId', '=', session.user.id)
           .execute()
       }
 
       if (updates.email) {
         await trx
-          .updateTable('chats')
+          .updateTable('Chat')
           .set({
             email: updates.email,
-            updated_at: new Date(),
+            updatedAt: new Date(),
           })
           .where('id', '=', id)
-          .where('user_id', '=', session.user?.id ?? '')
+          .where('userId', '=', session.user.id)
           .execute()
       }
 
-      if (updates.previousEmail) {
-        await trx
-          .updateTable('chats')
-          .set({ previous_email: updates.previousEmail })
-          .where('id', '=', id)
-          .where('user_id', '=', session.user?.id ?? '')
-          .execute()
-      }
-
-      // Update messages
       if (updates.messages) {
-        // Get existing messages to preserve created_at for existing messages
         const existingMessages = await trx
-          .selectFrom('messages')
-          .select(['id', 'created_at', 'email'])
-          .where('chat_id', '=', id)
+          .selectFrom('Message')
+          .select(['id', 'createdAt', 'email'])
+          .where('chatId', '=', id)
           .execute()
 
-        // Create a map of existing message IDs to their created_at timestamps
         const existingMessageMap = new Map(
-          existingMessages.map((msg) => [msg.id, { created_at: msg.created_at, email: msg.email }])
+          existingMessages.map((msg) => [msg.id, { createdAt: msg.createdAt, email: msg.email }])
         )
 
-        // Delete existing messages
-        await trx.deleteFrom('messages').where('chat_id', '=', id).execute()
+        await trx.deleteFrom('Message').where('chatId', '=', id).execute()
 
-        // Sort messages by creation time
         const sortedMessages = [...updates.messages].sort((a, b) => {
           const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0
           const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0
           return timeA - timeB
         })
 
-        // Prepare message values with sequential ordering
         const messageValues = sortedMessages.map((msg, index) => {
-          // For created_at, ensure we're using consistent UTC dates
-          let created_at: Date = new Date()
+          let createdAt: Date = new Date()
           if (existingMessageMap.get(msg.id)) {
             // Use existing timestamp from database
-            created_at = existingMessageMap.get(msg.id)?.created_at as Date
+            createdAt = existingMessageMap.get(msg.id)?.createdAt as Date
           } else if (msg.createdAt) {
-            // Convert provided timestamp to a Date object
-            created_at = new Date(msg.createdAt)
+            createdAt = new Date(msg.createdAt)
           } else {
-            // Create a new UTC timestamp
-            created_at = new Date()
+            createdAt = new Date()
           }
 
           const email = existingMessageMap.get(msg.id)?.email ?? null
 
           return {
-            chat_id: id,
+            chatId: id,
             role: msg.role,
             content: msg.content,
-            sequence: index,
             id: msg.id,
-            created_at,
+            createdAt,
             email,
           }
         })
 
         // Insert new messages
-        await trx.insertInto('messages').values(messageValues).returningAll().execute()
+        await trx.insertInto('Message').values(messageValues).returningAll().execute()
       }
     })
   } catch (error) {
@@ -233,10 +204,10 @@ export async function deleteChat(id: string) {
 
   try {
     const result = await db
-      .updateTable('chats')
-      .set({ deleted_at: new Date() })
+      .updateTable('Chat')
+      .set({ deletedAt: new Date() })
       .where('id', '=', id)
-      .where('user_id', '=', session.user.id)
+      .where('userId', '=', session.user.id)
       .executeTakeFirst()
 
     return result !== undefined
@@ -253,11 +224,11 @@ export async function getChats() {
   }
 
   const chats = await db
-    .selectFrom('chats')
+    .selectFrom('Chat')
     .selectAll()
-    .where('user_id', '=', session.user.id)
-    .where('deleted_at', 'is', null)
-    .orderBy('updated_at', 'desc')
+    .where('userId', '=', session.user.id)
+    .where('deletedAt', 'is', null)
+    .orderBy('updatedAt', 'desc')
     .execute()
 
   return chats
@@ -269,7 +240,7 @@ export async function getMessage(id: string) {
     throw new Error('User not authenticated')
   }
 
-  const message = await db.selectFrom('messages').selectAll().where('id', '=', id).executeTakeFirst()
+  const message = await db.selectFrom('Message').selectAll().where('id', '=', id).executeTakeFirst()
   return message
 }
 
@@ -280,11 +251,11 @@ export async function getChat(id: string) {
   }
 
   const chat = await db
-    .selectFrom('chats')
+    .selectFrom('Chat')
     .selectAll()
     .where('id', '=', id)
-    .where('user_id', '=', session.user.id)
-    .where('deleted_at', 'is', null)
+    .where('userId', '=', session.user.id)
+    .where('deletedAt', 'is', null)
     .executeTakeFirst()
   return chat
 }
@@ -296,20 +267,20 @@ export async function getChatWithMessages(id: string) {
   }
 
   const chat = await db
-    .selectFrom('chats')
+    .selectFrom('Chat')
     .selectAll()
     .where('id', '=', id)
-    .where('user_id', '=', session.user.id)
-    .where('deleted_at', 'is', null)
+    .where('userId', '=', session.user.id)
+    .where('deletedAt', 'is', null)
     .executeTakeFirst()
 
   if (!chat) return undefined
 
   const messages = await db
-    .selectFrom('messages')
+    .selectFrom('Message')
     .selectAll()
-    .where('chat_id', '=', id)
-    .orderBy('sequence', 'asc')
+    .where('chatId', '=', id)
+    .orderBy('createdAt', 'asc')
     .execute()
 
   const response = {
@@ -317,8 +288,7 @@ export async function getChatWithMessages(id: string) {
     messages: messages.map((msg) => ({
       id: msg.id,
       role: msg.role,
-      sequence: msg.sequence,
-      created_at: msg.created_at,
+      createdAt: msg.createdAt,
       content: msg.content,
       email: msg.email,
     })),

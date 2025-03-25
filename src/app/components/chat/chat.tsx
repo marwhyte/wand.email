@@ -8,6 +8,7 @@ import { useMessageParser } from '@/app/hooks/useMessageParser'
 import { updateChat } from '@/lib/database/queries/chats'
 import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat as ChatType, Company } from '@/lib/database/types'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { chatStore } from '@/lib/stores/chat'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -25,14 +26,13 @@ import {
   NewspaperIcon,
   ShoppingCartIcon,
 } from '@heroicons/react/24/solid'
-import { useAnimate } from 'framer-motion'
+import { useAnimate } from 'motion/react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { v4 as uuidv4 } from 'uuid'
 import { BackgroundGradients } from '../background-gradients'
-import { AuthDialog } from '../dialogs/auth-dialog'
 import CompanyDialog from '../dialogs/company-dialog'
 import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
 import UpgradeDialog from '../dialogs/upgrade-dialog'
@@ -140,8 +140,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
   // Auth and session
   const session = useSession()
-  const [showSignUpDialog, setShowSignUpDialog] = useState(false)
-  const [stepType, setStepType] = useState<'login' | 'signup'>('signup')
+
   const [pendingAction, setPendingAction] = useState<{
     type: 'send-message' | 'open-company-dialog' | 'enhance-prompt'
     messageInput?: string
@@ -150,6 +149,8 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
   // Company management
   const [activeCompany, setActiveCompany] = useState<Company | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+
+  const { showSignUpDialog, setShowSignUpDialog, stepType, setStepType } = useAuthStore()
 
   // Dialog openers
   const companyOpener = useOpener()
@@ -518,13 +519,6 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
               )}
             </div>
           </div>
-
-          <AuthDialog
-            open={showSignUpDialog}
-            onClose={() => setShowSignUpDialog(false)}
-            stepType={stepType}
-            onSwitchType={(type) => setStepType(type)}
-          />
 
           <CompanyDialog
             company={activeCompany}

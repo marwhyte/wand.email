@@ -1,5 +1,4 @@
 import LoginForm from '@/app/forms/login-form'
-import RegistrationForm from '@/app/forms/registration-form'
 import { Dialog, DialogBody, DialogDescription, DialogTitle } from './dialog'
 
 type AuthDialogProps = {
@@ -15,10 +14,7 @@ export function AuthDialog({ open, onClose, stepType, onSwitchType }: AuthDialog
       <DialogTitle>{`${stepType === 'login' ? 'Log in' : 'Sign up'} to start creating emails`}</DialogTitle>
       <DialogBody className="!mt-2">
         <DialogDescription className="mb-4">Access and edit your saved emails anytime, anywhere.</DialogDescription>
-        {stepType === 'login' && <LoginForm redirectToInitialProject onSwitchType={() => onSwitchType('signup')} />}
-        {stepType === 'signup' && (
-          <RegistrationForm redirectToInitialProject onSwitchType={() => onSwitchType('login')} />
-        )}
+        <LoginForm onSwitchType={() => onSwitchType('signup')} />
       </DialogBody>
     </Dialog>
   )

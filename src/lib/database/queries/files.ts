@@ -9,7 +9,7 @@ export async function getFiles() {
     throw new Error('User not authenticated')
   }
 
-  const files = await db.selectFrom('files').selectAll().where('user_id', '=', session.user.id).execute()
+  const files = await db.selectFrom('File').selectAll().where('userId', '=', session.user.id).execute()
   return files
 }
 
@@ -17,14 +17,14 @@ export async function getFile(fileId: string) {
   const session = await auth()
 
   const file = await db
-    .selectFrom('files')
+    .selectFrom('File')
     .selectAll()
     .where('id', '=', fileId)
     .where((eb) =>
       eb.or([
-        eb('user_id', 'is', null),
+        eb('userId', 'is', null),
         // Only check user_id match if user is authenticated
-        session?.user?.id ? eb('user_id', '=', session.user.id) : eb.val(false),
+        session?.user?.id ? eb('userId', '=', session.user.id) : eb.val(false),
       ])
     )
     .executeTakeFirst()
@@ -33,14 +33,12 @@ export async function getFile(fileId: string) {
 
 export async function addFile(userId: string | null, fileName: string, imageKey: string, sizeBytes: number) {
   const file = await db
-    .insertInto('files')
+    .insertInto('File')
     .values({
-      user_id: userId,
-      file_name: fileName,
-      image_key: imageKey,
-      size_bytes: sizeBytes,
-      created_at: new Date(),
-      updated_at: new Date(),
+      userId,
+      fileName,
+      imageKey,
+      sizeBytes,
     })
     .returningAll()
     .executeTakeFirst()
@@ -53,5 +51,5 @@ export async function removeFile(fileKey: string) {
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
   }
-  await db.deleteFrom('files').where('user_id', '=', session.user.id).where('image_key', '=', fileKey).execute()
+  await db.deleteFrom('File').where('userId', '=', session.user.id).where('imageKey', '=', fileKey).execute()
 }

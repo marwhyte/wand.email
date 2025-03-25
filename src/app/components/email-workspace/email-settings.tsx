@@ -103,7 +103,7 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
         >
           <option value="default">Default</option>
           <option value="outline">Outline</option>
-          <option value="floating">Floating</option>
+          <option value="clear">Clear</option>
         </Select>
       </Field>
       {company && (
@@ -111,20 +111,20 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
           <Label>Company branding</Label>
           <div className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
             <div className="flex items-center space-x-4">
-              {company.logo_image_key && (
+              {company.logoFileId && (
                 <img
-                  src={getImgFromKey(company.logo_image_key)}
+                  src={getImgFromKey(company.logoFileId)}
                   alt={`${company.name} logo`}
                   className="h-8 min-w-8 max-w-[70px] bg-white object-contain"
                 />
               )}
               <div className="flex items-center gap-2">
                 <span className="font-medium text-gray-900">{company.name}</span>
-                {company.primary_color && (
+                {company.primaryColor && (
                   <div
                     className="h-4 w-4 rounded-full border border-gray-200"
-                    style={{ backgroundColor: company.primary_color }}
-                    title={`Primary color: ${company.primary_color}`}
+                    style={{ backgroundColor: company.primaryColor }}
+                    title={`Primary color: ${company.primaryColor}`}
                   />
                 )}
               </div>

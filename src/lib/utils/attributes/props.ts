@@ -347,7 +347,7 @@ export function getContentProps(email: Email): OmitChildren<React.ComponentProps
     defaultStyles.paddingTop = '20px'
   }
 
-  if (emailAttributes.styleVariant === 'floating') {
+  if (emailAttributes.styleVariant === 'default') {
     defaultStyles.paddingTop = '20px'
   }
 

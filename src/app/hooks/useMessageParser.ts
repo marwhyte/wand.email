@@ -50,7 +50,7 @@ export function useMessageParser(message: Message) {
     if (!chatId) return
 
     setEmail(emailData)
-    updateChat(chatId, { email: emailData, previousEmail: emailData }).then(() => {
+    updateChat(chatId, { email: emailData }).then(() => {
       updateEmailForMessage(chatId, message, emailData)
     })
   }

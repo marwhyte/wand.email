@@ -1,5 +1,6 @@
 'use client'
 
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
@@ -20,9 +21,15 @@ import { useOpener } from '../hooks'
 import { useEmailSave } from '../hooks/useEmailSave'
 import { Logo } from './Logo'
 import { Button } from './button'
+import { AuthDialog } from './dialogs/auth-dialog'
 import ExportDialog from './dialogs/export-dialog'
 import PreviewDialog from './dialogs/preview-dialog'
 import EmailRendererFinal from './email-workspace/email-renderer-final'
+import { defaultEbayTemplate } from './email-workspace/templates/ecommerce/default-ebay-template'
+import { defaultStripeTemplate } from './email-workspace/templates/newsletter/default-stripe'
+import { outlineStocktwitsTemplate } from './email-workspace/templates/newsletter/outline-stocktwits'
+import { defaultNikeVerificationTemplate } from './email-workspace/templates/transactional/default-nike-verification'
+import { outlineGoogleTemplate } from './email-workspace/templates/transactional/outline-google'
 import { Email, EmailStyleVariant } from './email-workspace/types'
 import Loading from './loading'
 import Notification from './notification'
@@ -43,6 +50,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const { mobileView, setMobileView } = useMobileViewStore()
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const saveEmail = useEmailSave(chatId)
+  const { showSignUpDialog, setShowSignUpDialog, stepType, setStepType } = useAuthStore()
 
   const exportOpener = useOpener()
   const previewOpener = useOpener()
@@ -69,28 +77,28 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
     setSelectedDevice(newValue)
   }
 
-  // const templates = [
-  //   {
-  //     name: 'Stocktwits',
-  //     value: outlineStocktwitsTemplate(),
-  //   },
-  //   {
-  //     name: 'Ebay',
-  //     value: defaultEbayTemplate,
-  //   },
-  //   {
-  //     name: 'Google',
-  //     value: outlineGoogleTemplate(),
-  //   },
-  //   {
-  //     name: 'Stripe',
-  //     value: defaultStripeTemplate(),
-  //   },
-  //   {
-  //     name: 'Nike Verification',
-  //     value: defaultNikeVerificationTemplate(),
-  //   },
-  // ]
+  const templates = [
+    {
+      name: 'Stocktwits',
+      value: outlineStocktwitsTemplate(),
+    },
+    {
+      name: 'Ebay',
+      value: defaultEbayTemplate,
+    },
+    {
+      name: 'Google',
+      value: outlineGoogleTemplate(),
+    },
+    {
+      name: 'Stripe',
+      value: defaultStripeTemplate(),
+    },
+    {
+      name: 'Nike Verification',
+      value: defaultNikeVerificationTemplate(),
+    },
+  ]
 
   const sendTestEmail = async () => {
     if (!session?.data?.user?.email || !email) return
@@ -137,24 +145,31 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
           className="-m-1.5 p-1.5"
         >
           <span className="sr-only">wand.email</span>
-          <Logo className="z-100" text />
+          <Logo className="z-100" />
         </Link>
 
         {title && <div className="absolute left-1/2 -translate-x-1/2 truncate font-medium">{title}</div>}
 
         {email && session?.data?.user && (
           <div className="flex items-center space-x-4">
-            <div className="flex items-center">
-              <span className="mr-1 text-xs text-gray-500">Style:</span>
+            {process.env.NODE_ENV === 'development' && (
               <Select
                 value={emailAttributes.styleVariant}
-                onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
+                onChange={(e) => setEmail(templates.find((t) => t.name === e.target.value)?.value)}
               >
-                <option value="default">Default</option>
-                <option value="outline">Outline</option>
-                <option value="floating">Floating</option>
+                {templates.map((template) => (
+                  <option key={template.name}>{template.name}</option>
+                ))}
               </Select>
-            </div>
+            )}
+            <Select
+              value={emailAttributes.styleVariant}
+              onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
+            >
+              <option value="default">Default</option>
+              <option value="outline">Outline</option>
+              <option value="clear">Clear</option>
+            </Select>
             <TabGroup
               value={selectedDevice}
               className="flex min-w-fit flex-nowrap justify-center"
@@ -194,10 +209,22 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
         )}
         {!session?.data?.user && (
           <div className="hidden items-center space-x-4 md:flex">
-            <Button color="white" href="/login">
+            <Button
+              color="white"
+              onClick={() => {
+                setStepType('login')
+                setShowSignUpDialog(true)
+              }}
+            >
               Log in
             </Button>
-            <Button color="purple" href="/signup">
+            <Button
+              color="purple"
+              onClick={() => {
+                setStepType('signup')
+                setShowSignUpDialog(true)
+              }}
+            >
               Sign up
             </Button>
           </div>
@@ -207,6 +234,13 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
       {emailStatus === 'error' && <Notification title="Failed to send test email" status="failure" />}
       <ExportDialog open={exportOpener.isOpen} onClose={exportOpener.close} monthlyExportCount={monthlyExportCount} />
       <PreviewDialog open={previewOpener.isOpen} onClose={previewOpener.close} />
+
+      <AuthDialog
+        open={showSignUpDialog}
+        onClose={() => setShowSignUpDialog(false)}
+        stepType={stepType}
+        onSwitchType={(type) => setStepType(type)}
+      />
     </header>
   )
 }

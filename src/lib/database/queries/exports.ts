@@ -15,10 +15,10 @@ export async function getMonthlyExportCount() {
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
 
   const result = await db
-    .selectFrom('exports')
+    .selectFrom('Export')
     .select(({ fn }) => [fn.count<number>('id').as('count')])
-    .where('created_at', '>=', startOfMonth)
-    .where('user_id', '=', session.user.id)
+    .where('createdAt', '>=', startOfMonth)
+    .where('userId', '=', session.user.id)
     .executeTakeFirst()
 
   return result?.count ?? 0
@@ -31,13 +31,11 @@ export async function addExport(content: Email, type: ExportType) {
   }
 
   const newExport = await db
-    .insertInto('exports')
+    .insertInto('Export')
     .values({
       content,
       type,
-      user_id: session.user.id,
-      created_at: new Date(),
-      updated_at: new Date(),
+      userId: session.user.id,
     })
     .returningAll()
     .executeTakeFirst()

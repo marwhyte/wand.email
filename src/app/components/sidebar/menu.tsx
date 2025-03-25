@@ -1,7 +1,7 @@
 'use client'
 
 import { Dialog, DialogButton, DialogDescription, DialogTitle } from '@components/dialogs/dialog'
-import { motion, type Variants } from 'framer-motion'
+import { motion, type Variants } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { deleteChat } from '@/lib/database/queries/chats'
@@ -51,7 +51,7 @@ export function Menu() {
   const [dialogContent, setDialogContent] = useState<DialogContent>(null)
   const session = useSession()
   const { plan, setUpgradeDialogOpen } = usePlan()
-  const isPremium = plan !== 'free'
+  const isPremium = plan && plan !== 'free'
   const router = useRouter()
 
   const handleUpgradeClick = () => {

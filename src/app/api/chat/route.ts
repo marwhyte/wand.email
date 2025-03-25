@@ -41,7 +41,7 @@ export async function POST(request: Request) {
 
       await createChat({ messages, email, companyId, id })
     } else {
-      if (chat.user_id !== session.user.id) {
+      if (chat.userId !== session.user.id) {
         return new Response('Unauthorized', { status: 401 })
       }
     }

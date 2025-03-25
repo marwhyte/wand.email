@@ -1,5 +1,5 @@
 import { ArrowRightIcon, StopCircleIcon } from '@heroicons/react/24/solid'
-import { AnimatePresence, cubicBezier, motion } from 'framer-motion'
+import { AnimatePresence, cubicBezier, motion } from 'motion/react'
 
 interface SendButtonProps {
   show: boolean

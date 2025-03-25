@@ -58,7 +58,7 @@ const generateBlockAttributesDocs = () => {
 // Template structure definition
 const templateStructureDefinition = `
 <email_script_syntax>
-  <EMAIL preview="Optional email preview text" styleVariant="default|outline|floating" type="default|welcome-series|ecommerce|invite|transactional|newsletter|invoice|cart">
+  <EMAIL preview="Optional email preview text" styleVariant="default|outline|clear" type="default|welcome-series|ecommerce|invite|transactional|newsletter|invoice|cart">
     <ROW type="header|footer|content|gallery">
       <COLUMN width="50%">
         <HEADING level="h1|h2|h3">Heading text</HEADING>

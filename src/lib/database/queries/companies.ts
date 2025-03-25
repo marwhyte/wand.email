@@ -8,18 +8,19 @@ import { db } from '../db'
 const getCompaniesInternal = unstable_cache(
   async (userId: string) => {
     const companies = await db
-      .selectFrom('companies')
-      .leftJoin('files', 'files.id', 'companies.logo_file_id')
+      .selectFrom('Company')
+      .leftJoin('File', 'File.id', 'Company.logoFileId')
       .select([
-        'companies.created_at',
-        'companies.id',
-        'companies.name',
-        'companies.logo_file_id',
-        'companies.primary_color',
-        'companies.user_id',
-        'files.image_key as logo_image_key',
+        'Company.createdAt',
+        'Company.updatedAt',
+        'Company.id',
+        'Company.name',
+        'Company.logoFileId',
+        'Company.primaryColor',
+        'Company.userId',
+        'File.imageKey as logoImageKey',
       ])
-      .where('companies.user_id', '=', userId)
+      .where('Company.userId', '=', userId)
       .execute()
     return companies
   },
@@ -34,19 +35,20 @@ const getCompaniesInternal = unstable_cache(
 const getCompanyInternal = unstable_cache(
   async (userId: string, companyId: string) => {
     const company = await db
-      .selectFrom('companies')
-      .leftJoin('files', 'files.id', 'companies.logo_file_id')
+      .selectFrom('Company')
+      .leftJoin('File', 'File.id', 'Company.logoFileId')
       .select([
-        'companies.id',
-        'companies.name',
-        'companies.primary_color',
-        'companies.logo_file_id',
-        'companies.user_id',
-        'companies.created_at',
-        'files.image_key as logo_image_key',
+        'Company.id',
+        'Company.name',
+        'Company.primaryColor',
+        'Company.logoFileId',
+        'Company.userId',
+        'Company.createdAt',
+        'Company.updatedAt',
+        'File.imageKey as logoImageKey',
       ])
-      .where('companies.id', '=', companyId)
-      .where('companies.user_id', '=', userId)
+      .where('Company.id', '=', companyId)
+      .where('Company.userId', '=', userId)
       .executeTakeFirst()
     return company
   },
@@ -91,38 +93,37 @@ export async function addCompany({
   }
 
   const company = await db
-    .insertInto('companies')
+    .insertInto('Company')
     .values({
       name,
-      primary_color: primaryColor,
-      logo_file_id: logoFileId,
-      user_id: session.user.id,
-      created_at: new Date(),
+      primaryColor: primaryColor,
+      logoFileId: logoFileId,
+      userId: session.user.id,
     })
     .returning([
-      'companies.id',
-      'companies.name',
-      'companies.primary_color',
-      'companies.logo_file_id',
-      'companies.user_id',
-      'companies.created_at',
+      'Company.id',
+      'Company.name',
+      'Company.primaryColor',
+      'Company.logoFileId',
+      'Company.userId',
+      'Company.createdAt',
     ])
     .execute()
     .then(async ([newCompany]) => {
       if (!newCompany) return null
       return db
-        .selectFrom('companies')
-        .leftJoin('files', 'files.id', 'companies.logo_file_id')
+        .selectFrom('Company')
+        .leftJoin('File', 'File.id', 'Company.logoFileId')
         .select([
-          'companies.id',
-          'companies.name',
-          'companies.primary_color',
-          'companies.logo_file_id',
-          'companies.user_id',
-          'companies.created_at',
-          'files.image_key as logo_image_key',
+          'Company.id',
+          'Company.name',
+          'Company.primaryColor',
+          'Company.logoFileId',
+          'Company.userId',
+          'Company.createdAt',
+          'File.imageKey as logoImageKey',
         ])
-        .where('companies.id', '=', newCompany.id)
+        .where('Company.id', '=', newCompany.id)
         .executeTakeFirst()
     })
 
@@ -148,31 +149,31 @@ export async function updateCompany(
   }
 
   const company = await db
-    .updateTable('companies')
+    .updateTable('Company')
     .set({
       ...(name && { name }),
-      ...(primaryColor !== undefined && { primary_color: primaryColor }),
-      ...(logoFileId !== undefined && { logo_file_id: logoFileId }),
+      ...(primaryColor !== undefined && { primaryColor }),
+      ...(logoFileId !== undefined && { logoFileId }),
     })
     .where('id', '=', companyId)
-    .where('user_id', '=', session.user.id)
-    .returning(['id', 'name', 'primary_color', 'logo_file_id', 'user_id', 'created_at'])
+    .where('userId', '=', session.user.id)
+    .returning(['id', 'name', 'primaryColor', 'logoFileId', 'userId', 'createdAt'])
     .execute()
     .then(async ([updatedCompany]) => {
       if (!updatedCompany) return null
       return db
-        .selectFrom('companies')
-        .leftJoin('files', 'files.id', 'companies.logo_file_id')
+        .selectFrom('Company')
+        .leftJoin('File', 'File.id', 'Company.logoFileId')
         .select([
-          'companies.id',
-          'companies.name',
-          'companies.primary_color',
-          'companies.logo_file_id',
-          'companies.user_id',
-          'companies.created_at',
-          'files.image_key as logo_image_key',
+          'Company.id',
+          'Company.name',
+          'Company.primaryColor',
+          'Company.logoFileId',
+          'Company.userId',
+          'Company.createdAt',
+          'File.imageKey as logoImageKey',
         ])
-        .where('companies.id', '=', updatedCompany.id)
+        .where('Company.id', '=', updatedCompany.id)
         .executeTakeFirst()
     })
 
@@ -186,7 +187,7 @@ export async function deleteCompany(companyId: string) {
     throw new Error('User not authenticated')
   }
 
-  await db.deleteFrom('companies').where('id', '=', companyId).where('user_id', '=', session.user.id).execute()
+  await db.deleteFrom('Company').where('id', '=', companyId).where('userId', '=', session.user.id).execute()
 
   revalidateTag('companies')
 }

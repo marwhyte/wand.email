@@ -83,17 +83,17 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
     defaultAttributes.fontFamily = 'Open Sans, Roboto, Helvetica, Arial, sans-serif'
   }
 
-  if (defaultAttributes?.styleVariant === 'default') {
+  if (defaultAttributes?.styleVariant === 'clear') {
     defaultAttributes.backgroundColor = '#ffffff'
   }
 
-  if (defaultAttributes.styleVariant === 'default' && defaultAttributes.type === 'ecommerce') {
+  if (defaultAttributes.styleVariant === 'clear' && defaultAttributes.type === 'ecommerce') {
     defaultAttributes.fontFamily = 'Outfit, Roboto, Helvetica, Arial, sans-serif'
-  } else if (defaultAttributes.styleVariant === 'default') {
+  } else if (defaultAttributes.styleVariant === 'clear') {
     defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
   }
 
-  if (defaultAttributes?.styleVariant === 'floating') {
+  if (defaultAttributes?.styleVariant === 'default') {
     defaultAttributes.backgroundColor = '#f4f4f4'
   }
 

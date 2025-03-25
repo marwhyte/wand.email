@@ -100,7 +100,7 @@ export const defaultEbayTemplateScript = (useImage: boolean) => `
   <ROW type="gallery">
     <COLUMN>
       <IMAGE src="${useImage ? getPhotoUrl('smilingoutside.png', 'ebay') : 'pexels:Person smiling outside'}" alt="Person smiling outside" />
-      <TEXT>
+      <TEXT fontWeight="bold">
         Up to 70% off laptops
       </TEXT>
       <TEXT>
@@ -109,7 +109,7 @@ export const defaultEbayTemplateScript = (useImage: boolean) => `
     </COLUMN>
     <COLUMN>
       <IMAGE src="${useImage ? getPhotoUrl('smiling.png', 'ebay') : 'pexels:Person smiling'}" alt="Person smiling" />
-      <TEXT>
+      <TEXT fontWeight="bold">
         Fresh fashion for women
       </TEXT>
       <TEXT>

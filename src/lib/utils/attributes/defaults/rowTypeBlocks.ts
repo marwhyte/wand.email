@@ -93,25 +93,6 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
       },
     },
   },
-  floating: {
-    footer: {
-      link: {
-        align: 'center',
-      },
-    },
-    default: {
-      link: {
-        align: 'left',
-      },
-      button: {
-        align: 'left',
-        paddingLeft: '0',
-        contentPaddingLeft: '24px',
-        contentPaddingRight: '24px',
-        fontWeight: 'bold',
-      },
-    },
-  },
   default: {
     footer: {
       link: {
@@ -120,10 +101,29 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
     },
     default: {
       link: {
-        align: 'left',
+        align: 'center',
       },
       button: {
-        align: 'left',
+        align: 'center',
+        paddingLeft: '0',
+        contentPaddingLeft: '24px',
+        contentPaddingRight: '24px',
+        fontWeight: 'bold',
+      },
+    },
+  },
+  clear: {
+    footer: {
+      link: {
+        align: 'center',
+      },
+    },
+    default: {
+      link: {
+        align: 'center',
+      },
+      button: {
+        align: 'center',
         paddingLeft: '0',
         contentPaddingLeft: '24px',
         contentPaddingRight: '24px',
@@ -157,7 +157,7 @@ export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
   ecommerce: {
     default: {
       button: {
-        align: 'left',
+        align: 'center',
         paddingLeft: '0',
         contentPaddingLeft: '24px',
         contentPaddingRight: '24px',
@@ -169,12 +169,12 @@ export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
     default: {
       heading: {
         color: '#0a2540',
-        textAlign: 'left',
+        textAlign: 'center',
         paddingBottom: '10px',
         paddingTop: '10px',
       },
       text: {
-        textAlign: 'left',
+        textAlign: 'center',
         fontSize: '16px',
         color: '#3f4b66',
       },
@@ -298,7 +298,7 @@ export const combinedTypeBlockDefaults: Record<string, Record<string, VariantBlo
     marketing: {},
     transactional: {},
   },
-  floating: {
+  default: {
     newsletter: {},
   },
 }

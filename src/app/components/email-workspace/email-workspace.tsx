@@ -1,7 +1,7 @@
 'use client'
 
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { motion } from 'framer-motion'
+import { motion } from 'motion/react'
 import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import EmailEditor from './email-editor'

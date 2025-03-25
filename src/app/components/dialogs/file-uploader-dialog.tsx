@@ -149,21 +149,21 @@ export default function FileUploaderDialog({ opener, onUpload }: Props) {
                     <div className="mb-2 flex h-32 !w-32 min-w-32 items-center justify-center overflow-hidden rounded-md bg-gray-200">
                       <img
                         className="max-h-full max-w-full object-contain"
-                        src={getImgFromKey(file.image_key)}
-                        alt={file.file_name}
+                        src={getImgFromKey(file.imageKey)}
+                        alt={file.fileName}
                       />
                     </div>
                     <div className="ml-2">
-                      <Text className="max-w-[100px] truncate !text-sm font-bold">{file.file_name}</Text>
+                      <Text className="max-w-[100px] truncate !text-sm font-bold">{file.fileName}</Text>
                       <div>
-                        <Text className="!text-xs text-gray-500">{formatFileSize(file.size_bytes)}</Text>
+                        <Text className="!text-xs text-gray-500">{formatFileSize(file.sizeBytes)}</Text>
                       </div>
                     </div>
                   </div>
                   <div className="flex w-full justify-between">
                     <Button
                       onClick={() => {
-                        onUpload(getImgFromKey(file.image_key))
+                        onUpload(getImgFromKey(file.imageKey))
                         opener.close()
                       }}
                       color="purple"
@@ -171,7 +171,7 @@ export default function FileUploaderDialog({ opener, onUpload }: Props) {
                       Apply
                     </Button>
                     <div>
-                      <Button onClick={() => handleDeleteConfirmation(file.image_key)} color="red">
+                      <Button onClick={() => handleDeleteConfirmation(file.imageKey)} color="red">
                         <TrashIcon className="size-4" />
                       </Button>
                     </div>

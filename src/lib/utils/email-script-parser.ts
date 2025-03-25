@@ -1133,7 +1133,6 @@ export function parseEmailScript(script: string, email: Email | null): Email {
   }
 
   return {
-    ...email,
     ...emailAttributes,
     rows,
     id: email?.id || v4(),

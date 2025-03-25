@@ -1,131 +1,64 @@
-import bcrypt from 'bcryptjs'
 import NextAuth, { NextAuthConfig } from 'next-auth'
-import CredentialProvider from 'next-auth/providers/credentials'
 import GoogleProvider from 'next-auth/providers/google'
+import Resend from 'next-auth/providers/resend'
 import { authConfig } from './auth.config'
-import { addUser, getUserByEmail, userExists } from './lib/database/queries/users'
-
-interface Credentials {
-  email: string
-  password: string
-}
+import { sendVerificationRequest } from './lib/auth/authSendRequest'
+import KyselyAdapter from './lib/database/custom-adapter'
+import { db } from './lib/database/db'
 
 export const authOptions: NextAuthConfig = {
   ...authConfig,
+  adapter: KyselyAdapter(db),
   providers: [
-    CredentialProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: 'Email', type: 'text' },
-        password: { label: 'Password', type: 'password' },
-      },
-      async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error('Email and password are required')
+    Resend({
+      apiKey: process.env.RESEND_API_KEY,
+      from: 'noreply@wand.email',
+      sendVerificationRequest: async (params) => {
+        if (!params.provider.apiKey) {
+          console.error('Missing Resend API key')
+          throw new Error('Missing Resend API key')
         }
+
+        console.log('Verification request params:', {
+          to: params.identifier,
+          from: params.provider.from,
+          url: params.url,
+          hasApiKey: !!params.provider.apiKey,
+        })
 
         try {
-          const user = await getUserByEmail(credentials.email as string)
-
-          if (!user) {
-            throw new Error('User not found')
-          }
-
-          if (!user.password) {
-            throw new Error('Invalid credentials')
-          }
-
-          const isMatch = await bcrypt.compare(credentials.password as string, user.password)
-
-          if (!isMatch) {
-            throw new Error('Invalid credentials')
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-          }
+          await sendVerificationRequest(params)
+          console.log('Verification email sent successfully')
         } catch (error) {
-          if (error instanceof Error && error.message === 'User not found') {
-            console.error('User not found')
-            throw new Error('User not found')
-          }
-
-          console.error('Error during authorization:', error)
-          throw new Error('Invalid credentials')
+          console.error('Detailed send error:', error)
+          throw error
         }
+      },
+      async generateVerificationToken() {
+        return crypto.randomUUID()
       },
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_ID!,
       clientSecret: process.env.GOOGLE_SECRET!,
-      authorization: {
-        params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code',
-        },
-      },
     }),
   ],
   callbacks: {
-    async signIn({ user, account, profile, credentials }) {
-      if (account?.provider === 'google') {
-        try {
-          let dbUser = await getUserByEmail(profile?.email as string)
-          if (!dbUser) {
-            addUser({
-              googleId: account.providerAccountId,
-              name: profile?.name as string,
-              email: user.email as string,
-            })
-          }
-          user.id = dbUser?.id
-          return true
-        } catch (error) {
-          console.error('Error during Google sign-in:', error)
-          return false
-        }
-      }
-      return true
-    },
-    async session({ session, token }) {
-      const exists = await userExists(session.user.email as string)
-
-      if (!exists) {
-        return { user: undefined, expires: new Date(0).toISOString() }
-      }
-
-      if (session.user) {
-        session.user.id = token.id as string
+    session: async ({ session, token }) => {
+      if (session?.user) {
+        session.user.id = token.sub as string
       }
       return session
     },
-    async jwt({ token, user, account, trigger, session }) {
-      if (trigger === 'update') {
-        const dbUser = await getUserByEmail(token.email as string)
-        if (dbUser) {
-          token.name = dbUser.name
-        }
-
-        return token
-      }
+    jwt: async ({ user, token }) => {
       if (user) {
-        token.id = user.id
-      }
-      if (account && account.provider === 'google') {
-        try {
-          const dbUser = await getUserByEmail(token.email as string)
-          if (dbUser) {
-            token.id = dbUser.id
-          }
-        } catch (error) {
-          console.error('Error fetching user from database:', error)
-        }
+        token.uid = user.id
       }
       return token
     },
+  },
+  session: {
+    strategy: 'jwt',
   },
 }
 
