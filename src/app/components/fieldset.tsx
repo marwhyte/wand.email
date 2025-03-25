@@ -49,12 +49,14 @@ export function Field({
   return (
     <Headless.Field
       {...props}
+      data-label-position={labelPosition}
       className={clsx(
         className,
         'grid grid-cols-1 gap-x-4',
         labelPosition === 'side' && 'sm:grid-cols-[3fr_2fr]',
         '[&>[data-slot=label]]:font-medium',
         labelPosition === 'side' && '[&>[data-slot=label]]:sm:self-center',
+        labelPosition === 'top' && '[&>[data-slot=label]]:mb-1',
         labelPosition === 'side' &&
           '[&:has([data-slot=label])>[data-slot=control]]:sm:w-full [&:has([data-slot=label])>[data-slot=control]]:sm:justify-self-end',
         labelPosition === 'side' &&
@@ -77,7 +79,8 @@ export function Label({ className, ...props }: { className?: string } & Omit<Hea
       {...props}
       className={clsx(
         className,
-        'select-none text-base/6 text-zinc-950 data-[disabled]:opacity-50 dark:text-white sm:text-sm/6'
+        'select-none text-base/6 text-zinc-950 data-[disabled]:opacity-50 dark:text-white sm:text-sm/6',
+        '[.field-group[data-label-position=top]_&]:mb-2'
       )}
     />
   )

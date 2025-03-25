@@ -104,13 +104,12 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
     if (!session?.data?.user?.email || !email) return
 
     setEmailStatus('loading')
-
     try {
       const response = await fetch('/api/send', {
         method: 'POST',
         body: JSON.stringify({
           html: render(EmailRendererFinal({ email: email, company: company })),
-          email: session.data.user.email,
+          email: '',
         }),
         headers: {
           'Content-Type': 'application/json',

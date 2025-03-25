@@ -89,12 +89,15 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
     footer: {
       text: {
         fontSize: '12px',
-        color: 'rgba(0,0,0,0.54)',
+        color: '#8b8b8b',
       },
     },
   },
   default: {
     footer: {
+      text: {
+        color: '#696969',
+      },
       link: {
         align: 'center',
       },

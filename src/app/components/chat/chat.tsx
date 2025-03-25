@@ -4,6 +4,7 @@ import { generateTitleFromUserMessage } from '@/app/(chat)/actions'
 import { usePlan } from '@/app/components/payment/plan-provider'
 import { useOpener, usePromptEnhancer, useSnapScroll } from '@/app/hooks'
 import { useChatHistory } from '@/app/hooks/useChatHistory'
+import { useLocalStorage } from '@/app/hooks/useLocalStorage'
 import { useMessageParser } from '@/app/hooks/useMessageParser'
 import { updateChat } from '@/lib/database/queries/chats'
 import { deleteCompany } from '@/lib/database/queries/companies'
@@ -208,6 +209,24 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session.status])
+
+  // Change the localStorage key based on whether chat has started
+  const [localStorageInput, setLocalStorageInput] = useLocalStorage(chatStarted ? `chat-input-${id}` : 'input', '')
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      const domValue = textareaRef.current.value
+      // Prefer DOM value over localStorage to handle hydration
+      const finalValue = domValue || localStorageInput || ''
+      setInput(finalValue)
+    }
+    // Add id to dependencies to re-run when chat changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id])
+
+  useEffect(() => {
+    setLocalStorageInput(input)
+  }, [input, setLocalStorageInput])
 
   const scrollTextArea = () => {
     const textarea = textareaRef.current

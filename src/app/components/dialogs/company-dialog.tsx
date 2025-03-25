@@ -14,7 +14,7 @@ import clsx from 'clsx'
 import { useEffect, useState } from 'react'
 import { Dialog, DialogTitle } from './dialog'
 
-type FormData = Omit<Company, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
+type FormData = Omit<Company, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'logoImageKey'>
 
 interface CompanyDialogProps {
   isOpen: boolean

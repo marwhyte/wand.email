@@ -5,6 +5,13 @@ import { v4 as uuidv4 } from 'uuid'
 import { Company } from '../database/types'
 import { parseEmailScript } from './email-script-parser'
 
+import { ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
 export function shouldUseDarkText(backgroundColor: string) {
   // Convert hex to RGB
   const hex = backgroundColor.replace('#', '')
@@ -114,8 +121,8 @@ export function getEmailFromMessage(email: Email | null, message: Message) {
 
 export function getImgSrc(src: string, company?: Company | null) {
   return src === 'logo'
-    ? company?.logoFileId
-      ? getImgFromKey(company.logoFileId)
+    ? company?.logoImageKey
+      ? getImgFromKey(company.logoImageKey)
       : getImgFromKey('dummy-logo.png')
     : src
 }

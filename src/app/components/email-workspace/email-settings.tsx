@@ -107,13 +107,13 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
         </Select>
       </Field>
       {company && (
-        <Field>
-          <Label>Company branding</Label>
+        <Field labelPosition="top">
+          <Label className="mb-2">Company branding</Label>
           <div className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
             <div className="flex items-center space-x-4">
-              {company.logoFileId && (
+              {company.logoImageKey && (
                 <img
-                  src={getImgFromKey(company.logoFileId)}
+                  src={getImgFromKey(company.logoImageKey)}
                   alt={`${company.name} logo`}
                   className="h-8 min-w-8 max-w-[70px] bg-white object-contain"
                 />

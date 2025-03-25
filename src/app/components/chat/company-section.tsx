@@ -55,9 +55,9 @@ export function CompanySection({
               )}
             >
               <div className="flex items-center space-x-4">
-                {company.logoFileId && (
+                {company.logoImageKey && (
                   <img
-                    src={getImgFromKey(company.logoFileId)}
+                    src={getImgFromKey(company.logoImageKey)}
                     alt={`${company.name} logo`}
                     className="h-8 min-w-8 max-w-[70px] bg-white object-contain"
                   />

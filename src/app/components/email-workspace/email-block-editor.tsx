@@ -11,9 +11,10 @@ import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getBlockProps } from '@/lib/utils/attributes'
 import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
-import { capitalizeFirstLetter, isValidHttpUrl, safeParseInt } from '@/lib/utils/misc'
+import { capitalizeFirstLetter, safeParseInt } from '@/lib/utils/misc'
 import { useMemo } from 'react'
 import { Select } from '../select'
+import HrefEditor from './href-editor'
 import ListEditor from './list-editor'
 import SocialsEditor from './socials-editor'
 import SurveyEditor from './survey-editor'
@@ -56,6 +57,7 @@ enum Options {
   SRC = 'src',
   NO_PADDING_MOBILE = 'no-padding-mobile',
   HEADING_LEVEL = 'heading-level',
+  LINK_TYPE = 'link-type',
 }
 
 type EmailBlockEditorProps = {
@@ -84,6 +86,14 @@ type EmailBlockEditorProps = {
       | DividerBlockAttributes
     >
   ) => void
+}
+
+type LinkFields = {
+  email?: string
+  subject?: string
+  body?: string
+  phone?: string
+  url?: string
 }
 
 const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
@@ -132,6 +142,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
           Options.BACKGROUND_COLOR,
           Options.PADDING,
           Options.BORDER,
+          Options.BORDER_RADIUS,
         ]
       case 'heading':
         return [Options.HEADING_LEVEL, Options.TEXT, Options.TEXT_PROPERTIES, Options.TEXT_ALIGN, Options.PADDING]
@@ -170,6 +181,12 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         />
       )}
 
+      <Disclosure title="Action" defaultOpen>
+        {options.includes(Options.HREF) && 'href' in processedProps && (
+          <HrefEditor href={processedProps.href} onChange={(href) => onChange({ href })} />
+        )}
+      </Disclosure>
+
       {block.type !== 'text' && (
         <Disclosure title={`${capitalizeFirstLetter(block.type)} Attributes`} defaultOpen>
           <FieldGroup>
@@ -201,21 +218,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 </div>
               </Field>
             )}
-            {options.includes(Options.HREF) && 'href' in processedProps && (
-              <Field labelPosition="top">
-                <Label>Link URL</Label>
-                <Input
-                  pattern="https?://.*"
-                  title="Please enter a valid link"
-                  invalid={!isValidHttpUrl(processedProps.href || '')}
-                  error={!isValidHttpUrl(processedProps.href || '') ? 'Please enter a valid link' : undefined}
-                  type="url"
-                  value={processedProps.href || ''}
-                  onChange={(e) => onChange({ href: e.target.value })}
-                  placeholder="https://example.com"
-                />
-              </Field>
-            )}
+
             {options.includes(Options.BACKGROUND_COLOR) && (
               <Field>
                 <Label>Background Color</Label>

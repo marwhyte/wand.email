@@ -32,6 +32,20 @@ export function ChatInput({
   enhancePrompt,
   handleStop,
 }: ChatInputProps) {
+  // Function to clear input from localStorage
+  const clearInput = () => {
+    // Clear both the generic input and any specific chat inputs
+    localStorage.removeItem('input')
+    // Get all localStorage keys
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i)
+      // Remove any key that starts with 'chat-input-'
+      if (key?.startsWith('chat-input-')) {
+        localStorage.removeItem(key)
+      }
+    }
+  }
+
   return (
     <motion.div
       layout
@@ -56,7 +70,7 @@ export function ChatInput({
               }
 
               event.preventDefault()
-
+              clearInput()
               sendMessage?.()
             }
           }}
@@ -78,6 +92,7 @@ export function ChatInput({
               return
             }
 
+            clearInput()
             sendMessage?.()
           }}
         />

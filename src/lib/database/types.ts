@@ -72,6 +72,7 @@ export type Company = Omit<CompanyTable, 'id' | 'createdAt' | 'updatedAt'> & {
   id: string
   createdAt: Date
   updatedAt: Date
+  logoImageKey: string | null
 }
 
 export interface ExportTable {

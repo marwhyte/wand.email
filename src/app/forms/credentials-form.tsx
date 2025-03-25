@@ -1,21 +1,24 @@
 'use client'
 
 import { Button } from '@components/button'
-import { Field, Label } from '@components/fieldset'
-import { Input } from '@components/input'
+import { Field } from '@components/fieldset'
 import Loading from '@components/loading'
-import { ExclamationTriangleIcon } from '@heroicons/react/20/solid'
+import { ExclamationTriangleIcon, PencilSquareIcon } from '@heroicons/react/20/solid'
 import { signIn } from 'next-auth/react'
 import React, { useState } from 'react'
+import { GlowInput } from '../components/glow-input'
+import { Text } from '../components/text'
 
-type Props = {
-  register?: boolean
-}
-
-const CredentialsForm = ({ register }: Props) => {
+const CredentialsForm = () => {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [email, setEmail] = useState('')
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return emailRegex.test(email)
+  }
 
   async function handleFormSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -25,8 +28,16 @@ const CredentialsForm = ({ register }: Props) => {
     const formData = new FormData(event.currentTarget)
     const email = formData.get('email')
 
+    setEmail(email as string)
+
     if (!email) {
       setError('Please enter your email address.')
+      setLoading(false)
+      return
+    }
+
+    if (!isValidEmail(email as string)) {
+      setError('Please enter a valid email address.')
       setLoading(false)
       return
     }
@@ -58,18 +69,33 @@ const CredentialsForm = ({ register }: Props) => {
     return (
       <div className="text-center">
         <h2 className="text-lg font-semibold">Check your email</h2>
-        <p className="mt-2">We&apos;ve sent you a magic link to sign in. Please check your email inbox.</p>
+        <Text className="mt-2 flex items-center justify-center gap-2">
+          We&apos;ve emailed a magic link to {email}
+          <button onClick={() => setSubmitted(false)} className="text-sm text-blue-600 hover:text-blue-800">
+            <PencilSquareIcon className="h-4 w-4" />
+          </button>
+        </Text>
+        <Text className="mt-2">Click the link in your email to log in or sign up.</Text>
       </div>
     )
   }
 
   return (
     <form className="flex flex-col gap-3" onSubmit={handleFormSubmit}>
-      <Field labelPosition="top" className="mb-4">
-        <Label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
-          Email
-        </Label>
-        <Input id="email" placeholder="Email" name="email" type="email" autoComplete="email" required />
+      <Text className="text-center !text-base font-medium !text-black">
+        Welcome to <b>wand.email</b>! Enter your email to continue.
+      </Text>
+
+      <Field labelPosition="top" className="mb-2">
+        <GlowInput
+          defaultValue={email}
+          id="email"
+          placeholder="Email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+        />
       </Field>
 
       {error && (
@@ -90,7 +116,7 @@ const CredentialsForm = ({ register }: Props) => {
           <Loading />
         ) : (
           <Button className="w-full" type="submit">
-            Send Sign in Link
+            Send link
           </Button>
         )}
       </div>
