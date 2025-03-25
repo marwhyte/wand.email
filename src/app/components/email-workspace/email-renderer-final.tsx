@@ -217,7 +217,7 @@ const RenderBlockFinal = ({
       cellSpacing="0"
       role="presentation"
       // @ts-ignore
-      style={{ msoTableLspace: '0pt', msoTableRspace: '0pt', wordBreak: 'break-word' }}
+      style={{ borderRadius: '10px' }}
     >
       <tr>
         <td {...columnProps}>{content}</td>
@@ -226,7 +226,21 @@ const RenderBlockFinal = ({
   )
 }
 
-const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; company: Company | null }) => {
+const RenderColumns = ({
+  row,
+  email,
+  company,
+  needsRounding,
+  isFirstRow,
+  isLastRow,
+}: {
+  row: RowBlock
+  email: Email
+  company: Company | null
+  needsRounding?: boolean
+  isFirstRow: boolean
+  isLastRow: boolean
+}) => {
   const emailAttributes = getEmailAttributes(email)
   const rowAttributes = getRowAttributes(row, email)
   const columnSpacing = rowAttributes?.columnSpacing || 0
@@ -266,15 +280,20 @@ const RenderColumns = ({ row, email, company }: { row: RowBlock; email: Email; c
       </Column>
     )
 
+  const rowProps = getRowProps(row, email)
+
   return (
     <Row
-      {...getRowProps(row, email)}
+      {...rowProps}
       style={{
-        ...getRowProps(row, email).style,
+        ...rowProps.style,
         // @ts-ignore - MSO properties for Outlook compatibility
         msoTableLspace: '0pts',
         // @ts-ignore - MSO properties for Outlook compatibility
         msoTableRspace: '0pts',
+        borderRadius:
+          rowProps.style?.borderRadius ||
+          (needsRounding && (isFirstRow || isLastRow) ? (isFirstRow ? '8px 8px 0 0' : '0 0 8px 8px') : undefined),
       }}
     >
       {row.columns.map((column, index) => (
@@ -316,24 +335,18 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
         // Add border radius for 'floating' style variant
         const isFirstRow = index === 0
         const isLastRow = index === email.rows.filter((r) => r.attributes.type !== 'footer').length - 1
-        const needsRounding = emailAttributes.styleVariant === 'default'
-
-        // Create styles object for row wrapper if needed
-        const floatingStyles =
-          needsRounding && (isFirstRow || isLastRow)
-            ? {
-                style: {
-                  borderRadius: isFirstRow ? '8px 8px 0 0' : isLastRow ? '0 0 8px 8px' : undefined,
-                  overflow: 'hidden',
-                },
-              }
-            : {}
+        const needsRounding = emailAttributes.styleVariant === 'default' && (isFirstRow || isLastRow)
 
         return (
           <React.Fragment key={row.id}>
-            <div {...floatingStyles}>
-              <RenderColumns row={row} email={email} company={company} />
-            </div>
+            <RenderColumns
+              isFirstRow={isFirstRow}
+              isLastRow={isLastRow}
+              needsRounding={needsRounding}
+              row={row}
+              email={email}
+              company={company}
+            />
             {index < email.rows.length - 1 &&
               emailAttributes.styleVariant === 'outline' &&
               row.attributes.type !== 'header' &&
