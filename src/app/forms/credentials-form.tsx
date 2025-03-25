@@ -58,7 +58,7 @@ const CredentialsForm = ({ register }: Props) => {
     return (
       <div className="text-center">
         <h2 className="text-lg font-semibold">Check your email</h2>
-        <p className="mt-2">We've sent you a magic link to sign in. Please check your email inbox.</p>
+        <p className="mt-2">We&apos;ve sent you a magic link to sign in. Please check your email inbox.</p>
       </div>
     )
   }
