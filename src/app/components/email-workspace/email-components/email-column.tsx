@@ -1,9 +1,10 @@
+import { useIsMobile } from '@/app/hooks/useIsMobile'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
 import { getColumnProps } from '@/lib/utils/attributes'
 import { ArrowDownCircleIcon, ArrowUpCircleIcon } from '@heroicons/react/20/solid'
 import { Column } from '@react-email/components'
-import React, { useRef } from 'react'
+import React from 'react'
 import { useDrop } from 'react-dnd'
 import { EmailBlock as BlockType, ColumnBlock, EmailBlockType, RowBlock } from '../types'
 import EmailBlock from './email-block'
@@ -38,8 +39,8 @@ export default function EmailColumn({
   setDropTarget,
   onBlockDrop,
 }: Props) {
-  const ref = useRef<HTMLDivElement>(null)
   const { mobileView } = useMobileViewStore()
+  const isMobile = useIsMobile()
   const { email } = useEmailStore()
   const handleColumnClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -73,7 +74,7 @@ export default function EmailColumn({
         ...getColumnProps(column, row, email).style,
         width: column.attributes.width,
       }}
-      className={`${getColumnProps(column, row, email).className || ''} ${mobileView ? 'mobile-forced-full-width' : ''} ${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
+      className={`${getColumnProps(column, row, email).className || ''} ${mobileView || isMobile ? 'mobile-forced-full-width' : ''} ${column.blocks.length === 0 ? 'border-2 border-dashed bg-blue-50' : ''} ${isDropTarget && isOver ? 'border-green-500 bg-green-100' : 'border-blue-500'}`}
       onClick={handleColumnClick}
       // @ts-ignore
       ref={drop}

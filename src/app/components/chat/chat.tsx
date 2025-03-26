@@ -566,7 +566,8 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                 >
                   <StickToBottom
                     className={classNames('relative flex flex-col justify-end', {
-                      'h-[calc(100vh-95px)]': chatStarted,
+                      'h-[calc(100vh-95px)]': chatStarted && !isMobile,
+                      'h-[calc(100vh-140px)]': chatStarted && isMobile,
                       'pl-[30px]': chatStarted && !isMobile,
                     })}
                     resize="smooth"
@@ -585,7 +586,14 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                     </StickToBottom.Content>
                     <ScrollToBottom textareaHeight={textareaHeight} />
 
-                    <div className="px-0 sm:px-4">
+                    <div
+                      className={classNames(
+                        'px-0 sm:px-4',
+                        isMobile && chatStarted
+                          ? 'fixed bottom-0 left-0 right-0 z-50 bg-white/95 pb-2 pt-2 backdrop-blur'
+                          : ''
+                      )}
+                    >
                       <ChatInput
                         chatStarted={chatStarted}
                         textareaRef={textareaRef}
