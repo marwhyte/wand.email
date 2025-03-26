@@ -40,7 +40,8 @@ export async function cancelSubscription() {
       cancel_at_period_end: true,
     })
 
-    await updateUserPlan(user.id, 'free', user.stripeCustomerId)
+    const expiresAt = new Date(subscriptions.data[0].current_period_end * 1000)
+    await updateUserPlan(user.id, 'free', user.stripeCustomerId, expiresAt)
 
     return { success: true }
   } catch (err) {

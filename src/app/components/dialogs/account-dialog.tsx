@@ -61,7 +61,7 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const session = useSession()
-  const { plan, refetchUser } = usePlan()
+  const { plan, refetchUser, expiresAt } = usePlan()
 
   // Subscription state
   const [selectedTier, setSelectedTier] = useState(tiers[1])
@@ -209,6 +209,16 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
                       <div className="space-y-2">
                         <Strong>Current Plan: Pro</Strong>
                         <Text>You currently have access to all premium features.</Text>
+                        {expiresAt && expiresAt > new Date() && (
+                          <Text className="text-gray-600">
+                            Your subscription will remain active until{' '}
+                            {new Date(expiresAt).toLocaleDateString('en-US', {
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </Text>
+                        )}
                       </div>
                     </div>
                     <Button color="red" className="w-full" onClick={handleCancelClick} disabled={isCanceling}>

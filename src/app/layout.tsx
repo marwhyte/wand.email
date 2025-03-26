@@ -43,7 +43,11 @@ export default async function RootLayout({
       <body className={`${inter.className} h-full`}>
         <main>
           <SessionProvider session={session}>
-            <PlanProvider fetchUser={fetchUser} plan={initialUser?.plan}>
+            <PlanProvider
+              fetchUser={fetchUser}
+              plan={initialUser?.plan}
+              expiresAt={initialUser?.stripeSubscriptionExpiresAt}
+            >
               {children}
             </PlanProvider>
           </SessionProvider>

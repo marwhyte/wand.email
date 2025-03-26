@@ -12,7 +12,7 @@ export async function getUsers() {
 export async function getUserByEmail(email: string) {
   return await db
     .selectFrom('User')
-    .select(['id', 'name', 'plan', 'email', 'stripeCustomerId'])
+    .select(['id', 'name', 'plan', 'email', 'stripeCustomerId', 'stripeSubscriptionExpiresAt'])
     .where('email', '=', email)
     .executeTakeFirst()
 }
@@ -26,8 +26,17 @@ export async function getUserByStripeCustomerId(stripeCustomerId: string) {
   return user
 }
 
-export async function updateUserPlan(userId: string, plan: Plan, stripeCustomerId: string) {
-  await db.updateTable('User').set({ plan, stripeCustomerId, updatedAt: new Date() }).where('id', '=', userId).execute()
+export async function updateUserPlan(
+  userId: string,
+  plan: Plan,
+  stripeCustomerId: string,
+  stripeSubscriptionExpiresAt: Date | null
+) {
+  await db
+    .updateTable('User')
+    .set({ plan, stripeCustomerId, stripeSubscriptionExpiresAt, updatedAt: new Date() })
+    .where('id', '=', userId)
+    .execute()
 }
 
 export async function updateUser(formData: FormData) {

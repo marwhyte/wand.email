@@ -145,6 +145,7 @@ export interface UserTable {
   image: string | null
   plan: Plan
   stripeCustomerId: string | null
+  stripeSubscriptionExpiresAt: Date | null
   createdAt: GeneratedAlways<Date>
   updatedAt: Generated<Date>
 }

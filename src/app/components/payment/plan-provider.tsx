@@ -6,6 +6,7 @@ import { createContext, ReactNode, useContext, useEffect, useState } from 'react
 // Create the context
 const PlanContext = createContext<{
   plan: Plan | null | undefined
+  expiresAt: Date | null
   refetchUser: () => Promise<Pick<User, 'id' | 'name' | 'plan' | 'email'> | null | undefined>
   upgradeDialogOpen: boolean
   setUpgradeDialogOpen: (open: boolean) => void
@@ -24,9 +25,10 @@ interface PlanProviderProps {
   children: ReactNode
   fetchUser: () => Promise<Pick<User, 'id' | 'name' | 'plan' | 'email'> | null | undefined>
   plan: Plan | null | undefined
+  expiresAt: Date | null | undefined
 }
 
-const PlanProvider = ({ children, fetchUser, plan }: PlanProviderProps) => {
+const PlanProvider = ({ children, fetchUser, plan, expiresAt }: PlanProviderProps) => {
   const [userPlan, setUserPlan] = useState<Plan | null | undefined>(plan)
   const [upgradeDialogOpen, setUpgradeDialogOpen] = useState<boolean>(false)
 
@@ -46,6 +48,7 @@ const PlanProvider = ({ children, fetchUser, plan }: PlanProviderProps) => {
     <PlanContext.Provider
       value={{
         plan: userPlan,
+        expiresAt: expiresAt ?? null,
         refetchUser,
         upgradeDialogOpen,
         setUpgradeDialogOpen,

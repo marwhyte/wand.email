@@ -67,7 +67,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     }
 
     // Update the user's plan in the database
-    await updateUserPlan(userId, planName, stripeCustomerId)
+    await updateUserPlan(userId, planName, stripeCustomerId, null)
   }
 }
 
@@ -77,13 +77,14 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   if (!user) throw new Error(`User not found with stripe customer id ${subscription.customer}`)
 
   const plan = getPlanNameFromPriceId(stripePriceId)
+  const expiresAt = new Date(subscription.current_period_end * 1000)
 
-  await updateUserPlan(user.id, plan, subscription.customer as string)
+  await updateUserPlan(user.id, plan, subscription.customer as string, expiresAt)
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   const user = await getUserByStripeCustomerId(subscription.customer as string)
   if (!user) throw new Error(`User not found with stripe customer id ${subscription.customer}`)
 
-  await updateUserPlan(user.id, 'free', subscription.customer as string)
+  await updateUserPlan(user.id, 'free', subscription.customer as string, new Date())
 }
