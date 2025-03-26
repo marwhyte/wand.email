@@ -57,8 +57,8 @@ export function Footer() {
               Hey! I&apos;m Marco, an indie hacker who loves to build AI apps while traveling the world.
             </p>
             <p className="text-sm text-gray-700">
-              After battling with email styling across different email clients, I built this tool to solve my own
-              frustrations and help others create beautiful, consistent, on brand emails without the headache.
+              After battling with email styling across different clients, I built this tool to solve my own frustrations
+              and help others create beautiful, consistent, on brand emails without the headache.
             </p>
             <div className="mt-2 text-xs text-blue-600">
               <Link href="https://marcowhyte.com/blog" target="_blank" rel="noopener noreferrer">

@@ -4,7 +4,6 @@ import { updateUser } from '@/lib/database/queries/users'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import AlertBox from '../components/alert-box'
-import { Button } from '../components/button'
 import { Subheading } from '../components/heading'
 import { Input } from '../components/input'
 import SubmitButton from '../components/submit-button'
@@ -40,7 +39,7 @@ const AccountForm = () => {
   }, [message])
 
   return (
-    <form action={handleSubmit}>
+    <form action={handleSubmit} className="space-y-6">
       <section className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
         <div className="space-y-1">
           <Subheading>Name</Subheading>
@@ -50,14 +49,8 @@ const AccountForm = () => {
           <Input value={name} onChange={(e) => setName(e.target.value)} aria-label="Organization Name" name="name" />
         </div>
       </section>
-      <div className="flex justify-end gap-4">
-        <Button type="reset" plain>
-          Reset
-        </Button>
-        <SubmitButton
-          isSuccess={message.type === 'success'}
-          disabled={!name || name === sessionData?.user?.name || sessionData?.user?.name === name}
-        >
+      <div className="mb-4 flex justify-end gap-4">
+        <SubmitButton isSuccess={message.type === 'success'} disabled={!name || name === sessionData?.user?.name}>
           Save changes
         </SubmitButton>
       </div>
