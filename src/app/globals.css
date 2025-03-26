@@ -19,7 +19,6 @@ input {
 }
 
 
-
 table {
     border-collapse: separate;
 }
@@ -64,6 +63,17 @@ table {
 .mobile-forced-full-width {
   display: inline-block !important;
   width: 100% !important;
+  padding-bottom: 20px !important;
+}
+
+/* Add stacking behavior for row with the stack class */
+table.stack > tr > td {
+  display: block !important;
+  width: 100% !important;
+}
+/* Also need to ensure spacing TDs don't show in stacked mode */
+table.stack > tr > td[width] {
+  display: none !important;
 }
 
 .mobile-forced-half-width {
@@ -74,6 +84,7 @@ table {
   padding-left: 0 !important;
   padding-right: 0 !important;
 }
+
 
 @keyframes stroke {
   100% {

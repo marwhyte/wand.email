@@ -193,6 +193,14 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   // Add state for mobile view toggle
   const [showEmailPreview, setShowEmailPreview] = useState(false)
 
+  // Add a new state to track if we've received an assistant message
+  const [hasReceivedAssistantMessage, setHasReceivedAssistantMessage] = useState(false)
+
+  // Add a state to track if this is the first assistant message
+  const [isFirstAssistantMessageComplete, setIsFirstAssistantMessageComplete] = useState(
+    initialMessages.filter((m) => m.role === 'assistant').length > 0
+  )
+
   renderLogger.trace('Chat')
 
   useEffect(() => {
@@ -456,6 +464,26 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     }
   }, [initialMessages.length])
 
+  useEffect(() => {
+    // Only run when status changes from 'streaming' to 'idle'
+    if (status === 'ready' && latestAssistantMessage) {
+      if (!isFirstAssistantMessageComplete) {
+        // First assistant message just completed
+        setIsFirstAssistantMessageComplete(true)
+
+        // Automatically switch to preview when the first assistant message completes
+        if (isMobile && chatStarted) {
+          setShowEmailPreview(true)
+        }
+      } else {
+        // Subsequent messages - only switch when they complete (status becomes idle)
+        if (isMobile && chatStarted) {
+          setShowEmailPreview(true)
+        }
+      }
+    }
+  }, [status, latestAssistantMessage, isMobile, chatStarted, isFirstAssistantMessageComplete])
+
   return (
     <div className="mx-auto w-full">
       {session?.data?.user && <Menu />}
@@ -464,46 +492,51 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       <div className="flex flex-1">
         <>
           {isMobile && chatStarted && (
-            <div className="fixed left-1/2 top-14 z-20 flex -translate-x-1/2 transform rounded-lg bg-white/90 p-1 shadow-lg backdrop-blur-sm">
-              <div className="relative flex">
-                <div
-                  className="absolute h-full rounded-md bg-purple-600 transition-all duration-300"
-                  style={{
-                    width: '50%',
-                    transform: showEmailPreview ? 'translateX(100%)' : 'translateX(0)',
-                    top: 0,
-                    left: 0,
-                    zIndex: 0,
-                  }}
-                />
-                <Button
-                  plain
-                  size="small"
-                  onClick={() => setShowEmailPreview(false)}
-                  className="relative z-10 min-w-[80px]"
-                >
-                  <span
-                    className={`flex items-center transition-colors duration-300 ${!showEmailPreview ? 'text-white' : 'text-gray-600'}`}
-                  >
-                    <ChatBubbleLeftRightIcon className="mr-1 h-4 w-4" />
-                    Chat
-                  </span>
-                </Button>
-                <Button
-                  plain
-                  size="small"
-                  onClick={() => setShowEmailPreview(true)}
-                  className="relative z-10 min-w-[80px]"
-                >
-                  <span
-                    className={`flex items-center transition-colors duration-300 ${showEmailPreview ? 'text-white' : 'text-gray-600'}`}
-                  >
-                    <DocumentTextIcon className="mr-1 h-4 w-4" />
-                    Preview
-                  </span>
-                </Button>
-              </div>
-            </div>
+            <>
+              {isFirstAssistantMessageComplete ? (
+                <div className="fixed left-1/2 top-14 z-20 flex -translate-x-1/2 transform rounded-lg bg-white/90 p-1 shadow-lg backdrop-blur-sm">
+                  <div className="relative flex">
+                    <div
+                      className="absolute h-full rounded-md bg-purple-600 transition-all duration-300"
+                      style={{
+                        width: '50%',
+                        transform: showEmailPreview ? 'translateX(100%)' : 'translateX(0)',
+                        top: 0,
+                        left: 0,
+                        zIndex: 0,
+                      }}
+                    />
+                    <Button
+                      plain
+                      size="small"
+                      onClick={() => setShowEmailPreview(false)}
+                      className="relative z-10 min-w-[80px]"
+                    >
+                      <span
+                        className={`flex items-center transition-colors duration-300 ${!showEmailPreview ? 'text-white' : 'text-gray-600'}`}
+                      >
+                        <ChatBubbleLeftRightIcon className="mr-1 h-4 w-4" />
+                        Chat
+                      </span>
+                    </Button>
+                    <Button
+                      plain
+                      size="small"
+                      onClick={() => setShowEmailPreview(true)}
+                      className="relative z-10 min-w-[80px]"
+                    >
+                      <span
+                        className={`flex items-center transition-colors duration-300 ${showEmailPreview ? 'text-white' : 'text-gray-600'}`}
+                      >
+                        <DocumentTextIcon className="mr-1 h-4 w-4" />
+                        Preview
+                      </span>
+                    </Button>
+                  </div>
+                </div>
+              ) : // Show loading indicator or nothing while waiting for first message
+              null}
+            </>
           )}
           <div
             ref={animationScope}
@@ -634,45 +667,45 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                 </div>
               )}
             </div>
+
+            <MobileWarningDialog
+              isOpen={mobileWarningOpener.isOpen}
+              onClose={mobileWarningOpener.close}
+              onConfirm={() => {
+                mobileWarningOpener.close()
+                // Mark the warning as seen when confirmed
+                setMobileWarningSeen(true)
+                if (pendingMessage) {
+                  sendMessageImpl(pendingMessage)
+                  setPendingMessage(undefined)
+                }
+              }}
+            />
+
+            <CompanyDialog
+              company={activeCompany}
+              isOpen={companyOpener.isOpen}
+              onClose={companyOpener.close}
+              onSuccess={(company) => {
+                companyOpener.close()
+                setActiveCompany(null)
+                mutate('/api/companies')
+              }}
+            />
+
+            <UpgradeDialog />
+
+            <DeleteCompanyDialog
+              open={deleteOpener.isOpen}
+              onClose={() => {
+                deleteOpener.close()
+                setActiveCompany(null)
+              }}
+              company={activeCompany}
+              isDeleting={isDeleting}
+              onConfirmDelete={confirmDeleteCompany}
+            />
           </div>
-
-          <MobileWarningDialog
-            isOpen={mobileWarningOpener.isOpen}
-            onClose={mobileWarningOpener.close}
-            onConfirm={() => {
-              mobileWarningOpener.close()
-              // Mark the warning as seen when confirmed
-              setMobileWarningSeen(true)
-              if (pendingMessage) {
-                sendMessageImpl(pendingMessage)
-                setPendingMessage(undefined)
-              }
-            }}
-          />
-
-          <CompanyDialog
-            company={activeCompany}
-            isOpen={companyOpener.isOpen}
-            onClose={companyOpener.close}
-            onSuccess={(company) => {
-              companyOpener.close()
-              setActiveCompany(null)
-              mutate('/api/companies')
-            }}
-          />
-
-          <UpgradeDialog />
-
-          <DeleteCompanyDialog
-            open={deleteOpener.isOpen}
-            onClose={() => {
-              deleteOpener.close()
-              setActiveCompany(null)
-            }}
-            company={activeCompany}
-            isDeleting={isDeleting}
-            onConfirmDelete={confirmDeleteCompany}
-          />
         </>
       </div>
     </div>

@@ -132,7 +132,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
     <header>
       <div
         className={classNames(
-          'z-100 flex w-full items-center bg-white px-4 py-4 pt-5',
+          'z-100 flex min-h-[71px] w-full items-center bg-white px-4 py-4 pt-5',
           chatStarted ? 'border-b border-gray-200' : '',
           isMobile && chatStarted ? 'justify-between' : 'justify-between',
           isMobile && session?.data?.user ? 'pl-[68px]' : ''

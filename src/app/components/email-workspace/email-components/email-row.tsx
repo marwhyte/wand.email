@@ -235,6 +235,8 @@ export default function EmailRow({
                   // In mobile view with stacking, use the original width
                   adjustedWidth = column.attributes.width
                 }
+              } else if (rowAttributes.columnSpacing !== undefined && rowAttributes.columnSpacing > 0) {
+                adjustedWidth = `${(rowAttributes.columnSpacing / emailWidth) * 100}%`
               }
 
               return (
@@ -244,6 +246,7 @@ export default function EmailRow({
                       ...column,
                       attributes: {
                         ...column.attributes,
+
                         width: (isMobile || mobileView) && rowAttributes.stackOnMobile ? '100%' : adjustedWidth,
                       },
                     }}
@@ -256,11 +259,19 @@ export default function EmailRow({
                     onBlockDrop={onBlockDrop}
                   />
                   {/* Add spacing td between columns, but not after the last column */}
-                  {!mobileView &&
-                    rowAttributes.columnSpacing !== undefined &&
+                  {rowAttributes.columnSpacing !== undefined &&
                     rowAttributes.columnSpacing > 0 &&
-                    index < row.columns.length - 1 && (
-                      <td width={rowAttributes.columnSpacing} style={{ width: `${rowAttributes.columnSpacing}px` }} />
+                    index < row.columns.length - 1 &&
+                    !((isMobile || mobileView) && rowAttributes.stackOnMobile) && (
+                      <td width={rowAttributes.columnSpacing} style={{ width: `${rowAttributes.columnSpacing}px` }}>
+                        <table
+                          width={rowAttributes.columnSpacing}
+                          style={{
+                            width: `${rowAttributes.columnSpacing}px`,
+                            height: `${rowAttributes.columnSpacing}px`,
+                          }}
+                        />
+                      </td>
                     )}
                 </React.Fragment>
               )
