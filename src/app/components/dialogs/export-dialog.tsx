@@ -131,16 +131,22 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           )}
           <div className="mt-4">
             <AlertBox
-              action={{
-                onClick: () => {
-                  setStepType('subscription')
-                  setShowAccountDialog(true)
-                },
-                text: 'Upgrade',
-              }}
+              action={
+                plan !== 'pro'
+                  ? {
+                      onClick: () => {
+                        setStepType('subscription')
+                        setShowAccountDialog(true)
+                      },
+                      text: 'Manage Subscription',
+                    }
+                  : undefined
+              }
               status={!canExport ? 'error' : 'info'}
             >
-              You have made {monthlyExportCount} out of 5 monthly exports.
+              {plan === 'pro'
+                ? `You have made ${monthlyExportCount} exports. You have unlimited exports on your current plan.`
+                : `You have made ${monthlyExportCount} out of 5 monthly exports.`}
             </AlertBox>
           </div>
         </DialogTitle>
