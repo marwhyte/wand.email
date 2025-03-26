@@ -147,23 +147,10 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
 
     try {
       await cancelSubscription()
-      const startTime = Date.now()
-      const timeout = 30000 // 30 seconds timeout
-      const interval = 2000 // Check every 2 seconds
+      // Immediately refetch user data
+      await mutate('/api/user')
+      await refetchUser()
 
-      const checkRefetchUser = async () => {
-        mutate('/api/user')
-
-        if (!userData?.stripeSubscriptionExpiresAt) {
-          // Either user is not found or expiresAt is not set
-          const timeElapsed = Date.now() - startTime
-          if (timeElapsed < timeout) {
-            setTimeout(checkRefetchUser, interval)
-          }
-        }
-      }
-
-      checkRefetchUser()
       notifySlack(`${session.data?.user?.email} cancelled their subscription`, 'upgrade')
       setCancelSuccess(true)
     } catch (error) {
@@ -233,17 +220,16 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
                       <div className="space-y-2">
                         <Strong>Current Plan: Pro</Strong>
                         <Text>You currently have access to all premium features.</Text>
-                        {userData?.stripeSubscriptionExpiresAt &&
-                          new Date(userData.stripeSubscriptionExpiresAt) > new Date() && (
-                            <Text className="text-gray-600">
-                              Your subscription will remain active until{' '}
-                              {new Date(userData.stripeSubscriptionExpiresAt).toLocaleDateString('en-US', {
-                                month: 'long',
-                                day: 'numeric',
-                                year: 'numeric',
-                              })}
-                            </Text>
-                          )}
+                        {userData?.stripeSubscriptionExpiresAt && (
+                          <Text className="text-gray-600">
+                            Your subscription will remain active until{' '}
+                            {new Date(userData.stripeSubscriptionExpiresAt).toLocaleDateString('en-US', {
+                              month: 'long',
+                              day: 'numeric',
+                              year: 'numeric',
+                            })}
+                          </Text>
+                        )}
                       </div>
                     </div>
 

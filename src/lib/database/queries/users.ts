@@ -96,3 +96,14 @@ export async function deleteUser(): Promise<boolean> {
     return result[0].numDeletedRows > 0
   })
 }
+
+export async function updateUserSubscriptionExpiry(userId: string, stripeSubscriptionExpiresAt: Date | null) {
+  await db
+    .updateTable('User')
+    .set({
+      stripeSubscriptionExpiresAt,
+      updatedAt: new Date(),
+    })
+    .where('id', '=', userId)
+    .execute()
+}

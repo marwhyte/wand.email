@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
-import { getUserByEmail } from '@/lib/database/queries/users'
+import { getUserByEmail, updateUserSubscriptionExpiry } from '@/lib/database/queries/users'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -41,6 +41,12 @@ export async function cancelSubscription() {
     })
 
     const expiresAt = new Date(subscriptions.data[0].current_period_end * 1000)
+
+    console.log('expiresAt', expiresAt)
+
+    if (expiresAt) {
+      await updateUserSubscriptionExpiry(user.id, expiresAt)
+    }
 
     return { success: true, expiresAt }
   } catch (err) {
