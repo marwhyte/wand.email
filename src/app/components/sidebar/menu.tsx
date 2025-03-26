@@ -4,6 +4,7 @@ import { Dialog, DialogButton, DialogDescription, DialogTitle } from '@component
 import { motion, type Variants } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
+import { useOpener } from '@/app/hooks'
 import { deleteChat } from '@/lib/database/queries/chats'
 import { Chat } from '@/lib/database/types'
 import { useAccountStore } from '@/lib/stores/accountStore'
@@ -13,6 +14,7 @@ import { cubicEasingFn } from '@/lib/utils/easings'
 import { fetcher, truncate } from '@/lib/utils/misc'
 import {
   ArrowRightStartOnRectangleIcon,
+  ChatBubbleBottomCenterTextIcon,
   CreditCardIcon,
   QuestionMarkCircleIcon,
   ViewColumnsIcon,
@@ -23,6 +25,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import useSWR from 'swr'
 import AccountDialog from '../dialogs/account-dialog'
+import FeedbackDialog from '../dialogs/feedback-dialog'
 import Loading from '../loading'
 import { usePlan } from '../payment/plan-provider'
 import { Text } from '../text'
@@ -57,6 +60,7 @@ export function Menu() {
   const { setEmail } = useEmailStore()
   const { setTitle } = useChatStore()
   const { setShowAccountDialog, setStepType, showAccountDialog } = useAccountStore()
+  const feedbackOpener = useOpener()
   const menuRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const [dialogContent, setDialogContent] = useState<DialogContent>(null)
@@ -196,6 +200,13 @@ export function Menu() {
 
           <div className="flex flex-col gap-2 border-t border-gray-200 bg-white p-3">
             <button
+              onClick={() => signOut()}
+              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100"
+            >
+              <ArrowRightStartOnRectangleIcon className="w-5" />
+              Sign out
+            </button>
+            <button
               onClick={() => {
                 setStepType('general')
                 setShowAccountDialog(true)
@@ -205,13 +216,6 @@ export function Menu() {
               <Cog6ToothIcon className="w-5" />
               Settings
             </button>
-            <Link
-              href="mailto:support@wand.email"
-              className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-gray-600 transition-colors hover:bg-gray-100"
-            >
-              <QuestionMarkCircleIcon className="w-5" />
-              Contact support
-            </Link>
             <button
               onClick={() => {
                 setStepType('subscription')
@@ -223,13 +227,22 @@ export function Menu() {
               <CreditCardIcon className="w-5" />
               Manage subscription
             </button>
-
-            <button
-              onClick={() => signOut()}
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100"
+            <Link
+              href="mailto:support@wand.email"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-gray-600 transition-colors hover:bg-gray-100"
             >
-              <ArrowRightStartOnRectangleIcon className="w-5" />
-              Sign out
+              <QuestionMarkCircleIcon className="w-5" />
+              Contact support
+            </Link>
+            <button
+              onClick={() => {
+                feedbackOpener.open()
+              }}
+              type="button"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-gray-600 transition-colors hover:bg-gray-100"
+            >
+              <ChatBubbleBottomCenterTextIcon className="w-5" />
+              Provide feedback
             </button>
           </div>
 
@@ -252,10 +265,20 @@ export function Menu() {
         </div>
       </motion.div>
       <div className="absolute bottom-0 left-0 flex flex-col items-center gap-2 pb-3 pl-3">
+        <button
+          onClick={() => {
+            /* Add your feedback dialog logic here */
+          }}
+          className="rounded-md p-1 text-gray-600 hover:bg-gray-100"
+          title="Leave feedback"
+        >
+          <ChatBubbleBottomCenterTextIcon className="h-5 w-5" />
+        </button>
         <UserAvatar size={24} />
         <ViewColumnsIcon className="h-5 w-5" />
       </div>
       <AccountDialog isOpen={showAccountDialog} onClose={() => setShowAccountDialog(false)} />
+      <FeedbackDialog isOpen={feedbackOpener.isOpen} onClose={feedbackOpener.close} />
     </div>
   )
 }
