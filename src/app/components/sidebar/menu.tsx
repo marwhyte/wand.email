@@ -147,6 +147,25 @@ export function Menu() {
     }
   }, [isMobile])
 
+  // Add a new effect to handle clicking outside to close the menu on mobile
+  useEffect(() => {
+    if (!isMobile || !open) return
+
+    const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener('touchstart', handleClickOutside)
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('touchstart', handleClickOutside)
+    }
+  }, [isMobile, open])
+
   // Function to toggle the menu open/closed
   const toggleMenu = () => {
     setOpen(!open)
