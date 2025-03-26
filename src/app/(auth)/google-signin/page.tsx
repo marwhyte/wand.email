@@ -8,12 +8,23 @@ export default function SignInPopUpPage() {
   const { data: session, status } = useSession()
 
   useEffect(() => {
-    if (!(status === 'loading') && !session) {
-      doGoogleLogin()
-    }
-    if (session) {
-      window.opener?.postMessage('signInComplete', window.location.origin)
-      window.close()
+    if (!(status === 'loading')) {
+      if (!session) {
+        try {
+          doGoogleLogin()
+        } catch (error) {
+          if (window.opener) {
+            window.opener.postMessage({ error: error }, window.location.origin)
+            window.close()
+          }
+        }
+      }
+      if (session) {
+        if (window.opener) {
+          window.opener.postMessage('signInComplete', window.location.origin)
+          window.close()
+        }
+      }
     }
   }, [session, status])
 
