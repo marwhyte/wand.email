@@ -8,6 +8,8 @@ export async function GET(request: Request) {
     throw new Error('User not authenticated')
   }
 
+  console.log('session', session)
+
   try {
     const user = await getUserByEmail(session.user.email)
     return NextResponse.json(user)

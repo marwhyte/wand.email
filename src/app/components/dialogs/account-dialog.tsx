@@ -220,16 +220,17 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
                       <div className="space-y-2">
                         <Strong>Current Plan: Pro</Strong>
                         <Text>You currently have access to all premium features.</Text>
-                        {userData?.stripeSubscriptionExpiresAt && (
-                          <Text className="text-gray-600">
-                            Your subscription will remain active until{' '}
-                            {new Date(userData.stripeSubscriptionExpiresAt).toLocaleDateString('en-US', {
-                              month: 'long',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
-                          </Text>
-                        )}
+                        {userData?.stripeSubscriptionExpiresAt &&
+                          new Date(userData.stripeSubscriptionExpiresAt) > new Date() && (
+                            <Text className="text-gray-600">
+                              Your subscription will remain active until{' '}
+                              {new Date(userData.stripeSubscriptionExpiresAt).toLocaleDateString('en-US', {
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </Text>
+                          )}
                       </div>
                     </div>
 
