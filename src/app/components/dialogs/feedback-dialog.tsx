@@ -2,6 +2,7 @@
 
 import { notifySlack } from '@/app/actions/notifySlack'
 import { FaceFrownIcon, FaceSmileIcon } from '@heroicons/react/24/outline'
+import { useSession } from 'next-auth/react'
 import { useState } from 'react'
 import { Button } from '../button'
 import Notification from '../notification'
@@ -15,6 +16,7 @@ interface FeedbackDialogProps {
 }
 
 export default function FeedbackDialog({ isOpen, onClose }: FeedbackDialogProps) {
+  const session = useSession()
   const [selectedMood, setSelectedMood] = useState<Mood | null>(null)
   const [feedback, setFeedback] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -31,7 +33,7 @@ export default function FeedbackDialog({ isOpen, onClose }: FeedbackDialogProps)
 
     try {
       await notifySlack(
-        `New Feedback:\nMood: ${moodEmoji ? moodEmoji : 'No mood selected'}\nFeedback: ${feedback || 'No feedback provided'}`,
+        `New Feedback from ${session.data?.user?.name || 'no-name'} (${session.data?.user?.email || 'No email provided'}):\nMood: ${moodEmoji ? moodEmoji : 'No mood selected'}\nFeedback: ${feedback || 'No feedback provided'}`,
         'errors'
       )
       setFeedbackSent(true)
