@@ -139,7 +139,23 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
 
     try {
       await cancelSubscription()
-      await refetchUser()
+      const startTime = Date.now()
+      const timeout = 30000 // 30 seconds timeout
+      const interval = 2000 // Check every 2 seconds
+
+      const checkRefetchUser = async () => {
+        await refetchUser()
+
+        if (!expiresAt) {
+          // Either user is not found or expiresAt is not set
+          const timeElapsed = Date.now() - startTime
+          if (timeElapsed < timeout) {
+            setTimeout(checkRefetchUser, interval)
+          }
+        }
+      }
+
+      checkRefetchUser()
       notifySlack(`${session.data?.user?.email} cancelled their subscription`, 'upgrade')
       setCancelSuccess(true)
     } catch (error) {
@@ -221,7 +237,7 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
                         )}
                       </div>
                     </div>
-                    <Button color="red" className="w-full" onClick={handleCancelClick} disabled={isCanceling}>
+                    <Button outline className="w-full" onClick={handleCancelClick} disabled={isCanceling}>
                       Cancel Subscription
                     </Button>
                   </div>
