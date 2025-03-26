@@ -20,7 +20,7 @@ export async function sendVerificationRequest(params: Params) {
     body: JSON.stringify({
       from: provider.from,
       to,
-      subject: `Sign in to ${host}`,
+      subject: `Sign in to wand.email`,
       html: html({ url, host }),
       text: text({ url, host }),
     }),

@@ -88,15 +88,32 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
       setStepType('subscription')
       setUpgradeSuccess(true)
       notifySlack(`${session.data?.user?.email} upgraded to ${selectedTier.id} plan`, 'upgrade')
-      refetchUser
 
-      router.replace(window.location.pathname)
+      // Add retry mechanism with timeout
+      const startTime = Date.now()
+      const timeout = 30000 // 30 seconds timeout
+      const interval = 2000 // Check every 2 seconds
+
+      const checkSubscription = async () => {
+        await refetchUser()
+        const timeElapsed = Date.now() - startTime
+
+        if (plan === 'pro' || timeElapsed >= timeout) {
+          // Either plan is updated or we've timed out
+          router.replace(window.location.pathname)
+        } else {
+          // Try again after interval
+          setTimeout(checkSubscription, interval)
+        }
+      }
+
+      checkSubscription()
     } else if (canceled === 'true') {
       setShowAccountDialog(true)
       setStepType('subscription')
       router.replace(window.location.pathname)
     }
-  }, [searchParams, setShowAccountDialog, setStepType, router])
+  }, [searchParams, setShowAccountDialog, setStepType, router, plan, refetchUser])
 
   const handleUpgrade = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
