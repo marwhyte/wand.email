@@ -66,6 +66,7 @@ export function Menu() {
   const menuRef = useRef<HTMLDivElement>(null)
   const [open, setOpen] = useState(false)
   const [dialogContent, setDialogContent] = useState<DialogContent>(null)
+  const manualToggledRef = useRef(false)
   const session = useSession()
 
   // Use the isMobile hook
@@ -131,12 +132,15 @@ export function Menu() {
     const exitThreshold = 40
 
     function onMouseMove(event: MouseEvent) {
-      if (event.pageX < enterThreshold) {
+      // Auto-open menu with mouse movement only if it wasn't manually controlled recently
+      if (event.pageX < enterThreshold && !manualToggledRef.current) {
         setOpen(true)
       }
 
       if (menuRef.current && event.clientX > menuRef.current.getBoundingClientRect().right + exitThreshold) {
         setOpen(false)
+        // Reset manual toggle state when mouse moves far enough away
+        manualToggledRef.current = false
       }
     }
 
@@ -152,6 +156,12 @@ export function Menu() {
     if (!isMobile || !open) return
 
     const handleClickOutside = (event: MouseEvent | TouchEvent) => {
+      // Don't close if the click was on the toggle button (that's handled separately)
+      const toggleButton = document.querySelector('[aria-label="Close menu"], [aria-label="Open menu"]')
+      if (toggleButton && toggleButton.contains(event.target as Node)) {
+        return
+      }
+
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setOpen(false)
       }
@@ -166,8 +176,22 @@ export function Menu() {
     }
   }, [isMobile, open])
 
+  // Add a ref to track when the last toggle occurred to prevent immediate reopening
+  const lastToggleTimeRef = useRef(0)
+
   // Function to toggle the menu open/closed
-  const toggleMenu = () => {
+  const toggleMenu = (event?: React.MouseEvent) => {
+    // Stop propagation to prevent the click from being captured by other handlers
+    event?.stopPropagation()
+
+    // Prevent rapid toggling by checking time since last toggle
+    const now = Date.now()
+    if (now - lastToggleTimeRef.current < 300) {
+      return // Ignore clicks that happen too soon after the last one
+    }
+
+    lastToggleTimeRef.current = now
+    manualToggledRef.current = true
     setOpen(!open)
   }
 

@@ -9,6 +9,8 @@ import { SendButton } from './send-button'
 
 const TEXTAREA_MIN_HEIGHT = 76
 const TEXTAREA_MAX_HEIGHT = 200
+// Add a smaller min height for mobile when chat has started
+const MOBILE_CHAT_STARTED_MIN_HEIGHT = 50
 
 interface ChatInputProps {
   chatStarted: boolean
@@ -57,18 +59,24 @@ export function ChatInput({
       transition={{
         layout: { duration: 0.3, ease: 'easeInOut' },
       }}
-      className="z-40 mx-auto w-full max-w-[552px] flex-shrink-0"
+      className={classNames(
+        'z-40 mx-auto w-full flex-shrink-0',
+        isMobile && chatStarted ? 'max-w-[95%] pb-3' : 'max-w-[552px]'
+      )}
     >
       <div
         className={classNames(
           'overflow-hidden rounded-lg border border-blue-200 bg-white shadow-sm backdrop-blur-[8px] backdrop-filter',
           'relative w-full',
-          isMobile && chatStarted ? 'scale-95' : ''
+          isMobile && chatStarted ? 'scale-90 transform' : ''
         )}
       >
         <textarea
           ref={textareaRef}
-          className={`w-full resize-none bg-transparent pl-4 pr-16 pt-4 text-gray-500 focus:outline-none ${isMobile ? 'text-sm' : 'text-md'}`}
+          className={classNames(
+            'w-full resize-none bg-transparent pr-16 text-gray-500 focus:outline-none',
+            isMobile && chatStarted ? 'pl-3 pt-3 text-xs' : isMobile ? 'pl-4 pt-4 text-sm' : 'text-md pl-4 pt-4'
+          )}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               if (event.shiftKey) {
@@ -85,11 +93,11 @@ export function ChatInput({
           style={{
             minHeight:
               isMobile && chatStarted
-                ? TEXTAREA_MIN_HEIGHT - 18
+                ? MOBILE_CHAT_STARTED_MIN_HEIGHT
                 : isMobile
                   ? TEXTAREA_MIN_HEIGHT - 10
                   : TEXTAREA_MIN_HEIGHT,
-            maxHeight: TEXTAREA_MAX_HEIGHT,
+            maxHeight: isMobile && chatStarted ? TEXTAREA_MAX_HEIGHT - 50 : TEXTAREA_MAX_HEIGHT,
           }}
           placeholder={!chatStarted ? 'What email do you want to build?' : 'What changes do you want to make?'}
           translate="no"
@@ -110,28 +118,46 @@ export function ChatInput({
         <div
           className={classNames(
             'flex justify-between',
-            isMobile && chatStarted ? 'p-2 pt-1 text-xs' : isMobile ? 'p-3 pt-2 text-xs' : 'p-4 pt-2 text-sm'
+            isMobile && chatStarted ? 'p-1.5 pt-0.5 text-xs' : isMobile ? 'p-3 pt-2 text-xs' : 'p-4 pt-2 text-sm'
           )}
         >
           <div className="flex items-center gap-1">
-            <IconButton
-              title="Enhance prompt"
-              disabled={input.length === 0 || enhancingPrompt}
-              onClick={() => enhancePrompt?.()}
-            >
-              {enhancingPrompt ? (
-                <div className="flex items-center">
-                  <Loading height={isMobile ? 12 : 16} width={isMobile ? 12 : 16} />
-                  <div className="i-svg-spinners:90-ring-with-bg text-xl text-gray-500"></div>
-                  <div className={isMobile ? 'ml-1.5 text-xs' : 'ml-1.5'}>Enhancing prompt...</div>
-                </div>
-              ) : (
-                <>
-                  <SparklesIcon className={isMobile ? 'h-4 w-4 text-gray-500' : 'h-5 w-5 text-gray-500'} />
-                  {promptEnhanced && <div className={isMobile ? 'ml-1.5 text-xs' : 'ml-1.5'}>Prompt enhanced</div>}
-                </>
-              )}
-            </IconButton>
+            {!(isMobile && chatStarted) && (
+              <IconButton
+                title="Enhance prompt"
+                disabled={input.length === 0 || enhancingPrompt}
+                onClick={() => enhancePrompt?.()}
+              >
+                {enhancingPrompt ? (
+                  <div className="flex items-center">
+                    <Loading height={isMobile ? 12 : 16} width={isMobile ? 12 : 16} />
+                    <div className="i-svg-spinners:90-ring-with-bg text-xl text-gray-500"></div>
+                    <div className={isMobile && chatStarted ? 'ml-1 text-xs' : isMobile ? 'ml-1.5 text-xs' : 'ml-1.5'}>
+                      {isMobile && chatStarted ? 'Enhancing...' : 'Enhancing prompt...'}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <SparklesIcon
+                      className={
+                        isMobile && chatStarted
+                          ? 'h-3 w-3 text-gray-500'
+                          : isMobile
+                            ? 'h-4 w-4 text-gray-500'
+                            : 'h-5 w-5 text-gray-500'
+                      }
+                    />
+                    {promptEnhanced && (
+                      <div
+                        className={isMobile && chatStarted ? 'ml-1 text-xs' : isMobile ? 'ml-1.5 text-xs' : 'ml-1.5'}
+                      >
+                        {isMobile && chatStarted ? 'Enhanced' : 'Prompt enhanced'}
+                      </div>
+                    )}
+                  </>
+                )}
+              </IconButton>
+            )}
           </div>
           {input.length > 3 && !isMobile ? (
             <div className="text-xs text-gray-500">
