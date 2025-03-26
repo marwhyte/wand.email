@@ -55,7 +55,7 @@ export default function FeedbackDialog({ isOpen, onClose }: FeedbackDialogProps)
         <DialogTitle>Leave feedback</DialogTitle>
         <DialogBody>
           <div className="space-y-4">
-            Hey! I'd love to hear what went well and how I can improve the product experience.
+            Hey! I&apos;d love to hear what went well and how I can improve the product experience.
             <div className="flex justify-center gap-4 py-2 pt-4">
               {[
                 { mood: 'happy' as const, icon: FaceSmileIcon },
