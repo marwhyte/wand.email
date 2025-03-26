@@ -105,8 +105,23 @@ export function Menu() {
   useEffect(() => {
     if (open) {
       mutate()
+
+      // Prevent body scrolling when menu is open on mobile
+      if (isMobile) {
+        document.body.style.overflow = 'hidden'
+      }
+    } else {
+      // Restore body scrolling when menu is closed
+      if (isMobile) {
+        document.body.style.overflow = ''
+      }
     }
-  }, [open, mutate])
+
+    // Clean up when component unmounts
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [open, mutate, isMobile])
 
   useEffect(() => {
     // Only add hover detection on desktop
@@ -156,6 +171,7 @@ export function Menu() {
         animate={open ? 'open' : 'closed'}
         variants={menuVariants}
         className="fixed top-0 z-50 flex h-full w-[350px] flex-col rounded-r-3xl border-r border-gray-100 bg-gray-50 text-sm shadow-xl"
+        onTouchMove={(e) => isMobile && open && e.stopPropagation()}
       >
         <div className="mt-16 flex h-[var(--header-height)] items-center">{/* Placeholder */}</div>
         <div className="flex h-full w-full flex-1 flex-col overflow-hidden">
