@@ -204,6 +204,39 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   // Add a ref for the main container
   const containerRef = useRef<HTMLDivElement>(null)
 
+  // Add a state to track the input container height
+  const [inputContainerHeight, setInputContainerHeight] = useState(110)
+  const inputContainerRef = useRef<HTMLDivElement>(null)
+
+  // Add effect to measure the actual height of the input container
+  useEffect(() => {
+    if (!isMobile || !chatStarted) return
+
+    const updateInputHeight = () => {
+      if (inputContainerRef.current) {
+        const height = inputContainerRef.current.offsetHeight
+        setInputContainerHeight(height + 20) // Add a small buffer
+      }
+    }
+
+    // Set up ResizeObserver to detect height changes
+    const resizeObserver = new ResizeObserver(updateInputHeight)
+    if (inputContainerRef.current) {
+      resizeObserver.observe(inputContainerRef.current)
+    }
+
+    // Initial measurement
+    updateInputHeight()
+
+    // Also update when window resizes
+    window.addEventListener('resize', updateInputHeight)
+
+    return () => {
+      resizeObserver.disconnect()
+      window.removeEventListener('resize', updateInputHeight)
+    }
+  }, [isMobile, chatStarted, input.length, textareaHeight])
+
   // Add useEffect to handle viewport height on mobile
   useEffect(() => {
     if (!isMobile) return
@@ -602,8 +635,9 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                     <StickToBottom.Content
                       className={classNames(
                         'relative flex-grow overflow-auto px-4 pt-4',
-                        isMobile && chatStarted ? 'pb-[56px]' : 'pb-4' // Add padding at bottom to prevent content hiding behind fixed input
+                        isMobile && chatStarted ? '' : 'pb-4' // Remove fixed padding, we'll use style
                       )}
+                      style={isMobile && chatStarted ? { paddingBottom: `${inputContainerHeight}px` } : {}}
                     >
                       <AutoScroller input={input} />
                       <div style={{ opacity: contentReady ? 1 : 0, transition: 'opacity 0.1s' }}>
@@ -618,6 +652,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                     <ScrollToBottom textareaHeight={textareaHeight} />
 
                     <div
+                      ref={inputContainerRef}
                       className={classNames(
                         'px-0 sm:px-4',
                         isMobile && chatStarted
@@ -643,7 +678,6 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                         handleInputChange={(event) => {
                           handleInputChange?.(event)
                           if (textareaRef?.current) {
-                            // Update textarea height and also update padding bottom of messages container
                             setTextareaHeight(textareaRef.current.scrollHeight)
                           }
                         }}
