@@ -20,6 +20,9 @@ const config: Config = {
       fontFamily: {
         calSans: ['CalSans', 'sans-serif'],
       },
+      screens: {
+        wide: '1375px',
+      },
       colors: {
         google: {
           'text-gray': '#3c4043',

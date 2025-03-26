@@ -429,7 +429,8 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
               <div
                 className={classNames('flex shrink-0 flex-col', {
                   'border-r border-gray-200': chatStarted,
-                  'w-full sm:w-[370px] sm:min-w-[370px] sm:max-w-[370px]': chatStarted,
+                  'wide:w-[420px] wide:min-w-[420px] wide:max-w-[420px] w-full sm:w-[370px] sm:min-w-[370px] sm:max-w-[370px]':
+                    chatStarted,
                   'w-full max-w-[600px]': !chatStarted,
                 })}
               >
@@ -441,7 +442,8 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                 >
                   <StickToBottom
                     className={classNames('relative flex flex-col justify-end', {
-                      'h-[calc(100vh-100px)]': chatStarted,
+                      'h-[calc(100vh-95px)]': chatStarted,
+                      'pl-[30px]': chatStarted,
                     })}
                     resize="smooth"
                     initial="instant"
@@ -451,7 +453,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                       <div style={{ opacity: contentReady ? 1 : 0, transition: 'opacity 0.1s' }}>
                         <Messages
                           ref={messageRef}
-                          className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col pb-3"
+                          className={classNames('z-1 mx-auto flex h-full w-full max-w-[552px] flex-col pb-3', {})}
                           messages={messagesWithoutSystem}
                           isStreaming={isLoading}
                         />

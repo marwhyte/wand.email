@@ -296,8 +296,8 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
         <div className="p-6">
           <Strong className="mb-4 block">Cancel Subscription</Strong>
           <Text>
-            Are you sure you want to cancel your subscription? You'll lose access to Pro features at the end of your
-            current billing period.
+            Are you sure you want to cancel your subscription? You&apos;ll lose access to Pro features at the end of
+            your current billing period.
           </Text>
           <div className="mt-6 flex justify-end gap-3">
             <Button onClick={() => setShowCancelConfirm(false)} color="light">
