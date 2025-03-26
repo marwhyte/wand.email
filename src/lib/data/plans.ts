@@ -73,6 +73,6 @@ export const getPriceIdByTierAndAnually = (tier: string, anually: boolean) => {
     if (anually) {
       return 'price_1R6iU3FQjmQhGhP2wfsc6aaZ'
     }
-    return 'price_1R6iVFFQjmQhGhP2dI2xoboZ'
+    return 'price_1R6iUJFQjmQhGhP20mdbWEP3'
   }
 }
