@@ -19,7 +19,6 @@ import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
 import { classNames } from '@/lib/utils/misc'
 import { Message, useChat } from '@ai-sdk/react'
 import { Header } from '@components/header'
-import { Menu } from '@components/sidebar/menu'
 import {
   ArrowDownCircleIcon,
   DocumentTextIcon,
@@ -38,6 +37,7 @@ import CompanyDialog from '../dialogs/company-dialog'
 import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
 import UpgradeDialog from '../dialogs/upgrade-dialog'
 import Workspace from '../email-workspace/email-workspace'
+import { Menu } from '../sidebar/menu'
 import { ChatToastContainer } from '../toast/chat-toast-container'
 import { ChatInput } from './chat-input'
 import { ChatIntro } from './chat-intro'
@@ -410,8 +410,8 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
   return (
     <div className="mx-auto w-full">
+      {session?.data?.user && <Menu />}
       <BackgroundGradients inputDisabled={chatStarted} />
-      {session.data?.user?.id && <Menu />}
       <Header monthlyExportCount={monthlyExportCount} chatStarted={chatStarted} />
       <div className="flex flex-1">
         <>
@@ -420,7 +420,6 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
             className="relative mx-auto flex w-full items-center overflow-hidden"
             data-chat-visible={showChat}
           >
-            {session.data?.user?.id && <Menu />}
             <div
               className={classNames(`flex w-full justify-center`, {
                 '-mb-2': chatStarted,
@@ -431,7 +430,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                 className={classNames('flex shrink-0 flex-col', {
                   'border-r border-gray-200': chatStarted,
                   'w-full sm:w-[370px] sm:min-w-[370px] sm:max-w-[370px]': chatStarted,
-                  'w-full max-w-[500px]': !chatStarted,
+                  'w-full max-w-[600px]': !chatStarted,
                 })}
               >
                 {!chatStarted && <ChatIntro />}
@@ -462,6 +461,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
 
                     <div className="px-0 sm:px-4">
                       <ChatInput
+                        chatStarted={chatStarted}
                         textareaRef={textareaRef}
                         input={input}
                         isStreaming={isLoading}
@@ -494,14 +494,14 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
                 {!chatStarted && (
                   <div
                     id="examples"
-                    className="max-w-l relative mt-8 flex w-full flex-wrap justify-center gap-2 px-0 sm:px-4"
+                    className="relative mx-auto mt-8 flex w-full max-w-xl flex-wrap justify-center gap-2 px-0 sm:px-0"
                   >
                     {examplePrompts.map((examplePrompt, index) => {
                       const Icon = examplePrompt.icon
                       return (
                         <button
                           key={index}
-                          className="group relative mb-2 inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium shadow transition-colors hover:bg-gray-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 disabled:pointer-events-none disabled:opacity-50"
+                          className="group relative mb-2 inline-flex h-8 items-center justify-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-bold shadow transition-colors hover:bg-gray-50 hover:shadow-md focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 disabled:pointer-events-none disabled:opacity-50"
                           style={{ color: 'rgb(82,82,82)' }}
                           onClick={() => streamTextToInput(examplePrompt.prompt)}
                         >

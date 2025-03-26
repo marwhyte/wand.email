@@ -10,6 +10,7 @@ const TEXTAREA_MIN_HEIGHT = 76
 const TEXTAREA_MAX_HEIGHT = 200
 
 interface ChatInputProps {
+  chatStarted: boolean
   textareaRef: React.RefObject<HTMLTextAreaElement>
   input: string
   isStreaming: boolean
@@ -22,6 +23,7 @@ interface ChatInputProps {
 }
 
 export function ChatInput({
+  chatStarted,
   textareaRef,
   input,
   isStreaming,
@@ -80,7 +82,7 @@ export function ChatInput({
             minHeight: TEXTAREA_MIN_HEIGHT,
             maxHeight: TEXTAREA_MAX_HEIGHT,
           }}
-          placeholder={'Describe your perfect email'}
+          placeholder={!chatStarted ? 'What email do you want to build?' : 'What changes do you want to make?'}
           translate="no"
         />
         <SendButton

@@ -1,7 +1,6 @@
 'use client'
 
 import { updateUser } from '@/lib/database/queries/users'
-import { Session } from 'next-auth'
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import AlertBox from '../components/alert-box'
@@ -11,20 +10,16 @@ import { Input } from '../components/input'
 import SubmitButton from '../components/submit-button'
 import { Text } from '../components/text'
 
-type Props = {
-  session: Session | null
-}
-
-const AccountForm = ({ session }: Props) => {
+const AccountForm = () => {
   const { data: sessionData, update } = useSession()
-  const [name, setName] = useState(session?.user?.name ?? '')
+  const [name, setName] = useState(sessionData?.user?.name ?? '')
   const [message, setMessage] = useState({ type: '', content: '' })
 
   useEffect(() => {
-    if (session?.user) {
-      setName(session.user.name ?? '')
+    if (sessionData?.user) {
+      setName(sessionData.user.name ?? '')
     }
-  }, [session?.user])
+  }, [sessionData?.user])
 
   const handleSubmit = async (formData: FormData) => {
     try {
@@ -61,7 +56,7 @@ const AccountForm = ({ session }: Props) => {
         </Button>
         <SubmitButton
           isSuccess={message.type === 'success'}
-          disabled={!name || name === session?.user?.name || sessionData?.user?.name === name}
+          disabled={!name || name === sessionData?.user?.name || sessionData?.user?.name === name}
         >
           Save changes
         </SubmitButton>

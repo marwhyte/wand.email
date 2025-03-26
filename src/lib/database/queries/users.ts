@@ -12,7 +12,7 @@ export async function getUsers() {
 export async function getUserByEmail(email: string) {
   return await db
     .selectFrom('User')
-    .select(['id', 'name', 'plan', 'email'])
+    .select(['id', 'name', 'plan', 'email', 'stripeCustomerId'])
     .where('email', '=', email)
     .executeTakeFirst()
 }

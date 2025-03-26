@@ -15,6 +15,8 @@ export async function createCheckoutSession(tier: string, anually: boolean, path
     throw new Error('User not logged in')
   }
 
+  console.log(`${process.env.NEXT_PUBLIC_BASE}${path}?success=true`)
+
   try {
     const stripeSession = await stripe.checkout.sessions.create({
       metadata: {
@@ -31,8 +33,8 @@ export async function createCheckoutSession(tier: string, anually: boolean, path
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_BASE}${path.startsWith('/') ? path : `/${path}`}&success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_BASE}${path.startsWith('/') ? path : `/${path}`}&canceled=true`,
+      success_url: new URL(path, process.env.NEXT_PUBLIC_BASE).toString() + '?success=true',
+      cancel_url: new URL(path, process.env.NEXT_PUBLIC_BASE).toString() + '?canceled=true',
       automatic_tax: { enabled: true },
     })
     return redirect(stripeSession.url!)

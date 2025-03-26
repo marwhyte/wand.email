@@ -27,9 +27,9 @@ export const tiers: Tier[] = [
     ],
   },
   {
-    name: 'Starter',
-    id: 'starter',
-    href: '/templates?upgrade=true&plan=starter',
+    name: 'Pro',
+    id: 'pro',
+    href: '/templates?upgrade=true&plan=pro',
     color: 'blue',
     featured: true,
     description: 'Emails on brand with your business',
@@ -51,7 +51,7 @@ export const tiers: Tier[] = [
     featured: false,
     description: 'Great for larger businesses with complex needs',
     price: { monthly: '$40', annually: '$384' },
-    highlights: ['Everything in Starter', 'Premium support', 'Custom code'],
+    highlights: ['Everything in Pro', 'Premium support', 'Custom code'],
   },
 ]
 
@@ -61,7 +61,7 @@ export const getPlanNameFromPriceId = (productId: string): Plan => {
     productId === 'price_1QAYsVFQjmQhGhP2h9N1zQuj' ||
     productId === 'price_1QAvCuFQjmQhGhP2RHkrtIL2'
   ) {
-    return 'starter'
+    return 'pro'
   }
   if (productId === 'price_1QAYryFQjmQhGhP2YcUrnPqE' || productId === 'price_1QAYsVFQjmQhGhP2h9N1zQuj') {
     return 'pro'
@@ -70,18 +70,10 @@ export const getPlanNameFromPriceId = (productId: string): Plan => {
 }
 
 export const getPriceIdByTierAndAnually = (tier: string, anually: boolean) => {
-  if (tier === 'starter') {
-    if (anually) {
-      return 'price_1QAYqbFQjmQhGhP2aPnqRYux'
-    }
-    return 'price_1QAYppFQjmQhGhP2vSTaThs7'
-    // this is free version for testing
-    // return 'price_1QAvCuFQjmQhGhP2RHkrtIL2'
-  }
   if (tier === 'pro') {
     if (anually) {
       return 'price_1QAYsVFQjmQhGhP2h9N1zQuj'
     }
-    return 'price_1QAYryFQjmQhGhP2YcUrnPqE'
+    return 'price_1R6iVFFQjmQhGhP2dI2xoboZ'
   }
 }

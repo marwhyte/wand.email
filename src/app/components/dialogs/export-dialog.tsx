@@ -1,6 +1,7 @@
 import { isLocalDev } from '@/constants'
 import { addExport } from '@/lib/database/queries/exports'
 import { ExportType } from '@/lib/database/types'
+import { useAccountStore } from '@/lib/stores/accountStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getReactEmailCode } from '@/lib/utils/code-generation'
@@ -70,10 +71,10 @@ function formatHTML(html: string): string {
 const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const { email } = useEmailStore()
   const { company } = useChatStore()
+  const { setStepType, setShowAccountDialog } = useAccountStore()
   const [exportType, setExportType] = useState<ExportType | null>(null)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
-
   const canExport = (monthlyExportCount !== null && monthlyExportCount < 5) || isLocalDev
 
   const handleExport = (type: ExportType) => {
@@ -124,7 +125,8 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
             <AlertBox
               action={{
                 onClick: () => {
-                  window.location.search = '?upgrade=true'
+                  setStepType('subscription')
+                  setShowAccountDialog(true)
                 },
                 text: 'Upgrade',
               }}

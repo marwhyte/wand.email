@@ -3,9 +3,9 @@
 import { classNames } from '@/lib/utils/misc'
 import type { Message } from 'ai'
 import { useSession } from 'next-auth/react'
-import Image from 'next/image'
 import React from 'react'
 import { Logo } from '../Logo'
+import { UserAvatar } from '../user-avatar'
 import { AssistantMessage } from './assistant-message'
 import { UserMessage } from './user-message'
 
@@ -39,27 +39,7 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                   })}
                 >
                   <div className="flex h-[24px] w-[24px] shrink-0 items-center justify-center self-start overflow-hidden rounded-full text-gray-600">
-                    {isUserMessage ? (
-                      data?.user?.image ? (
-                        <Image
-                          width={24}
-                          height={24}
-                          src={data?.user?.image}
-                          alt={data?.user?.name || 'User'}
-                          className="h-full w-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-blue-500 font-medium text-white">
-                          {data?.user?.name ? (
-                            data.user.name.charAt(0).toUpperCase()
-                          ) : (
-                            <div className="i-ph:user-fill text-xl"></div>
-                          )}
-                        </div>
-                      )
-                    ) : (
-                      <Logo width={24} height={24} icon />
-                    )}
+                    {isUserMessage ? <UserAvatar size={24} /> : <Logo width={24} height={24} icon />}
                   </div>
                   <div className="grid-col-1 grid w-full text-sm">
                     {isUserMessage ? (

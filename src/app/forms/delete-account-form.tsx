@@ -4,7 +4,6 @@ import { deleteUser } from '@/lib/database/queries/users'
 import { Dialog, DialogActions, DialogBody, DialogTitle } from '@components/dialogs/dialog'
 import { doLogout } from '../actions/authentication'
 import { Button } from '../components/button'
-import { Divider } from '../components/divider'
 import { Subheading } from '../components/heading'
 import { Text } from '../components/text'
 import { useOpener } from '../hooks/useOpener'
@@ -30,7 +29,6 @@ const DeleteAccountForm = () => {
           Delete Account
         </Button>
       </div>
-      <Divider className="my-10" soft />
       <Dialog open={dialogOpener.isOpen} onClose={dialogOpener.close}>
         <DialogTitle>Delete Account</DialogTitle>
         <DialogBody>

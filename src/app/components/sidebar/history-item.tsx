@@ -1,5 +1,5 @@
 import { Chat } from '@/lib/database/types'
-import { TrashIcon } from '@heroicons/react/24/solid'
+import { TrashIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
 import { IconButton } from '../icon-button'
 
@@ -39,11 +39,11 @@ export function HistoryItem({ item, onDelete }: HistoryItemProps) {
   return (
     <div
       ref={hoverRef}
-      className="group flex items-center justify-between overflow-hidden rounded-md px-2 py-1 text-gray-600 hover:bg-gray-200"
+      className="group flex items-center justify-between overflow-hidden rounded-md px-2 py-1 text-gray-700 hover:bg-gray-200"
     >
       <a href={`/chat/${item.id}`} className="relative flex w-full truncate">
         {item.title}
-        <div className="absolute bottom-0 right-0 top-0 flex w-10 justify-end to-transparent group-hover:w-[60px] group-hover:from-gray-100 group-hover:from-45%">
+        <div className="absolute bottom-0 right-0 top-0 flex w-10 justify-end bg-gradient-to-l from-gray-50 from-50% to-transparent transition-all duration-150 group-hover:w-[60px] group-hover:from-gray-200">
           {hovering && (
             <div className="flex items-center p-1 text-gray-600 hover:text-red-600">
               <IconButton
