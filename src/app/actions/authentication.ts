@@ -3,7 +3,7 @@
 import { signIn, signOut } from '@/auth'
 
 export async function doGoogleLogin() {
-  return signIn('google', { callbackUrl: 'false' })
+  return signIn('google', { callbackUrl: window.location.href })
 }
 
 export async function doCredentialsLogin(formData: FormData) {

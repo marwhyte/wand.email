@@ -21,7 +21,12 @@ export default function SignInPopUpPage() {
     }
 
     if (!(status === 'loading') && !session) {
-      doGoogleLogin()
+      doGoogleLogin().catch((error) => {
+        if (window.opener) {
+          window.opener.postMessage({ error }, window.location.origin)
+          window.close()
+        }
+      })
     }
 
     if (session) {
