@@ -4,12 +4,15 @@ import { notifySlack } from '@/app/actions/notifySlack'
 import { Dialog } from '@/app/components/dialogs/dialog'
 import AccountForm from '@/app/forms/account-form'
 import DeleteAccountForm from '@/app/forms/delete-account-form'
+import { User } from '@/lib/database/types'
 import { useAccountStore } from '@/lib/stores/accountStore'
+import { fetcher } from '@/lib/utils/misc'
 import { Radio, RadioGroup } from '@headlessui/react'
 import { CheckIcon, Cog6ToothIcon, CreditCardIcon, XMarkIcon } from '@heroicons/react/20/solid'
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import useSWR, { useSWRConfig } from 'swr'
 import AlertBox from '../alert-box'
 import { Badge } from '../badge'
 import { Button } from '../button'
@@ -61,7 +64,12 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
   const searchParams = useSearchParams()
   const router = useRouter()
   const session = useSession()
-  const { plan, refetchUser, expiresAt } = usePlan()
+  const { plan, refetchUser } = usePlan()
+  const { mutate } = useSWRConfig()
+
+  const { data: userData } = useSWR<Pick<User, 'stripeSubscriptionExpiresAt'> | null>('/api/user', fetcher, {
+    fallbackData: null,
+  })
 
   // Subscription state
   const [selectedTier, setSelectedTier] = useState(tiers[1])
@@ -144,9 +152,9 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
       const interval = 2000 // Check every 2 seconds
 
       const checkRefetchUser = async () => {
-        await refetchUser()
+        mutate('/api/user')
 
-        if (!expiresAt) {
+        if (!userData?.stripeSubscriptionExpiresAt) {
           // Either user is not found or expiresAt is not set
           const timeElapsed = Date.now() - startTime
           if (timeElapsed < timeout) {
@@ -225,19 +233,26 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
                       <div className="space-y-2">
                         <Strong>Current Plan: Pro</Strong>
                         <Text>You currently have access to all premium features.</Text>
-                        {expiresAt && expiresAt > new Date() && (
-                          <Text className="text-gray-600">
-                            Your subscription will remain active until{' '}
-                            {new Date(expiresAt).toLocaleDateString('en-US', {
-                              month: 'long',
-                              day: 'numeric',
-                              year: 'numeric',
-                            })}
-                          </Text>
-                        )}
+                        {userData?.stripeSubscriptionExpiresAt &&
+                          new Date(userData.stripeSubscriptionExpiresAt) > new Date() && (
+                            <Text className="text-gray-600">
+                              Your subscription will remain active until{' '}
+                              {new Date(userData.stripeSubscriptionExpiresAt).toLocaleDateString('en-US', {
+                                month: 'long',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </Text>
+                          )}
                       </div>
                     </div>
-                    <Button outline className="w-full" onClick={handleCancelClick} disabled={isCanceling}>
+
+                    <Button
+                      outline
+                      className="w-full"
+                      onClick={handleCancelClick}
+                      disabled={isCanceling || !userData?.stripeSubscriptionExpiresAt}
+                    >
                       Cancel Subscription
                     </Button>
                   </div>
