@@ -16,7 +16,7 @@ export function Footer() {
       <Link href="mailto:support@wand.email" className="hidden hover:text-gray-900 md:inline">
         Support
       </Link>
-      <span>•</span>
+      <span className="hidden md:inline">•</span>
       <Link href="/tos.html" className="hover:text-gray-900">
         Terms
       </Link>
