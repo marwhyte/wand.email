@@ -1,7 +1,7 @@
 'use server'
 
 import { auth } from '@/auth'
-import { getUserByEmail, updateUserPlan } from '@/lib/database/queries/users'
+import { getUserByEmail } from '@/lib/database/queries/users'
 import Stripe from 'stripe'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -41,9 +41,8 @@ export async function cancelSubscription() {
     })
 
     const expiresAt = new Date(subscriptions.data[0].current_period_end * 1000)
-    await updateUserPlan(user.id, 'free', user.stripeCustomerId, expiresAt)
 
-    return { success: true }
+    return { success: true, expiresAt }
   } catch (err) {
     console.error('Error canceling subscription:', err)
     throw err

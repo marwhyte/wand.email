@@ -79,7 +79,12 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
   const plan = getPlanNameFromPriceId(stripePriceId)
   const expiresAt = new Date(subscription.current_period_end * 1000)
 
-  await updateUserPlan(user.id, plan, subscription.customer as string, plan === 'pro' ? null : expiresAt)
+  await updateUserPlan(
+    user.id,
+    plan,
+    subscription.customer as string,
+    subscription.cancel_at_period_end ? expiresAt : null
+  )
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
