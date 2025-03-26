@@ -39,6 +39,7 @@ export const authOptions: NextAuthConfig = {
       },
     }),
     GoogleProvider({
+      allowDangerousEmailAccountLinking: true,
       clientId: process.env.GOOGLE_ID!,
       clientSecret: process.env.GOOGLE_SECRET!,
     }),
