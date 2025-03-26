@@ -288,7 +288,7 @@ export function Menu() {
           <div className="flex flex-col gap-2 border-t border-gray-200 bg-white p-3">
             <button
               onClick={() => signOut()}
-              className="flex w-full items-center gap-2 rounded-md px-3 py-2 text-gray-600 transition-colors hover:bg-gray-100"
+              className="flex w-full items-center gap-2 rounded-md px-2 py-2 text-gray-600 transition-colors hover:bg-gray-100"
             >
               <ArrowRightStartOnRectangleIcon className="w-5" />
               Sign out
