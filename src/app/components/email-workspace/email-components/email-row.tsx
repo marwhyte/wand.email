@@ -1,4 +1,5 @@
 import DragLine from '@/app/components/drag-line'
+import { useIsMobile } from '@/app/hooks'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getEmailAttributes, getRowAttributes, getRowProps } from '@/lib/utils/attributes'
 import { classNames } from '@/lib/utils/misc'
@@ -128,6 +129,8 @@ export default function EmailRow({
   const { isFirstRow, isLastRow } = getRowPosition()
   const needsRounding = emailAttributes.styleVariant === 'default'
 
+  const isMobile = useIsMobile()
+
   // Define border radius styles
   const borderRadiusStyle =
     needsRounding && (isFirstRow || isLastRow)
@@ -189,12 +192,12 @@ export default function EmailRow({
       <div className="relative" style={{ zIndex: 2, ...borderRadiusStyle }}>
         <Container
           bgcolor={emailAttributes.backgroundColor}
-          width={mobileView ? '360' : `${emailAttributes.width}`}
-          className={rowAttributes.hideOnMobile && mobileView ? 'hidden' : undefined}
+          width={isMobile ? '100%' : mobileView ? '360' : `${emailAttributes.width}`}
+          className={rowAttributes.hideOnMobile && (isMobile || mobileView) ? 'hidden' : undefined}
           style={{
             backgroundColor: emailAttributes.backgroundColor,
-            width: emailAttributes.width,
-            maxWidth: emailAttributes.width,
+            width: isMobile ? '100%' : emailAttributes.width,
+            maxWidth: isMobile ? '100%' : emailAttributes.width,
             ...borderRadiusStyle,
           }}
         >
@@ -203,9 +206,10 @@ export default function EmailRow({
             {...getRowProps(row, email)}
             style={{
               ...getRowProps(row, email).style,
-              maxWidth: mobileView ? '360px' : undefined,
+              maxWidth: isMobile ? '100%' : mobileView ? '360px' : undefined,
+              width: isMobile ? '100%' : mobileView ? '360px' : getRowProps(row, email).style?.width,
             }}
-            className={mobileView && rowAttributes.stackOnMobile ? 'stack' : undefined}
+            className={(isMobile || mobileView) && rowAttributes.stackOnMobile ? 'stack' : undefined}
           >
             {row.columns.map((column, index) => {
               // Convert pixel spacing to percentage of total width
@@ -225,7 +229,7 @@ export default function EmailRow({
                 )
 
                 // Only adjust width when not in mobile view or not stacking
-                if (!mobileView || !rowAttributes.stackOnMobile) {
+                if ((isMobile || mobileView) && !rowAttributes.stackOnMobile) {
                   adjustedWidth = `${(originalWidth / totalColumnsWidth) * (100 - totalSpacerWidthPercent)}%`
                 } else {
                   // In mobile view with stacking, use the original width
@@ -240,7 +244,7 @@ export default function EmailRow({
                       ...column,
                       attributes: {
                         ...column.attributes,
-                        width: mobileView && rowAttributes.stackOnMobile ? '100%' : adjustedWidth,
+                        width: (isMobile || mobileView) && rowAttributes.stackOnMobile ? '100%' : adjustedWidth,
                       },
                     }}
                     row={row}

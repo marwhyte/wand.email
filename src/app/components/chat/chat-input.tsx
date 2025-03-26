@@ -1,3 +1,4 @@
+import { useIsMobile } from '@/app/hooks'
 import { classNames } from '@/lib/utils/misc'
 import { SparklesIcon } from '@heroicons/react/24/outline'
 import { motion } from 'motion/react'
@@ -34,6 +35,8 @@ export function ChatInput({
   enhancePrompt,
   handleStop,
 }: ChatInputProps) {
+  const isMobile = useIsMobile()
+
   // Function to clear input from localStorage
   const clearInput = () => {
     // Clear both the generic input and any specific chat inputs
@@ -59,12 +62,13 @@ export function ChatInput({
       <div
         className={classNames(
           'overflow-hidden rounded-lg border border-blue-200 bg-white shadow-sm backdrop-blur-[8px] backdrop-filter',
-          'relative w-full'
+          'relative w-full',
+          isMobile && chatStarted ? 'scale-95' : ''
         )}
       >
         <textarea
           ref={textareaRef}
-          className={`text-md w-full resize-none bg-transparent pl-4 pr-16 pt-4 text-gray-500 focus:outline-none`}
+          className={`w-full resize-none bg-transparent pl-4 pr-16 pt-4 text-gray-500 focus:outline-none ${isMobile ? 'text-sm' : 'text-md'}`}
           onKeyDown={(event) => {
             if (event.key === 'Enter') {
               if (event.shiftKey) {
@@ -79,7 +83,12 @@ export function ChatInput({
           value={input}
           onChange={handleInputChange}
           style={{
-            minHeight: TEXTAREA_MIN_HEIGHT,
+            minHeight:
+              isMobile && chatStarted
+                ? TEXTAREA_MIN_HEIGHT - 18
+                : isMobile
+                  ? TEXTAREA_MIN_HEIGHT - 10
+                  : TEXTAREA_MIN_HEIGHT,
             maxHeight: TEXTAREA_MAX_HEIGHT,
           }}
           placeholder={!chatStarted ? 'What email do you want to build?' : 'What changes do you want to make?'}
@@ -98,7 +107,12 @@ export function ChatInput({
             sendMessage?.()
           }}
         />
-        <div className="flex justify-between p-4 pt-2 text-sm">
+        <div
+          className={classNames(
+            'flex justify-between',
+            isMobile && chatStarted ? 'p-2 pt-1 text-xs' : isMobile ? 'p-3 pt-2 text-xs' : 'p-4 pt-2 text-sm'
+          )}
+        >
           <div className="flex items-center gap-1">
             <IconButton
               title="Enhance prompt"
@@ -107,19 +121,19 @@ export function ChatInput({
             >
               {enhancingPrompt ? (
                 <div className="flex items-center">
-                  <Loading height={16} width={16} />
+                  <Loading height={isMobile ? 12 : 16} width={isMobile ? 12 : 16} />
                   <div className="i-svg-spinners:90-ring-with-bg text-xl text-gray-500"></div>
-                  <div className="ml-1.5">Enhancing prompt...</div>
+                  <div className={isMobile ? 'ml-1.5 text-xs' : 'ml-1.5'}>Enhancing prompt...</div>
                 </div>
               ) : (
                 <>
-                  <SparklesIcon className="h-5 w-5 text-gray-500" />
-                  {promptEnhanced && <div className="ml-1.5">Prompt enhanced</div>}
+                  <SparklesIcon className={isMobile ? 'h-4 w-4 text-gray-500' : 'h-5 w-5 text-gray-500'} />
+                  {promptEnhanced && <div className={isMobile ? 'ml-1.5 text-xs' : 'ml-1.5'}>Prompt enhanced</div>}
                 </>
               )}
             </IconButton>
           </div>
-          {input.length > 3 ? (
+          {input.length > 3 && !isMobile ? (
             <div className="text-xs text-gray-500">
               Use <kbd className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold">Shift</kbd> +{' '}
               <kbd className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold">Return</kbd> for a new line

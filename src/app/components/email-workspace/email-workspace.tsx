@@ -1,5 +1,6 @@
 'use client'
 
+import { useIsMobile } from '@/app/hooks'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { motion } from 'motion/react'
 import { DndProvider } from 'react-dnd'
@@ -13,6 +14,7 @@ type Props = {
 
 export default function Workspace({ isStreaming }: Props) {
   const { email } = useEmailStore()
+  const isMobile = useIsMobile()
 
   if (!email) {
     return (
@@ -34,7 +36,7 @@ export default function Workspace({ isStreaming }: Props) {
       >
         <div className="flex flex-row" style={{ height: 'calc(100vh - 65px)' }}>
           <EmailRenderer email={email} />
-          <EmailEditor email={email} />
+          {!isMobile && <EmailEditor email={email} />}
         </div>
       </motion.div>
     </DndProvider>

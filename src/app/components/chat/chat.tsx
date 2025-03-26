@@ -1,8 +1,7 @@
 'use client'
 
 import { generateTitleFromUserMessage } from '@/app/(chat)/actions'
-import { usePlan } from '@/app/components/payment/plan-provider'
-import { useOpener, usePromptEnhancer, useSnapScroll } from '@/app/hooks'
+import { useIsMobile, useOpener, usePromptEnhancer, useSnapScroll } from '@/app/hooks'
 import { useChatHistory } from '@/app/hooks/useChatHistory'
 import { useLocalStorage } from '@/app/hooks/useLocalStorage'
 import { useMessageParser } from '@/app/hooks/useMessageParser'
@@ -21,6 +20,7 @@ import { Message, useChat } from '@ai-sdk/react'
 import { Header } from '@components/header'
 import {
   ArrowDownCircleIcon,
+  ChatBubbleLeftRightIcon,
   DocumentTextIcon,
   EnvelopeIcon,
   NewspaperIcon,
@@ -33,8 +33,10 @@ import useSWR, { useSWRConfig } from 'swr'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { v4 as uuidv4 } from 'uuid'
 import { BackgroundGradients } from '../background-gradients'
+import { Button } from '../button'
 import CompanyDialog from '../dialogs/company-dialog'
 import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
+import { MobileWarningDialog } from '../dialogs/mobile-warning-dialog'
 import UpgradeDialog from '../dialogs/upgrade-dialog'
 import Workspace from '../email-workspace/email-workspace'
 import { Menu } from '../sidebar/menu'
@@ -165,11 +167,18 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   // Dialog openers
   const companyOpener = useOpener()
   const deleteOpener = useOpener()
+  const mobileWarningOpener = useOpener()
+
+  // Check if on mobile
+  const isMobile = useIsMobile()
+
+  // Add localStorage hook to track if mobile warning has been shown this session
+  const [mobileWarningSeen, setMobileWarningSeen] = useLocalStorage('mobile-warning-seen', false)
+
+  // Store pending message to be sent after mobile warning confirmation
+  const [pendingMessage, setPendingMessage] = useState<string | undefined>()
 
   const [chatStarted, setChatStarted] = useState(initialMessages.length > 0)
-
-  // Get upgrade dialog state from plan provider
-  const { upgradeDialogOpen, setUpgradeDialogOpen } = usePlan()
 
   // Global state
   const showChat = chatStore((state) => state.showChat)
@@ -180,6 +189,9 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
 
   // Add a state for content loading
   const [contentReady, setContentReady] = useState(false)
+
+  // Add state for mobile view toggle
+  const [showEmailPreview, setShowEmailPreview] = useState(false)
 
   renderLogger.trace('Chat')
 
@@ -292,6 +304,20 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       return
     }
 
+    // Check if on mobile and show warning dialog before sending
+    // Only show warning if it hasn't been seen this session
+    if (isMobile && !chatStarted && !mobileWarningSeen) {
+      setPendingMessage(_input)
+      mobileWarningOpener.open()
+      return
+    }
+
+    // Continue with normal message sending
+    sendMessageImpl(_input)
+  }
+
+  // Actual implementation of message sending
+  const sendMessageImpl = async (_input: string) => {
     setKey('aborted', false)
 
     runAnimation()
@@ -357,27 +383,27 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   const examplePrompts = [
     {
       label: 'Welcome',
-      prompt: 'I want to create a welcome series for my new customers',
+      prompt: 'Create a welcome series for my new customers',
       icon: EnvelopeIcon,
     },
     {
       label: 'E-commerce',
-      prompt: 'I want to create an email for my ecommerce store',
+      prompt: 'Create an email for my ecommerce store',
       icon: ShoppingCartIcon,
     },
     {
       label: 'Transactional',
-      prompt: 'I want to create a transactional email for my business',
+      prompt: 'Create a transactional email for my business',
       icon: DocumentTextIcon,
     },
     {
       label: 'Newsletter',
-      prompt: 'I want to create a newsletter for my business',
+      prompt: 'Create a newsletter for my business',
       icon: NewspaperIcon,
     },
     {
       label: 'Cart',
-      prompt: 'I want to create an invoice for my business',
+      prompt: 'Create a cart abandonment email for my business',
       icon: ShoppingCartIcon,
     },
   ]
@@ -387,22 +413,33 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     // Clear the input first
     setInput('')
 
-    let fullText = ''
     let currentIndex = 0
+    const fullText = text // Store the complete target text
 
-    // Set up an interval to add characters one by one
-    const interval = setInterval(() => {
-      if (currentIndex < text.length) {
-        // Build the string directly without depending on previous state
-        fullText += text[currentIndex]
-        setInput(fullText)
-        currentIndex++
+    // We'll stream a portion of the text in each interval
+    const streamNextChunk = () => {
+      const chunk = fullText.substring(0, currentIndex + 1)
+      setInput(chunk)
+
+      currentIndex++
+
+      if (currentIndex < fullText.length) {
+        setTimeout(streamNextChunk, 15)
       } else {
-        clearInterval(interval)
-        // Focus the textarea after streaming
+        // Streaming complete
         textareaRef.current?.focus()
+
+        // Check if on mobile and show warning dialog for example prompts
+        // Only show warning if it hasn't been seen this session
+        if (isMobile && !chatStarted && !mobileWarningSeen) {
+          setPendingMessage(fullText)
+          mobileWarningOpener.open()
+        }
       }
-    }, 15)
+    }
+
+    // Start the streaming process
+    streamNextChunk()
   }
 
   // Add an effect to delay showing content until positioning is complete
@@ -426,6 +463,48 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       <Header monthlyExportCount={monthlyExportCount ?? null} chatStarted={chatStarted} />
       <div className="flex flex-1">
         <>
+          {isMobile && chatStarted && (
+            <div className="fixed left-1/2 top-14 z-20 flex -translate-x-1/2 transform rounded-lg bg-white/90 p-1 shadow-lg backdrop-blur-sm">
+              <div className="relative flex">
+                <div
+                  className="absolute h-full rounded-md bg-purple-600 transition-all duration-300"
+                  style={{
+                    width: '50%',
+                    transform: showEmailPreview ? 'translateX(100%)' : 'translateX(0)',
+                    top: 0,
+                    left: 0,
+                    zIndex: 0,
+                  }}
+                />
+                <Button
+                  plain
+                  size="small"
+                  onClick={() => setShowEmailPreview(false)}
+                  className="relative z-10 min-w-[80px]"
+                >
+                  <span
+                    className={`flex items-center transition-colors duration-300 ${!showEmailPreview ? 'text-white' : 'text-gray-600'}`}
+                  >
+                    <ChatBubbleLeftRightIcon className="mr-1 h-4 w-4" />
+                    Chat
+                  </span>
+                </Button>
+                <Button
+                  plain
+                  size="small"
+                  onClick={() => setShowEmailPreview(true)}
+                  className="relative z-10 min-w-[80px]"
+                >
+                  <span
+                    className={`flex items-center transition-colors duration-300 ${showEmailPreview ? 'text-white' : 'text-gray-600'}`}
+                  >
+                    <DocumentTextIcon className="mr-1 h-4 w-4" />
+                    Preview
+                  </span>
+                </Button>
+              </div>
+            </div>
+          )}
           <div
             ref={animationScope}
             className="relative mx-auto flex w-full items-center overflow-hidden"
@@ -439,10 +518,11 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
             >
               <div
                 className={classNames('flex shrink-0 flex-col', {
-                  'border-r border-gray-200': chatStarted,
-                  'wide:w-[420px] wide:min-w-[420px] wide:max-w-[420px] w-full sm:w-[370px] sm:min-w-[370px] sm:max-w-[370px]':
+                  'border-r border-gray-200': chatStarted && !isMobile,
+                  'w-full sm:w-[370px] sm:min-w-[370px] sm:max-w-[370px] wide:w-[420px] wide:min-w-[420px] wide:max-w-[420px]':
                     chatStarted,
                   'w-full max-w-[600px]': !chatStarted,
+                  hidden: chatStarted && isMobile && showEmailPreview,
                 })}
               >
                 {!chatStarted && <ChatIntro />}
@@ -454,7 +534,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                   <StickToBottom
                     className={classNames('relative flex flex-col justify-end', {
                       'h-[calc(100vh-95px)]': chatStarted,
-                      'pl-[30px]': chatStarted,
+                      'pl-[30px]': chatStarted && !isMobile,
                     })}
                     resize="smooth"
                     initial="instant"
@@ -545,12 +625,30 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                 )}
               </div>
               {chatStarted && (
-                <div className="w-full overflow-auto">
+                <div
+                  className={classNames('w-full overflow-auto', {
+                    hidden: isMobile && !showEmailPreview,
+                  })}
+                >
                   <Workspace isStreaming={isLoading} />
                 </div>
               )}
             </div>
           </div>
+
+          <MobileWarningDialog
+            isOpen={mobileWarningOpener.isOpen}
+            onClose={mobileWarningOpener.close}
+            onConfirm={() => {
+              mobileWarningOpener.close()
+              // Mark the warning as seen when confirmed
+              setMobileWarningSeen(true)
+              if (pendingMessage) {
+                sendMessageImpl(pendingMessage)
+                setPendingMessage(undefined)
+              }
+            }}
+          />
 
           <CompanyDialog
             company={activeCompany}

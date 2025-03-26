@@ -4,7 +4,7 @@ import { Dialog, DialogButton, DialogDescription, DialogTitle } from '@component
 import { motion, type Variants } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
-import { useOpener } from '@/app/hooks'
+import { useIsMobile, useOpener } from '@/app/hooks'
 import { deleteChat } from '@/lib/database/queries/chats'
 import { Chat } from '@/lib/database/types'
 import { useAccountStore } from '@/lib/stores/accountStore'
@@ -14,10 +14,12 @@ import { cubicEasingFn } from '@/lib/utils/easings'
 import { fetcher, truncate } from '@/lib/utils/misc'
 import {
   ArrowRightStartOnRectangleIcon,
+  Bars3Icon,
   ChatBubbleBottomCenterTextIcon,
   CreditCardIcon,
   QuestionMarkCircleIcon,
   ViewColumnsIcon,
+  XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { Cog6ToothIcon, SparklesIcon, StarIcon } from '@heroicons/react/24/solid'
 import { signOut, useSession } from 'next-auth/react'
@@ -66,6 +68,9 @@ export function Menu() {
   const [dialogContent, setDialogContent] = useState<DialogContent>(null)
   const session = useSession()
 
+  // Use the isMobile hook
+  const isMobile = useIsMobile()
+
   const { plan, setUpgradeDialogOpen } = usePlan()
   const isPremium = plan && plan !== 'free'
   const router = useRouter()
@@ -104,6 +109,9 @@ export function Menu() {
   }, [open, mutate])
 
   useEffect(() => {
+    // Only add hover detection on desktop
+    if (isMobile) return
+
     const enterThreshold = 40
     const exitThreshold = 40
 
@@ -122,10 +130,26 @@ export function Menu() {
     return () => {
       window.removeEventListener('mousemove', onMouseMove)
     }
-  }, [])
+  }, [isMobile])
+
+  // Function to toggle the menu open/closed
+  const toggleMenu = () => {
+    setOpen(!open)
+  }
 
   return (
     <div>
+      {/* Mobile menu toggle button - only show on mobile */}
+      {isMobile && (
+        <button
+          onClick={toggleMenu}
+          className="fixed left-4 top-4 z-[51] rounded-md bg-white p-2 shadow-md"
+          aria-label={open ? 'Close menu' : 'Open menu'}
+        >
+          {open ? <XMarkIcon className="h-6 w-6 text-gray-600" /> : <Bars3Icon className="h-6 w-6 text-gray-600" />}
+        </button>
+      )}
+
       <motion.div
         ref={menuRef}
         initial="closed"
@@ -140,6 +164,10 @@ export function Menu() {
               onClick={() => {
                 setEmail(undefined)
                 setTitle(undefined)
+                // Close menu on mobile after navigation
+                if (isMobile) {
+                  setOpen(false)
+                }
               }}
               href="/"
               className="flex items-center gap-2 rounded-md bg-blue-50 p-2 font-bold text-blue-500 transition-colors hover:bg-blue-100"
@@ -264,19 +292,17 @@ export function Menu() {
           </div>
         </div>
       </motion.div>
-      <div className="absolute bottom-0 left-0 flex flex-col items-center gap-2 pb-3 pl-3">
-        <button
-          onClick={() => {
-            /* Add your feedback dialog logic here */
-          }}
-          className="rounded-md p-1 text-gray-600 hover:bg-gray-100"
-          title="Leave feedback"
-        >
+
+      {/* Only show this on desktop (hide on mobile) */}
+      {!isMobile && (
+        <div className="fixed bottom-3 left-3 z-40 flex flex-col items-center gap-2">
           <ChatBubbleBottomCenterTextIcon className="h-5 w-5" />
-        </button>
-        <UserAvatar size={24} />
-        <ViewColumnsIcon className="h-5 w-5" />
-      </div>
+          <UserAvatar size={24} />
+
+          <ViewColumnsIcon className="h-5 w-5" />
+        </div>
+      )}
+
       <AccountDialog isOpen={showAccountDialog} onClose={() => setShowAccountDialog(false)} />
       <FeedbackDialog isOpen={feedbackOpener.isOpen} onClose={feedbackOpener.close} />
     </div>

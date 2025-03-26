@@ -17,7 +17,7 @@ import { render } from '@react-email/components'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useCallback, useState } from 'react'
-import { useOpener } from '../hooks'
+import { useIsMobile, useOpener } from '../hooks'
 import { useEmailSave } from '../hooks/useEmailSave'
 import { Logo } from './Logo'
 import { Button } from './button'
@@ -45,6 +45,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()
   const { email, setEmail } = useEmailStore()
   const { chatId } = useChatStore()
+  const isMobile = useIsMobile()
   const emailAttributes = getEmailAttributes(email)
   const { title, setTitle, company } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
@@ -131,27 +132,37 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
     <header>
       <div
         className={classNames(
-          'z-100 flex w-full items-center justify-between bg-white px-4 py-4',
-          chatStarted ? 'border-b border-gray-200' : ''
+          'z-100 flex w-full items-center bg-white px-4 py-4 pt-5',
+          chatStarted ? 'border-b border-gray-200' : '',
+          isMobile && chatStarted ? 'justify-between' : 'justify-between',
+          isMobile && session?.data?.user ? 'pl-[68px]' : ''
         )}
       >
-        <Link
-          onClick={() => {
-            setEmail(undefined)
-            setTitle(undefined)
-          }}
-          href="/"
-          className="z-100 -m-1.5 p-1.5"
-        >
-          <span className="sr-only">wand.email</span>
-          <Logo />
-        </Link>
+        {!chatStarted || !isMobile ? (
+          <Link
+            onClick={() => {
+              setEmail(undefined)
+              setTitle(undefined)
+            }}
+            href="/"
+            className="z-100 -m-1.5 p-1.5"
+          >
+            <span className="sr-only">wand.email</span>
+            <Logo />
+          </Link>
+        ) : (
+          <div className="flex-shrink-0">
+            {title && <div className="max-w-[140px] truncate text-left text-sm font-medium">{title}</div>}
+          </div>
+        )}
 
-        {title && <div className="absolute left-1/2 -translate-x-1/2 truncate font-medium">{title}</div>}
+        {title && !isMobile && (
+          <div className="absolute left-1/2 max-w-[300px] -translate-x-1/2 truncate font-medium">{title}</div>
+        )}
 
         {email && session?.data?.user && (
-          <div className="flex items-center space-x-4">
-            {process.env.NODE_ENV === 'development' && (
+          <div className={classNames('flex items-center', isMobile && chatStarted ? 'space-x-2' : 'space-x-4')}>
+            {process.env.NODE_ENV === 'development' && !isMobile && (
               <Select
                 value={emailAttributes.styleVariant}
                 onChange={(e) => setEmail(templates.find((t) => t.name === e.target.value)?.value)}
@@ -161,37 +172,44 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                 ))}
               </Select>
             )}
-            <Select
-              value={emailAttributes.styleVariant}
-              onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
-            >
-              <option value="default">Default</option>
-              <option value="outline">Outline</option>
-              <option value="clear">Clear</option>
-            </Select>
-            <TabGroup
-              value={selectedDevice}
-              className="flex min-w-fit flex-nowrap justify-center"
-              onChange={handleDeviceChange}
-            >
-              <TabList>
-                {deviceOptions.map((option) => (
-                  <Tab selected={option.value === selectedDevice} key={option.value}>
-                    {option.name}
-                  </Tab>
-                ))}
-              </TabList>
-            </TabGroup>
 
-            <Button onClick={previewOpener.open} tooltipPosition="left" tooltip="Preview email">
-              <EyeIcon className="h-4 w-4" />
-            </Button>
+            {(!isMobile || !chatStarted) && (
+              <>
+                <Select
+                  value={emailAttributes.styleVariant}
+                  onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
+                >
+                  <option value="default">Default</option>
+                  <option value="outline">Outline</option>
+                  <option value="clear">Clear</option>
+                </Select>
+
+                <TabGroup
+                  value={selectedDevice}
+                  className="flex min-w-fit flex-nowrap justify-center"
+                  onChange={handleDeviceChange}
+                >
+                  <TabList>
+                    {deviceOptions.map((option) => (
+                      <Tab selected={option.value === selectedDevice} key={option.value}>
+                        {option.name}
+                      </Tab>
+                    ))}
+                  </TabList>
+                </TabGroup>
+
+                <Button onClick={previewOpener.open} tooltipPosition="left" tooltip="Preview email">
+                  <EyeIcon className="h-4 w-4" />
+                </Button>
+              </>
+            )}
 
             <Button
               disabled={emailStatus === 'loading'}
               onClick={sendTestEmail}
               tooltipPosition="left"
               tooltip="Send test email"
+              size={isMobile && chatStarted ? 'small' : undefined}
             >
               {emailStatus === 'loading' ? (
                 <Loading height={24} width={24} />
@@ -200,33 +218,47 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
               )}
             </Button>
 
-            <Button onClick={exportOpener.open} color="purple">
+            <Button onClick={exportOpener.open} color="purple" size={isMobile && chatStarted ? 'small' : undefined}>
               <ArrowDownTrayIcon className="h-4 w-4" />
               {session?.data?.user ? 'Export' : 'Sign up to export'}
             </Button>
           </div>
         )}
         {!session?.data?.user && (
-          <div className="hidden items-center space-x-4 md:flex">
-            <Button
-              color="white"
-              onClick={() => {
-                setStepType('login')
-                setShowSignUpDialog(true)
-              }}
-            >
-              Log in
-            </Button>
-            <Button
-              color="purple"
-              onClick={() => {
-                setStepType('signup')
-                setShowSignUpDialog(true)
-              }}
-            >
-              Sign up
-            </Button>
-          </div>
+          <>
+            <div className="hidden items-center space-x-4 md:flex">
+              <Button
+                color="white"
+                onClick={() => {
+                  setStepType('login')
+                  setShowSignUpDialog(true)
+                }}
+              >
+                Log in
+              </Button>
+              <Button
+                color="purple"
+                onClick={() => {
+                  setStepType('signup')
+                  setShowSignUpDialog(true)
+                }}
+              >
+                Sign up
+              </Button>
+            </div>
+            <div className="md:hidden">
+              <Button
+                outline
+                size="small"
+                onClick={() => {
+                  setStepType('signup')
+                  setShowSignUpDialog(true)
+                }}
+              >
+                Get started
+              </Button>
+            </div>
+          </>
         )}
       </div>
       {emailStatus === 'success' && <Notification title="Test email sent successfully!" status="success" />}

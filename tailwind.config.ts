@@ -22,6 +22,7 @@ const config: Config = {
       },
       screens: {
         wide: '1375px',
+        xs: '372px',
       },
       colors: {
         google: {
