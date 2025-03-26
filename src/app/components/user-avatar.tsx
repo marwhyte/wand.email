@@ -19,7 +19,7 @@ export function UserAvatar({ size = 24 }: { size?: number }) {
       ) : (
         <div
           className="flex h-full w-full items-center justify-center bg-blue-500 font-medium text-white"
-          style={{ fontSize: size }}
+          style={{ fontSize: size === 24 ? '12px' : '18px' }}
         >
           {data?.user?.name ? data.user.name.charAt(0).toUpperCase() : data?.user?.email?.charAt(0).toUpperCase()}
         </div>
