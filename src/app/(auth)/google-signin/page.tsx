@@ -8,12 +8,32 @@ export default function SignInPopUpPage() {
   const { data: session, status } = useSession()
 
   useEffect(() => {
-    if (!(status === 'loading') && !session) {
-      doGoogleLogin()
+    // Check for error in URL parameters
+    const urlParams = new URLSearchParams(window.location.search)
+    const error = urlParams.get('error')
+
+    if (error) {
+      if (window.opener) {
+        window.opener.postMessage({ error }, window.location.origin)
+        window.close()
+      }
+      return
     }
+
+    if (!(status === 'loading') && !session) {
+      doGoogleLogin().catch((error) => {
+        if (window.opener) {
+          window.opener.postMessage({ error }, window.location.origin)
+          window.close()
+        }
+      })
+    }
+
     if (session) {
-      window.opener?.postMessage('signInComplete', window.location.origin)
-      window.close()
+      if (window.opener) {
+        window.opener.postMessage('signInComplete', window.location.origin)
+        window.close()
+      }
     }
   }, [session, status])
 
