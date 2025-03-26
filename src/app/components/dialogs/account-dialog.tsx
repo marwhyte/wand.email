@@ -251,7 +251,7 @@ const AccountDialog = ({ isOpen, onClose }: AccountDialogProps) => {
                       outline
                       className="w-full"
                       onClick={handleCancelClick}
-                      disabled={isCanceling || !userData?.stripeSubscriptionExpiresAt}
+                      disabled={isCanceling || !!userData?.stripeSubscriptionExpiresAt}
                     >
                       Cancel Subscription
                     </Button>
