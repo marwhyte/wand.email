@@ -201,6 +201,31 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     initialMessages.filter((m) => m.role === 'assistant').length > 0
   )
 
+  // Add a ref for the main container
+  const containerRef = useRef<HTMLDivElement>(null)
+
+  // Add useEffect to handle viewport height on mobile
+  useEffect(() => {
+    if (!isMobile) return
+
+    function updateContainerHeight() {
+      // Set a custom property for the visible viewport height
+      document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`)
+    }
+
+    // Initial update
+    updateContainerHeight()
+
+    // Update on resize and orientation change
+    window.addEventListener('resize', updateContainerHeight)
+    window.addEventListener('orientationchange', updateContainerHeight)
+
+    return () => {
+      window.removeEventListener('resize', updateContainerHeight)
+      window.removeEventListener('orientationchange', updateContainerHeight)
+    }
+  }, [isMobile])
+
   renderLogger.trace('Chat')
 
   useEffect(() => {
@@ -485,11 +510,11 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   }, [status, latestAssistantMessage, isMobile, chatStarted, isFirstAssistantMessageComplete])
 
   return (
-    <div className="mx-auto w-full">
+    <div ref={containerRef} className="mx-auto flex h-full w-full flex-col overflow-hidden">
       {session?.data?.user && <Menu />}
       <BackgroundGradients inputDisabled={chatStarted} />
       <Header monthlyExportCount={monthlyExportCount ?? null} chatStarted={chatStarted} />
-      <div className="flex flex-1">
+      <div className="flex flex-1 overflow-hidden">
         <>
           {isMobile && chatStarted && (
             <>
@@ -540,17 +565,17 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
           )}
           <div
             ref={animationScope}
-            className="relative mx-auto flex w-full items-center overflow-hidden"
+            className="relative mx-auto flex h-full w-full items-center overflow-hidden"
             data-chat-visible={showChat}
           >
             <div
-              className={classNames(`flex w-full justify-center`, {
+              className={classNames(`flex h-full w-full justify-center`, {
                 '-mb-2': chatStarted,
                 'mt-[3vh] px-4 sm:mt-[7vh] sm:px-0': !chatStarted,
               })}
             >
               <div
-                className={classNames('flex shrink-0 flex-col', {
+                className={classNames('flex h-full shrink-0 flex-col', {
                   'border-r border-gray-200': chatStarted && !isMobile,
                   'w-full sm:w-[370px] sm:min-w-[370px] sm:max-w-[370px] wide:w-[420px] wide:min-w-[420px] wide:max-w-[420px]':
                     chatStarted,
@@ -568,6 +593,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                     className={classNames('relative flex flex-col justify-end', {
                       'h-[calc(100vh-95px)]': chatStarted && !isMobile,
                       'h-[calc(100vh-140px)]': chatStarted && isMobile,
+                      'h-[calc(var(--vh, 1vh) * 100 - 140px)]': chatStarted && isMobile,
                       'pl-[30px]': chatStarted && !isMobile,
                     })}
                     resize="smooth"
@@ -590,9 +616,16 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                       className={classNames(
                         'px-0 sm:px-4',
                         isMobile && chatStarted
-                          ? 'fixed bottom-0 left-0 right-0 z-50 bg-white/95 pb-2 pt-2 backdrop-blur'
+                          ? 'pb-safe fixed bottom-0 left-0 right-0 z-50 bg-white/95 pt-2 shadow-lg backdrop-blur'
                           : ''
                       )}
+                      style={
+                        isMobile && chatStarted
+                          ? {
+                              paddingBottom: 'env(safe-area-inset-bottom, 16px)',
+                            }
+                          : {}
+                      }
                     >
                       <ChatInput
                         chatStarted={chatStarted}

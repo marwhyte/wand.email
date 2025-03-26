@@ -43,8 +43,8 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
   // }
 
   return (
-    <>
+    <div className="relative isolate flex h-[100dvh] flex-col overflow-hidden">
       <Chat chat={chat} id={chat.id} initialMessages={sortByCreatedAt(chat.messages)} chatCompany={company} />
-    </>
+    </div>
   )
 }
