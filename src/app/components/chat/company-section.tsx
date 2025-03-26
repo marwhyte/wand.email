@@ -4,7 +4,6 @@ import { PencilSquareIcon, PlusCircleIcon, TrashIcon } from '@heroicons/react/24
 import { motion } from 'motion/react'
 import { Badge } from '../badge'
 import { Button } from '../button'
-import { Divider } from '../divider'
 import { Heading } from '../heading'
 
 interface CompanySectionProps {
@@ -30,11 +29,14 @@ export function CompanySection({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="relative mb-10 mt-10">
-        <Divider className="absolute inset-3 flex items-center" aria-hidden="true" />
-        <div className="relative flex justify-center text-sm font-medium leading-6">
-          <span className="bg-white px-6 text-gray-600">{companies?.length ? 'Your companies' : 'Optionally'}</span>
-        </div>
+      <div className="relative mb-10 mt-10 flex items-center justify-center">
+        <hr className="flex-grow border-gray-200" />
+
+        <span className="px-6 text-sm font-medium leading-6 text-gray-600">
+          {companies?.length ? 'Your companies' : 'Optionally'}
+        </span>
+
+        <hr className="flex-grow border-gray-200" />
       </div>
 
       {companies?.length ? (
