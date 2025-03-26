@@ -44,14 +44,7 @@ export default async function Page(props: { params: Promise<{ id: string }> }) {
 
   return (
     <>
-      <Chat
-        chat={chat}
-        id={chat.id}
-        initialMessages={sortByCreatedAt(chat.messages)}
-        companies={companies}
-        chatCompany={company}
-        monthlyExportCount={monthlyExportCount}
-      />
+      <Chat chat={chat} id={chat.id} initialMessages={sortByCreatedAt(chat.messages)} chatCompany={company} />
     </>
   )
 }

@@ -16,7 +16,7 @@ import { useEmailStore } from '@/lib/stores/emailStore'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { generateEmailScript } from '@/lib/utils/email-script-generator'
 import { createScopedLogger, renderLogger } from '@/lib/utils/logger'
-import { classNames } from '@/lib/utils/misc'
+import { classNames, fetcher } from '@/lib/utils/misc'
 import { Message, useChat } from '@ai-sdk/react'
 import { Header } from '@components/header'
 import {
@@ -29,7 +29,7 @@ import {
 import { useAnimate } from 'motion/react'
 import { useSession } from 'next-auth/react'
 import { useEffect, useRef, useState } from 'react'
-import { useSWRConfig } from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { v4 as uuidv4 } from 'uuid'
 import { BackgroundGradients } from '../background-gradients'
@@ -49,9 +49,7 @@ const logger = createScopedLogger('Chat')
 type Props = {
   id: string
   chat?: ChatType
-  companies: Company[] | null
   chatCompany?: Company | null
-  monthlyExportCount: number | null
   initialMessages: Message[]
 }
 
@@ -95,9 +93,22 @@ function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
   )
 }
 
-export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMessages, chat }: Props) {
+export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   // Add email store access
   const { email } = useEmailStore()
+  const session = useSession()
+
+  const { data: monthlyExportCount } = useSWR<number | null>(
+    session?.data?.user?.id ? '/api/exports/count' : null,
+    fetcher,
+    {
+      fallbackData: null,
+    }
+  )
+
+  const { data: companies } = useSWR<Company[]>(session?.data?.user?.id ? '/api/companies' : null, fetcher, {
+    fallbackData: [],
+  })
 
   const { mutate } = useSWRConfig()
   const { setTitle, setCompany, company, title } = useChatStore()
@@ -140,7 +151,6 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
   const [textareaHeight, setTextareaHeight] = useState(TEXTAREA_MIN_HEIGHT)
 
   // Auth and session
-  const session = useSession()
 
   const [pendingAction, setPendingAction] = useState<{
     type: 'send-message' | 'open-company-dialog' | 'enhance-prompt'
@@ -175,17 +185,19 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
   renderLogger.trace('Chat')
 
   useEffect(() => {
-    if (chat) return
+    if (chat) return // Early return if chat exists
 
+    // Only update company if necessary to avoid infinite loops
     if (companies?.length && !company) {
       setCompany(companies[0])
-    } else if (!companies?.length) {
+    } else if (!companies?.length && company) {
+      // Only clear company if companies is empty and we have a company set
+      setCompany(undefined)
+    } else if (company && companies?.length && !companies.find((c) => c.id === company.id)) {
+      // Only clear company if it no longer exists in the companies list
       setCompany(undefined)
     }
-    if (company && !companies?.find((c) => c.id === company.id)) {
-      setCompany(undefined)
-    }
-  }, [companies, company])
+  }, [companies, company, chat])
 
   useEffect(() => {
     if (session.data?.user) {
@@ -324,7 +336,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
     try {
       setIsDeleting(true)
       await deleteCompany(activeCompany.id)
-
+      mutate('/api/companies')
       setActiveCompany(null)
     } catch (error) {
     } finally {
@@ -412,7 +424,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
     <div className="mx-auto w-full">
       {session?.data?.user && <Menu />}
       <BackgroundGradients inputDisabled={chatStarted} />
-      <Header monthlyExportCount={monthlyExportCount} chatStarted={chatStarted} />
+      <Header monthlyExportCount={monthlyExportCount ?? null} chatStarted={chatStarted} />
       <div className="flex flex-1">
         <>
           <div
@@ -548,6 +560,7 @@ export function Chat({ id, companies, chatCompany, monthlyExportCount, initialMe
             onSuccess={(company) => {
               companyOpener.close()
               setActiveCompany(null)
+              mutate('/api/companies')
             }}
           />
 

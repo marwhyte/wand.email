@@ -7,7 +7,9 @@ import { useEmailStore } from '@/lib/stores/emailStore'
 import { getReactEmailCode } from '@/lib/utils/code-generation'
 import { ChevronLeftIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
 import { CodeBlock, dracula, render } from '@react-email/components'
+import { useSession } from 'next-auth/react'
 import { useCallback, useState } from 'react'
+import { useSWRConfig } from 'swr'
 import AlertBox from '../alert-box'
 import { Button } from '../button'
 import ButtonCard from '../button-card'
@@ -71,17 +73,20 @@ function formatHTML(html: string): string {
 const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const { email } = useEmailStore()
   const { company } = useChatStore()
+  const { data: session } = useSession()
+  const { mutate } = useSWRConfig()
   const { setStepType, setShowAccountDialog } = useAccountStore()
   const [exportType, setExportType] = useState<ExportType | null>(null)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
   const canExport = (monthlyExportCount !== null && monthlyExportCount < 5) || isLocalDev
 
-  const handleExport = (type: ExportType) => {
+  const handleExport = async (type: ExportType) => {
     if (!email) return
     if (!canExport) return
-    addExport(email, type)
     setExportType(type)
+    await addExport(email, type)
+    mutate('/api/exports/count')
   }
 
   const htmlEmailCode = open ? formatHTML(render(EmailRendererFinal({ email: email, company: company }))) : ''
@@ -100,7 +105,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
     }
   }, [reactEmailCode])
 
-  if (monthlyExportCount === null)
+  if (!monthlyExportCount) {
     return (
       <Dialog open={open} onClose={onClose}>
         <DialogTitle>
@@ -108,6 +113,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
         </DialogTitle>
       </Dialog>
     )
+  }
 
   return (
     <>
