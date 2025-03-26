@@ -599,12 +599,17 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                     resize="smooth"
                     initial="instant"
                   >
-                    <StickToBottom.Content className="relative flex-grow overflow-auto px-4 pt-4">
+                    <StickToBottom.Content
+                      className={classNames(
+                        'relative flex-grow overflow-auto px-4 pt-4',
+                        isMobile && chatStarted ? 'pb-[56px]' : 'pb-4' // Add padding at bottom to prevent content hiding behind fixed input
+                      )}
+                    >
                       <AutoScroller input={input} />
                       <div style={{ opacity: contentReady ? 1 : 0, transition: 'opacity 0.1s' }}>
                         <Messages
                           ref={messageRef}
-                          className={classNames('z-1 mx-auto flex h-full w-full max-w-[552px] flex-col pb-3', {})}
+                          className={classNames('z-1 mx-auto flex h-full w-full max-w-[552px] flex-col', {})}
                           messages={messagesWithoutSystem}
                           isStreaming={isLoading}
                         />
@@ -616,7 +621,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                       className={classNames(
                         'px-0 sm:px-4',
                         isMobile && chatStarted
-                          ? 'pb-safe fixed bottom-0 left-0 right-0 z-50 bg-white/95 pt-2 shadow-lg backdrop-blur'
+                          ? 'fixed bottom-0 left-0 right-0 z-50 bg-white/95 pt-2 shadow-lg backdrop-blur'
                           : ''
                       )}
                       style={
@@ -638,6 +643,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                         handleInputChange={(event) => {
                           handleInputChange?.(event)
                           if (textareaRef?.current) {
+                            // Update textarea height and also update padding bottom of messages container
                             setTextareaHeight(textareaRef.current.scrollHeight)
                           }
                         }}
