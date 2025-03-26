@@ -15,6 +15,7 @@ import { Button } from '../button'
 import ButtonCard from '../button-card'
 import EmailRendererFinal from '../email-workspace/email-renderer-final'
 import Notification from '../notification'
+import { usePlan } from '../payment/plan-provider'
 import { Text } from '../text'
 import { Dialog, DialogBody, DialogTitle } from './dialog'
 
@@ -74,12 +75,13 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const { email } = useEmailStore()
   const { company } = useChatStore()
   const { data: session } = useSession()
+  const { plan } = usePlan()
   const { mutate } = useSWRConfig()
   const { setStepType, setShowAccountDialog } = useAccountStore()
   const [exportType, setExportType] = useState<ExportType | null>(null)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
-  const canExport = (monthlyExportCount !== null && monthlyExportCount < 5) || isLocalDev
+  const canExport = plan === 'pro' || (monthlyExportCount !== null && monthlyExportCount < 5) || isLocalDev
 
   const handleExport = async (type: ExportType) => {
     if (!email) return
