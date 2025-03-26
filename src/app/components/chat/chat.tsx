@@ -38,7 +38,6 @@ import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
 import UpgradeDialog from '../dialogs/upgrade-dialog'
 import Workspace from '../email-workspace/email-workspace'
 import { Menu } from '../sidebar/menu'
-import { ChatToastContainer } from '../toast/chat-toast-container'
 import { ChatInput } from './chat-input'
 import { ChatIntro } from './chat-intro'
 import { CompanySection } from './company-section'
@@ -576,8 +575,6 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
             isDeleting={isDeleting}
             onConfirmDelete={confirmDeleteCompany}
           />
-
-          <ChatToastContainer />
         </>
       </div>
     </div>

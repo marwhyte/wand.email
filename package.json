@@ -64,8 +64,6 @@
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "19.0.0",
-    "react-hot-toast": "^2.4.1",
-    "react-toastify": "^11.0.2",
     "require-in-the-middle": "^7.5.2",
     "resend": "^3.5.0",
     "sanity-mobile-preview": "^1.0.9",
