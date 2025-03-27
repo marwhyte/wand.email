@@ -221,8 +221,6 @@ export async function streamText(
         ? anthropic('claude-3-haiku-20240307')
         : google('gemini-2.0-flash-001')
 
-  console.log('systemPrompt', systemPrompt)
-
   return _streamText({
     experimental_generateMessageId: () => {
       const messageId = assistantMessageId || uuidv4()

@@ -10,7 +10,7 @@ type Params = {
 export async function sendVerificationRequest(params: Params) {
   const { identifier: to, provider, url } = params
   const { host } = new URL(url)
-  console.log('this', to, provider, url)
+
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {

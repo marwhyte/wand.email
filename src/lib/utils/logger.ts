@@ -72,7 +72,6 @@ function log(level: DebugLevel, scope: string | undefined, messages: any[]) {
   }, '')
 
   if (!supportsColor) {
-    console.log(`[${level.toUpperCase()}]`, allMessages)
     return
   }
 

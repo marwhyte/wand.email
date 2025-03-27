@@ -2,13 +2,11 @@ import { auth } from '@/auth'
 import { getUserByEmail } from '@/lib/database/queries/users'
 import { NextResponse } from 'next/server'
 
-export async function GET(request: Request) {
+export async function GET() {
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('User not authenticated')
   }
-
-  console.log('session', session)
 
   try {
     const user = await getUserByEmail(session.user.email)

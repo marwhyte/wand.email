@@ -16,8 +16,6 @@ export function usePromptEnhancer() {
     setEnhancingPrompt(true)
     setPromptEnhanced(false)
 
-    console.log('Enhancing prompt', input)
-
     const response = await fetch('/api/enhancer', {
       method: 'POST',
       headers: {
@@ -27,8 +25,6 @@ export function usePromptEnhancer() {
         message: input,
       }),
     })
-
-    console.log('Response', response)
 
     if (!response.ok) {
       logger.error(`Error enhancing prompt: ${response.status} ${response.statusText}`)

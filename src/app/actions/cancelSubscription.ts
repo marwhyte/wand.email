@@ -42,8 +42,6 @@ export async function cancelSubscription() {
 
     const expiresAt = new Date(subscriptions.data[0].current_period_end * 1000)
 
-    console.log('expiresAt', expiresAt)
-
     if (expiresAt) {
       await updateUserSubscriptionExpiry(user.id, expiresAt)
     }

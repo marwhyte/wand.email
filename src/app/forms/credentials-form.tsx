@@ -43,18 +43,14 @@ const CredentialsForm = () => {
     }
 
     try {
-      console.log('Submitting email:', email)
       const result = await signIn('resend', {
         email,
         redirect: false,
       })
-      console.log('SignIn result:', result)
 
       if (result?.ok) {
-        console.log('Response was ok')
         setSubmitted(true)
       } else {
-        console.log('Response error:', result?.error)
         setError('Failed to send login link. Please try again.')
       }
     } catch (e) {

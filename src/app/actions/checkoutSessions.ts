@@ -15,8 +15,6 @@ export async function createCheckoutSession(tier: string, anually: boolean, path
     throw new Error('User not logged in')
   }
 
-  console.log(`${process.env.NEXT_PUBLIC_BASE}${path}?success=true`)
-
   try {
     const stripeSession = await stripe.checkout.sessions.create({
       metadata: {

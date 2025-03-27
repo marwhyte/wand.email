@@ -6,9 +6,11 @@ import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getReactEmailCode } from '@/lib/utils/code-generation'
 import { ChevronLeftIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
-import { CodeBlock, dracula, render } from '@react-email/components'
+import { render } from '@react-email/components'
 import { useSession } from 'next-auth/react'
 import { useCallback, useState } from 'react'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { dracula as draculaSyntaxHighlighter } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import { useSWRConfig } from 'swr'
 import AlertBox from '../alert-box'
 import { Button } from '../button'
@@ -26,44 +28,87 @@ type Props = {
 }
 
 function formatHTML(html: string): string {
+  // Remove excess whitespace first
+  html = html.replace(/>\s+</g, '><').trim()
+
   let formatted = ''
   let indentLevel = 0
   let inTag = false
   let inContent = false
+  let skipIndent = false
+
+  // Define self-closing tags that shouldn't increase indent
+  const selfClosingTags = ['img', 'br', 'hr', 'input', 'meta', 'link']
+  let currentTag = ''
+  let isSelfClosing = false
 
   for (let i = 0; i < html.length; i++) {
     const char = html[i]
 
-    if (char === '<' && html[i + 1] !== '/') {
-      if (inContent) {
-        formatted += '\n' + '  '.repeat(indentLevel)
-        inContent = false
-      }
+    // Collect tag name to detect self-closing tags
+    if (inTag && char !== ' ' && char !== '>' && char !== '/') {
+      currentTag += char
+    } else if (inTag && (char === ' ' || char === '>' || char === '/')) {
+      isSelfClosing = selfClosingTags.includes(currentTag.toLowerCase()) || html.substring(i - 1, i + 1) === '/>'
+      if (char !== '>') currentTag = ''
+    }
 
-      formatted += '\n' + '  '.repeat(indentLevel)
-      formatted += char
-      inTag = true
-      indentLevel++
-    } else if (char === '<' && html[i + 1] === '/') {
-      indentLevel--
-      if (inContent) {
+    if (char === '<') {
+      // Handle opening tag
+      if (html[i + 1] !== '/') {
+        if (inContent) {
+          formatted += '\n' + '  '.repeat(indentLevel)
+          inContent = false
+        }
+
         formatted += '\n' + '  '.repeat(indentLevel)
-        inContent = false
-      } else {
-        formatted += '\n' + '  '.repeat(indentLevel)
+        formatted += char
+        inTag = true
+        currentTag = ''
+
+        // Only increase indent if not a self-closing tag
+        if (!html.substring(i, i + 4).includes('<!--')) {
+          indentLevel++
+          skipIndent = false
+        } else {
+          skipIndent = true
+        }
       }
-      formatted += char
-      inTag = true
-    } else if (char === '>') {
+      // Handle closing tag
+      else {
+        indentLevel--
+        if (inContent) {
+          formatted += '\n' + '  '.repeat(indentLevel)
+          inContent = false
+        } else {
+          formatted += '\n' + '  '.repeat(indentLevel)
+        }
+        formatted += char
+        inTag = true
+      }
+    }
+    // End of tag
+    else if (char === '>') {
       formatted += char
       inTag = false
 
+      // If it was a self-closing tag, reduce indent level immediately
+      if (isSelfClosing || skipIndent) {
+        indentLevel--
+        isSelfClosing = false
+      }
+
+      currentTag = ''
+
+      // Check if there's content after this tag
       let j = i + 1
       while (j < html.length && html[j].trim() === '') j++
       if (j < html.length && html[j] !== '<') {
         inContent = true
       }
-    } else {
+    }
+    // Regular character
+    else {
       formatted += char
     }
   }
@@ -273,13 +318,15 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                   </Button>
                 </div>
                 <div className="rounded border border-gray-700 bg-gray-900">
-                  <CodeBlock
-                    style={{ maxHeight: '400px', overflow: 'auto' }}
-                    theme={dracula}
-                    lineNumbers
+                  <SyntaxHighlighter
+                    style={draculaSyntaxHighlighter}
                     language="html"
-                    code={htmlEmailCode}
-                  />
+                    showLineNumbers={true}
+                    wrapLines
+                    customStyle={{ maxHeight: '400px', overflow: 'auto' }}
+                  >
+                    {htmlEmailCode}
+                  </SyntaxHighlighter>
                 </div>
               </div>
             </div>

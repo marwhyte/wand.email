@@ -10,8 +10,6 @@ export function useIsMobile() {
     // Mark component as mounted (client-side)
     setIsMounted(true)
 
-    console.log('isMounted', isMounted)
-
     // Set initial value
     const checkIsMobile = () => {
       const mobileMediaQuery = window.matchMedia('(max-width: 767px)')

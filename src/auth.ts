@@ -19,16 +19,8 @@ export const authOptions: NextAuthConfig = {
           throw new Error('Missing Resend API key')
         }
 
-        console.log('Verification request params:', {
-          to: params.identifier,
-          from: params.provider.from,
-          url: params.url,
-          hasApiKey: !!params.provider.apiKey,
-        })
-
         try {
           await sendVerificationRequest(params)
-          console.log('Verification email sent successfully')
         } catch (error) {
           console.error('Detailed send error:', error)
           throw error

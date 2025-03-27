@@ -55,8 +55,6 @@ export async function updateUser(formData: FormData) {
   if (name) updateFields.name = name as string
   if (email) updateFields.email = email as string
 
-  console.log('updateFields', updateFields)
-
   await db
     .updateTable('User')
     .set({ ...updateFields, updatedAt: new Date() })
