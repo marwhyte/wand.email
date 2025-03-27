@@ -499,7 +499,6 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
         // Only show warning if it hasn't been seen this session
         if (isMobile && !chatStarted && !mobileWarningSeen) {
           setPendingMessage(fullText)
-          mobileWarningOpener.open()
         }
       }
     }
