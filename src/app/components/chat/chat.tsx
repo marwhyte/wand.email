@@ -96,7 +96,8 @@ function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
 
 export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   // Add email store access
-  const { email } = useEmailStore()
+  const { email, setEmail } = useEmailStore()
+
   const session = useSession()
 
   const { data: monthlyExportCount } = useSWR<number | null>(

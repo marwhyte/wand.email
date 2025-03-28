@@ -70,7 +70,7 @@ export default function EmailEditor({ email }: { email: Email }) {
   const description = getTabDescription()
 
   return (
-    <div className="flex h-full w-full min-w-[290px] max-w-[310px] flex-col overflow-y-scroll border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
+    <div className="email-editor flex h-full w-full min-w-[290px] max-w-[310px] flex-col overflow-y-scroll border-zinc-200 bg-white dark:border-zinc-700 dark:bg-zinc-900">
       <TabGroup value={tab} className="mx-auto mt-4" onChange={handleTabChange}>
         <TabList>
           {Object.values(Tabs).map((tabValue) => {

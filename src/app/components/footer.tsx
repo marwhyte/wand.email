@@ -1,4 +1,5 @@
 'use client'
+
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { motion } from 'motion/react'
 import Image from 'next/image'

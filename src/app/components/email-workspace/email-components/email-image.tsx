@@ -15,7 +15,7 @@ type Props = {
 export default function EmailImage({ block, parentRow }: Props) {
   const { email, setCurrentBlock } = useEmailStore()
   const { chatId } = useChatStore()
-  const saveEmail = useEmailSave(chatId)
+  const saveEmail = useEmailSave()
   const { company } = useChatStore()
 
   const handleUpload = (src: string) => {

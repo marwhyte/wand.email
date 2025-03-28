@@ -1,9 +1,9 @@
+import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getLinkProps } from '@/lib/utils/attributes'
-import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
-import { Link } from '@react-email/components'
-import parse from 'html-react-parser'
+import { useCallback } from 'react'
 import { LinkBlock, RowBlock } from '../types'
+import EditableContent from './editable-content'
 
 type Props = {
   block: LinkBlock
@@ -11,11 +11,10 @@ type Props = {
 }
 
 export default function EmailLink({ block, parentRow }: Props) {
-  const { email } = useEmailStore()
+  const { email, currentBlock } = useEmailStore()
+  const saveEmail = useEmailSave()
 
   const linkProps = getLinkProps(block, parentRow, email)
-  const linkAttributes = getBlockAttributes(block, parentRow, email)
-
   const { style, ...restLinkProps } = linkProps
 
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
@@ -28,12 +27,22 @@ export default function EmailLink({ block, parentRow }: Props) {
     paddingLeft,
   }
 
+  const handleSelect = useCallback(() => {
+    // The block selection is handled by the parent EmailBlock component
+  }, [])
+
   return (
-    // @ts-expect-error align is not a valid prop for the div
-    <div align={linkAttributes.align} style={divStyle}>
-      <Link {...restLinkProps} style={restStyles} href={undefined}>
-        {parse(linkAttributes.content)}
-      </Link>
+    <div style={divStyle}>
+      <EditableContent
+        content={block.attributes.content || ''}
+        isSelected={currentBlock?.id === block.id}
+        onSelect={handleSelect}
+        className="w-full"
+        style={{
+          ...restStyles,
+          color: linkProps.style?.color,
+        }}
+      />
     </div>
   )
 }

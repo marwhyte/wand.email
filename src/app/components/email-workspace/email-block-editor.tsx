@@ -5,7 +5,6 @@ import { Disclosure } from '@/app/components/disclosure'
 import { Field, FieldGroup, Label } from '@/app/components/fieldset'
 import FileUploader from '@/app/components/file-uploader'
 import { Input, NumberInput } from '@/app/components/input'
-import Textbox from '@/app/components/textbox'
 import PaddingForm, { PaddingValues } from '@/app/forms/padding-form'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -14,7 +13,6 @@ import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { capitalizeFirstLetter, safeParseInt } from '@/lib/utils/misc'
 import { useMemo } from 'react'
 import { Select } from '../select'
-import HrefEditor from './href-editor'
 import ListEditor from './list-editor'
 import SocialsEditor from './socials-editor'
 import SurveyEditor from './survey-editor'
@@ -171,22 +169,6 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
 
   return (
     <div className="flex flex-col gap-4">
-      {options.includes(Options.TEXT) && 'content' in blockAttributes && (
-        <Textbox
-          autofocus
-          hideToolbar={block.type === 'link' || block.type === 'button'}
-          key={`textbox-${block.id}`}
-          value={blockAttributes.content || ''}
-          onChange={(value: string) => onChange({ content: value })}
-        />
-      )}
-
-      <Disclosure title="Action" defaultOpen>
-        {options.includes(Options.HREF) && 'href' in processedProps && (
-          <HrefEditor href={processedProps.href} onChange={(href) => onChange({ href })} />
-        )}
-      </Disclosure>
-
       {block.type !== 'text' && (
         <Disclosure title={`${capitalizeFirstLetter(block.type)} Attributes`} defaultOpen>
           <FieldGroup>
@@ -322,30 +304,6 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         <Disclosure title="Text Properties" defaultOpen>
           <FieldGroup>
             <Field>
-              <Label>Font Size</Label>
-              <NumberInput
-                className="ml-auto"
-                min={1}
-                max={144}
-                value={safeParseInt(String(processedProps.style?.fontSize).replace('px', '')) || 16}
-                onChange={(value) => onChange({ fontSize: `${value}px` })}
-              />
-            </Field>
-
-            <Field>
-              <Label>Font Weight</Label>
-              <div className="ml-auto w-24">
-                <Select
-                  value={processedProps.style?.fontWeight || 'normal'}
-                  onChange={(e) => onChange({ fontWeight: e.target.value as 'normal' | 'bold' })}
-                >
-                  <option value="normal">Normal</option>
-                  <option value="bold">Bold</option>
-                </Select>
-              </div>
-            </Field>
-
-            <Field>
               <Label>Letter Spacing</Label>
               <NumberInput
                 className="ml-auto"
@@ -359,62 +317,6 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 onChange={(value) => onChange({ letterSpacing: value === 0 ? 'normal' : `${value}px` })}
               />
             </Field>
-
-            <Field>
-              <Label>Line Height</Label>
-              <div className="ml-auto w-24">
-                <Select
-                  value={
-                    processedProps.style?.lineHeight === '120%'
-                      ? 'small'
-                      : processedProps.style?.lineHeight === '150%'
-                        ? 'medium'
-                        : processedProps.style?.lineHeight === '180%'
-                          ? 'large'
-                          : processedProps.style?.lineHeight === '200%'
-                            ? 'extra-large'
-                            : 'medium'
-                  }
-                  onChange={(e) => {
-                    const value = e.target.value
-                    let lineHeight = '150%'
-                    if (value === 'small') lineHeight = '120%'
-                    if (value === 'large') lineHeight = '180%'
-                    if (value === 'extra-large') lineHeight = '200%'
-                    onChange({ lineHeight })
-                  }}
-                >
-                  <option value="small">Small</option>
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
-                  <option value="extra-large">XL</option>
-                </Select>
-              </div>
-            </Field>
-
-            <Field>
-              <Label>Text Color</Label>
-              <ColorInput
-                value={processedProps.style?.color || '#000000'}
-                onChange={(value) => onChange({ color: value })}
-              />
-            </Field>
-
-            {options.includes(Options.TEXT_ALIGN) && (
-              <Field>
-                <Label>Text Alignment</Label>
-                <div className="ml-auto w-24">
-                  <Select
-                    value={processedProps.style?.textAlign || 'left'}
-                    onChange={(e) => onChange({ textAlign: e.target.value as 'left' | 'center' | 'right' })}
-                  >
-                    <option value="left">Left</option>
-                    <option value="center">Center</option>
-                    <option value="right">Right</option>
-                  </Select>
-                </div>
-              </Field>
-            )}
           </FieldGroup>
         </Disclosure>
       )}

@@ -221,7 +221,7 @@ export function Menu() {
           <div className="p-4">
             <Link
               onClick={() => {
-                setEmail(undefined)
+                setEmail(null)
                 setTitle(undefined)
                 // Close menu on mobile after navigation
                 if (isMobile) {

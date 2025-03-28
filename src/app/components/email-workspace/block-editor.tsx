@@ -20,9 +20,9 @@ import {
   Email,
   EmailBlock,
   ImageBlockAttributes,
+  ListBlockAttributes,
   PaddingAttributes,
   RowBlock,
-  ListBlockAttributes,
   RowBlockAttributes,
   SocialsBlockAttributes,
   TableBlockAttributes,
@@ -37,7 +37,7 @@ type BlockEditorProps = {
 const BlockEditor = ({ email }: BlockEditorProps) => {
   const { currentBlock, setCurrentBlock } = useEmailStore()
   const { chatId } = useChatStore()
-  const saveEmail = useEmailSave(chatId)
+  const saveEmail = useEmailSave()
 
   const handleSave = useCallback(
     (updatedTemplate: Email) => {

@@ -1,6 +1,5 @@
 'use client'
 
-import { Field, FieldGroup, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import { Select } from '@/app/components/select'
 import { isValidHttpUrl } from '@/lib/utils/misc'
@@ -22,9 +21,10 @@ type LinkFields = {
 interface HrefEditorProps {
   href: string | undefined
   onChange: (href: string) => void
+  compact?: boolean
 }
 
-const HrefEditor = ({ href, onChange }: HrefEditorProps) => {
+const HrefEditor = ({ href, onChange, compact = false }: HrefEditorProps) => {
   const getLinkType = (href: string | undefined): LinkType => {
     if (!href) return LinkType.WEB
     if (href.startsWith('mailto:')) return LinkType.EMAIL
@@ -87,84 +87,89 @@ const HrefEditor = ({ href, onChange }: HrefEditorProps) => {
   const type = getLinkType(href)
   const fields = getLinkTypeFields(type, href)
 
+  const labelClassName = compact ? 'text-xs mb-1' : ''
+
   return (
-    <FieldGroup>
-      <Field labelPosition="top">
-        <Label>Link Type</Label>
-        <Select
-          value={type}
-          onChange={(e) => {
-            const newType = e.target.value as LinkType
-            const newFields = getLinkTypeFields(newType, '')
-            handleLinkTypeChange(newType, newFields)
-          }}
-        >
-          <option value={LinkType.WEB}>Open Web Page</option>
-          <option value={LinkType.EMAIL}>Send Email</option>
-          <option value={LinkType.PHONE}>Call Phone Number</option>
-        </Select>
-      </Field>
+    <div className={`${compact ? 'space-y-2' : 'space-y-4'}`}>
+      <div className="flex gap-2">
+        <div className={`w-36`}>
+          <span className={labelClassName}>Link Type</span>
+          <Select
+            value={type}
+            onChange={(e) => {
+              const newType = e.target.value as LinkType
+              const newFields = getLinkTypeFields(newType, '')
+              handleLinkTypeChange(newType, newFields)
+            }}
+          >
+            <option value={LinkType.WEB}>Web</option>
+            <option value={LinkType.EMAIL}>Email</option>
+            <option value={LinkType.PHONE}>Phone</option>
+          </Select>
+        </div>
+
+        {type === LinkType.WEB && (
+          <div className={`w-full`}>
+            <span className={labelClassName}>URL</span>
+            <Input
+              type="url"
+              value={fields.url}
+              onChange={(e) => handleLinkTypeChange(type, { ...fields, url: e.target.value })}
+              placeholder="https://example.com"
+              pattern="https?://.*"
+              title="Please enter a valid URL"
+              invalid={!isValidHttpUrl(fields.url || '')}
+              error={!isValidHttpUrl(fields.url || '') ? 'Invalid URL' : undefined}
+            />
+          </div>
+        )}
+
+        {type === LinkType.PHONE && (
+          <div className={`w-full`}>
+            <span className={labelClassName}>Phone Number</span>
+            <Input
+              type="tel"
+              value={fields.phone}
+              onChange={(e) => handleLinkTypeChange(type, { ...fields, phone: e.target.value })}
+              placeholder="+1234567890"
+            />
+          </div>
+        )}
+      </div>
 
       {type === LinkType.EMAIL && (
-        <>
-          <Field labelPosition="top">
-            <Label>Email to</Label>
+        <div className={`${compact ? 'space-y-2' : 'space-y-4'}`}>
+          <div>
+            <span className={labelClassName}>Email to</span>
             <Input
               type="email"
               value={fields.email}
               onChange={(e) => handleLinkTypeChange(type, { ...fields, email: e.target.value })}
               placeholder="example@email.com"
             />
-          </Field>
-          <Field labelPosition="top">
-            <Label>Subject</Label>
-            <Input
-              value={fields.subject}
-              onChange={(e) => handleLinkTypeChange(type, { ...fields, subject: e.target.value })}
-              placeholder="Email subject"
-            />
-          </Field>
-          <Field labelPosition="top">
-            <Label>Body</Label>
-            <Input
-              value={fields.body}
-              onChange={(e) => handleLinkTypeChange(type, { ...fields, body: e.target.value })}
-              placeholder="Email body"
-            />
-          </Field>
-        </>
-      )}
+          </div>
 
-      {type === LinkType.PHONE && (
-        <Field labelPosition="top">
-          <Label>Phone Number</Label>
-          <Input
-            type="tel"
-            value={fields.phone}
-            onChange={(e) => handleLinkTypeChange(type, { ...fields, phone: e.target.value })}
-            placeholder="+1234567890"
-          />
-        </Field>
+          <div className="flex gap-2">
+            <div className="w-1/2">
+              <span className={labelClassName}>Subject</span>
+              <Input
+                value={fields.subject}
+                onChange={(e) => handleLinkTypeChange(type, { ...fields, subject: e.target.value })}
+                placeholder="Email subject"
+              />
+            </div>
+            <div className="w-1/2">
+              <span className={labelClassName}>Body</span>
+              <Input
+                value={fields.body}
+                onChange={(e) => handleLinkTypeChange(type, { ...fields, body: e.target.value })}
+                placeholder="Email body"
+              />
+            </div>
+          </div>
+        </div>
       )}
-
-      {type === LinkType.WEB && (
-        <Field labelPosition="top">
-          <Label>URL</Label>
-          <Input
-            type="url"
-            value={fields.url}
-            onChange={(e) => handleLinkTypeChange(type, { ...fields, url: e.target.value })}
-            placeholder="https://example.com"
-            pattern="https?://.*"
-            title="Please enter a valid URL (e.g. https://example.com)"
-            invalid={!isValidHttpUrl(fields.url || '')}
-            error={
-              !isValidHttpUrl(fields.url || '') ? 'Please enter a valid URL (e.g. https://example.com)' : undefined
-            }
-          />
-        </Field>
-      )}
-    </FieldGroup>
+    </div>
   )
 }
 

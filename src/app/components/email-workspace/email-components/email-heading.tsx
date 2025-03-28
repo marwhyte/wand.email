@@ -1,9 +1,9 @@
+import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getHeadingProps } from '@/lib/utils/attributes'
-import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
-import { Heading } from '@react-email/components'
-import parse from 'html-react-parser'
+import { useCallback } from 'react'
 import { HeadingBlock, RowBlock } from '../types'
+import EditableContent from './editable-content'
 
 type Props = {
   block: HeadingBlock
@@ -11,19 +11,10 @@ type Props = {
 }
 
 export default function EmailHeading({ block, parentRow }: Props) {
-  const { email } = useEmailStore()
-  const linkAttributes = getBlockAttributes(block, parentRow, email)
-  const options = {
-    replace: (domNode: any) => {
-      if (domNode.name === 'a' && (!domNode.attribs.style || !domNode.attribs.style.includes('color'))) {
-        domNode.attribs.style = `color: ${linkAttributes.color};`
-        return domNode
-      }
-    },
-  }
+  const { email, currentBlock } = useEmailStore()
+  const saveEmail = useEmailSave()
 
   const headingProps = getHeadingProps(block, parentRow, email)
-
   const { style, ...restHeadingProps } = headingProps
 
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
@@ -36,11 +27,19 @@ export default function EmailHeading({ block, parentRow }: Props) {
     paddingLeft,
   }
 
+  const handleSelect = useCallback(() => {
+    // The block selection is handled by the parent EmailBlock component
+  }, [])
+
   return (
     <div style={divStyle}>
-      <Heading {...restHeadingProps} style={restStyles}>
-        {parse(linkAttributes.content, options)}
-      </Heading>
+      <EditableContent
+        content={block.attributes.content || ''}
+        isSelected={currentBlock?.id === block.id}
+        onSelect={handleSelect}
+        className="w-full"
+        style={restStyles}
+      />
     </div>
   )
 }

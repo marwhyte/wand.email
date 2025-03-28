@@ -50,7 +50,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const { title, setTitle, company } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
-  const saveEmail = useEmailSave(chatId)
+  const saveEmail = useEmailSave()
   const { showSignUpDialog, setShowSignUpDialog, stepType, setStepType } = useAuthStore()
 
   const exportOpener = useOpener()
@@ -141,7 +141,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
         {!chatStarted || !isMobile ? (
           <Link
             onClick={() => {
-              setEmail(undefined)
+              setEmail(null)
               setTitle(undefined)
             }}
             href="/"
@@ -165,7 +165,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
             {process.env.NODE_ENV === 'development' && !isMobile && (
               <Select
                 value={emailAttributes.styleVariant}
-                onChange={(e) => setEmail(templates.find((t) => t.name === e.target.value)?.value)}
+                onChange={(e) => setEmail(templates.find((t) => t.name === e.target.value)?.value ?? null)}
               >
                 {templates.map((template) => (
                   <option key={template.name}>{template.name}</option>

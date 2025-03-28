@@ -3,9 +3,12 @@ import type { PaddingAttributes, TextAttributes } from '@/app/components/email-w
 export function applyTextAttributes(attributes: TextAttributes): React.CSSProperties {
   const textProps = ['color', 'fontSize', 'fontWeight', 'fontFamily', 'letterSpacing'] as const
 
-  return Object.fromEntries(
-    textProps.map((prop) => [prop, attributes[prop]]).filter(([_, value]) => value !== undefined)
-  )
+  return {
+    ...Object.fromEntries(
+      textProps.map((prop) => [prop, attributes[prop]]).filter(([_, value]) => value !== undefined)
+    ),
+    wordBreak: 'break-word',
+  }
 }
 
 export function applyPaddingAttributes(attributes: PaddingAttributes): React.CSSProperties {

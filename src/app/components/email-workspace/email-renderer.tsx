@@ -1,14 +1,18 @@
 'use client'
 
 import { useEmailSave } from '@/app/hooks/useEmailSave'
+import { useIsMobile } from '@/app/hooks/useIsMobile'
 import { createNewBlock } from '@/lib/data/templates'
 import { useChatStore } from '@/lib/stores/chatStore'
+import { useEmailStore } from '@/lib/stores/emailStore'
 import { useMobileViewStore } from '@/lib/stores/mobleViewStore'
+import { useToolbarStore } from '@/lib/stores/toolbarStore'
 import { getBodyProps, getContentProps, getEmailAttributes } from '@/lib/utils/attributes'
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useDrop } from 'react-dnd'
 import { v4 as uuidv4 } from 'uuid'
 import EmailRow from './email-components/email-row'
+import FloatingToolbar from './email-components/floating-toolbar'
 import { ColumnBlock, Email, EmailBlockType, RowBlock } from './types'
 
 type Props = {
@@ -17,8 +21,11 @@ type Props = {
 
 const EmailRenderer = ({ email }: Props) => {
   const { chatId } = useChatStore()
-  const saveEmail = useEmailSave(chatId)
+  const { currentBlock } = useEmailStore()
+  const isMobile = useIsMobile()
+  const saveEmail = useEmailSave()
   const { mobileView } = useMobileViewStore()
+  const { position, hide } = useToolbarStore()
   const [dropLine, setDropLine] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<{
     type: 'block' | 'column'
@@ -279,8 +286,48 @@ const EmailRenderer = ({ email }: Props) => {
 
   const emailAttributes = getEmailAttributes(email)
 
+  useEffect(() => {
+    if (!currentBlock) {
+      // Only hide if no other EditableContent is selected
+      // The toolbar store should handle this logic
+      hide()
+    }
+  }, [currentBlock, hide])
+
+  // Prevent automatic scrolling when editor focuses
+  useEffect(() => {
+    const handleFocus = (e: FocusEvent) => {
+      const container = document.querySelector('[data-email-container]')
+      if (container && container.contains(e.target as Node)) {
+        // Save current scroll position
+        const scrollTop = container.scrollTop
+
+        // Use requestAnimationFrame to restore scroll position after browser's automatic scrolling
+        requestAnimationFrame(() => {
+          container.scrollTop = scrollTop
+        })
+      }
+    }
+
+    document.addEventListener('focus', handleFocus, true)
+    return () => {
+      document.removeEventListener('focus', handleFocus, true)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (
+      currentBlock?.type !== 'link' &&
+      currentBlock?.type !== 'button' &&
+      currentBlock?.type !== 'text' &&
+      currentBlock?.type !== 'heading'
+    ) {
+      hide()
+    }
+  }, [currentBlock])
+
   return (
-    <div className="w-full min-w-0 overflow-x-auto overflow-y-auto pt-4">
+    <div className="relative w-full min-w-0 overflow-x-auto overflow-y-auto pt-4" data-email-container>
       {/* @ts-ignore */}
       <div {...getBodyProps(email)} className="mx-auto">
         <div {...getContentProps(email)}>
@@ -323,6 +370,17 @@ const EmailRenderer = ({ email }: Props) => {
           )}
         </div>
       </div>
+      {position.visible && !isMobile && (
+        <FloatingToolbar
+          style={{
+            position: 'absolute',
+            top: position.top,
+            left: position.left,
+            transform: 'translateX(-50%)',
+            zIndex: 50,
+          }}
+        />
+      )}
     </div>
   )
 }

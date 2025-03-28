@@ -1,9 +1,9 @@
 import { useChatStore } from '@/lib/stores/chatStore'
-import { getButtonProps } from '@/lib/utils/attributes'
-import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
-import { Button } from '@react-email/components'
-import parse from 'html-react-parser'
+import { useEmailStore } from '@/lib/stores/emailStore'
+import { getBlockAttributes, getButtonProps } from '@/lib/utils/attributes'
+import { useCallback } from 'react'
 import { ButtonBlock, Email, RowBlock } from '../types'
+import EditableContent from './editable-content'
 
 type Props = {
   block: ButtonBlock
@@ -12,50 +12,56 @@ type Props = {
 }
 
 export default function EmailButton({ block, parentRow, email }: Props) {
+  const { currentBlock } = useEmailStore()
   const { company } = useChatStore()
 
   const buttonProps = getButtonProps(block, parentRow, company, email)
-
+  const attributes = getBlockAttributes(block, parentRow, email)
   const { style, ...restButtonProps } = buttonProps
 
   const {
-    padding,
-    paddingTop,
-    paddingRight,
-    paddingBottom,
-    paddingLeft,
     marginTop,
     marginRight,
     marginBottom,
     marginLeft,
+    paddingTop,
+    paddingRight,
+    paddingBottom,
+    paddingLeft,
     ...restStyles
   } = style || {}
 
-  // Create div style with padding properties
   const divStyle = {
-    padding,
     paddingTop,
     paddingRight,
     paddingBottom,
     paddingLeft,
   }
 
-  const buttonStyle = {
-    ...restStyles,
-    paddingTop: marginTop,
-    paddingRight: marginRight,
-    paddingBottom: marginBottom,
-    paddingLeft: marginLeft,
-  }
-
-  const buttonAttributes = getBlockAttributes(block, parentRow, email)
+  const handleSelect = useCallback(() => {
+    // The block selection is handled by the parent EmailBlock component
+  }, [])
 
   return (
     // @ts-expect-error align is not a valid prop for the div
-    <div align={buttonAttributes.align} style={divStyle}>
-      <Button {...restButtonProps} style={buttonStyle} href={undefined}>
-        {parse(buttonAttributes.content)}
-      </Button>
+    <div style={divStyle} align={attributes.align}>
+      <EditableContent
+        content={block.attributes.content || ''}
+        isSelected={currentBlock?.id === block.id}
+        onSelect={handleSelect}
+        style={{
+          ...restStyles,
+          textAlign: 'center',
+          backgroundColor: buttonProps.style?.backgroundColor,
+          borderRadius: buttonProps.style?.borderRadius,
+          border: buttonProps.style?.border,
+          color: buttonProps.style?.color,
+          paddingTop: marginTop,
+          paddingRight: marginRight,
+          paddingBottom: marginBottom,
+          paddingLeft: marginLeft,
+        }}
+      />
     </div>
   )
 }

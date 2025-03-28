@@ -33,7 +33,7 @@ export const getAdditionalTextStyles = (
     fontSize: '16px',
     overflowWrap: 'break-word',
     wordBreak: 'break-word',
-    lineHeight: '120%',
+    lineHeight: '100%',
     letterSpacing: 'normal',
   }
 
@@ -127,6 +127,7 @@ export const getAdditionalButtonStyles = (
     marginLeft: '14px',
     marginRight: '14px',
     cursor: 'pointer',
+    lineHeight: '120%',
   }
 
   const rowTypeDefaults = getBlockCSSProperties(buttonBlock, email, parentRow) || {}
@@ -205,6 +206,7 @@ export const getAdditionalLinkStyles = (
     fontSize: '16px',
     fontWeight: 'normal',
     cursor: 'pointer',
+    lineHeight: '100%',
   }
 
   const rowTypeDefaults = getBlockCSSProperties(linkBlock, email, parentRow) || {}
