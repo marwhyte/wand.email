@@ -118,9 +118,6 @@ export const goingTemplateScript = `
 `
 
 export const goingTemplate = (): Email => {
-  const rows = parseEmailScript(goingTemplateScript, {
-    id: '1',
-    rows: [],
-  })
+  const rows = parseEmailScript(goingTemplateScript)
   return createEmail(rows, '#004449', '#004449')
 }

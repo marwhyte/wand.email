@@ -1,3 +1,5 @@
+'use client'
+
 import { getBlockAttributes, getEmailAttributes } from '@/lib/utils/attributes/attributes'
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
 import parse from 'html-react-parser'

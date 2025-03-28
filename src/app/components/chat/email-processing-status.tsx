@@ -4,6 +4,7 @@ import { useOpener } from '@/app/hooks'
 import { deleteMessagesAfterId, getMessage, updateChat } from '@/lib/database/queries/chats'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
+import { parseEmailScript } from '@/lib/utils/email-script-parser'
 import { useChat } from '@ai-sdk/react'
 import type { Message } from 'ai'
 import React from 'react'
@@ -75,7 +76,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
           .then(() => {
             deleteMessagesAfterId(newMessage.id, chatId).then((messages) => {
               if (newMessage.email) {
-                setEmail(newMessage.email)
+                setEmail(parseEmailScript(newMessage.email))
               }
               setMessages(messages)
             })

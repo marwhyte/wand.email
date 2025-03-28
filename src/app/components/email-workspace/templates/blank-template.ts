@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid'
 import { Email } from '../types'
 
 export const blankTemplateScript = `
@@ -8,7 +7,6 @@ export const blankTemplateScript = `
 
 export const blankTemplate = (): Email => {
   return {
-    id: uuidv4(),
     preview: 'Blank Template',
     fontFamily: 'Arial, sans-serif',
     width: '600',

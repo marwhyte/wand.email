@@ -226,7 +226,6 @@ export type Email = {
   backgroundColor?: string
   color?: string
   fontFamily?: string
-  id: string
   linkColor?: string
   preview?: string
   rowBackgroundColor?: string

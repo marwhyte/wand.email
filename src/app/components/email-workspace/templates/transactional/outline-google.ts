@@ -61,7 +61,7 @@ export const googleTransactionalExample = `
 `
 
 export const outlineGoogleTemplate = (): Email => {
-  const email = parseEmailScript(outlineGoogleTemplateScript(true), { id: '123', rows: [] })
+  const email = parseEmailScript(outlineGoogleTemplateScript(true))
 
   return createEmail(email)
 }

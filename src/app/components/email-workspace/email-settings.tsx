@@ -15,7 +15,7 @@ type EmailSettingsProps = {
 }
 
 const EmailSettings = ({ email }: EmailSettingsProps) => {
-  const { company, chatId } = useChatStore()
+  const { company } = useChatStore()
   const saveEmail = useEmailSave()
 
   const handleChange = useCallback(

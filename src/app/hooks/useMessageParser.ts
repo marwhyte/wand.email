@@ -1,6 +1,7 @@
 import { updateChat } from '@/lib/database/queries/chats'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
+import { generateEmailScript } from '@/lib/utils/email-script-generator'
 import { processEmailImages } from '@/lib/utils/email-script-parser'
 import { createScopedLogger } from '@/lib/utils/logger'
 import { getEmailFromMessage } from '@/lib/utils/misc'
@@ -50,14 +51,14 @@ export function useMessageParser(message: Message) {
     if (!chatId) return
 
     setEmail(emailData)
-    updateChat(chatId, { email: emailData }).then(() => {
+    updateChat(chatId, { email: generateEmailScript(emailData) }).then(() => {
       updateEmailForMessage(chatId, message, emailData)
     })
   }
 
   // Helper function to process email content and avoid duplication
   const processEmailContent = (message: Message) => {
-    const emailObject = getEmailFromMessage(email, message)
+    const emailObject = getEmailFromMessage(message)
 
     if (emailObject && chatId) {
       // Process images before updating the email

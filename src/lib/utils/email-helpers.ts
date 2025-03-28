@@ -57,5 +57,4 @@ export const createEmail = (
   width,
   preview: '',
   ...email,
-  id: uuidv4(),
 })

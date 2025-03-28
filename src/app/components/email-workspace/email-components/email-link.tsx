@@ -1,4 +1,3 @@
-import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getLinkProps } from '@/lib/utils/attributes'
 import { useCallback } from 'react'
@@ -12,7 +11,6 @@ type Props = {
 
 export default function EmailLink({ block, parentRow }: Props) {
   const { email, currentBlock } = useEmailStore()
-  const saveEmail = useEmailSave()
 
   const linkProps = getLinkProps(block, parentRow, email)
   const { style, ...restLinkProps } = linkProps

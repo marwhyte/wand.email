@@ -74,5 +74,5 @@ export const nikeTransactionalExample = `
 </example>
 `
 export const defaultNikeVerificationTemplate = (): Email => {
-  return createEmail(parseEmailScript(defaultNikeVerificationTemplateScript(true), { id: '123', rows: [] }))
+  return createEmail(parseEmailScript(defaultNikeVerificationTemplateScript(true)))
 }

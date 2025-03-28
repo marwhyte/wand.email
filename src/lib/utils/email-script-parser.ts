@@ -21,7 +21,6 @@ import {
   TextAttributes,
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
-import { v4 } from 'uuid'
 import { createBlock, createColumn, createRow } from './email-helpers'
 import { resolveImageSrc } from './image-service'
 import { ensurePx } from './misc'
@@ -689,7 +688,7 @@ async function processRows(rows: any[]): Promise<any[]> {
 }
 
 // ===== Main Parser Functions =====
-export function parseEmailScript(script: string, email: Email | null): Email {
+export function parseEmailScript(script: string): Email {
   const rows: RowBlock[] = []
   const lines = script.trim().split('\n')
   let currentRow: RowBlock | null = null
@@ -1135,7 +1134,6 @@ export function parseEmailScript(script: string, email: Email | null): Email {
   return {
     ...emailAttributes,
     rows,
-    id: email?.id || v4(),
   }
 }
 

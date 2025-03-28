@@ -6,6 +6,7 @@ import { useEffect } from 'react'
 
 import { Tab, TabGroup, TabList } from '@/app/components/tab'
 import { Text } from '@/app/components/text'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
 import { Cog6ToothIcon, Square3Stack3DIcon, TableCellsIcon } from '@heroicons/react/24/outline'
 import BlockEditor from './block-editor'
@@ -28,9 +29,10 @@ const tabIcons = {
 
 export default function EmailEditor({ email }: { email: Email }) {
   const { currentBlock, setCurrentBlock } = useEmailStore()
+  const { chatId } = useChatStore()
 
   // Use our custom hook with the email ID as namespace
-  const [tab, setTab] = usePersistedState<Tabs>('editorTab', Tabs.CONTENT, `email_${email.id}`, 'session')
+  const [tab, setTab] = usePersistedState<Tabs>('editorTab', Tabs.CONTENT, `email_${chatId}`, 'session')
 
   useEffect(() => {
     if (currentBlock?.type === 'row') {

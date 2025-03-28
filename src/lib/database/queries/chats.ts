@@ -1,6 +1,5 @@
 'use server'
 
-import { Email } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import type { Message } from 'ai'
 import { db } from '../db'
@@ -15,7 +14,7 @@ export async function createChat({
   id: string
   messages?: Message[]
   title?: string
-  email?: Email | null
+  email?: string | null
   companyId?: string | null
 }) {
   const session = await auth()
@@ -55,7 +54,7 @@ export async function createChat({
   })
 }
 
-export async function updateMessage(id: string, chatId: string, updates: { content?: string; email?: Email }) {
+export async function updateMessage(id: string, chatId: string, updates: { content?: string; email?: string }) {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
@@ -109,7 +108,7 @@ export async function deleteMessagesAfterId(id: string, chatId: string) {
 
 export async function updateChat(
   id: string,
-  updates: { messages?: Message[]; title?: string; email?: Email; parsed?: boolean }
+  updates: { messages?: Message[]; title?: string; email?: string; parsed?: boolean }
 ) {
   const session = await auth()
   if (!session?.user?.id) {

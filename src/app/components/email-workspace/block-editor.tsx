@@ -6,7 +6,6 @@ import { Button } from '@/app/components/button'
 import { Divider } from '@/app/components/divider'
 import { Text } from '@/app/components/text'
 import { useEmailSave } from '@/app/hooks/useEmailSave'
-import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
 import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
@@ -36,7 +35,6 @@ type BlockEditorProps = {
 
 const BlockEditor = ({ email }: BlockEditorProps) => {
   const { currentBlock, setCurrentBlock } = useEmailStore()
-  const { chatId } = useChatStore()
   const saveEmail = useEmailSave()
 
   const handleSave = useCallback(

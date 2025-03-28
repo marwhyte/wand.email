@@ -118,7 +118,7 @@ export const stocktwitsNewsletterExample = `
 `
 
 export const outlineStocktwitsTemplate = (): Email => {
-  const email = parseEmailScript(outlineStocktwitsTemplateScript(true), { id: '123', rows: [] })
+  const email = parseEmailScript(outlineStocktwitsTemplateScript(true))
 
   return createEmail(email)
 }

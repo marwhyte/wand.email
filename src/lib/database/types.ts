@@ -45,7 +45,7 @@ export interface ChatTable {
   id: Generated<string>
   userId: string
   title: string
-  email: Email | null
+  email: string | null
   createdAt: GeneratedAlways<Date>
   updatedAt: Generated<Date>
   deletedAt: Date | null
@@ -113,7 +113,7 @@ export interface MessageTable {
   content: string
   createdAt: GeneratedAlways<Date>
   updatedAt: Generated<Date>
-  email: Email | null
+  email: string | null
 }
 
 export type Message = Omit<MessageTable, 'id' | 'createdAt' | 'updatedAt'> & {

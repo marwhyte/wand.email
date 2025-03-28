@@ -1,4 +1,3 @@
-import { Email } from '@/app/components/email-workspace/types'
 import { Message } from '@ai-sdk/react'
 import parse from 'html-react-parser'
 import { v4 as uuidv4 } from 'uuid'
@@ -101,7 +100,7 @@ export const parseText = (text: string, linkColor: string) => {
   return parse(text, options)
 }
 
-export function getEmailFromMessage(email: Email | null, message: Message) {
+export function getEmailFromMessage(message: Message) {
   const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+[^>]*>/)
   const hasCloseTag = message.content.includes('</EMAIL>')
 
@@ -111,7 +110,7 @@ export function getEmailFromMessage(email: Email | null, message: Message) {
 
     if (emailMatch) {
       const emailString = emailMatch[0] // This gets the entire match including tags
-      const emailObject = parseEmailScript(emailString, email)
+      const emailObject = parseEmailScript(emailString)
       return emailObject
     }
   }
