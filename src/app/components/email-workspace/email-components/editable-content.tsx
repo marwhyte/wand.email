@@ -2,7 +2,6 @@ import { EmailBlock, TextBlockAttributes } from '@/app/components/email-workspac
 import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useToolbarStore } from '@/lib/stores/toolbarStore'
-import { getEmailAttributes } from '@/lib/utils/attributes'
 import Color from '@tiptap/extension-color'
 import Link from '@tiptap/extension-link'
 import TextStyle from '@tiptap/extension-text-style'
@@ -61,17 +60,32 @@ type Props = {
   onSelect: () => void
   className?: string
   style?: React.CSSProperties
+  onChange?: (newContent: string) => void
+  onEnterKey?: () => void
+  onBackspaceKey?: () => void
+  forceListItem?: boolean
+  listType?: 'bullet' | 'ordered'
 }
 
-export default function EditableContent({ content, isSelected, onSelect, className, style }: Props) {
+export default function EditableContent({
+  content,
+  isSelected,
+  onSelect,
+  className,
+  style,
+  onChange,
+  onEnterKey,
+  onBackspaceKey,
+  forceListItem = false,
+  listType = 'bullet',
+}: Props) {
   const { email, editorCommand, clearCommand, currentBlock, setCurrentBlock, executeCommand } = useEmailStore()
   const { show, hide } = useToolbarStore()
   const saveEmail = useEmailSave()
   const { setState: setToolbarState } = useToolbarStateStore()
-  const emailAttributes = getEmailAttributes(email)
   const editorRef = useRef<Editor | null>(null)
 
-  const onChange = useCallback(
+  const onChangeInternal = useCallback(
     (attributes: Partial<TextBlockAttributes>) => {
       if (currentBlock) {
         const updatedBlock = {
@@ -111,7 +125,14 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
     return debounce((html: string) => {
       // Strip outer paragraph tags if present
       const strippedHtml = html.replace(/^<p>(.*)<\/p>$/, '$1')
-      onChange({ content: strippedHtml })
+      if (!onChange) {
+        onChangeInternal({ content: strippedHtml })
+      }
+
+      // Call the external onChange handler if provided
+      if (onChange) {
+        onChange(strippedHtml)
+      }
     }, 300)
   }, [onChange])
 
@@ -125,14 +146,14 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        bulletList: false,
-        orderedList: false,
-        listItem: false,
+        bulletList: forceListItem ? {} : false,
+        orderedList: forceListItem ? {} : false,
+        listItem: forceListItem ? {} : false,
       }),
       Underline,
       TextStyle,
       Color,
-      PreventEmptyLines,
+      ...(forceListItem ? [] : [PreventEmptyLines]),
       Link.configure({
         openOnClick: false,
         linkOnPaste: true,
@@ -155,21 +176,42 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
         class: `focus:outline-none ${isButton || isLink ? 'inline-block' : ''}`,
       },
       handleKeyDown: (view, event) => {
-        if (event.key === 'Enter') {
+        if (event.key === 'Enter' && !event.shiftKey && forceListItem && onEnterKey) {
           const { state } = view
           const { selection } = state
           const { $head } = selection
 
-          // Get the current node content
+          if ($head.parentOffset === $head.parent.content.size) {
+            event.preventDefault()
+            onEnterKey()
+            return true
+          }
+        }
+
+        if (event.key === 'Backspace' && forceListItem && onBackspaceKey) {
+          const { state } = view
+          const { selection } = state
+          const { $head } = selection
+
+          if ($head.parentOffset === 0 && $head.parent.textContent.trim() === '') {
+            event.preventDefault()
+            onBackspaceKey()
+            return true
+          }
+        }
+
+        if (event.key === 'Enter' && !forceListItem) {
+          const { state } = view
+          const { selection } = state
+          const { $head } = selection
+
           const isEmptyNode = $head.parent.textContent.trim() === ''
 
-          // Still prevent Enter for buttons, links, and headings as before
           if (isButton || isLink || currentBlock?.type === 'heading') {
             event.preventDefault()
             return true
           }
 
-          // Prevent Enter on empty paragraphs (to avoid consecutive empty lines)
           if (isEmptyNode) {
             event.preventDefault()
             return true
@@ -178,9 +220,19 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
         return false
       },
     },
-    content,
+    content: forceListItem ? content : content,
     onUpdate: ({ editor }) => {
-      debouncedOnChange(editor.getHTML())
+      let html = editor.getHTML()
+
+      if (forceListItem) {
+        html = html
+          .replace(/<li>(.*?)<\/li>/s, '$1')
+          .replace(/<ul>(.*?)<\/ul>/s, '$1')
+          .replace(/<ol>(.*?)<\/ol>/s, '$1')
+          .replace(/<p>(.*?)<\/p>/s, '$1')
+      }
+
+      debouncedOnChange(html)
     },
     onSelectionUpdate: ({ editor }) => {
       // Update toolbar state when selection changes
@@ -320,6 +372,22 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
     },
     [onSelect, editor]
   )
+
+  // Initial setup for list content if needed
+  useEffect(() => {
+    if (editor && forceListItem) {
+      if (listType === 'bullet') {
+        editor.commands.toggleBulletList()
+      } else if (listType === 'ordered') {
+        editor.commands.toggleOrderedList()
+      }
+
+      // Focus the editor after initialization to ensure the cursor is positioned
+      setTimeout(() => {
+        editor.commands.focus()
+      }, 10)
+    }
+  }, [editor, forceListItem, listType])
 
   if (!editor) {
     return null

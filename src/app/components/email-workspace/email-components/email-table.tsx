@@ -1,3 +1,4 @@
+import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useTableStore } from '@/lib/stores/tableStore'
 import { getTableProps } from '@/lib/utils/attributes'
@@ -12,10 +13,12 @@ type Props = {
 }
 
 export default function EmailTable({ block, parentRow }: Props) {
-  const { email, currentBlock } = useEmailStore()
+  const { email, currentBlock, setCurrentBlock } = useEmailStore()
   const { selectedCell, setSelectedCell, selectedCellValue, setSelectedCellValue } = useTableStore()
   const tableProps = getTableProps(block, parentRow, email)
   const tableAttributes = getBlockAttributes(block, parentRow, email)
+  const saveEmail = useEmailSave()
+
   useEffect(() => {
     if (currentBlock?.id !== block.id) {
       setSelectedCell(null)
@@ -42,6 +45,45 @@ export default function EmailTable({ block, parentRow }: Props) {
       }
     },
     [selectedCell, setSelectedCell, setSelectedCellValue]
+  )
+
+  const handleCellChange = useCallback(
+    (rowIndex: number, cellIndex: number, newContent: string) => {
+      if (!email) return
+
+      // Create a deep copy of the table attributes to avoid mutating state directly
+      const updatedRows = [...tableAttributes.rows]
+      updatedRows[rowIndex] = [...updatedRows[rowIndex]]
+      updatedRows[rowIndex][cellIndex] = newContent
+
+      // Create an updated block with the new cell content
+      const updatedBlock = {
+        ...block,
+        attributes: {
+          ...block.attributes,
+          rows: updatedRows,
+        },
+      }
+
+      // Update the current block
+      setCurrentBlock(updatedBlock)
+
+      // Update the email with the new block
+      const updatedEmail = {
+        ...email,
+        rows: email.rows.map((row) => ({
+          ...row,
+          columns: row.columns.map((column) => ({
+            ...column,
+            blocks: column.blocks.map((b) => (b.id === block.id ? updatedBlock : b)),
+          })),
+        })),
+      }
+
+      // Save the updated email
+      saveEmail(updatedEmail)
+    },
+    [email, block, tableAttributes.rows, setCurrentBlock, saveEmail]
   )
 
   return (
@@ -78,6 +120,7 @@ export default function EmailTable({ block, parentRow }: Props) {
                     onSelect={() => handleCellSelect(rowIndex, cellIndex, cell)}
                     className="w-full"
                     style={{}}
+                    onChange={(newContent) => handleCellChange(rowIndex, cellIndex, newContent)}
                   />
                 </td>
               ))}
