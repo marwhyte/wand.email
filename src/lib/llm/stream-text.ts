@@ -1,3 +1,4 @@
+import { notifySlack } from '@/app/actions/notifySlack'
 import { defaultCartSeriesExample } from '@/app/components/email-workspace/templates/cart/default'
 import { ebayEcommerceExample } from '@/app/components/email-workspace/templates/ecommerce/default-ebay-template'
 import { stripeNewsletterExample } from '@/app/components/email-workspace/templates/newsletter/default-stripe'
@@ -178,6 +179,9 @@ export async function streamText(
 ) {
   // Find the first and last user messages
   const userMessages = messages.filter((msg) => msg.role === 'user')
+  if (userMessages.length === 1) {
+    notifySlack(`User ${userMessages[0].id} sent a message with no context.`, 'upgrade')
+  }
   const firstUserMessage = userMessages[0]
   const lastUserMessage = userMessages[userMessages.length - 1]
   const combinedUserPrompt = `${firstUserMessage?.content || ''}\n\n${

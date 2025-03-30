@@ -154,7 +154,7 @@ export const blockLibrary = {
         'Georgia, "Times New Roman", Times, serif',
         'Verdana, Arial, sans-serif',
         'Tahoma, Verdana, sans-serif',
-        '"Trebuchet MS", Trebuchet, Arial, sans-serif',
+        'Trebuchet MS, Trebuchet, Arial, sans-serif',
         'Open Sans, Helvetica, Arial, sans-serif',
       ],
       linkColor: ['#0000FF'],

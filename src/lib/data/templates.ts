@@ -8,6 +8,7 @@ import {
   LinkBlock,
   ListBlock,
   SocialsBlock,
+  SpacerBlock,
   SurveyBlock,
   TableBlock,
   TemplateTypes,
@@ -220,6 +221,17 @@ export function createNewBlock<T extends EmailBlockType>(type: T): Extract<Email
         attributes: {
           items: ['Item 1', 'Item 2', 'Item 3'],
           type: 'ul',
+        },
+      }
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'spacer': {
+      const block: SpacerBlock = {
+        ...baseBlock,
+        type: 'spacer',
+        attributes: {
+          height: '10',
         },
       }
       return block as Extract<EmailBlock, { type: T }>

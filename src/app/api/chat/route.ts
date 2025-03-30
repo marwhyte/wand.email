@@ -1,5 +1,6 @@
 export const maxDuration = 60
 
+import { notifySlack } from '@/app/actions/notifySlack'
 import { EmailType } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
@@ -47,6 +48,7 @@ export async function POST(request: Request) {
 
     if (!chat) {
       await createChat({ messages, companyId, id })
+      notifySlack(`User ${session.user.email} created a new chat.`, 'upgrade')
     } else {
       if (chat.userId !== session.user.id) {
         return new Response('Unauthorized', { status: 401 })

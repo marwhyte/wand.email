@@ -1,10 +1,4 @@
-import {
-  blockLibrary,
-  COMMON_SOCIAL_ICONS,
-  componentLibrary,
-  emailStyleVariants,
-  emailTypes,
-} from '@/app/components/email-workspace/types'
+import { blockLibrary, COMMON_SOCIAL_ICONS, componentLibrary, emailTypes } from '@/app/components/email-workspace/types'
 import { stripIndents } from '../utils/stripIndent'
 
 // Function to generate documentation for the component library
@@ -133,11 +127,11 @@ ${generateBlockAttributesDocs()}
   - IMPORTANT: Only add styling attributes when specifically requested by the user. Keep templates simple with minimal attributes unless the user asks for specific styling changes.
   - IMPORTANT: While the block_attributes section shows all possible attributes, DO NOT use these additional attributes unless the user explicitly requests them.
   - Every EMAIL tag MUST include styleVariant and type attributes.
-  - styleVariant must be one of: ${emailStyleVariants.join(', ')}
   - type must be one of: ${emailTypes.join(', ')}
   - LIST component must have LI child elements
   - TABLE component must have TR and TD child elements
   - SOCIALS component must have SOCIAL child elements
+  
 </validation_rules>
 `
 

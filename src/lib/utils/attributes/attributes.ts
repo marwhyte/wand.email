@@ -102,7 +102,7 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
   }
 
   if (defaultAttributes?.type === 'cart') {
-    defaultAttributes.fontFamily = '"Trebuchet MS", Trebuchet, Arial, sans-serif'
+    defaultAttributes.fontFamily = 'Trebuchet MS, Trebuchet, Arial, sans-serif'
   }
 
   if (defaultAttributes?.styleVariant === 'default') {

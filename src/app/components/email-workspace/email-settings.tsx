@@ -26,6 +26,8 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
     [email]
   )
 
+  console.log('here', email)
+
   const fontFamilies = [
     { label: 'Arial', value: 'Arial, Helvetica, sans-serif' },
     { label: 'Helvetica', value: 'Helvetica, Arial, sans-serif' },
@@ -33,7 +35,7 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
     { label: 'Georgia', value: 'Georgia, "Times New Roman", Times, serif' },
     { label: 'Verdana', value: 'Verdana, Arial, sans-serif' },
     { label: 'Tahoma', value: 'Tahoma, Verdana, sans-serif' },
-    { label: 'Trebuchet MS', value: '"Trebuchet MS", Trebuchet, Arial, sans-serif' },
+    { label: 'Trebuchet MS', value: 'Trebuchet MS, Trebuchet, Arial, sans-serif' },
     { label: 'Open Sans', value: 'Open Sans, Helvetica, Arial, sans-serif' },
   ]
 

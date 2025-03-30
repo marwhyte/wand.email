@@ -2,6 +2,7 @@ import { Heading } from '@/app/components/heading'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
 import {
   ArrowRightCircleIcon,
+  ArrowsUpDownIcon,
   ArrowTopRightOnSquareIcon,
   DocumentTextIcon,
   H1Icon,
@@ -28,6 +29,7 @@ export default function EmailComponents() {
     'socials',
     'survey',
     'table',
+    'spacer',
   ]
 
   const iconForType = (type: EmailBlockType) => {
@@ -52,6 +54,8 @@ export default function EmailComponents() {
         return <QuestionMarkCircleIcon className="h-10 w-10" />
       case 'table':
         return <TableCellsIcon className="h-10 w-10" />
+      case 'spacer':
+        return <ArrowsUpDownIcon className="h-10 w-10" />
     }
   }
 

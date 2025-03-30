@@ -25,6 +25,22 @@ const defaultCartTemplateScript = (useImage: boolean) => `
         <DIVIDER />
     </COLUMN>
   </ROW>
+      <ROW type="discount">
+    <COLUMN>
+      <TEXT>
+        Enjoy this exclusive offer
+      </TEXT>
+      <HEADING level="h3">
+        <strong>Complete your purchase now and save 10% off your entire order</strong>
+      </HEADING>
+      <TEXT>
+        (This offer is exclusive to the account associated with this email address)
+      </TEXT>
+      <TEXT>
+        WELCOME2023
+      </TEXT>
+    </COLUMN>
+  </ROW>
   <ROW>
     <COLUMN>
       <HEADING>Here's what <b>you left behind</b></HEADING>
@@ -68,23 +84,6 @@ const defaultCartTemplateScript = (useImage: boolean) => `
         <TEXT>
           If you have any questions, please <a href="/">contact us</a>.
         </TEXT>
-    </COLUMN>
-  </ROW>
-
-    <ROW type="discount">
-    <COLUMN>
-      <TEXT>
-        Enjoy this exclusive offer
-      </TEXT>
-      <HEADING level="h3">
-        <strong>Special discount for new members</strong>
-      </HEADING>
-      <TEXT>
-        (This offer is exclusive to the account associated with this email address)
-      </TEXT>
-      <TEXT>
-        WELCOME2023
-      </TEXT>
     </COLUMN>
   </ROW>
   <ROW>
