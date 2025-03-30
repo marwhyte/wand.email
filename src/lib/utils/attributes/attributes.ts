@@ -84,7 +84,7 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
   if (defaultAttributes?.styleVariant === 'outline') {
     defaultAttributes.backgroundColor = '#ffffff'
     defaultAttributes.color = '#2d2d2d'
-    defaultAttributes.fontFamily = 'Open Sans, Roboto, Helvetica, Arial, sans-serif'
+    defaultAttributes.fontFamily = 'Open Sans, Helvetica, Arial, sans-serif'
   }
 
   if (defaultAttributes?.styleVariant === 'clear') {
@@ -92,17 +92,17 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
   }
 
   if (defaultAttributes.styleVariant === 'clear' && defaultAttributes.type === 'ecommerce') {
-    defaultAttributes.fontFamily = 'Outfit, Roboto, Helvetica, Arial, sans-serif'
+    defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
   } else if (defaultAttributes.styleVariant === 'clear') {
     defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
   }
 
   if (defaultAttributes?.type === 'welcome-series') {
-    defaultAttributes.fontFamily = 'Outfit, Roboto, Helvetica, Arial, sans-serif'
+    defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
   }
 
   if (defaultAttributes?.type === 'cart') {
-    defaultAttributes.fontFamily = 'Montserrat, Arial, sans-serif'
+    defaultAttributes.fontFamily = '"Trebuchet MS", Trebuchet, Arial, sans-serif'
   }
 
   if (defaultAttributes?.styleVariant === 'default') {

@@ -833,7 +833,6 @@ export function parseEmailScript(script: string): Email {
             // Create row for this cart item
             const cartRow = createRow({
               type: 'cart',
-              borderRadius: '12',
               borderRadiusSide,
             })
 

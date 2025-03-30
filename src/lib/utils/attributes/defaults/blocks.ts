@@ -15,7 +15,7 @@ import { Email } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
 import { ensurePx, shouldUseDarkText } from '../../misc'
-import { getButtonAttributes } from '../attributes'
+import { getButtonAttributes, getEmailAttributes } from '../attributes'
 import { getBlockCSSProperties } from './rowTypeBlocks'
 
 export const getAdditionalTextStyles = (
@@ -23,6 +23,7 @@ export const getAdditionalTextStyles = (
   parentRow: RowBlock,
   email: Email | null
 ): React.ComponentProps<typeof Text>['style'] => {
+  const emailAttributes = getEmailAttributes(email)
   const baseDefaults: React.ComponentProps<typeof Text>['style'] = {
     textAlign: 'left',
     paddingTop: '10px',
@@ -35,6 +36,7 @@ export const getAdditionalTextStyles = (
     wordBreak: 'break-word',
     lineHeight: '100%',
     letterSpacing: 'normal',
+    fontFamily: emailAttributes.fontFamily,
   }
 
   const rowTypeDefaults = getBlockCSSProperties(textBlock, email, parentRow) || {}
@@ -61,6 +63,8 @@ export const getAdditionalHeadingStyles = (
     h5: '12px',
   }
 
+  const emailAttributes = getEmailAttributes(email)
+
   const baseDefaults: React.ComponentProps<typeof Heading>['style'] = {
     textAlign: 'left',
     paddingTop: '12px',
@@ -70,6 +74,7 @@ export const getAdditionalHeadingStyles = (
     fontWeight: 'bold',
     lineHeight: '100%',
     letterSpacing: 'normal',
+    fontFamily: emailAttributes.fontFamily,
     fontSize: defaultHeadingSizes[headingBlock.attributes.level as keyof typeof defaultHeadingSizes] ?? '16px',
   }
 

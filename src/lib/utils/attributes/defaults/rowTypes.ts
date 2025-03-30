@@ -129,6 +129,7 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       }
       case 'cart': {
         return {
+          borderRadius: '12px',
           paddingTop: '2px',
           paddingBottom: '2px',
           backgroundColor: '#f4f4f4',
@@ -197,10 +198,10 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       // Add borderWidth only for default variant
       return {
         ...(variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}),
+        borderRadius: '0px',
         borderColor: '#ffffff',
         borderWidth: '20px',
         borderStyle: 'solid',
-        borderRadius: '0px',
         borderSide: rowType === 'cart' ? 'leftRight' : 'all',
       }
     }

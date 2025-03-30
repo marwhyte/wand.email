@@ -30,12 +30,6 @@ export function getAdditionalRowStyles(attributes: RowBlockAttributes): React.CS
   }
 
   if (borderSide && borderWidth && borderColor) {
-    if (attributes?.type === 'cart') {
-      console.log('borderSide', borderSide)
-      console.log('borderWidth', borderWidth)
-      console.log('borderColor', borderColor)
-    }
-
     if (borderSide === 'leftRight') {
       styles.borderLeft = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
       styles.borderRight = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
@@ -47,10 +41,6 @@ export function getAdditionalRowStyles(attributes: RowBlockAttributes): React.CS
       styles.borderRight = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
       styles.borderTop = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
       styles.borderBottom = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
-    }
-
-    if (attributes?.type === 'cart') {
-      console.log('styles', styles)
     }
   }
   return styles

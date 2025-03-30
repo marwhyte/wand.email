@@ -37,6 +37,27 @@ export const FOLDERS: { name: SocialIconFolders; title: string }[] = [
   },
 ]
 
+export type EmailType =
+  | 'default'
+  | 'welcome-series'
+  | 'ecommerce'
+  | 'invite'
+  | 'transactional'
+  | 'newsletter'
+  | 'invoice'
+  | 'cart'
+
+export const emailTypes = [
+  'default',
+  'welcome-series',
+  'ecommerce',
+  'invite',
+  'transactional',
+  'newsletter',
+  'invoice',
+  'cart',
+] as const
+
 export const componentLibrary = {
   cart: {
     note: 'Use CART_ITEM child elements to define individual cart items.',
@@ -118,6 +139,27 @@ export const componentLibrary = {
 } as const
 
 export const blockLibrary = {
+  EMAIL: {
+    attributes: {
+      styleVariant: ['default', 'outline', 'clear'],
+      type: emailTypes,
+      preview: ['This is a preview text'],
+      width: ['600'],
+      backgroundColor: ['#ffffff'],
+      color: ['#000000'],
+      fontFamily: [
+        'Arial, Helvetica, sans-serif',
+        'Helvetica, Arial, sans-serif',
+        '"Times New Roman", Times, serif',
+        'Georgia, "Times New Roman", Times, serif',
+        'Verdana, Arial, sans-serif',
+        'Tahoma, Verdana, sans-serif',
+        '"Trebuchet MS", Trebuchet, Arial, sans-serif',
+        'Open Sans, Helvetica, Arial, sans-serif',
+      ],
+      linkColor: ['#0000FF'],
+    },
+  },
   ROW: {
     attributes: {
       borderRadius: ['4'],
@@ -148,30 +190,6 @@ export const blockLibrary = {
       padding: ['10,0,10,0'],
       href: ['#'],
     },
-  },
-  CART: {
-    note: 'Include image, name, description, quantity, price, and customField by default.',
-    example: `
-      <CART>
-        <CART_ITEM
-          image="pexels:product image"
-          name="Product Name"
-          description="Product description here"
-          quantity="1"
-          price="$19.99"
-          customField="Custom Field Value"
-        />
-        <CART_ITEM
-          image="pexels:another product"
-          name="Another Product"
-          description="Another description"
-          quantity="2"
-          price="$24.99"
-          customField="Custom Field Value"
-        />
-    </CART>
-    `,
-    attributes: {},
   },
   DIVIDER: {
     attributes: {
@@ -292,26 +310,6 @@ export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T
 
 export type EmailStyleVariant = 'default' | 'outline' | 'clear'
 export const emailStyleVariants = ['default', 'outline', 'clear'] as const
-export type EmailType =
-  | 'default'
-  | 'welcome-series'
-  | 'ecommerce'
-  | 'invite'
-  | 'transactional'
-  | 'newsletter'
-  | 'invoice'
-  | 'cart'
-
-export const emailTypes = [
-  'default',
-  'welcome-series',
-  'ecommerce',
-  'invite',
-  'transactional',
-  'newsletter',
-  'invoice',
-  'cart',
-] as const
 
 export type Email = {
   backgroundColor?: string

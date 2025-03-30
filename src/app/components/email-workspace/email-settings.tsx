@@ -33,10 +33,8 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
     { label: 'Georgia', value: 'Georgia, "Times New Roman", Times, serif' },
     { label: 'Verdana', value: 'Verdana, Arial, sans-serif' },
     { label: 'Tahoma', value: 'Tahoma, Verdana, sans-serif' },
-    { label: 'Trebuchet MS', value: '"Trebuchet MS", Arial, sans-serif' },
-    { label: 'Outfit', value: 'Outfit, Roboto, Helvetica, Arial, sans-serif' },
-    { label: 'Open Sans', value: 'Open Sans, Roboto, Helvetica, Arial, sans-serif' },
-    { label: 'Montserrat', value: 'Montserrat, Arial, sans-serif' },
+    { label: 'Trebuchet MS', value: '"Trebuchet MS", Trebuchet, Arial, sans-serif' },
+    { label: 'Open Sans', value: 'Open Sans, Helvetica, Arial, sans-serif' },
   ]
 
   const emailAttributes = getEmailAttributes(email)

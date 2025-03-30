@@ -366,20 +366,12 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
 const EmailRendererFinal = ({ email, company }: Props) => {
   if (!email) return <></>
 
+  const emailAttributes = getEmailAttributes(email)
+
   return (
-    <Html>
+    <Html lang="en">
       <Head>
-        {email.fontFamily?.includes('Outfit') && (
-          <Font
-            fontFamily="Outfit"
-            fallbackFontFamily="Arial"
-            webFont={{
-              url: 'https://fonts.gstatic.com/s/outfit/v11/QGYvz_MVcBeNP4NJtEtqUYLknw.woff2',
-              format: 'woff2',
-            }}
-          />
-        )}
-        {email.fontFamily?.includes('Open Sans') && (
+        {emailAttributes.fontFamily?.includes('Open Sans') && (
           <Font
             fontFamily="Open Sans"
             fallbackFontFamily="Arial"
@@ -389,16 +381,7 @@ const EmailRendererFinal = ({ email, company }: Props) => {
             }}
           />
         )}
-        {email.fontFamily?.includes('Montserrat') && (
-          <Font
-            fontFamily="Montserrat"
-            fallbackFontFamily="Arial"
-            webFont={{
-              url: 'https://fonts.gstatic.com/s/montserrat/v29/JTUSjIg1_i6t8kCHKm459WlhyyTh89Y.woff2',
-              format: 'woff2',
-            }}
-          />
-        )}
+
         <style>{`
           p, h1, h2, h3, h3, h4, h5 {
             margin: 0 !important;
