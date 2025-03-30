@@ -6,7 +6,7 @@ export const defaultEbayTemplateScript = (useImage: boolean) => `
 <EMAIL type="ecommerce" preview="Ace back-to-school season with these deals!">
   <ROW type="header">
     <COLUMN>
-      <IMAGE src="${useImage ? getPhotoUrl('ebaylogo.png', 'ebay') : 'logo'}" alt="eBay Logo" />
+      <IMAGE src="logo" alt="Company Logo" />
     </COLUMN>
   </ROW>
 
@@ -161,23 +161,23 @@ export const defaultEbayTemplateScript = (useImage: boolean) => `
 
   <ROW type="footer">
     <COLUMN>
-      <IMAGE src="${useImage ? getPhotoUrl('ebaylogo.png', 'ebay') : 'logo'}" alt="eBay Logo" />
+      <IMAGE src="logo" alt="Company Logo" />
       <HEADING level="h4">
         Connect with us
       </HEADING>
       <SOCIALS folder="socials-dark-gray">
-        <SOCIAL icon="facebook" url="https://www.facebook.com/ebay" title="Facebook" alt="Facebook" />
-        <SOCIAL icon="x" url="https://twitter.com/ebay" title="X" alt="X" />
-        <SOCIAL icon="instagram" url="https://www.instagram.com/ebay" title="Instagram" alt="Instagram" />
+        <SOCIAL icon="facebook" url="https://www.facebook.com" title="Facebook" alt="Facebook" />
+        <SOCIAL icon="x" url="https://twitter.com" title="X" alt="X" />
+        <SOCIAL icon="instagram" url="https://www.instagram.com" title="Instagram" alt="Instagram" />
       </SOCIALS>
       <TEXT>
         <a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.
       </TEXT>
       <TEXT>
-        If you have a question, <a href="/">contact us</a>. eBay I‌nc., 2‌025 H‌amilton A‌venue, S‌an J‌ose, C‌A 9‌5125, U‌nited S‌tates
+        If you have a question, <a href="/">contact us</a>. 123 Main St, San Jose, CA 95125, United States
       </TEXT>
       <TEXT>
-        © 1995-2024 eBay Inc. or its affiliates
+        © 2025 Company Name
       </TEXT>
     </COLUMN>
   </ROW>

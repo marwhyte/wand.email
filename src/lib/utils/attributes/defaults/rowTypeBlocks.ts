@@ -9,6 +9,7 @@ import type {
   ListBlockAttributes,
   RowBlock,
   SocialsBlockAttributes,
+  SpacerBlockAttributes,
   SurveyBlockAttributes,
   TableBlockAttributes,
   TextBlockAttributes,
@@ -29,6 +30,7 @@ type BlockAttributeMap = {
   survey: SurveyBlockAttributes
   table: TableBlockAttributes
   list: ListBlockAttributes
+  spacer: SpacerBlockAttributes
 }
 
 type BlockStyleModifier = {
@@ -40,6 +42,7 @@ type BlockStyleModifier = {
   divider?: Partial<DividerBlockAttributes>
   socials?: Partial<SocialsBlockAttributes>
   button?: Partial<ButtonBlockAttributes>
+  spacer?: Partial<SpacerBlockAttributes>
   survey?: Partial<SurveyBlockAttributes>
   list?: Partial<ListBlockAttributes>
 }
@@ -60,7 +63,6 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
         align: 'center',
       },
       button: {
-        align: 'center',
         fontSize: '14px',
         paddingTop: '10px',
         paddingBottom: '10px',
@@ -98,16 +100,12 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
       text: {
         color: '#696969',
       },
-      link: {
-        align: 'center',
-      },
     },
     default: {
       link: {
         align: 'center',
       },
       button: {
-        align: 'center',
         paddingLeft: '0',
         contentPaddingLeft: '24px',
         contentPaddingRight: '24px',
@@ -122,11 +120,7 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
       },
     },
     default: {
-      link: {
-        align: 'center',
-      },
       button: {
-        align: 'center',
         paddingLeft: '0',
         contentPaddingLeft: '24px',
         contentPaddingRight: '24px',
@@ -135,19 +129,16 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
     },
     h1: {
       heading: {
-        color: '#0a2540',
         fontSize: '48px',
       },
     },
     h2: {
       heading: {
-        color: '#0a2540',
         fontSize: '32px',
       },
     },
     h3: {
       heading: {
-        color: '#2e3a55',
         fontSize: '20px',
       },
     },
@@ -157,6 +148,16 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
 
 // Add email type-specific styles
 export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
+  cart: {
+    default: {
+      text: {
+        textAlign: 'center',
+      },
+      heading: {
+        textAlign: 'center',
+      },
+    },
+  },
   ecommerce: {
     default: {
       button: {
@@ -172,12 +173,12 @@ export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
     default: {
       heading: {
         color: '#0a2540',
-        textAlign: 'center',
+        textAlign: 'left',
         paddingBottom: '10px',
         paddingTop: '10px',
       },
       text: {
-        textAlign: 'center',
+        textAlign: 'left',
         fontSize: '16px',
         color: '#3f4b66',
       },
@@ -189,7 +190,6 @@ export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
         fontWeight: 'bold',
         paddingLeft: '0',
         paddingRight: '0',
-        align: 'left',
       },
       image: {
         paddingTop: '10px',
@@ -240,6 +240,26 @@ export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
 }
 
 export const rowTypeBlockDefaults: Record<string, BlockStyleModifier> = {
+  cart: {
+    image: {
+      paddingRight: '16px',
+    },
+    text: {
+      textAlign: 'left',
+      fontWeight: 'bold',
+      fontSize: '14px',
+    },
+    heading: {
+      textAlign: 'left',
+    },
+    button: {
+      align: 'left',
+    },
+    divider: {
+      paddingTop: '10px',
+      paddingBottom: '10px',
+    },
+  },
   gallery: {
     heading: {
       fontSize: '24px',
@@ -248,6 +268,9 @@ export const rowTypeBlockDefaults: Record<string, BlockStyleModifier> = {
     text: {
       fontSize: '14px',
     },
+    button: {
+      align: 'left',
+    },
   },
   header: {
     image: {
@@ -255,6 +278,18 @@ export const rowTypeBlockDefaults: Record<string, BlockStyleModifier> = {
     },
     heading: {
       fontSize: '32px',
+    },
+  },
+  discount: {
+    text: {
+      fontSize: '14px',
+      textAlign: 'center',
+    },
+    heading: {
+      textAlign: 'center',
+      fontSize: '16px',
+      fontWeight: 'bold',
+      color: '#4184f3',
     },
   },
   footer: {
@@ -370,6 +405,16 @@ function getBlockSpecificOverrides(
   parentRow: RowBlock,
   company?: Company | null
 ): Partial<BlockStyleModifier> {
+  // High-priority overrides for specific row types
+  if (parentRow.attributes.type === 'cart' && block.type === 'text') {
+    return { text: { textAlign: 'left' } }
+  }
+
+  if (parentRow.attributes.type === 'cart' && block.type === 'heading') {
+    return { heading: { textAlign: 'left' } }
+  }
+
+  // Existing overrides logic
   switch (block.type) {
     case 'image':
       if (parentRow.attributes.type === 'header' || parentRow.attributes.type === 'footer') {
@@ -423,10 +468,11 @@ function getMergedStyles(block: EmailBlock, email: Email | null, parentRow: RowB
         ]?.[block.type as keyof BlockStyleModifier] || {}
       : {}
 
+  // Apply styles in order of increasing priority
   return {
     ...mergedDefaults,
-    ...specificOverrides[block.type as keyof BlockStyleModifier],
     ...combinedStyles,
+    ...specificOverrides[block.type as keyof BlockStyleModifier], // The specific overrides now have highest priority
   }
 }
 

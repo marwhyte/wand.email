@@ -1,6 +1,7 @@
 import * as Headless from '@headlessui/react'
 import clsx from 'clsx'
 import React, { forwardRef } from 'react'
+import { Tooltip } from 'react-tooltip'
 import { Link } from './link'
 
 const styles = {
@@ -170,13 +171,14 @@ type ButtonProps = (
 ) & {
   className?: string
   children: React.ReactNode
-  tooltip?: string
-  tooltipTransform?: string
-  tooltipPosition?: 'top' | 'bottom' | 'left' | 'right'
   disabled?: boolean
   size?: 'small'
   loading?: boolean
-} & (Omit<Headless.ButtonProps, 'className'> | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>)
+} & (
+    | { tooltip: string; tooltipId: string; tooltipPosition?: 'top' | 'bottom' | 'left' | 'right' }
+    | { tooltip?: never; tooltipId?: never; tooltipPosition?: 'top' | 'bottom' | 'left' | 'right' }
+  ) &
+  (Omit<Headless.ButtonProps, 'className'> | Omit<React.ComponentPropsWithoutRef<typeof Link>, 'className'>)
 
 export const Button = forwardRef(function Button(
   {
@@ -186,8 +188,8 @@ export const Button = forwardRef(function Button(
     className,
     children,
     tooltip,
-    tooltipTransform,
     tooltipPosition = 'top',
+    tooltipId,
     disabled,
     size,
     loading,
@@ -199,26 +201,10 @@ export const Button = forwardRef(function Button(
     className,
     styles.base,
     outline ? styles.outline : plain ? styles.plain : clsx(styles.solid, styles.colors[color ?? 'dark/zinc']),
-    tooltip && 'group',
     disabled && 'cursor-not-allowed opacity-50',
     size === 'small' && '!px-2 !py-1 !text-xs',
     loading && 'relative'
   )
-
-  const getTooltipPositionClasses = (position: string) => {
-    switch (position) {
-      case 'top':
-        return '-top-9 left-1/2'
-      case 'bottom':
-        return '-bottom-9 left-1/2'
-      case 'left':
-        return 'top-1/2 -translate-y-1/2 right-full mr-2'
-      case 'right':
-        return 'top-1/2 -translate-y-1/2 left-full ml-2'
-      default:
-        return '-top-9 left-1/2'
-    }
-  }
 
   const content = (
     <>
@@ -228,24 +214,37 @@ export const Button = forwardRef(function Button(
         </span>
       )}
       <TouchTarget>{children}</TouchTarget>
-      {tooltip && (
-        <span
-          className={`pointer-events-none absolute z-100 text-xs ${getTooltipPositionClasses(tooltipPosition)} ${tooltipPosition === 'left' || tooltipPosition === 'right' ? '' : tooltipTransform || '-translate-x-1/2'} whitespace-nowrap rounded bg-gray-800 px-1 py-1 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100`}
-        >
-          {tooltip}
-        </span>
-      )}
     </>
   )
 
-  return 'href' in props ? (
-    <Link {...props} className={classes} ref={ref as React.ForwardedRef<HTMLAnchorElement>} aria-disabled={disabled}>
-      {content}
-    </Link>
-  ) : (
-    <Headless.Button {...props} className={clsx(classes, 'cursor-pointer')} ref={ref} disabled={disabled || loading}>
-      {content}
-    </Headless.Button>
+  const buttonElement =
+    'href' in props ? (
+      <Link
+        {...props}
+        className={classes}
+        ref={ref as React.ForwardedRef<HTMLAnchorElement>}
+        aria-disabled={disabled}
+        data-tooltip-id={tooltipId}
+      >
+        {content}
+      </Link>
+    ) : (
+      <Headless.Button
+        {...props}
+        className={clsx(classes, 'cursor-pointer')}
+        ref={ref}
+        disabled={disabled || loading}
+        data-tooltip-id={tooltipId}
+      >
+        {content}
+      </Headless.Button>
+    )
+
+  return (
+    <>
+      {buttonElement}
+      {tooltip && tooltipId && <Tooltip place={tooltipPosition} id={tooltipId} content={tooltip} />}
+    </>
   )
 })
 

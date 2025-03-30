@@ -1,5 +1,6 @@
 'use client'
 
+import { isLocalDev } from '@/constants'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -29,6 +30,7 @@ import { defaultEbayTemplate } from './email-workspace/templates/ecommerce/defau
 import { defaultStripeTemplate } from './email-workspace/templates/newsletter/default-stripe'
 import { outlineStocktwitsTemplate } from './email-workspace/templates/newsletter/outline-stocktwits'
 import { defaultNikeVerificationTemplate } from './email-workspace/templates/transactional/default-nike-verification'
+import { magicLinkTemplate } from './email-workspace/templates/transactional/magic-link'
 import { outlineGoogleTemplate } from './email-workspace/templates/transactional/outline-google'
 import { Email, EmailStyleVariant } from './email-workspace/types'
 import Loading from './loading'
@@ -99,6 +101,10 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
       name: 'Nike Verification',
       value: defaultNikeVerificationTemplate(),
     },
+    {
+      name: 'Magic Link',
+      value: magicLinkTemplate(),
+    },
   ]
 
   const sendTestEmail = async () => {
@@ -167,6 +173,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                 value={emailAttributes.styleVariant}
                 onChange={(e) => setEmail(templates.find((t) => t.name === e.target.value)?.value ?? null)}
               >
+                <option value="default">Default</option>
                 {templates.map((template) => (
                   <option key={template.name}>{template.name}</option>
                 ))}
@@ -198,9 +205,16 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                   </TabList>
                 </TabGroup>
 
-                <Button onClick={previewOpener.open} tooltipPosition="left" tooltip="Preview email">
-                  <EyeIcon className="h-4 w-4" />
-                </Button>
+                {isLocalDev && (
+                  <Button
+                    onClick={previewOpener.open}
+                    tooltipPosition="left"
+                    tooltip="Preview email"
+                    tooltipId="preview-email"
+                  >
+                    <EyeIcon className="h-4 w-4" />
+                  </Button>
+                )}
               </>
             )}
 
@@ -209,6 +223,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
               onClick={sendTestEmail}
               tooltipPosition="left"
               tooltip="Send test email"
+              tooltipId="send-test-email"
               size={isMobile && chatStarted ? 'small' : undefined}
             >
               {emailStatus === 'loading' ? (
@@ -218,7 +233,13 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
               )}
             </Button>
 
-            <Button onClick={exportOpener.open} color="purple" size={isMobile && chatStarted ? 'small' : undefined}>
+            <Button
+              onClick={exportOpener.open}
+              color="purple"
+              size={isMobile && chatStarted ? 'small' : undefined}
+              tooltip="Export email"
+              tooltipId="export-email"
+            >
               <ArrowDownTrayIcon className="h-4 w-4" />
               {session?.data?.user ? 'Export' : 'Sign up to export'}
             </Button>

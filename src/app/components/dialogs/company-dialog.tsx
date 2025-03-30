@@ -12,6 +12,7 @@ import { Company, File } from '@/lib/database/types'
 import { formatFileSize, getImgFromKey } from '@/lib/utils/misc'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
+import { Textarea } from '../textarea'
 import { Dialog, DialogTitle } from './dialog'
 
 type FormData = Omit<Company, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'logoImageKey'>
@@ -19,7 +20,7 @@ type FormData = Omit<Company, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'log
 interface CompanyDialogProps {
   isOpen: boolean
   onClose: () => void
-  onSuccess: (company: FormData) => void
+  onSuccess: (company: Company) => void
   company?: Company | null
 }
 
@@ -28,6 +29,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
     name: '',
     primaryColor: '#000000',
     logoFileId: '',
+    description: '',
+    address: '',
   })
   const [fileDetails, setFileDetails] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -44,6 +47,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
         name: '',
         primaryColor: '#000000',
         logoFileId: '',
+        description: '',
+        address: '',
       })
     }
   }, [company])
@@ -84,6 +89,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
           name: formData.name,
           primaryColor: formData.primaryColor ?? undefined,
           logoFileId: formData.logoFileId ?? undefined,
+          description: formData.description ?? null,
+          address: formData.address ?? null,
         })
         if (updatedCompany) {
           onSuccess(updatedCompany)
@@ -93,6 +100,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
         const newCompany = await addCompany({
           name: formData.name,
           primaryColor: formData.primaryColor ?? undefined,
+          description: formData.description ?? null,
+          address: formData.address ?? null,
           logoFileId: formData.logoFileId ?? undefined,
         })
         if (newCompany) {
@@ -112,12 +121,12 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
     <Dialog size="xl" open={isOpen} onClose={onClose}>
       <form onSubmit={handleSubmit} className="space-y-6">
         <DialogTitle className="mb-4 text-lg font-medium leading-6 text-zinc-900 dark:text-white">
-          {company ? company.name : 'Create a new company'}
+          {company ? company.name : 'Create a new brand'}
         </DialogTitle>
 
         <FieldGroup>
           <Field>
-            <Label htmlFor="company_name">Company Name</Label>
+            <Label htmlFor="company_name">Brand Name</Label>
             <Input
               id="company_name"
               value={formData.name}
@@ -129,7 +138,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
           </Field>
 
           <Field>
-            <Label>Company Logo</Label>
+            <Label>Brand Logo</Label>
             <LogoUploader
               onUpload={(file) => {
                 setFormData({ ...formData, logoFileId: file.id })
@@ -167,6 +176,29 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
               onChange={(value) => setFormData({ ...formData, primaryColor: value })}
             />
           </Field>
+
+          <Field labelPosition="top">
+            <Label htmlFor="description">Optional: Description</Label>
+            <Textarea
+              id="description"
+              value={formData.description ?? ''}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </Field>
+
+          <Field labelPosition="top">
+            <Label htmlFor="address">Optional: Address</Label>
+            <Input
+              id="address"
+              value={formData.address ?? ''}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+            />
+            <span className="pt-2 text-xs text-gray-500">
+              A complete, valid mailing address where you are able to receive business mail is required on all
+              commercial email communications in order to comply with anti-spam regulations in the US. This is a legal
+              requirement for all commercial email communications.
+            </span>
+          </Field>
         </FieldGroup>
 
         <div className="mt-6 flex justify-end gap-3">
@@ -174,7 +206,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
             Cancel
           </Button>
           <Button type="submit" color="purple" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : company ? 'Save Changes' : 'Create Company'}
+            {isSubmitting ? 'Saving...' : company ? 'Save Changes' : 'Create Brand'}
           </Button>
         </div>
       </form>

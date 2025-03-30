@@ -1,10 +1,4 @@
-import {
-  ButtonBlockAttributes,
-  EmailBlock,
-  HeadingBlockAttributes,
-  LinkBlockAttributes,
-  TextBlockAttributes,
-} from '@/app/components/email-workspace/types'
+import { EmailBlock, TextBlockAttributes } from '@/app/components/email-workspace/types'
 import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useToolbarStore } from '@/lib/stores/toolbarStore'
@@ -101,8 +95,6 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
             })),
           }
 
-          console.log('updatedEmail', updatedEmail)
-
           saveEmail(updatedEmail)
         }
       }
@@ -114,22 +106,9 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
   const isButton = currentBlock?.type === 'button'
   const isLink = currentBlock?.type === 'link'
 
-  // Get alignment from current block's attributes, ensuring type safety
-  const textAlign =
-    currentBlock?.type === 'button'
-      ? (currentBlock.attributes as ButtonBlockAttributes).align || 'left'
-      : currentBlock?.type === 'link'
-        ? (currentBlock.attributes as LinkBlockAttributes).align || 'left'
-        : currentBlock?.type === 'text'
-          ? (currentBlock.attributes as TextBlockAttributes).textAlign || 'left'
-          : currentBlock?.type === 'heading'
-            ? (currentBlock.attributes as HeadingBlockAttributes).textAlign || 'left'
-            : 'left'
-
   // Create a debounced onChange function with useMemo
   const debouncedOnChange = useMemo(() => {
     return debounce((html: string) => {
-      console.log('debounced', html)
       // Strip outer paragraph tags if present
       const strippedHtml = html.replace(/^<p>(.*)<\/p>$/, '$1')
       onChange({ content: strippedHtml })
@@ -160,17 +139,7 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
         autolink: true,
         defaultProtocol: 'https',
         protocols: ['http', 'https'],
-        HTMLAttributes: {
-          class: isButton
-            ? 'block text-center no-underline'
-            : isLink
-              ? 'text-blue-600 underline hover:text-blue-800'
-              : 'text-blue-600 underline hover:text-blue-800',
-          rel: 'noopener noreferrer',
-          style: isButton
-            ? `color: ${currentBlock?.attributes?.color || '#ffffff'}; display: inline-block; text-align: center; text-decoration: none;`
-            : `color: ${emailAttributes.linkColor ?? '#2563eb'};`,
-        },
+        HTMLAttributes: {},
         validate: (url) => {
           try {
             new URL(url.startsWith('http') ? url : `https://${url}`)
@@ -359,16 +328,14 @@ export default function EditableContent({ content, isSelected, onSelect, classNa
   return (
     <div
       onClick={handleClick}
-      className={`${className} ${isButton || isLink ? '' : ''}`}
+      className={`${className}`}
       style={{
         ...style,
-        ...(isButton || isLink ? { textAlign: textAlign } : {}),
       }}
     >
       <EditorContent
         editor={editor}
         className={`cursor-text focus:outline-none ${isButton || isLink ? 'inline-block' : ''}`}
-        style={isButton || isLink ? { textAlign: textAlign } : {}}
       />
     </div>
   )

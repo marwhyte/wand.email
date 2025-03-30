@@ -24,9 +24,18 @@ export async function POST(request: Request) {
       messages,
       companyName,
       companyId,
+      companyDescription,
+      companyAddress,
       emailType,
-    }: { id: string; messages: Message[]; companyName?: string; companyId?: string; emailType?: EmailType } =
-      await request.json()
+    }: {
+      id: string
+      messages: Message[]
+      companyName?: string
+      companyId?: string
+      companyDescription?: string
+      companyAddress?: string
+      emailType?: EmailType
+    } = await request.json()
 
     const userMessage = getMostRecentUserMessage(messages)
 
@@ -87,13 +96,31 @@ export async function POST(request: Request) {
           content: CONTINUE_PROMPT,
         })
 
-        const result = await streamText(messages, options, companyName, DEFAULT_PROVIDER, assistantMessageId, emailType)
+        const result = await streamText(
+          messages,
+          options,
+          companyName,
+          companyDescription,
+          companyAddress,
+          DEFAULT_PROVIDER,
+          assistantMessageId,
+          emailType
+        )
 
         return stream.switchSource(result.toDataStream())
       },
     }
 
-    const result = await streamText(messages, options, companyName, DEFAULT_PROVIDER, assistantMessageId, emailType)
+    const result = await streamText(
+      messages,
+      options,
+      companyName,
+      companyDescription,
+      companyAddress,
+      DEFAULT_PROVIDER,
+      assistantMessageId,
+      emailType
+    )
 
     stream.switchSource(result.toDataStream())
 

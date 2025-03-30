@@ -2,9 +2,10 @@ import { useEmailStore } from '@/lib/stores/emailStore'
 import { useTableStore } from '@/lib/stores/tableStore'
 import { getTableProps } from '@/lib/utils/attributes'
 import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
-import parse from 'html-react-parser'
-import { useEffect } from 'react'
+import { useCallback, useEffect } from 'react'
 import { RowBlock, TableBlock } from '../types'
+import EditableContent from './editable-content'
+
 type Props = {
   block: TableBlock
   parentRow: RowBlock
@@ -33,6 +34,16 @@ export default function EmailTable({ block, parentRow }: Props) {
     paddingLeft,
   }
 
+  const handleCellSelect = useCallback(
+    (rowIndex: number, cellIndex: number, cellContent: string) => {
+      setSelectedCell({ row: rowIndex, column: cellIndex, value: cellContent })
+      if (selectedCell?.row !== rowIndex || selectedCell?.column !== cellIndex) {
+        setSelectedCellValue(cellContent)
+      }
+    },
+    [selectedCell, setSelectedCell, setSelectedCellValue]
+  )
+
   return (
     <div style={divStyles}>
       <table style={{ ...restStyles }} {...restProps}>
@@ -41,12 +52,6 @@ export default function EmailTable({ block, parentRow }: Props) {
             <tr key={rowIndex}>
               {row.map((cell, cellIndex) => (
                 <td
-                  onClick={() => {
-                    setSelectedCell({ row: rowIndex, column: cellIndex, value: cell })
-                    if (selectedCell?.row !== rowIndex || selectedCell?.column !== cellIndex) {
-                      setSelectedCellValue(cell)
-                    }
-                  }}
                   width={`${100 / row.length}%`}
                   key={cellIndex}
                   style={{
@@ -67,11 +72,13 @@ export default function EmailTable({ block, parentRow }: Props) {
                   }}
                   className={`table-cell hover:bg-purple-200`}
                 >
-                  {parse(
-                    selectedCell?.row === rowIndex && selectedCell?.column === cellIndex
-                      ? selectedCellValue || cell
-                      : cell
-                  ) || '\u200B'}
+                  <EditableContent
+                    content={cell}
+                    isSelected={selectedCell?.row === rowIndex && selectedCell?.column === cellIndex}
+                    onSelect={() => handleCellSelect(rowIndex, cellIndex, cell)}
+                    className="w-full"
+                    style={{}}
+                  />
                 </td>
               ))}
             </tr>

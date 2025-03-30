@@ -22,6 +22,7 @@ export async function resolveImageSrc(
           query: keyword,
           per_page: 1,
           orientation: orientation,
+          color: '#f4f4f4',
         })
 
         if ('error' in result) {

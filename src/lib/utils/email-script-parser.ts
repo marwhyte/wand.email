@@ -16,6 +16,7 @@ import {
   SocialIconFolders,
   SocialIconName,
   SocialsBlockAttributes,
+  SpacerBlockAttributes,
   SurveyBlockAttributes,
   TableBlockAttributes,
   TextAttributes,
@@ -227,45 +228,48 @@ function handleContentPadding(raw: RawAttributes): Record<string, string> {
 function parseAttributes(attrString: string): RawAttributes {
   const attrs: RawAttributes = {}
 
+  // Normalize whitespace - convert newlines and multiple spaces to single spaces
+  const normalizedAttrString = attrString.replace(/\s+/g, ' ').trim()
+
   // Special handling for content - capture everything between <p> tags
-  const contentMatch = attrString.match(/content=<p>(.*?)<\/p>/)
+  const contentMatch = normalizedAttrString.match(/content=<p>(.*?)<\/p>/)
   if (contentMatch) {
     // Strip the <p> tags when storing the content
     attrs.content = parseEscapeSequences(contentMatch[1])
-    attrString = attrString.replace(contentMatch[0], '')
+    attrString = normalizedAttrString.replace(contentMatch[0], '')
   }
 
   // Special handling for complex JSON arrays (like table rows)
   // This needs to happen before other attribute parsing
-  const complexJsonMatch = attrString.match(/(\w+)=(\[[\s\S]*?\])(?=\s+\w+=|\s*$)/)
+  const complexJsonMatch = normalizedAttrString.match(/(\w+)=(\[[\s\S]*?\])(?=\s+\w+=|\s*$)/)
   if (complexJsonMatch) {
     const [fullMatch, key, jsonValue] = complexJsonMatch
     attrs[key] = jsonValue
-    attrString = attrString.replace(fullMatch, '')
+    attrString = normalizedAttrString.replace(fullMatch, '')
   }
 
   // Special handling for links - match both quoted and unquoted keys
-  const jsonMatch = attrString.match(/(\w+)=(\[[\s\S]*?\])/)
+  const jsonMatch = normalizedAttrString.match(/(\w+)=(\[[\s\S]*?\])/)
   if (jsonMatch) {
     const [fullMatch, key, jsonValue] = jsonMatch
     // Convert unquoted keys to quoted keys before parsing
     const normalizedJson = jsonValue.replace(/(\{|,)\s*(\w+):/g, '$1"$2":')
     attrs[key] = normalizedJson
-    attrString = attrString.replace(fullMatch, '')
+    attrString = normalizedAttrString.replace(fullMatch, '')
   }
 
   // Special handling for alt attribute - capture everything between quotes
-  const altMatch = attrString.match(/alt="([^"]*)"/)
+  const altMatch = normalizedAttrString.match(/alt="([^"]*)"/)
   if (altMatch) {
     attrs.alt = altMatch[1]
-    attrString = attrString.replace(altMatch[0], '')
+    attrString = normalizedAttrString.replace(altMatch[0], '')
   }
 
   // Parse remaining attributes - improved regex to handle values with or without quotes
   // This regex matches key=value pairs where value can be:
   // 1. A quoted string: key="value with spaces"
   // 2. A non-quoted string without spaces: key=value
-  const pairs = attrString.match(/(\w+)=(?:"([^"]*)"|([^\s"]+))/g) || []
+  const pairs = normalizedAttrString.match(/(\w+)=(?:"([^"]*)"|([^\s"]+))/g) || []
 
   pairs.forEach((pair) => {
     // Split only at the first equals sign
@@ -310,6 +314,8 @@ const parseRowAttributes: AttributeParser<RowBlockAttributes> = (raw) => {
   if ('backgroundColor' in raw) attrs.backgroundColor = raw.backgroundColor
   if ('borderColor' in raw) attrs.borderColor = raw.borderColor
   if ('borderRadius' in raw) attrs.borderRadius = ensurePx(raw.borderRadius)
+  if ('borderRadiusSide' in raw) attrs.borderRadiusSide = raw.borderRadiusSide as RowBlockAttributes['borderRadiusSide']
+  if ('borderSide' in raw) attrs.borderSide = raw.borderSide as RowBlockAttributes['borderSide']
   if ('borderStyle' in raw && isBorderStyle(raw.borderStyle)) attrs.borderStyle = raw.borderStyle
   if ('borderWidth' in raw) attrs.borderWidth = ensurePx(raw.borderWidth)
   if ('columnSpacing' in raw) attrs.columnSpacing = Number(raw.columnSpacing)
@@ -613,6 +619,13 @@ const parseListAttributes: AttributeParser<ListBlockAttributes> = (raw) => {
 }
 
 // ===== Parser Registry =====
+const parseSpacerAttributes: AttributeParser<SpacerBlockAttributes> = (raw) => {
+  // Get the height attribute with a default value of '20' if not provided
+  return {
+    height: raw.height || '10',
+  }
+}
+
 const blockParsers = {
   heading: parseHeadingAttributes,
   text: parseTextAttributes,
@@ -624,6 +637,7 @@ const blockParsers = {
   survey: parseSurveyAttributes,
   table: parseTableAttributes,
   list: parseListAttributes,
+  spacer: parseSpacerAttributes,
 } as const
 
 // ===== Image Processing Helpers =====
@@ -631,6 +645,10 @@ function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 's
   // Count image blocks and total blocks in the row
   let imageCount = 0
   let totalBlocks = 0
+
+  if (row.attributes.type === 'cart') {
+    return 'square'
+  }
 
   row.columns.forEach((column) => {
     const hasImage = column.blocks.some((block) => block.type === 'image')
@@ -655,7 +673,7 @@ async function processBlocks(blocks: any[], row: RowBlock): Promise<any[]> {
     blocks.map(async (block) => {
       if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
         // Resolve the image source with determined orientation
-        const resolvedSrc = await resolveImageSrc(block.attributes.src, 'landscape')
+        const resolvedSrc = await resolveImageSrc(block.attributes.src, orientation)
         return {
           ...block,
           attributes: {
@@ -758,12 +776,362 @@ export function parseEmailScript(script: string): Email {
       currentColumn = createColumn([], width, parseColumnAttributes(columnAttrs))
       currentRow.columns.push(currentColumn)
       depth++
+
+      // Special handling for cart rows
+      if (currentRow.attributes.type === 'cart') {
+        // Collect all CART_ITEM elements that will appear in this column
+        let cartItems = []
+        let j = i + 1
+        let columnDepth = 1
+
+        while (j < lines.length) {
+          const currentLine = lines[j].trim()
+
+          // Track column depth to properly detect the end of this column
+          if (currentLine.startsWith('<COLUMN')) {
+            columnDepth++
+          } else if (currentLine.startsWith('</COLUMN>')) {
+            columnDepth--
+            if (columnDepth === 0) {
+              break // End of this column
+            }
+          }
+
+          // Collect cart items
+          if (currentLine.startsWith('<CART_ITEM')) {
+            const itemMatch = currentLine.match(/<CART_ITEM\s*([^>\/]*)(?:\/>|>)/)
+            if (itemMatch) {
+              const itemAttrs = parseAttributes(itemMatch[1])
+              cartItems.push(itemAttrs)
+            }
+          }
+
+          j++
+        }
+
+        // If we found cart items, replace the current row and generate new rows
+        if (cartItems.length > 0) {
+          // Remove the current row from rows array since we'll replace it
+          rows.pop()
+
+          // Process cart items and create new rows for each item
+          for (let itemIndex = 0; itemIndex < cartItems.length; itemIndex++) {
+            const item = cartItems[itemIndex]
+            const isFirstItem = itemIndex === 0
+            const isLastItem = itemIndex === cartItems.length - 1
+
+            // Determine border radius side
+            let borderRadiusSide: 'top' | 'bottom' | 'both' | undefined = undefined
+            if (cartItems.length === 1) {
+              borderRadiusSide = 'both'
+            } else if (isFirstItem) {
+              borderRadiusSide = 'top'
+            } else if (isLastItem) {
+              borderRadiusSide = 'bottom'
+            }
+
+            // Create row for this cart item
+            const cartRow = createRow({
+              type: 'cart',
+              borderRadius: '12',
+              borderRadiusSide,
+            })
+
+            // Create first column with image
+            const imageColumn = createColumn([], '33%', {})
+            if (item.image) {
+              createBlock(
+                'image',
+                '',
+                {
+                  src: item.image,
+                  alt: item.name || 'Product image',
+                },
+                imageColumn
+              )
+            }
+            cartRow.columns.push(imageColumn)
+
+            // Create second column with item details
+            const detailsColumn = createColumn([], '66%', {})
+
+            // Add heading with product name
+            if (item.name) {
+              createBlock('heading', item.name, { content: item.name }, detailsColumn)
+            }
+
+            // Add price text
+            if (item.price) {
+              createBlock('text', item.price, { content: item.price }, detailsColumn)
+            }
+
+            // Add description text
+            if (item.description) {
+              createBlock('text', item.description, { content: item.description }, detailsColumn)
+            }
+
+            // Add quantity text
+            if (item.quantity) {
+              createBlock(
+                'text',
+                `Quantity: ${item.quantity}`,
+                {
+                  content: `Quantity: ${item.quantity}`,
+                },
+                detailsColumn
+              )
+            }
+
+            // Add buy button
+            createBlock(
+              'button',
+              'Buy now',
+              {
+                content: 'Buy now',
+                href: '#',
+              },
+              detailsColumn
+            )
+
+            // Add divider if this isn't the last item
+            if (!isLastItem) {
+              createBlock('divider', '', {}, detailsColumn)
+            }
+
+            cartRow.columns.push(detailsColumn)
+            rows.push(cartRow)
+          }
+
+          // Skip to the end of the column to avoid processing the cart items again
+          i = j
+
+          // Reset current column and row since we've replaced them
+          currentColumn = null
+          currentRow = null
+          depth--
+        }
+      }
+
+      continue
+    }
+
+    // Direct handler for CART_ITEM elements
+    if (line.startsWith('<CART_ITEM') && currentColumn && currentRow?.attributes.type === 'cart') {
+      // Get all cart items in this column
+      let cartItems = []
+      const rowIndex = rows.indexOf(currentRow)
+
+      // The current cart item might span multiple lines
+      let currentItemLines = [line]
+      let j = i + 1
+
+      // Collect lines until the closing /> is found
+      while (j < lines.length && !currentItemLines.join(' ').includes('/>')) {
+        currentItemLines.push(lines[j].trim())
+        j++
+      }
+
+      // Combine all lines of the current cart item
+      const fullItemTag = currentItemLines.join(' ').trim()
+
+      // Extract attributes from the combined tag
+      const itemMatch = fullItemTag.match(/<CART_ITEM\s+([^>]*)(?:\/>|>)/)
+      if (itemMatch) {
+        const itemAttrs = parseAttributes(itemMatch[1])
+        cartItems.push(itemAttrs)
+      }
+
+      // Look ahead for more cart items in this column
+      while (j < lines.length && !lines[j].trim().startsWith('</COLUMN>')) {
+        const nextLine = lines[j].trim()
+
+        if (nextLine.startsWith('<CART_ITEM')) {
+          // This is the start of another cart item
+          let nextItemLines = [nextLine]
+          let k = j + 1
+
+          // Collect lines until the closing /> is found
+          while (k < lines.length && !nextItemLines.join(' ').includes('/>')) {
+            nextItemLines.push(lines[k].trim())
+            k++
+          }
+
+          // Combine all lines of this cart item
+          const fullNextItemTag = nextItemLines.join(' ').trim()
+
+          // Extract attributes from the combined tag
+          const nextMatch = fullNextItemTag.match(/<CART_ITEM\s+([^>]*)(?:\/>|>)/)
+          if (nextMatch) {
+            const nextAttrs = parseAttributes(nextMatch[1])
+            cartItems.push(nextAttrs)
+          }
+
+          // Update j to skip past this cart item
+          j = k
+        } else {
+          j++
+        }
+      }
+
+      // Remove the original row - we'll create separate rows for each cart item
+      if (rowIndex !== -1) {
+        rows.splice(rowIndex, 1)
+      }
+
+      // Create rows for each cart item (and dividers between them)
+      let insertIndex = rowIndex
+
+      for (let itemIndex = 0; itemIndex < cartItems.length; itemIndex++) {
+        const item = cartItems[itemIndex]
+        const isFirstItem = itemIndex === 0
+        const isLastItem = itemIndex === cartItems.length - 1
+        const isSingleItem = cartItems.length === 1
+
+        // Determine border radius side
+        let borderRadiusSide: 'top' | 'bottom' | 'both' | undefined = undefined
+        if (isSingleItem) {
+          borderRadiusSide = 'both'
+        } else if (isFirstItem) {
+          borderRadiusSide = 'top'
+        } else if (isLastItem) {
+          borderRadiusSide = 'bottom'
+        }
+
+        // Only apply the border radius on first/last items
+        const borderRadius = isFirstItem || isLastItem || isSingleItem ? '12' : undefined
+
+        // Setup padding based on position
+        const rowPadding: Record<string, string> = {}
+
+        if (isFirstItem || isSingleItem) {
+          rowPadding.paddingTop = '16px'
+        }
+
+        if (isLastItem || isSingleItem) {
+          rowPadding.paddingBottom = '16px'
+        }
+
+        // Create a new row for this cart item with appropriate padding
+        const cartRow = createRow({
+          type: 'cart',
+          borderRadius,
+          borderRadiusSide,
+          ...rowPadding,
+        })
+
+        // Image column (33%)
+        const imageColumn = createColumn([], '33%', {})
+        if (item.image) {
+          createBlock(
+            'image',
+            '',
+            {
+              src: item.image,
+              alt: item.name || 'Product image',
+            },
+            imageColumn
+          )
+        }
+        cartRow.columns.push(imageColumn)
+
+        // Details column (66%)
+        const detailsColumn = createColumn([], '66%', {})
+
+        if (item.name) {
+          createBlock('heading', item.name, { content: item.name }, detailsColumn)
+        }
+
+        if (item.price) {
+          createBlock('text', item.price, { content: item.price }, detailsColumn)
+        }
+
+        if (item.description) {
+          createBlock('text', item.description, { content: item.description }, detailsColumn)
+        }
+
+        if (item.quantity) {
+          createBlock(
+            'text',
+            `Quantity: ${item.quantity}`,
+            {
+              content: `Quantity: ${item.quantity}`,
+            },
+            detailsColumn
+          )
+        }
+
+        createBlock(
+          'button',
+          'Buy now',
+          {
+            content: 'Buy now',
+            href: '#',
+          },
+          detailsColumn
+        )
+
+        cartRow.columns.push(detailsColumn)
+
+        // Insert the cart item row
+        rows.splice(insertIndex, 0, cartRow)
+        insertIndex++
+
+        // If this is not the last item, add a divider row
+        if (!isLastItem) {
+          // Create a separate row for the divider
+          const dividerRow = createRow({
+            type: 'cart',
+            // No border radius for divider rows
+          })
+
+          // Single column for the divider
+          const dividerColumn = createColumn([], '100%', {})
+          createBlock('divider', '', {}, dividerColumn)
+          dividerRow.columns.push(dividerColumn)
+
+          // Insert the divider row
+          rows.splice(insertIndex, 0, dividerRow)
+          insertIndex++
+        }
+      }
+
+      // Skip to after all the cart items we processed
+      i = j - 1
+
+      // Reset current row and column since we've replaced them
+      currentRow = null
+      currentColumn = null
+      depth--
+
       continue
     }
 
     // Handle closing tags
     if (line.startsWith('</ROW>')) {
       depth--
+
+      // Special handling for cart rows: adjust the last item
+      if (currentRow?.attributes.type === 'cart') {
+        // Find all cart rows that were generated
+        const cartRows = rows.filter((row) => row.attributes.type === 'cart')
+
+        if (cartRows.length > 0) {
+          // Set the last item's borderRadiusSide to 'bottom'
+          const lastCartRow = cartRows[cartRows.length - 1]
+          lastCartRow.attributes.borderRadiusSide = cartRows.length === 1 ? 'all' : 'bottom'
+
+          // Remove the divider from the last item's details column
+          if (lastCartRow.columns.length >= 2) {
+            const detailsColumn = lastCartRow.columns[1]
+            // Find and remove the last divider block
+            const dividerIndex = detailsColumn.blocks.findIndex((block) => block.type === 'divider')
+            if (dividerIndex !== -1) {
+              detailsColumn.blocks.splice(dividerIndex, 1)
+            }
+          }
+        }
+      }
+
       currentRow = null
       currentColumn = null
       continue
@@ -1113,6 +1481,9 @@ export function parseEmailScript(script: string): Email {
           break
         case 'divider':
           createBlock('divider', '', blockParsers.divider(attrs), currentColumn)
+          break
+        case 'spacer':
+          createBlock('spacer', '', blockParsers.spacer(attrs), currentColumn)
           break
         case 'socials':
           const socialAttrs = blockParsers.socials(attrs)

@@ -11,11 +11,11 @@ export const outlineGoogleTemplateScript = (useImage: boolean) => `
         A new sign-in on Apple iPhone 15 Pro
       </HEADING>
       <TEXT>
-        marcolwhyte@gmail.com
+        user@example.com
       </TEXT>
       <DIVIDER />
       <TEXT>
-        We noticed a new sign-in to your Google Account on a Apple iPhone 15 Pro device. If this was you, you don't need to do anything. If not, we'll help you secure your account.
+        We noticed a new sign-in to your account on an Apple iPhone 15 Pro device. If this was you, you don't need to do anything. If not, we'll help you secure your account.
       </TEXT>
       <BUTTON>
         Check activity
@@ -24,7 +24,7 @@ export const outlineGoogleTemplateScript = (useImage: boolean) => `
         You can also see security activity at
       </TEXT>
       <LINK padding="0" fontSize="12">
-        myactivity.google.com
+        myactivity.example.com
       </LINK>
     </COLUMN>
   </ROW>
@@ -36,10 +36,10 @@ export const outlineGoogleTemplateScript = (useImage: boolean) => `
         <SOCIAL icon="instagram" url="#" title="Instagram" alt="Instagram" />
       </SOCIALS>
       <TEXT>
-        You received this email to let you know about important changes to your Google Account and services.
+        You received this email to let you know about important changes to your account and services.
       </TEXT>
       <TEXT>
-        © 2025 Google LLC, 1600 Amphitheatre Parkway, Mountain View, CA 94043, USA
+        © 2025 Example Company, 123 Tech Plaza, San Francisco, CA 94103, USA
       </TEXT>
     </COLUMN>
   </ROW>
@@ -48,14 +48,14 @@ export const outlineGoogleTemplateScript = (useImage: boolean) => `
 
 export const googleTransactionalExample = `
 <example>
-  <user_query>Can you help me create an email for a Google account security alert?</user_query>
+  <user_query>Can you help me create an email for an account security alert?</user_query>
 
   <assistant_response>
-  I'll create a Google account security alert email.
+  I'll create an account security alert email.
 
   ${outlineGoogleTemplateScript(false)}
 
-  The template includes a clean header with the Google logo, a security alert message, and a footer with social media links and a copyright notice.
+  The template includes a clean header with your company logo, a security alert message, and a footer with social media links and a copyright notice.
   </assistant_response>
 </example>
 `

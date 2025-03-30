@@ -56,7 +56,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
     messages.filter((msg) => msg.role === 'assistant' && msg.content.includes('<EMAIL')).length === 1
   const buttonLabel = isMostRecentVersion ? 'Undo' : 'Restore'
   const buttonDisabled = isOnlyAssistantMessage || disabled
-  const buttonTooltip = isOnlyAssistantMessage ? 'Nothing to restore' : undefined
+  const buttonTooltip = isOnlyAssistantMessage ? 'Nothing to restore' : ''
 
   const handleRevert = async () => {
     const revertedMessage = isMostRecentVersion
@@ -98,7 +98,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
           outline
           disabled={buttonDisabled}
           tooltip={buttonTooltip}
-          tooltipTransform="-top-9 -left-14"
+          tooltipId="revert-email"
         >
           {buttonLabel}
         </Button>

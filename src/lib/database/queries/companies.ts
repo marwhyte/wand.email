@@ -3,6 +3,7 @@
 import { auth } from '@/auth'
 import { revalidateTag, unstable_cache } from 'next/cache'
 import { db } from '../db'
+import { Company } from '../types'
 
 // Internal helper that takes userId as parameter for caching
 const getCompaniesInternal = unstable_cache(
@@ -15,6 +16,8 @@ const getCompaniesInternal = unstable_cache(
         'Company.updatedAt',
         'Company.id',
         'Company.name',
+        'Company.description',
+        'Company.address',
         'Company.logoFileId',
         'Company.primaryColor',
         'Company.userId',
@@ -40,6 +43,8 @@ const getCompanyInternal = unstable_cache(
       .select([
         'Company.id',
         'Company.name',
+        'Company.description',
+        'Company.address',
         'Company.primaryColor',
         'Company.logoFileId',
         'Company.userId',
@@ -82,11 +87,15 @@ export async function addCompany({
   name,
   primaryColor,
   logoFileId,
+  description,
+  address,
 }: {
   name: string
   primaryColor?: string
   logoFileId?: string
-}) {
+  description?: string | null
+  address?: string | null
+}): Promise<Company | null> {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
@@ -98,6 +107,8 @@ export async function addCompany({
       name,
       primaryColor: primaryColor,
       logoFileId: logoFileId,
+      description: description,
+      address: address,
       userId: session.user.id,
     })
     .returning([
@@ -105,6 +116,8 @@ export async function addCompany({
       'Company.name',
       'Company.primaryColor',
       'Company.logoFileId',
+      'Company.description',
+      'Company.address',
       'Company.userId',
       'Company.createdAt',
     ])
@@ -119,8 +132,11 @@ export async function addCompany({
           'Company.name',
           'Company.primaryColor',
           'Company.logoFileId',
+          'Company.description',
+          'Company.address',
           'Company.userId',
           'Company.createdAt',
+          'Company.updatedAt',
           'File.imageKey as logoImageKey',
         ])
         .where('Company.id', '=', newCompany.id)
@@ -128,7 +144,7 @@ export async function addCompany({
     })
 
   revalidateTag('companies')
-  return company
+  return company ?? null
 }
 
 export async function updateCompany(
@@ -137,12 +153,16 @@ export async function updateCompany(
     name,
     primaryColor,
     logoFileId,
+    description,
+    address,
   }: {
     name?: string
     primaryColor?: string
     logoFileId?: string
+    description?: string | null
+    address?: string | null
   }
-) {
+): Promise<Company | null> {
   const session = await auth()
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
@@ -154,10 +174,12 @@ export async function updateCompany(
       ...(name && { name }),
       ...(primaryColor !== undefined && { primaryColor }),
       ...(logoFileId !== undefined && { logoFileId }),
+      ...(description !== undefined && { description }),
+      ...(address !== undefined && { address }),
     })
     .where('id', '=', companyId)
     .where('userId', '=', session.user.id)
-    .returning(['id', 'name', 'primaryColor', 'logoFileId', 'userId', 'createdAt'])
+    .returning(['id', 'name', 'primaryColor', 'logoFileId', 'description', 'address', 'userId', 'createdAt'])
     .execute()
     .then(async ([updatedCompany]) => {
       if (!updatedCompany) return null
@@ -169,8 +191,11 @@ export async function updateCompany(
           'Company.name',
           'Company.primaryColor',
           'Company.logoFileId',
+          'Company.description',
+          'Company.address',
           'Company.userId',
           'Company.createdAt',
+          'Company.updatedAt',
           'File.imageKey as logoImageKey',
         ])
         .where('Company.id', '=', updatedCompany.id)
@@ -178,7 +203,7 @@ export async function updateCompany(
     })
 
   revalidateTag('companies')
-  return company
+  return company ?? null
 }
 
 export async function deleteCompany(companyId: string) {

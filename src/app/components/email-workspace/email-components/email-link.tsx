@@ -1,5 +1,5 @@
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { getLinkProps } from '@/lib/utils/attributes'
+import { getBlockAttributes, getLinkProps } from '@/lib/utils/attributes'
 import { useCallback } from 'react'
 import { LinkBlock, RowBlock } from '../types'
 import EditableContent from './editable-content'
@@ -14,6 +14,7 @@ export default function EmailLink({ block, parentRow }: Props) {
 
   const linkProps = getLinkProps(block, parentRow, email)
   const { style, ...restLinkProps } = linkProps
+  const blockAttributes = getBlockAttributes(block, parentRow, email)
 
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
 
@@ -30,7 +31,8 @@ export default function EmailLink({ block, parentRow }: Props) {
   }, [])
 
   return (
-    <div style={divStyle}>
+    // @ts-ignore
+    <div style={divStyle} align={blockAttributes.align}>
       <EditableContent
         content={block.attributes.content || ''}
         isSelected={currentBlock?.id === block.id}

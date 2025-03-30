@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { SessionProvider } from 'next-auth/react'
 import { Inter, Montserrat, Open_Sans, Outfit } from 'next/font/google'
 
+import 'react-tooltip/dist/react-tooltip.css'
 import { fetchUser } from './actions'
 import PlanProvider from './components/payment/plan-provider'
 import './globals.css'

@@ -10,6 +10,7 @@ import type {
   ListBlock,
   RowBlock,
   SocialsBlock,
+  SpacerBlock,
   SurveyBlock,
   TableBlock,
   TextBlock,
@@ -217,6 +218,23 @@ export function getTextProps(
   }
 }
 
+export function getSpacerProps(
+  block: SpacerBlock,
+  parentRow: RowBlock,
+  email: Email | null
+): OmitChildren<React.ComponentProps<typeof Section>> {
+  const spacerAttributes = getBlockAttributes(block, parentRow, email)
+  return {
+    style: {
+      height: `${spacerAttributes.height}px`,
+      fontSize: '1px',
+      lineHeight: `${spacerAttributes.height}px`,
+      // @ts-ignore - MSO property for Outlook compatibility
+      msoLineHeightRule: 'exactly',
+    },
+  }
+}
+
 export function getBlockProps<T extends EmailBlock>(
   block: T,
   parentRow: RowBlock,
@@ -240,7 +258,9 @@ export function getBlockProps<T extends EmailBlock>(
                 ? ReturnType<typeof getSurveyProps>
                 : T extends SocialsBlock
                   ? ReturnType<typeof getSocialsProps>
-                  : never {
+                  : T extends SpacerBlock
+                    ? ReturnType<typeof getSpacerProps>
+                    : never {
   switch (block.type) {
     case 'text':
       return getTextProps(block as TextBlock, parentRow, email) as any
@@ -262,6 +282,8 @@ export function getBlockProps<T extends EmailBlock>(
       return getTableProps(block as TableBlock, parentRow, email) as any
     case 'list':
       return getListProps(block as ListBlock, parentRow, email) as any
+    case 'spacer':
+      return getSpacerProps(block as SpacerBlock, parentRow, email) as any
     default:
       return {} as never
   }

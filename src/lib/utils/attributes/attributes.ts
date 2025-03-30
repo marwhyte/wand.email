@@ -18,6 +18,8 @@ import type {
   RowBlock,
   SocialsBlock,
   SocialsBlockAttributes,
+  SpacerBlock,
+  SpacerBlockAttributes,
   SurveyBlock,
   SurveyBlockAttributes,
   TableBlock,
@@ -35,6 +37,8 @@ export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<Ro
     paddingLeft: '16px',
     paddingRight: '16px',
     paddingBottom: '16px',
+    paddingTop: '16px',
+    borderSide: 'all',
     stackOnMobile: true,
     columnSpacing: 12,
   }
@@ -91,6 +95,14 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
     defaultAttributes.fontFamily = 'Outfit, Roboto, Helvetica, Arial, sans-serif'
   } else if (defaultAttributes.styleVariant === 'clear') {
     defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
+  }
+
+  if (defaultAttributes?.type === 'welcome-series') {
+    defaultAttributes.fontFamily = 'Outfit, Roboto, Helvetica, Arial, sans-serif'
+  }
+
+  if (defaultAttributes?.type === 'cart') {
+    defaultAttributes.fontFamily = 'Montserrat, Arial, sans-serif'
   }
 
   if (defaultAttributes?.styleVariant === 'default') {
@@ -227,6 +239,19 @@ export function getListAttributes(block: ListBlock, parentRow: RowBlock, email: 
       : {}),
   }
 }
+
+export function getSpacerAttributes(
+  block: SpacerBlock,
+  parentRow: RowBlock,
+  email: Email | null
+): SpacerBlockAttributes {
+  const defaults = getBlockDefaultAttributes(block, email, parentRow)
+  return {
+    ...defaults,
+    ...block.attributes,
+  }
+}
+
 export function getBlockAttributes<T extends EmailBlock>(
   block: T,
   parentRow: RowBlock,
@@ -254,6 +279,8 @@ export function getBlockAttributes<T extends EmailBlock>(
       return getTableAttributes(block, parentRow, email)
     case 'list':
       return getListAttributes(block, parentRow, email)
+    case 'spacer':
+      return getSpacerAttributes(block, parentRow, email)
     default:
       return {} as never
   }

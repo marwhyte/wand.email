@@ -33,6 +33,8 @@ import {
   RowBlockAttributes,
   SocialsBlock,
   SocialsBlockAttributes,
+  SpacerBlock,
+  SpacerBlockAttributes,
   SurveyBlock,
   SurveyBlockAttributes,
   TableBlock,
@@ -56,6 +58,7 @@ enum Options {
   NO_PADDING_MOBILE = 'no-padding-mobile',
   HEADING_LEVEL = 'heading-level',
   LINK_TYPE = 'link-type',
+  HEIGHT = 'height',
 }
 
 type EmailBlockEditorProps = {
@@ -70,6 +73,7 @@ type EmailBlockEditorProps = {
     | DividerBlock
     | TableBlock
     | ListBlock
+    | SpacerBlock
   onChange: (
     attributes: Partial<
       | PaddingAttributes
@@ -82,16 +86,9 @@ type EmailBlockEditorProps = {
       | TableBlockAttributes
       | ListBlockAttributes
       | DividerBlockAttributes
+      | SpacerBlockAttributes
     >
   ) => void
-}
-
-type LinkFields = {
-  email?: string
-  subject?: string
-  body?: string
-  phone?: string
-  url?: string
 }
 
 const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
@@ -154,6 +151,8 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         return [Options.PADDING]
       case 'list':
         return [Options.TEXT_PROPERTIES, Options.PADDING]
+      case 'spacer':
+        return [Options.HEIGHT]
       default:
         return []
     }
@@ -172,6 +171,15 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
       {block.type !== 'text' && (
         <Disclosure title={`${capitalizeFirstLetter(block.type)} Attributes`} defaultOpen>
           <FieldGroup>
+            {block.type === 'spacer' && 'height' in blockAttributes && (
+              <Field>
+                <Label>Height</Label>
+                <NumberInput
+                  value={safeParseInt(String(blockAttributes.height).replace('px', '')) || 0}
+                  onChange={(value) => onChange({ height: `${value}` })}
+                />
+              </Field>
+            )}
             {block.type === 'survey' && <SurveyEditor block={block} onChange={onChange} />}
             {block.type === 'socials' && email && (
               <SocialsEditor parentRow={parentRow} email={email} block={block} onChange={onChange} />

@@ -164,6 +164,7 @@ const UpgradeDialog = () => {
                     <Button
                       type="submit"
                       tooltip={plan === selectedTier.id ? 'You are already on this plan' : ''}
+                      tooltipId={plan === selectedTier.id ? 'already-on-plan' : ''}
                       disabled={plan === selectedTier.id}
                       color={selectedTier.color}
                       className="mx-auto mt-4 w-full max-w-lg"

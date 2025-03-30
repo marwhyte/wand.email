@@ -24,6 +24,7 @@ import {
   RowBlock,
   RowBlockAttributes,
   SocialsBlockAttributes,
+  SpacerBlockAttributes,
   TableBlockAttributes,
   TextAttributes,
   TextBlockAttributes,
@@ -55,6 +56,7 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
         | SocialsBlockAttributes
         | TableBlockAttributes
         | ListBlockAttributes
+        | SpacerBlockAttributes
       >
     ) => {
       if (currentBlock) {
@@ -225,22 +227,23 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
       <div className="flex items-center justify-between gap-4">
         <Text>{capitalizeFirstLetter(currentBlock.type)} Properties</Text>
         <div className="flex gap-2">
-          <Button onClick={deleteBlock} outline tooltip={currentBlock.type === 'row' ? 'Delete Row' : 'Delete Block'}>
+          <Button
+            onClick={deleteBlock}
+            outline
+            tooltip={currentBlock.type === 'row' ? 'Delete Row' : 'Delete Block'}
+            tooltipId="delete-block"
+          >
             <TrashIcon className="!h-4 !w-4" />
           </Button>
           <Button
             onClick={duplicateBlock}
             outline
             tooltip={currentBlock.type === 'row' ? 'Duplicate Row' : 'Duplicate Block'}
+            tooltipId="duplicate-block"
           >
             <Square2StackIcon className="!h-4 !w-4" />
           </Button>
-          <Button
-            tooltipTransform="-translate-x-3/4"
-            onClick={() => setCurrentBlock(null)}
-            outline
-            tooltip="Close Editor"
-          >
+          <Button onClick={() => setCurrentBlock(null)} outline tooltip="Close Editor" tooltipId="close-editor">
             <XMarkIcon className="!h-4 !w-4" />
           </Button>
         </div>

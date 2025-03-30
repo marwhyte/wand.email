@@ -29,7 +29,6 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
     header: {},
     gallery: {},
     default: {
-      paddingBottom: '20px',
       paddingLeft: '40px',
       paddingRight: '40px',
     },
@@ -37,8 +36,6 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
   clear: {
     default: {},
   },
-
-  // Add more variants as needed
 }
 
 // Add email type-specific row styles
@@ -110,12 +107,45 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
   const rowAttributes = row.attributes
 
   // Get base styles for the row type
-  const baseStyles = (() => {
+  const baseStyles: Partial<RowBlock['attributes']> = (() => {
+    // Check if row only contains a spacer
+    const hasSingleSpacer =
+      row.columns.length === 1 && row.columns[0].blocks.length === 1 && row.columns[0].blocks[0].type === 'spacer'
+
+    // If row only has a spacer, remove top and bottom padding
+    if (hasSingleSpacer) {
+      return {
+        paddingTop: '0px',
+        paddingBottom: '0px',
+      }
+    }
+
     switch (rowAttributes.type) {
       case 'header': {
         return {
           paddingTop: '24px',
           paddingBottom: '12px',
+        }
+      }
+      case 'cart': {
+        return {
+          paddingTop: '2px',
+          paddingBottom: '2px',
+          backgroundColor: '#f4f4f4',
+          ...(row.columns.length === 1 &&
+            row.columns[0].blocks.length === 1 &&
+            row.columns[0].blocks[0].type === 'divider' && {
+              paddingTop: '0px',
+              paddingBottom: '0px',
+            }),
+        }
+      }
+      case 'discount': {
+        return {
+          backgroundColor: '#f4f4f4',
+          paddingTop: '30px',
+          paddingBottom: '30px',
+          borderRadius: '8px',
         }
       }
       case 'footer': {
@@ -147,9 +177,8 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
     }
   })()
 
-  // ... existing code ...
-
-  const variantStyles = (() => {
+  // Get variant styles
+  const variantStyles: Partial<RowBlock['attributes']> = (() => {
     if (!emailAttributes?.styleVariant) return {}
 
     const variant = emailAttributes.styleVariant
@@ -163,6 +192,24 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       }
     }
 
+    // Special handling for discount row type when variant is 'default'
+    if ((rowType === 'discount' || rowType === 'cart') && variant === 'default') {
+      // Add borderWidth only for default variant
+      return {
+        ...(variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}),
+        borderColor: '#ffffff',
+        borderWidth: '20px',
+        borderStyle: 'solid',
+        borderRadius: '0px',
+        borderSide: rowType === 'cart' ? 'leftRight' : 'all',
+      }
+    }
+
+    if (rowType === 'discount') {
+      return {
+        ...(variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}),
+      }
+    }
     // If there's a specific style for this row type in the variant, use it
     // Otherwise fall back to the 'default' style for this variant
     return variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}

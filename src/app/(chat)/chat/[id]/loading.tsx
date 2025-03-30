@@ -1,8 +1,5 @@
-'use client'
-
 import { Header } from '@/app/components/header'
 import { classNames } from '@/lib/utils/misc'
-import { StickToBottom } from 'use-stick-to-bottom'
 
 const Loading = () => {
   const chatStarted = true
@@ -20,32 +17,26 @@ const Loading = () => {
             {/* Chat section */}
             <div className="flex w-[370px] min-w-[370px] max-w-[370px] shrink-0 flex-col border-r border-gray-200">
               <div className="flex flex-col px-6 pt-6">
-                <StickToBottom
-                  className="relative flex h-[calc(100vh-100px)] flex-col justify-end pb-6"
-                  resize="smooth"
-                  initial="smooth"
-                >
-                  <StickToBottom.Content className="relative flex-grow overflow-auto">
-                    {/* Loading messages */}
-                    <div className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col space-y-6 pb-6">
-                      <div className="flex animate-pulse flex-col space-y-2">
-                        <div className="h-4 w-3/4 rounded bg-gray-200"></div>
-                        <div className="h-4 w-1/2 rounded bg-gray-200"></div>
-                        <div className="h-4 w-5/6 rounded bg-gray-200"></div>
-                      </div>
-                      <div className="flex animate-pulse flex-col space-y-2">
-                        <div className="h-4 w-2/3 rounded bg-gray-200"></div>
-                        <div className="h-4 w-3/4 rounded bg-gray-200"></div>
-                        <div className="h-4 w-1/2 rounded bg-gray-200"></div>
-                      </div>
+                <div className="relative flex h-[calc(100vh-100px)] flex-col justify-end pb-6">
+                  {/* Loading messages */}
+                  <div className="z-1 mx-auto flex h-full w-full max-w-[552px] flex-col space-y-6 pb-6">
+                    <div className="flex animate-pulse flex-col space-y-2">
+                      <div className="h-4 w-3/4 rounded bg-gray-200"></div>
+                      <div className="h-4 w-1/2 rounded bg-gray-200"></div>
+                      <div className="h-4 w-5/6 rounded bg-gray-200"></div>
                     </div>
-                  </StickToBottom.Content>
-
-                  {/* Loading input area */}
-                  <div className="mt-4 flex items-end rounded-lg border border-gray-300 bg-white p-2">
-                    <div className="h-10 w-full animate-pulse rounded bg-gray-100"></div>
+                    <div className="flex animate-pulse flex-col space-y-2">
+                      <div className="h-4 w-2/3 rounded bg-gray-200"></div>
+                      <div className="h-4 w-3/4 rounded bg-gray-200"></div>
+                      <div className="h-4 w-1/2 rounded bg-gray-200"></div>
+                    </div>
                   </div>
-                </StickToBottom>
+                </div>
+
+                {/* Loading input area */}
+                <div className="mt-4 flex items-end rounded-lg border border-gray-300 bg-white p-2">
+                  <div className="h-10 w-full animate-pulse rounded bg-gray-100"></div>
+                </div>
               </div>
             </div>
 

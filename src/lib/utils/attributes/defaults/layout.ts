@@ -2,17 +2,57 @@ import { ColumnBlockAttributes, Email, RowBlock, RowBlockAttributes } from '@/ap
 import { ensurePx } from '../../misc'
 
 export function getAdditionalRowStyles(attributes: RowBlockAttributes): React.CSSProperties {
-  const { borderWidth, borderColor, borderStyle, columnSpacing, hideOnMobile, stackOnMobile, type, ...rest } =
-    attributes
+  const {
+    borderRadius,
+    borderRadiusSide,
+    borderSide,
+    borderWidth,
+    borderColor,
+    borderStyle,
+    columnSpacing,
+    hideOnMobile,
+    stackOnMobile,
+    type,
+    ...rest
+  } = attributes
   const styles: React.CSSProperties = { ...rest }
 
-  if (borderWidth && borderColor) {
-    styles.borderLeft = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
-    styles.borderRight = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
-    styles.borderTop = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
-    styles.borderBottom = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+  if (borderRadius) {
+    styles.borderRadius = ensurePx(borderRadius)
   }
 
+  if (borderRadiusSide && borderRadius) {
+    if (borderRadiusSide === 'top') {
+      styles.borderRadius = `${ensurePx(borderRadius)} ${ensurePx(borderRadius)} 0 0`
+    } else if (borderRadiusSide === 'bottom') {
+      styles.borderRadius = `0 0 ${ensurePx(borderRadius)} ${ensurePx(borderRadius)}`
+    }
+  }
+
+  if (borderSide && borderWidth && borderColor) {
+    if (attributes?.type === 'cart') {
+      console.log('borderSide', borderSide)
+      console.log('borderWidth', borderWidth)
+      console.log('borderColor', borderColor)
+    }
+
+    if (borderSide === 'leftRight') {
+      styles.borderLeft = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+      styles.borderRight = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+    } else if (borderSide === 'topBottom') {
+      styles.borderTop = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+      styles.borderBottom = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+    } else if (borderSide === 'all') {
+      styles.borderLeft = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+      styles.borderRight = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+      styles.borderTop = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+      styles.borderBottom = `${ensurePx(borderWidth)} ${borderStyle || 'solid'} ${borderColor}`
+    }
+
+    if (attributes?.type === 'cart') {
+      console.log('styles', styles)
+    }
+  }
   return styles
 }
 

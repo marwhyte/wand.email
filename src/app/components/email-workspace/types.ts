@@ -38,6 +38,17 @@ export const FOLDERS: { name: SocialIconFolders; title: string }[] = [
 ]
 
 export const componentLibrary = {
+  cart: {
+    note: 'Use CART_ITEM child elements to define individual cart items.',
+    example: `
+      <ROW type="cart">
+        <COLUMN>
+          <CART_ITEM image="pexels:product image" name="Product Name" description="Product description here" quantity="1" price="$19.99" />
+        </COLUMN>
+      </ROW>
+    `,
+    allowedBlocks: ['CART_ITEM'],
+  },
   header: {
     example: `
       <ROW type="header">
@@ -83,9 +94,45 @@ export const componentLibrary = {
     `,
     allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
   },
+  discount: {
+    example: `
+  <ROW type="discount">
+    <COLUMN>
+      <TEXT>
+        Here is your exclusive
+      </TEXT>
+      <TEXT>
+        <strong>10% off your first purchase</strong>
+      </TEXT>
+      <TEXT>
+        (This code can only be used for the account associated with this email address)
+      </TEXT>
+      <TEXT>
+        XA7I9CfqJGG
+      </TEXT>
+    </COLUMN>
+  </ROW>
+    `,
+    allowedBlocks: ['TEXT', 'BUTTON', 'HEADING'],
+  },
 } as const
 
 export const blockLibrary = {
+  ROW: {
+    attributes: {
+      borderRadius: ['4'],
+      borderRadiusSide: ['top', 'bottom', 'all'],
+      borderWidth: ['1'],
+      borderColor: ['#000000'],
+      borderStyle: ['solid', 'dashed', 'dotted'],
+      borderSide: ['leftRight', 'topBottom', 'all'],
+    },
+  },
+  COLUMN: {
+    attributes: {
+      width: ['25%'],
+    },
+  },
   BUTTON: {
     attributes: {
       align: ['left', 'center', 'right'],
@@ -101,6 +148,30 @@ export const blockLibrary = {
       padding: ['10,0,10,0'],
       href: ['#'],
     },
+  },
+  CART: {
+    note: 'Include image, name, description, quantity, price, and customField by default.',
+    example: `
+      <CART>
+        <CART_ITEM
+          image="pexels:product image"
+          name="Product Name"
+          description="Product description here"
+          quantity="1"
+          price="$19.99"
+          customField="Custom Field Value"
+        />
+        <CART_ITEM
+          image="pexels:another product"
+          name="Another Product"
+          description="Another description"
+          quantity="2"
+          price="$24.99"
+          customField="Custom Field Value"
+        />
+    </CART>
+    `,
+    attributes: {},
   },
   DIVIDER: {
     attributes: {
@@ -143,6 +214,13 @@ export const blockLibrary = {
     },
   },
   LIST: {
+    example: `
+      <LIST type="ul">
+        <LI>Item 1</LI>
+        <LI>Item 2</LI>
+        <LI>Item 3</LI>
+      </LIST>
+    `,
     note: "Use LI elements to define list items. If type is icon, pick an icon that is relevant to the content. You can use any icon from google's material symbols. The default icon is checkmark. Only use icons if it makes sense for the list item, if not default to ul.",
     attributes: {
       padding: ['10,0,10,0'],
@@ -151,6 +229,13 @@ export const blockLibrary = {
     },
   },
   SOCIALS: {
+    example: `
+      <SOCIALS>
+        <SOCIAL icon="facebook" url="#" title="Facebook" alt="Facebook" />
+        <SOCIAL icon="x" url="#" title="X" alt="X" />
+        <SOCIAL icon="instagram" url="#" title="Instagram" alt="Instagram" />
+      </SOCIALS>
+    `,
     note: 'Use SOCIAL child elements to define individual social icons.',
     attributes: {
       align: ['left', 'center', 'right'],
@@ -192,6 +277,11 @@ export const blockLibrary = {
       padding: ['10,0,10,0'],
     },
   },
+  SPACER: {
+    attributes: {
+      height: ['10', '20', '30', '40', '50'],
+    },
+  },
 }
 
 // Type for component types
@@ -211,6 +301,7 @@ export type EmailType =
   | 'newsletter'
   | 'invoice'
   | 'cart'
+
 export const emailTypes = [
   'default',
   'welcome-series',
@@ -275,9 +366,12 @@ export type EmailBlock =
   | LinkBlock
   | ListBlock
   | SocialsBlock
+  | SpacerBlock
   | TableBlock
   | SurveyBlock
   | TextBlock
+  | SpacerBlock
+
 export type EmailBlockType = EmailBlock['type']
 
 // ===== Structural Blocks =====
@@ -356,6 +450,13 @@ export type TextBlock = {
   attributes: TextBlockAttributes
 }
 
+// Add the SpacerBlock type
+export type SpacerBlock = {
+  id: string
+  type: 'spacer'
+  attributes: SpacerBlockAttributes
+}
+
 // ===== Base Attribute Types =====
 export type PaddingAttributes = {
   paddingTop?: string
@@ -379,8 +480,10 @@ export type RowBlockAttributes = PaddingAttributes & {
   backgroundColor?: string
   borderColor?: string
   borderRadius?: string
+  borderRadiusSide?: 'top' | 'bottom' | 'all'
   borderStyle?: 'solid' | 'dashed' | 'dotted'
   borderWidth?: string
+  borderSide?: 'leftRight' | 'topBottom' | 'all'
   columnSpacing?: number
   hideOnMobile?: boolean
   stackOnMobile?: boolean
@@ -450,6 +553,10 @@ export type SocialsBlockAttributes = PaddingAttributes & {
     title: string
     url: string
   }[]
+}
+
+export type SpacerBlockAttributes = {
+  height: string
 }
 
 export type SurveyBlockAttributes = PaddingAttributes & {

@@ -1,19 +1,19 @@
 'use client'
 
-import { useEmailStore } from '@/lib/stores/emailStore'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 
 export function Footer() {
-  const { email } = useEmailStore()
+  const { chatStarted } = useChatStore()
   const [showInfo, setShowInfo] = useState(false)
 
-  if (email) return
+  if (chatStarted) return null
 
   return (
-    <footer className="flex items-center justify-end gap-4 px-4 py-4 text-sm text-gray-600">
+    <footer className="absolute bottom-0 flex w-full items-center justify-end gap-4 px-4 py-4 text-sm text-gray-600">
       <Link href="mailto:support@wand.email" className="hidden hover:text-gray-900 md:inline">
         Support
       </Link>

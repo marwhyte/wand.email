@@ -1,16 +1,12 @@
 import { Chat } from '@/app/components/chat/chat'
 import { Footer } from '@/app/components/footer'
 import { auth } from '@/auth'
-import { getCompanies } from '@/lib/database/queries/companies'
-import { getMonthlyExportCount } from '@/lib/database/queries/exports'
 import { generateUUID } from '@/lib/utils/misc'
 
 export default async function HomePage() {
   const id = generateUUID()
 
   const session = await auth()
-  const monthlyExportCount = session?.user?.id ? await getMonthlyExportCount() : null
-  const companies = session?.user?.id ? await getCompanies() : null
 
   // const isProduction = process.env.NODE_ENV === 'production'
 

@@ -7,6 +7,7 @@ import EmailImage from './email-components/email-image'
 import EmailLink from './email-components/email-link'
 import EmailList from './email-components/email-list'
 import EmailSocials from './email-components/email-socials'
+import EmailSpacer from './email-components/email-spacer'
 import EmailSurvey from './email-components/email-survey'
 import EmailTable from './email-components/email-table'
 import EmailText from './email-components/email-text'
@@ -85,6 +86,9 @@ const RenderBlock = ({ block, parentRow }: Props) => {
   }
   if (block.type === 'table') {
     return <EmailTable block={block} parentRow={parentRow} />
+  }
+  if (block.type === 'spacer') {
+    return <EmailSpacer block={block} parentRow={parentRow} email={email} />
   }
 
   return null

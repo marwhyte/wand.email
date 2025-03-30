@@ -64,6 +64,8 @@ export interface CompanyTable {
   name: string
   primaryColor: string | null
   logoFileId: string | null
+  description: string | null
+  address: string | null
   createdAt: GeneratedAlways<Date>
   updatedAt: Generated<Date>
 }

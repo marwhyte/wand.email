@@ -128,6 +128,8 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       id,
       companyName: company?.name,
       companyId: company?.id,
+      companyDescription: company?.description,
+      companyAddress: company?.address,
       emailType: email?.type,
     },
     onFinish: () => {
@@ -179,7 +181,11 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   // Store pending message to be sent after mobile warning confirmation
   const [pendingMessage, setPendingMessage] = useState<string | undefined>()
 
-  const [chatStarted, setChatStarted] = useState(initialMessages.length > 0)
+  const { chatStarted, setChatStarted } = useChatStore()
+
+  useEffect(() => {
+    setChatStarted(initialMessages.length > 0)
+  }, [])
 
   // Global state
   const showChat = chatStore((state) => state.showChat)
@@ -455,7 +461,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     },
     {
       label: 'E-commerce',
-      prompt: 'Create an email for my ecommerce store',
+      prompt: 'Create a marketing email for my ecommerce store',
       icon: ShoppingCartIcon,
     },
     {
@@ -657,7 +663,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                         'px-0 sm:px-4',
                         isMobile && chatStarted
                           ? 'fixed bottom-0 left-0 right-0 z-50 bg-white/95 pt-2 shadow-lg backdrop-blur'
-                          : ''
+                          : 'relative z-10'
                       )}
                       style={
                         isMobile && chatStarted
@@ -767,9 +773,10 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
               company={activeCompany}
               isOpen={companyOpener.isOpen}
               onClose={companyOpener.close}
-              onSuccess={(company) => {
+              onSuccess={(updatedCompany) => {
                 companyOpener.close()
                 setActiveCompany(null)
+                setCompany(updatedCompany)
                 mutate('/api/companies')
               }}
             />

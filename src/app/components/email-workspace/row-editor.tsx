@@ -249,6 +249,7 @@ export default function RowEditor({
               </div>
             </Field>
             <PaddingForm
+              label="Padding"
               padding={{
                 top: rowAttributes.paddingTop ?? '0px',
                 right: rowAttributes.paddingRight ?? '0px',
@@ -298,15 +299,39 @@ export default function RowEditor({
                   onChange={(e) => handleRowBorderChange('borderColor', e)}
                 />
               </div>
+              <div className="mt-2 flex gap-2">
+                <Select
+                  value={rowAttributes.borderSide || 'all'}
+                  onChange={(e) =>
+                    handleRowBorderChange('borderSide', e.target.value as 'leftRight' | 'topBottom' | 'all')
+                  }
+                >
+                  <option value="leftRight">Left/Right</option>
+                  <option value="topBottom">Top/Bottom</option>
+                  <option value="all">All</option>
+                </Select>
+              </div>
             </Field>
 
-            <Field>
+            <Field labelPosition="top">
               <Label>Rounded Corners</Label>
               <div className="flex items-center gap-2">
                 <NumberInput
                   value={rowAttributes.borderRadius ? parseInt(rowAttributes.borderRadius.replace('px', '')) : 0}
                   onChange={(e) => handleRowBorderChange('borderRadius', `${e}px`)}
                 />
+                <div className="ml-auto w-24">
+                  <Select
+                    value={rowAttributes.borderRadiusSide || 'all'}
+                    onChange={(e) =>
+                      handleRowBorderChange('borderRadiusSide', e.target.value as 'top' | 'bottom' | 'all')
+                    }
+                  >
+                    <option value="top">Top</option>
+                    <option value="bottom">Bottom</option>
+                    <option value="all">All</option>
+                  </Select>
+                </div>
               </div>
             </Field>
           </FieldGroup>
