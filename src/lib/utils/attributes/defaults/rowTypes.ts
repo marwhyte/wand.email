@@ -26,11 +26,9 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
     },
   },
   default: {
-    header: {},
-    gallery: {},
     default: {
-      paddingLeft: '40px',
-      paddingRight: '40px',
+      paddingLeft: '24px',
+      paddingRight: '24px',
     },
   },
   clear: {
