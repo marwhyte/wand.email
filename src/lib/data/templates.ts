@@ -109,19 +109,19 @@ export function createNewBlock<T extends EmailBlockType>(type: T): Extract<Email
           links: [
             {
               icon: 'facebook',
-              url: 'https://www.facebook.com',
+              url: '/',
               title: 'Facebook',
               alt: 'Facebook',
             },
             {
               icon: 'instagram',
-              url: 'https://www.instagram.com',
+              url: '/',
               title: 'Instagram',
               alt: 'Instagram',
             },
             {
               icon: 'x',
-              url: 'https://www.x.com',
+              url: '/',
               title: 'X',
               alt: 'X',
             },

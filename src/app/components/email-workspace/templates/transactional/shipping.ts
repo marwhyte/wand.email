@@ -82,9 +82,9 @@ export const shippingTemplateScript = (useImage: boolean) => `
         Connect with us
       </HEADING>
       <SOCIALS folder="socials-dark-gray">
-        <SOCIAL icon="facebook" url="https://www.facebook.com" title="Facebook" alt="Facebook" />
-        <SOCIAL icon="x" url="https://twitter.com" title="X" alt="X" />
-        <SOCIAL icon="instagram" url="https://www.instagram.com" title="Instagram" alt="Instagram" />
+        <SOCIAL icon="facebook" url="/" title="Facebook" alt="Facebook" />
+        <SOCIAL icon="x" url="/" title="X" alt="X" />
+        <SOCIAL icon="instagram" url="/" title="Instagram" alt="Instagram" />
       </SOCIALS>
       <TEXT>
         <a href="/">Update your email preferences</a>, <a href="/">unsubscribe</a> or <a href="/">learn about account protection</a>.

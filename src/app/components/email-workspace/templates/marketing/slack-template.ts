@@ -105,10 +105,10 @@ export const slackTemplateScript = `
     </COLUMN>
     <COLUMN width="50" align="right">
       <SOCIALS folder="socials-dark-gray">
-        <SOCIAL icon="facebook" url="https://www.facebook.com" title="Facebook" alt="Facebook" />
-        <SOCIAL icon="linkedin" url="https://www.linkedin.com" title="LinkedIn" alt="LinkedIn" />
-        <SOCIAL icon="youtube" url="https://www.youtube.com" title="YouTube" alt="YouTube" />
-        <SOCIAL icon="instagram" url="https://www.instagram.com" title="Instagram" alt="Instagram" />
+        <SOCIAL icon="facebook" url="/" title="Facebook" alt="Facebook" />
+        <SOCIAL icon="linkedin" url="/" title="LinkedIn" alt="LinkedIn" />
+        <SOCIAL icon="youtube" url="/" title="YouTube" alt="YouTube" />
+        <SOCIAL icon="instagram" url="/" title="Instagram" alt="Instagram" />
       </SOCIALS>
     </COLUMN>
   </ROW>
