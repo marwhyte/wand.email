@@ -286,8 +286,6 @@ const EmailRenderer = ({ email }: Props) => {
 
   const emailAttributes = getEmailAttributes(email)
 
-  console.log(emailAttributes)
-
   useEffect(() => {
     if (!currentBlock) {
       // Only hide if no other EditableContent is selected

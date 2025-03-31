@@ -26,8 +26,6 @@ const EmailSettings = ({ email }: EmailSettingsProps) => {
     [email]
   )
 
-  console.log('here', email)
-
   const fontFamilies = [
     { label: 'Arial', value: 'Arial, Helvetica, sans-serif' },
     { label: 'Helvetica', value: 'Helvetica, Arial, sans-serif' },

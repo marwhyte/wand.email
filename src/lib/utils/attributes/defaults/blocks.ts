@@ -31,6 +31,7 @@ export const getAdditionalTextStyles = (
     paddingBottom: '10px',
     paddingLeft: '0',
     margin: 0,
+    color: emailAttributes.color,
     fontSize: '16px',
     overflowWrap: 'break-word',
     wordBreak: 'break-word',

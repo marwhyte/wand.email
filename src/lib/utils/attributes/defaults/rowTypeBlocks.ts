@@ -115,6 +115,9 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
   },
   clear: {
     footer: {
+      text: {
+        color: '#696969',
+      },
       link: {
         align: 'center',
       },

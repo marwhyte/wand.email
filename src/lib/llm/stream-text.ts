@@ -4,6 +4,7 @@ import { stripeNewsletterExample } from '@/app/components/email-workspace/templa
 import { stocktwitsNewsletterExample } from '@/app/components/email-workspace/templates/newsletter/outline-stocktwits'
 import { nikeTransactionalExample } from '@/app/components/email-workspace/templates/transactional/default-nike-verification'
 import { googleTransactionalExample } from '@/app/components/email-workspace/templates/transactional/outline-google'
+import { shippingExample } from '@/app/components/email-workspace/templates/transactional/shipping'
 import { defaultWelcomeSeriesExample } from '@/app/components/email-workspace/templates/welcome/default'
 import { EmailType, emailTypes } from '@/app/components/email-workspace/types'
 import { MAX_TOKENS } from '@/constants'
@@ -43,6 +44,10 @@ const examplesByType: Record<EmailType, ExampleWithDescription[]> = {
   ],
   invite: [],
   transactional: [
+    {
+      template: shippingExample,
+      description: 'Order confirmation email with a tracking number and a footer with social media links.',
+    },
     {
       template: nikeTransactionalExample,
       description:

@@ -51,6 +51,7 @@ const RenderBlockFinal = ({
   company: Company | null
 }) => {
   const blockProps = getBlockProps(block, parentRow, company, email)
+  const rowProps = getRowProps(parentRow, email)
   const style = blockProps?.style || {}
   const { paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyle } = style
 
@@ -66,7 +67,7 @@ const RenderBlockFinal = ({
 
   // Prepare column props
   const columnProps: any = {
-    style: { width: '100%' },
+    style: { width: '100%', verticalAlign: rowProps.style?.verticalAlign },
   }
 
   // Add cellpadding to row if all padding values are the same
@@ -303,7 +304,11 @@ const RenderColumns = ({
         <React.Fragment key={column.id}>
           <Column
             {...getColumnProps(column, row, email)}
-            style={{ ...getColumnProps(column, row, email).style, width: `${columnWidth}%` }}
+            style={{
+              ...getColumnProps(column, row, email).style,
+              width: `${columnWidth}%`,
+              verticalAlign: rowProps.style?.verticalAlign,
+            }}
           >
             {renderColumnContent(column)}
           </Column>

@@ -129,7 +129,6 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       }
       case 'cart': {
         return {
-          borderRadius: '12px',
           paddingTop: '2px',
           paddingBottom: '2px',
           backgroundColor: '#f4f4f4',

@@ -25,6 +25,7 @@ import { Button } from './button'
 import { AuthDialog } from './dialogs/auth-dialog'
 import ExportDialog from './dialogs/export-dialog'
 import PreviewDialog from './dialogs/preview-dialog'
+import ContentValidator from './email-workspace/content-validator'
 import EmailRendererFinal from './email-workspace/email-renderer-final'
 import { defaultEbayTemplate } from './email-workspace/templates/ecommerce/default-ebay-template'
 import { defaultStripeTemplate } from './email-workspace/templates/newsletter/default-stripe'
@@ -116,7 +117,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
         method: 'POST',
         body: JSON.stringify({
           html: render(EmailRendererFinal({ email: email, company: company })),
-          email: session?.data?.user?.email,
+          email: 'marcolwhyte@outlook.com',
         }),
         headers: {
           'Content-Type': 'application/json',
@@ -232,6 +233,8 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                 <PaperAirplaneIcon className="h-4 w-4" />
               )}
             </Button>
+
+            <ContentValidator />
 
             <Button
               onClick={exportOpener.open}
