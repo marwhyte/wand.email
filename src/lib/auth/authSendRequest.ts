@@ -131,16 +131,7 @@ function html(params: { url: string; host: string }) {
                           <table width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="border-radius:10px">
                             <tr>
                               <td style="width:100%;padding-top:10px;padding-right:0;padding-bottom:10px;padding-left:0">
-                                <p style="font-size:27px;line-height:120%;margin:0;text-align:center;overflow-wrap:break-word;word-break:break-word;letter-spacing:normal">
-                                  <strong>wand
-                                  </strong>
-                                  <span style="color:#52a1ff">
-                                    <strong>.
-                                    </strong>
-                                  </span>
-                                  <strong>email
-                                  </strong>
-                                </p>
+                                <div align="center"><img alt="Company logo" src="https://d7fuhokyircdv.cloudfront.net/1743428543487-98662270-ebce-4bc4-954b-8becfd27a96b.png" style="display:block;outline:none;border:none;text-decoration:none;object-fit:contain;border-radius:0;width:22%"/></div>
                               </td>
                             </tr>
                           </table>

@@ -23,7 +23,7 @@ export const magicLinkTemplateScript = (useImage: boolean) => `
       <TEXT color="#787878">
         If you have any questions, feel free to contact our support team.
       </TEXT>
-      <LINK align="left" fontSize="14" href="mailto:support@companyname.com">
+      <LINK align="left" fontSize="14" href="/">
         Contact Support
       </LINK>
     </COLUMN>
@@ -40,6 +40,19 @@ export const magicLinkTemplateScript = (useImage: boolean) => `
     </COLUMN>
   </ROW>
 </EMAIL>
+`
+
+export const magicLinkExample = `
+<example>
+  <user_query>Can you help me create a magic link email?</user_query>
+  <assistant_response>
+  I'll create a magic link email with a sign-in link, a footer with social media links, and a header with the company logo.
+
+  ${magicLinkTemplateScript(false)}
+
+  The template includes a clean header with your logo, engaging product showcases, and a professional footer with social media links.
+  </assistant_response>
+</example>
 `
 
 export const magicLinkTemplate = (): Email => {

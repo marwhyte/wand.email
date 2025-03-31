@@ -3,6 +3,7 @@ import { ebayEcommerceExample } from '@/app/components/email-workspace/templates
 import { stripeNewsletterExample } from '@/app/components/email-workspace/templates/newsletter/default-stripe'
 import { stocktwitsNewsletterExample } from '@/app/components/email-workspace/templates/newsletter/outline-stocktwits'
 import { nikeTransactionalExample } from '@/app/components/email-workspace/templates/transactional/default-nike-verification'
+import { magicLinkExample } from '@/app/components/email-workspace/templates/transactional/magic-link'
 import { googleTransactionalExample } from '@/app/components/email-workspace/templates/transactional/outline-google'
 import { shippingExample } from '@/app/components/email-workspace/templates/transactional/shipping'
 import { defaultWelcomeSeriesExample } from '@/app/components/email-workspace/templates/welcome/default'
@@ -56,6 +57,11 @@ const examplesByType: Record<EmailType, ExampleWithDescription[]> = {
     {
       template: googleTransactionalExample,
       description: 'Security alert notification email with device login details and verification action button',
+    },
+    {
+      template: magicLinkExample,
+      description:
+        'Magic link email with a sign-in link, a footer with social media links, and a header with the company logo.',
     },
   ],
   newsletter: [
