@@ -15,7 +15,8 @@ export const metadata: Metadata = {
     template: '%s - wand.email',
     default: 'wand.email - Create stunning emails with ease',
   },
-  description: 'wand.email is an email integration that allows you to create stunning emails with ease.',
+  description:
+    'wand.email is an AI-powered tool that helps you craft beautiful, responsive emails in minutes. Create professional emails that work flawlessly across all email clients.',
 }
 
 export default async function RootLayout({
