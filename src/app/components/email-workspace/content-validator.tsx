@@ -50,6 +50,15 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
       if (block) {
         setCurrentBlock(block)
         close()
+
+        // Add a small delay to ensure the DOM has updated
+        setTimeout(() => {
+          // Find the element with the block's ID
+          const element = document.querySelector(`[data-block-id="${blockId}"]`)
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+          }
+        }, 100)
       }
     },
     [findBlockById, setCurrentBlock]

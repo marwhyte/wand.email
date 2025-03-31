@@ -108,6 +108,7 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
         onClick={handleClick}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        data-block-id={block.id}
         className={classNames(
           'group relative inline-block w-full',
           currentBlock?.id === block.id || isHovered ? 'outline outline-2 outline-blue-500' : ''
