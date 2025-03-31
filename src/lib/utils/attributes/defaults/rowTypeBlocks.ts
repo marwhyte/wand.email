@@ -417,6 +417,21 @@ function getBlockSpecificOverrides(
     return { heading: { textAlign: 'left' } }
   }
 
+  // Gallery row with multiple columns and images - center text and headings
+  if (parentRow.attributes.type === 'gallery' && parentRow.columns.length >= 2) {
+    // Check if there are at least 2 columns with images
+    const columnsWithImages = parentRow.columns.filter((column) => column.blocks.some((b) => b.type === 'image'))
+
+    if (columnsWithImages.length >= 2) {
+      if (block.type === 'text') {
+        return { text: { textAlign: 'center' } }
+      }
+      if (block.type === 'heading') {
+        return { heading: { textAlign: 'center' } }
+      }
+    }
+  }
+
   // Existing overrides logic
   switch (block.type) {
     case 'image':

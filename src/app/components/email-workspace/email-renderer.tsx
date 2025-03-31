@@ -351,8 +351,7 @@ const EmailRenderer = ({ email }: Props) => {
                     emailAttributes.styleVariant === 'outline' &&
                     row.attributes.type !== 'header' &&
                     row.attributes.type !== 'footer' &&
-                    email.rows[index + 1].attributes.type !== 'header' &&
-                    email.rows[index + 1].attributes.type !== 'footer' && <div style={{ height: '20px' }} />}
+                    email.rows[index + 1].attributes.type !== 'header' && <div style={{ height: '20px' }} />}
                 </React.Fragment>
               ))}
             </>

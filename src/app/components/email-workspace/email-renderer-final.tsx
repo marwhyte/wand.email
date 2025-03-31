@@ -413,8 +413,7 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
               emailAttributes.styleVariant === 'outline' &&
               row.attributes.type !== 'header' &&
               row.attributes.type !== 'footer' &&
-              email.rows[index + 1].attributes.type !== 'header' &&
-              email.rows[index + 1].attributes.type !== 'footer' && <RenderRowSpacer height={20} />}
+              email.rows[index + 1].attributes.type !== 'header' && <RenderRowSpacer height={20} />}
           </React.Fragment>
         )
       })}
@@ -514,6 +513,7 @@ const EmailRendererFinal = ({ email, company }: Props) => {
               display: table !important;
               max-height: none !important;
             }
+          
           }
         `}</style>
       </Head>
