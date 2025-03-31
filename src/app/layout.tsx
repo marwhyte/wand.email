@@ -13,7 +13,7 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: {
     template: '%s - wand.email',
-    default: 'wand.email - Create stunning emails with ease',
+    default: 'wand.email - Create emails with AI',
   },
   description:
     'wand.email is an AI-powered tool that helps you craft beautiful, responsive emails in minutes. Create professional emails that work flawlessly across all email clients.',
