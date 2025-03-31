@@ -242,6 +242,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
               size={isMobile && chatStarted ? 'small' : undefined}
               tooltip="Export email"
               tooltipId="export-email"
+              tooltipPosition="left"
             >
               <ArrowDownTrayIcon className="h-4 w-4" />
               {session?.data?.user ? 'Export' : 'Sign up to export'}
