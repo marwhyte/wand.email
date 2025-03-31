@@ -149,9 +149,9 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
     } else if (href.startsWith('tel:')) {
       // Phone links should have some content
       return href.replace('tel:', '').trim() !== ''
-    } else if (href === '#') {
+    } else if (href === '#' || href === '/') {
       // Placeholder links are technically valid, but not ideal
-      return true
+      return false
     } else {
       // Web links should be valid URLs
       return isValidHttpUrl(href)
