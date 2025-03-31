@@ -9,8 +9,9 @@ import { EmailBlock, RowBlock } from './types'
 
 interface ValidationIssue {
   blockId: string
-  type: 'invalidLink' | 'missingImageSrc'
+  type: 'invalidLink' | 'missingImageSrc' | 'invalidSocialLink'
   message: string
+  socialIndex?: number // Added for social link issues to track which specific social link has an issue
 }
 
 interface ContentValidatorProps {
@@ -116,6 +117,20 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
               })
             }
           }
+
+          // Check for social links in social blocks
+          if (block.type === 'socials' && block.attributes.links) {
+            block.attributes.links.forEach((socialLink, index) => {
+              if (!socialLink.url || !isValidLinkUrl(socialLink.url)) {
+                newIssues.push({
+                  blockId: block.id,
+                  type: 'invalidSocialLink',
+                  message: `Invalid URL for ${socialLink.icon || 'social'} icon: ${socialLink.url || 'missing URL'}`,
+                  socialIndex: index,
+                })
+              }
+            })
+          }
         })
       })
     })
@@ -125,6 +140,8 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
 
   // Helper function to check if a URL is valid for links
   const isValidLinkUrl = (href: string): boolean => {
+    if (!href || href.trim() === '') return false
+
     if (href.startsWith('mailto:')) {
       // Check email links (basic validation)
       const emailPart = href.replace('mailto:', '').split('?')[0]
@@ -132,6 +149,9 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
     } else if (href.startsWith('tel:')) {
       // Phone links should have some content
       return href.replace('tel:', '').trim() !== ''
+    } else if (href === '#') {
+      // Placeholder links are technically valid, but not ideal
+      return true
     } else {
       // Web links should be valid URLs
       return isValidHttpUrl(href)
@@ -141,7 +161,7 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
   if (issues.length === 0) return null
 
   // Increase icon sizes
-  const iconSize = size === 'small' ? 'h-6 w-6' : 'h-8 w-8'
+  const iconSize = size === 'small' ? 'h-6 w-6' : 'h-7 w-7'
   const badgeSize = size === 'small' ? 'h-3.5 w-3.5' : 'h-4 w-4'
   const badgeTextSize = size === 'small' ? 'text-[8px]' : 'text-[10px]'
 
@@ -186,9 +206,13 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
                           onClick={() => handleSelectBlock(issue.blockId, close)}
                         >
                           <div className="flex items-center">
-                            <ExclamationCircleIcon className="mr-2 h-8 w-8 text-red-500" />
+                            <ExclamationCircleIcon className="mr-2 h-4 w-4 text-red-500" />
                             <span className="text-sm font-medium">
-                              {issue.type === 'invalidLink' ? 'Invalid Link' : 'Missing Image Source'}
+                              {issue.type === 'invalidLink'
+                                ? 'Invalid Link'
+                                : issue.type === 'missingImageSrc'
+                                  ? 'Missing Image Source'
+                                  : 'Invalid Social Link'}
                             </span>
                           </div>
                           <p className="mt-1 text-xs text-gray-600">{issue.message}</p>

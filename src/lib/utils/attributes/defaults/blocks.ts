@@ -75,6 +75,7 @@ export const getAdditionalHeadingStyles = (
     fontWeight: 'bold',
     lineHeight: '100%',
     letterSpacing: 'normal',
+    color: emailAttributes.color,
     fontFamily: emailAttributes.fontFamily,
     fontSize: defaultHeadingSizes[headingBlock.attributes.level as keyof typeof defaultHeadingSizes] ?? '16px',
   }

@@ -117,7 +117,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
         method: 'POST',
         body: JSON.stringify({
           html: render(EmailRendererFinal({ email: email, company: company })),
-          email: 'marcolwhyte@outlook.com',
+          email: session?.data?.user?.email,
         }),
         headers: {
           'Content-Type': 'application/json',
