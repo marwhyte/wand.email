@@ -37,6 +37,9 @@ export const FOLDERS: { name: SocialIconFolders; title: string }[] = [
   },
 ]
 
+export type EmailTheme = 'default' | 'dark' | 'creme' | 'wood' | 'pink' | 'blue' | 'green'
+export const emailThemes = ['default', 'dark', 'creme', 'wood', 'pink', 'blue', 'green'] as const
+
 export type EmailType =
   | 'default'
   | 'welcome-series'
@@ -140,6 +143,7 @@ export const componentLibrary = {
 
 export const blockLibrary = {
   EMAIL: {
+    note: 'The theme of the email will determine the color scheme of the email. Only change the theme when asked to do so.',
     attributes: {
       styleVariant: ['default', 'outline', 'clear'],
       type: emailTypes,
@@ -158,6 +162,8 @@ export const blockLibrary = {
         'Open Sans, Helvetica, Arial, sans-serif',
       ],
       linkColor: ['#0000FF'],
+      rowBackgroundColor: ['#ffffff'],
+      theme: emailThemes,
     },
   },
   ROW: {
@@ -311,6 +317,50 @@ export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T
 export type EmailStyleVariant = 'default' | 'outline' | 'clear'
 export const emailStyleVariants = ['default', 'outline', 'clear'] as const
 
+export type ThemeColors = {
+  light: string
+  base: string
+  action: string
+}
+
+export const themeColorMap: Record<EmailTheme, ThemeColors> = {
+  default: {
+    light: '#f8f9fa',
+    base: '#ffffff',
+    action: '#4184f3',
+  },
+  dark: {
+    light: '#2c3032',
+    base: '#1a1c1e',
+    action: '#90caf9',
+  },
+  creme: {
+    light: '#f8f5ee',
+    base: '#fcf9f2',
+    action: '#d4a373',
+  },
+  wood: {
+    light: '#e4d5c3',
+    base: '#d9c5ad',
+    action: '#774936',
+  },
+  pink: {
+    light: '#fce9f1',
+    base: '#ffd6e9',
+    action: '#ff69b4',
+  },
+  blue: {
+    light: '#e6f2ff',
+    base: '#dbeafe',
+    action: '#3b82f6',
+  },
+  green: {
+    light: '#ecfdf5',
+    base: '#d1fae5',
+    action: '#059669',
+  },
+}
+
 export type Email = {
   backgroundColor?: string
   color?: string
@@ -321,6 +371,7 @@ export type Email = {
   rows: RowBlock[]
   width?: string
   styleVariant?: EmailStyleVariant
+  theme?: EmailTheme
   type?: EmailType
 }
 

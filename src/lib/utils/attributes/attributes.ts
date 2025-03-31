@@ -6,6 +6,7 @@ import type {
   Email,
   EmailBlock,
   EmailStyleVariant,
+  EmailTheme,
   EmailType,
   HeadingBlock,
   HeadingBlockAttributes,
@@ -27,6 +28,7 @@ import type {
   TextBlock,
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
+import { themeColorMap } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import { getTypeDefaults } from './defaults'
 import { getBlockDefaultAttributes } from './defaults/rowTypeBlocks'
@@ -68,28 +70,33 @@ type EmailAttributes = {
   width: string
   styleVariant: EmailStyleVariant
   type: EmailType
+  theme: EmailTheme
 }
 
 export function getEmailAttributes(email: Email | null): EmailAttributes {
+  const theme = email?.theme ?? 'default'
+  const themeColors = themeColorMap[theme]
+
   const defaultAttributes: EmailAttributes = {
-    backgroundColor: '#f4f4f4',
-    color: '#000000',
+    backgroundColor: themeColors.light,
+    color: theme === 'dark' ? '#ffffff' : '#000000',
     fontFamily: 'Arial, sans-serif',
-    linkColor: '#3b82f6',
-    rowBackgroundColor: '#FFFFFF',
+    linkColor: themeColors.action,
+    rowBackgroundColor: themeColors.base,
     width: email?.type === 'transactional' ? '500' : '600',
     styleVariant: email?.styleVariant ?? 'default',
     type: email?.type ?? 'default',
+    theme,
   }
 
   if (defaultAttributes?.styleVariant === 'outline') {
-    defaultAttributes.backgroundColor = '#ffffff'
-    defaultAttributes.color = '#2d2d2d'
+    defaultAttributes.backgroundColor = themeColors.base
+    defaultAttributes.color = theme === 'dark' ? '#ffffff' : '#2d2d2d'
     defaultAttributes.fontFamily = 'Open Sans, Helvetica, Arial, sans-serif'
   }
 
   if (defaultAttributes?.styleVariant === 'clear') {
-    defaultAttributes.backgroundColor = '#ffffff'
+    defaultAttributes.backgroundColor = themeColors.base
   }
 
   if (defaultAttributes.styleVariant === 'clear' && defaultAttributes.type === 'ecommerce') {
@@ -104,10 +111,6 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
 
   if (defaultAttributes?.type === 'cart') {
     defaultAttributes.fontFamily = 'Trebuchet MS, Trebuchet, Arial, sans-serif'
-  }
-
-  if (defaultAttributes?.styleVariant === 'default') {
-    defaultAttributes.backgroundColor = '#f4f4f4'
   }
 
   return {

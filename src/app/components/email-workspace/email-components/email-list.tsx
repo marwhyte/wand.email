@@ -13,7 +13,7 @@ type Props = {
 }
 
 const EmailList = ({ block, parentRow, email }: Props) => {
-  const { currentBlock, setCurrentBlock } = useEmailStore()
+  const { setCurrentBlock } = useEmailStore()
   const listAttributes = getBlockAttributes(block, parentRow, email) as ListBlockAttributes
   const emailAttributes = getEmailAttributes(email)
   const saveEmail = useEmailSave()

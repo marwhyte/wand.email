@@ -1,5 +1,5 @@
 import type { RowBlock } from '@/app/components/email-workspace/types'
-import { Email } from '@/app/components/email-workspace/types'
+import { Email, EmailTheme, themeColorMap } from '@/app/components/email-workspace/types'
 import { getEmailAttributes } from '../attributes'
 
 type RowStyleModifier = Partial<RowBlock['attributes']>
@@ -105,6 +105,8 @@ export const combinedTypeVariantDefaults: Record<string, Record<string, VariantR
 export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> {
   const emailAttributes = getEmailAttributes(email)
   const rowAttributes = row.attributes
+  const theme = (emailAttributes?.theme as EmailTheme) || 'default'
+  const themeColors = themeColorMap[theme]
 
   // Get base styles for the row type
   const baseStyles: Partial<RowBlock['attributes']> = (() => {
@@ -125,13 +127,14 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
         return {
           paddingTop: '24px',
           paddingBottom: '12px',
+          backgroundColor: themeColors.base,
         }
       }
       case 'cart': {
         return {
           paddingTop: '2px',
           paddingBottom: '2px',
-          backgroundColor: '#f4f4f4',
+          backgroundColor: themeColors.light,
           ...(row.columns.length === 1 &&
             row.columns[0].blocks.length === 1 &&
             row.columns[0].blocks[0].type === 'divider' && {
@@ -142,7 +145,7 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       }
       case 'discount': {
         return {
-          backgroundColor: '#f4f4f4',
+          backgroundColor: themeColors.light,
           paddingTop: '30px',
           paddingBottom: '30px',
           borderRadius: '8px',
@@ -152,11 +155,13 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
         return {
           paddingTop: '20px',
           paddingBottom: '48px',
-          backgroundColor: '#f4f4f4',
+          backgroundColor: themeColors.light,
         }
       }
       case 'gallery': {
-        const defaults: Partial<RowBlock['attributes']> = {}
+        const defaults: Partial<RowBlock['attributes']> = {
+          backgroundColor: themeColors.base,
+        }
 
         if (row.columns.length === 2) {
           defaults.stackOnMobile = true
@@ -173,7 +178,7 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       }
       case undefined:
       default:
-        return {} // Empty base styles for default/undefined types
+        return { backgroundColor: themeColors.base } // Default styles with theme base color
     }
   })()
 
@@ -188,7 +193,7 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
     if (variant === 'default' && rowType === 'footer' && emailAttributes.backgroundColor) {
       return {
         ...variantRowDefaults[variant]?.[rowType],
-        backgroundColor: emailAttributes.backgroundColor,
+        backgroundColor: emailAttributes.backgroundColor || themeColors.light,
       }
     }
 
@@ -198,7 +203,7 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       return {
         ...(variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}),
         borderRadius: '0px',
-        borderColor: '#ffffff',
+        borderColor: themeColors.base,
         borderWidth: '20px',
         borderStyle: 'solid',
         borderSide: rowType === 'cart' ? 'leftRight' : 'all',
@@ -208,11 +213,23 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
     if (rowType === 'discount') {
       return {
         ...(variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}),
+        backgroundColor: themeColors.light,
       }
     }
+
     // If there's a specific style for this row type in the variant, use it
     // Otherwise fall back to the 'default' style for this variant
-    return variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}
+    const styles = variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}
+
+    // Apply theme-specific overrides to variant styles for header and footer
+    if (rowType === 'header' || rowType === 'footer') {
+      return {
+        ...styles,
+        backgroundColor: rowType === 'header' ? themeColors.base : themeColors.light,
+      }
+    }
+
+    return styles
   })()
 
   // Get email type-specific styles

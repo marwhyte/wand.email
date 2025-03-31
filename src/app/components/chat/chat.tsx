@@ -439,9 +439,8 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     } catch (error) {
     } finally {
       setIsDeleting(false)
-      if (company?.id === activeCompany?.id) {
-        setCompany(undefined)
-      }
+
+      setCompany(undefined)
 
       setActiveCompany(null)
 

@@ -28,7 +28,6 @@ import {
 import parse from 'html-react-parser'
 import React from 'react'
 import { Table } from '../table'
-import EmailList from './email-components/email-list'
 import EmailSocials from './email-components/email-socials'
 import EmailSpacer from './email-components/email-spacer'
 import EmailSurvey from './email-components/email-survey'
@@ -180,7 +179,62 @@ const RenderBlockFinal = ({
       case 'spacer':
         return <EmailSpacer block={block} parentRow={parentRow} email={email} />
       case 'list':
-        return <EmailList block={block} parentRow={parentRow} email={email} />
+        const listProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<'div'>>
+        const listAttributes = getBlockAttributes(block, parentRow, email)
+        return (
+          <div style={{ ...restStyle }} {...listProps}>
+            {listAttributes.type === 'ul' ? (
+              <ul
+                style={{
+                  marginTop: 0,
+                  marginBottom: 0,
+                  listStyleType: 'disc',
+                  ...restStyle,
+                }}
+              >
+                {listAttributes.items.map((item, index) => (
+                  <li
+                    key={index}
+                    style={{
+                      marginTop: '5px',
+                      marginBottom: '5px',
+                      marginLeft: '0px',
+                      marginRight: '0px',
+                      position: 'relative',
+                    }}
+                  >
+                    {parse(item)}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ol
+                style={{
+                  marginTop: 0,
+                  marginBottom: 0,
+                  listStyleType: 'decimal',
+                  ...restStyle,
+                }}
+                start={1}
+              >
+                {listAttributes.items.map((item, index) => (
+                  <li
+                    key={index}
+                    style={{
+                      marginTop: '5px',
+                      marginBottom: '5px',
+                      marginLeft: '0px',
+                      marginRight: '0px',
+                      position: 'relative',
+                    }}
+                  >
+                    {parse(item)}
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+        )
       case 'table':
         const tableProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Table>>
         const tableAttributes = getBlockAttributes(block, parentRow, email)
