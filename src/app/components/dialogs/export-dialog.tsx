@@ -1,3 +1,4 @@
+import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { isLocalDev } from '@/constants'
 import { addExport } from '@/lib/database/queries/exports'
 import { ExportType } from '@/lib/database/types'
@@ -5,7 +6,7 @@ import { useAccountStore } from '@/lib/stores/accountStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getReactEmailCode } from '@/lib/utils/code-generation'
-import { ChevronLeftIcon, CodeBracketIcon } from '@heroicons/react/20/solid'
+import { ChevronLeftIcon, CodeBracketIcon, PencilIcon } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
 import { useSession } from 'next-auth/react'
 import { useCallback, useState } from 'react'
@@ -16,6 +17,7 @@ import AlertBox from '../alert-box'
 import { Button } from '../button'
 import ButtonCard from '../button-card'
 import EmailRendererFinal from '../email-workspace/email-renderer-final'
+import { Input } from '../input'
 import Notification from '../notification'
 import { usePlan } from '../payment/plan-provider'
 import { Text } from '../text'
@@ -119,6 +121,7 @@ function formatHTML(html: string): string {
 const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const { email } = useEmailStore()
   const { company } = useChatStore()
+  const saveEmail = useEmailSave()
   const { data: session } = useSession()
   const { plan } = usePlan()
   const { mutate } = useSWRConfig()
@@ -126,6 +129,8 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const [exportType, setExportType] = useState<ExportType | null>(null)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
+  const [isEditingPreview, setIsEditingPreview] = useState(false)
+  const [previewText, setPreviewText] = useState(email?.preview || '')
   const canExport = plan === 'pro' || (monthlyExportCount !== null && monthlyExportCount < 5) || isLocalDev
 
   const handleExport = async (type: ExportType) => {
@@ -134,6 +139,16 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
     setExportType(type)
     await addExport(email, type)
     mutate('/api/exports/count')
+  }
+
+  const handlePreviewChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPreviewText(e.target.value)
+  }
+
+  const handlePreviewSave = () => {
+    if (!email) return
+    saveEmail({ ...email, preview: previewText })
+    setIsEditingPreview(false)
   }
 
   const htmlEmailCode = open ? formatHTML(render(EmailRendererFinal({ email: email, company: company }))) : ''
@@ -196,106 +211,55 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           </div>
         </DialogTitle>
         <DialogBody>
-          {/* {exportType === null && (
-            <div className="m mb-4">
-              <Text className="text-sm">
-                With these options, images are hosted by wand.email. <Strong>Charges may apply.</Strong>
-                <Nbsp />
-                <TextLink href="https://wand.email/image-hosting" target="_blank">
-                  Learn more
-                </TextLink>
-              </Text>
-            </div>
-          )} */}
-          {/* {exportType === 'react' && (
-            <div>
-              <Steps onFinish={onClose} steps={[{ name: 'Install' }, { name: 'Create' }, { name: 'Integrate' }]}>
-                {(currentStep) => {
-                  if (currentStep.name === 'Install') {
-                    return (
-                      <div>
-                        <Heading className="text-center !text-base" level={3}>
-                          Install
-                          <Nbsp />
-                          <TextLink href="https://react.email/docs/getting-started/installation" target="_blank">
-                            react-email
-                          </TextLink>
-                          <Nbsp />
-                          to your react project
-                        </Heading>
-                        <Text className="mt-4">npm</Text>
-                        <CodeBlock
-                          theme={dracula}
-                          lineNumbers
-                          language="bash"
-                          code={`npm install @react-email/components`}
-                        />
-                        <Text>pnpm</Text>
-                        <CodeBlock
-                          theme={dracula}
-                          lineNumbers
-                          language="bash"
-                          code={`pnpm install @react-email/components`}
-                        />
-                        <Text>yarn</Text>
-                        <CodeBlock
-                          theme={dracula}
-                          lineNumbers
-                          language="bash"
-                          code={`yarn add @react-email/components`}
-                        />
-                      </div>
-                    )
-                  } else if (currentStep.name === 'Create') {
-                    return (
-                      <div>
-                        <Heading className="text-center !text-base" level={3}>
-                          Create Email Component
-                        </Heading>
-                        <Text className="mt-4">
-                          Create a new email component, for example <CodeInline>Email.tsx</CodeInline> in your project
-                          and copy and paste the code below. A common practice is to create a new email folder in your
-                          project.
-                        </Text>
-                        <div className="relative">
-                          <div className="absolute bottom-2 right-2 mt-4 text-end">
-                            <Button color="light" onClick={handleCopyReact}>
-                              Copy React Code
-                            </Button>
-                          </div>
-                          <CodeBlock
-                            style={{
-                              maxHeight: '200px',
-                              overflow: 'auto',
-                            }}
-                            theme={dracula}
-                            lineNumbers
-                            language="typescript"
-                            code={reactEmailCode ?? ''}
-                          />
-                        </div>
-                      </div>
-                    )
-                  } else if (currentStep.name === 'Integrate') {
-                    return (
-                      <div>
-                        <Heading className="text-center !text-base" level={3}>
-                          Integrate with Email Provider
-                        </Heading>
-                        <Text className="mt-4">
-                          Using react-email&apos;s docs, integrate the Email component with your email provider.
-                          <Nbsp />
-                          <TextLink href="https://react.email/docs/integrations/overview" target="_blank">
-                            Learn more
-                          </TextLink>
-                        </Text>
-                      </div>
-                    )
-                  }
+          {exportType === null && (
+            <>
+              <div className="mb-6">
+                <div className="mb-2 flex items-center justify-between">
+                  <Text className="text-sm font-medium">Email Preview</Text>
+                  <Button
+                    plain
+                    onClick={() => setIsEditingPreview(!isEditingPreview)}
+                    className="text-blue-500 hover:text-blue-600"
+                  >
+                    <PencilIcon className="mr-1 h-4 w-4" />
+                    {isEditingPreview ? 'Cancel' : 'Edit'}
+                  </Button>
+                </div>
+                <Text className="mb-3 text-sm text-gray-500">
+                  This preview text appears in the email client&apos;s inbox before the email is opened. It helps
+                  recipients decide whether to open your email.
+                </Text>
+                {isEditingPreview ? (
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <Input
+                        type="text"
+                        value={previewText}
+                        onChange={handlePreviewChange}
+                        placeholder="Enter preview text..."
+                      />
+                    </div>
+                    <div>
+                      <Button onClick={handlePreviewSave}>Save</Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-3">
+                    <Text className="text-sm">{email?.preview || 'No preview text set'}</Text>
+                  </div>
+                )}
+              </div>
+              <ButtonCard
+                icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
+                title="HTML Code"
+                description="Export as HTML code"
+                onClick={() => {
+                  handleExport('html')
                 }}
-              </Steps>
-            </div>
-          )} */}
+                disabled={!canExport}
+              />
+            </>
+          )}
           {exportType === 'html' && (
             <div>
               <div className="relative">
@@ -330,28 +294,6 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                 </div>
               </div>
             </div>
-          )}
-          {exportType === null && (
-            <>
-              {/* <ButtonCard
-                icon="/react.svg"
-                title="React Code"
-                description="Export as React code using react-email"
-                onClick={() => {
-                  handleExport('react')
-                }}
-                disabled={!canExport}
-              /> */}
-              <ButtonCard
-                icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
-                title="HTML Code"
-                description="Export as HTML code"
-                onClick={() => {
-                  handleExport('html')
-                }}
-                disabled={!canExport}
-              />
-            </>
           )}
         </DialogBody>
       </Dialog>

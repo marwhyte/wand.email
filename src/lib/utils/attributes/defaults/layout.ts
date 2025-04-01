@@ -58,7 +58,7 @@ export function getAdditionalColumnStyles(attributes: ColumnBlockAttributes, row
 }
 
 export function getAdditionalEmailStyles(attributes: Partial<Email>): React.CSSProperties {
-  const { linkColor, rowBackgroundColor, width, ...rest } = attributes
+  const { linkColor, rowBackgroundColor, width, rows, preview, styleVariant, theme, type, ...rest } = attributes
   const styles: React.CSSProperties = { ...rest, margin: 0, WebkitTextSizeAdjust: 'none', MozTextSizeAdjust: 'none' }
 
   return styles
