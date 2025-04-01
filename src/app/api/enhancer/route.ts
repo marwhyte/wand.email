@@ -1,7 +1,7 @@
 export const maxDuration = 60
 
 import { stripIndents } from '@/lib/utils/stripIndent'
-import { openai } from '@ai-sdk/openai'
+import { google } from '@ai-sdk/google'
 import { parseDataStreamPart, streamText } from 'ai'
 
 const encoder = new TextEncoder()
@@ -20,7 +20,7 @@ export async function POST(request: Request) {
         `
 
     const result = await streamText({
-      model: openai('gemini-2.0-flash-001'),
+      model: google('gemini-2.0-flash-001'),
       messages: [
         {
           role: 'user',
