@@ -1,6 +1,5 @@
 'use client'
 
-import { isLocalDev } from '@/constants'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -11,7 +10,6 @@ import {
   ArrowDownTrayIcon,
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
-  EyeIcon,
   PaperAirplaneIcon,
 } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
@@ -169,7 +167,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
 
         {email && session?.data?.user && (
           <div className={classNames('flex items-center', isMobile && chatStarted ? 'space-x-2' : 'space-x-4')}>
-            {process.env.NODE_ENV === 'development' && !isMobile && (
+            {/* {process.env.NODE_ENV === 'development' && !isMobile && (
               <Select
                 value={emailAttributes.styleVariant}
                 onChange={(e) => setEmail(templates.find((t) => t.name === e.target.value)?.value ?? null)}
@@ -179,7 +177,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                   <option key={template.name}>{template.name}</option>
                 ))}
               </Select>
-            )}
+            )} */}
 
             {(!isMobile || !chatStarted) && (
               <>
@@ -206,7 +204,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                   </TabList>
                 </TabGroup>
 
-                {isLocalDev && (
+                {/* {isLocalDev && (
                   <Button
                     onClick={previewOpener.open}
                     tooltipPosition="left"
@@ -215,7 +213,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                   >
                     <EyeIcon className="h-4 w-4" />
                   </Button>
-                )}
+                )} */}
               </>
             )}
 

@@ -132,7 +132,7 @@ export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
     },
     h1: {
       heading: {
-        fontSize: '48px',
+        fontSize: '36px',
       },
     },
     h2: {

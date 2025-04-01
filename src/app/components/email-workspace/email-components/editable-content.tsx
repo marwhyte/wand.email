@@ -294,7 +294,21 @@ export default function EditableContent({
           break
         case 'link':
           if (editorCommand.payload?.href) {
-            chain.setLink({ href: editorCommand.payload.href }).run()
+            const chain = editor.chain().focus()
+            if (editorCommand.payload.text) {
+              // If we have text, insert it as a link
+              chain
+                .insertContent({
+                  type: 'text',
+                  marks: [{ type: 'link', attrs: { href: editorCommand.payload.href } }],
+                  text: editorCommand.payload.text,
+                })
+                .run()
+            } else if (editor.isActive('link')) {
+              chain.unsetLink().setLink({ href: editorCommand.payload.href }).run()
+            } else {
+              chain.setLink({ href: editorCommand.payload.href }).run()
+            }
             setToolbarState({
               ...editor.getAttributes('textStyle'),
               bold: editor.isActive('bold'),
@@ -302,6 +316,11 @@ export default function EditableContent({
               underline: editor.isActive('underline'),
               link: editor.isActive('link'),
             })
+          }
+          break
+        case 'insertText':
+          if (editorCommand.payload?.text) {
+            chain.insertContent(editorCommand.payload.text).run()
           }
           break
         case 'focus':
@@ -339,14 +358,25 @@ export default function EditableContent({
       const elementRect = element.getBoundingClientRect()
 
       const toolbarHeight = 40
-      const spacing = 27
+      const spacing = 60
+      const toolbarWidth = 400 // Reduced from 600px to 400px to match actual width
 
       // Account for container scroll position
       const containerScrollTop = emailContainer.scrollTop
       const containerScrollLeft = emailContainer.scrollLeft
 
+      // Calculate initial left position (centered on element)
+      let left = elementRect.left - containerRect.left + elementRect.width / 2 + containerScrollLeft
+
+      // Ensure toolbar doesn't go off the right edge
+      const maxLeft = containerRect.width - toolbarWidth / 2 - 8 // Reduced padding to 8px
+      left = Math.min(left, maxLeft)
+
+      // Ensure toolbar doesn't go off the left edge
+      const minLeft = toolbarWidth / 2 + 8 // Reduced padding to 8px
+      left = Math.max(left, minLeft)
+
       const top = elementRect.top - containerRect.top - toolbarHeight - spacing + containerScrollTop
-      const left = elementRect.left - containerRect.left + elementRect.width / 2 + containerScrollLeft
 
       show(top, left)
     }

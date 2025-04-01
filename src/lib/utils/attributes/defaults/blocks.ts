@@ -57,9 +57,9 @@ export const getAdditionalHeadingStyles = (
   email: Email | null
 ): React.ComponentProps<typeof Heading>['style'] => {
   const defaultHeadingSizes = {
-    h1: '48px',
-    h2: '32px',
-    h3: '24px',
+    h1: '32px',
+    h2: '28px',
+    h3: '20px',
     h4: '16px',
     h5: '12px',
   }

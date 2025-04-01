@@ -3,7 +3,7 @@ import { create } from 'zustand'
 
 // Command bus for editor actions
 export type EditorCommand = {
-  type: 'bold' | 'italic' | 'underline' | 'link' | 'focus'
+  type: 'bold' | 'italic' | 'underline' | 'link' | 'focus' | 'insertText'
   payload?: any
 }
 

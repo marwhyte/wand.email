@@ -213,6 +213,15 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
         <DialogBody>
           {exportType === null && (
             <>
+              <ButtonCard
+                icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
+                title="HTML Code"
+                description="Export as HTML code"
+                onClick={() => {
+                  handleExport('html')
+                }}
+                disabled={!canExport}
+              />
               <div className="mb-6">
                 <div className="mb-2 flex items-center justify-between">
                   <Text className="text-sm font-medium">Email Preview</Text>
@@ -249,15 +258,6 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                   </div>
                 )}
               </div>
-              <ButtonCard
-                icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
-                title="HTML Code"
-                description="Export as HTML code"
-                onClick={() => {
-                  handleExport('html')
-                }}
-                disabled={!canExport}
-              />
             </>
           )}
           {exportType === 'html' && (

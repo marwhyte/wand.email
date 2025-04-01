@@ -146,6 +146,8 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
 
   const isLoading = status === 'streaming' || status === 'submitted'
 
+  console.log(chat)
+
   // UI and animation refs/state
   const textareaRef = useRef<HTMLTextAreaElement>(null) as React.RefObject<HTMLTextAreaElement>
   const TEXTAREA_MAX_HEIGHT = initialMessages.length > 0 ? 400 : 200
@@ -455,7 +457,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     {
       label: 'Welcome',
       prompt:
-        'Create a 3-part welcome series for new customers that introduces our product features, shares success stories, and offers a special first-time discount',
+        'Create a welcome series for new customers that introduces our product features, shares success stories, and offers a special first-time discount',
       icon: EnvelopeIcon,
     },
     {
