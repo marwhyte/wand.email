@@ -13,7 +13,7 @@ export async function updateEmailForMessage(chatId: string, message: Message, em
 
 export async function generateTitleFromUserMessage({ message }: { message: string }) {
   const { text: title } = await generateText({
-    model: openai('gpt-4-turbo'),
+    model: openai('gemini-2.0-flash-001'),
     system: `\n
       - you will generate a short title based on the first message a user begins a conversation with
       - ensure it is not more than 80 characters long

@@ -20,7 +20,7 @@ export async function POST(request: Request) {
         `
 
     const result = await streamText({
-      model: openai('gpt-4o-mini'),
+      model: openai('gemini-2.0-flash-001'),
       messages: [
         {
           role: 'user',
