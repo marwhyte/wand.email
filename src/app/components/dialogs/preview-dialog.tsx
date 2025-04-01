@@ -22,7 +22,6 @@ const PreviewDialog = ({ open, onClose }: Props) => {
   // Generate the complete HTML string
   const htmlContent = open ? render(EmailRendererFinal({ email: email, company: company })) : ''
 
-  console.log(htmlContent)
   const widthOptions = [
     { name: '600px', value: '600' },
     { name: '750px', value: '750' },

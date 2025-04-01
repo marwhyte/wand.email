@@ -644,7 +644,6 @@ const blockParsers = {
 function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 'square' {
   // Count image blocks and total blocks in the row
   let imageCount = 0
-  let totalBlocks = 0
 
   if (row.attributes.type === 'cart') {
     return 'square'
@@ -653,24 +652,23 @@ function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 's
   row.columns.forEach((column) => {
     const hasImage = column.blocks.some((block) => block.type === 'image')
     if (hasImage) imageCount++
-    totalBlocks += column.blocks.length
   })
 
   // If there are more than 2 columns with images, use square
   if (imageCount > 2) return 'square'
 
   // If there's 1 image column and other content, use square
-  if (imageCount === 1 && totalBlocks > imageCount) return 'square'
+  if (imageCount === 1 && row.columns.length > imageCount) return 'square'
 
   // Default to landscape for 1-2 columns of just images
   return 'landscape'
 }
 
 async function processBlocks(blocks: any[], row: RowBlock): Promise<any[]> {
-  const orientation = determineImageOrientation(row)
-
   return Promise.all(
     blocks.map(async (block) => {
+      const orientation = determineImageOrientation(row)
+
       if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
         // Resolve the image source with determined orientation
         const resolvedSrc = await resolveImageSrc(block.attributes.src, orientation)
