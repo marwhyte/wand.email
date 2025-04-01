@@ -4,20 +4,39 @@ import { notifySlack } from '@/app/actions/notifySlack'
 import { EmailType } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
-import { createChat, getChat, updateChat } from '@/lib/database/queries/chats'
+import { createChat, getChat, getUserMessageCount, updateChat } from '@/lib/database/queries/chats'
 import { CONTINUE_PROMPT } from '@/lib/llm/prompts'
 import { DEFAULT_PROVIDER, StreamingOptions, streamText } from '@/lib/llm/stream-text'
 import SwitchableStream from '@/lib/llm/switchable-stream'
 import { getMostRecentUserMessage } from '@/lib/utils/misc'
 import { Message } from 'ai'
+import { NextRequest } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
 
-export async function POST(request: Request) {
+// Allow streaming responses up to 30 seconds
+
+// Rate limit settings
+const MAX_MESSAGES_PER_HOUR = 50
+
+export async function POST(req: NextRequest) {
   try {
     const session = await auth()
 
     if (!session || !session.user || !session.user.id) {
       return new Response('Unauthorized', { status: 401 })
+    }
+
+    // Check rate limit
+    const messageCount = await getUserMessageCount(session.user.id)
+    console.log('messageCount', messageCount)
+
+    if (messageCount >= MAX_MESSAGES_PER_HOUR) {
+      return new Response('Rate limit exceeded. Please try again later.', {
+        status: 429,
+        headers: {
+          'Retry-After': '3600', // 1 hour in seconds
+        },
+      })
     }
 
     let {
@@ -36,7 +55,7 @@ export async function POST(request: Request) {
       companyDescription?: string
       companyAddress?: string
       emailType?: EmailType
-    } = await request.json()
+    } = await req.json()
 
     const userMessage = getMostRecentUserMessage(messages)
 

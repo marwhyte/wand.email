@@ -295,3 +295,18 @@ export async function getChatWithMessages(id: string) {
 
   return response
 }
+
+export async function getUserMessageCount(userId: string): Promise<number> {
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000)
+
+  const result = await db
+    .selectFrom('Message')
+    .innerJoin('Chat', 'Chat.id', 'Message.chatId')
+    .select(({ fn }) => [fn.count<number>('Message.id').as('count')])
+    .where('Chat.userId', '=', userId)
+    .where('Message.role', '=', 'user')
+    .where('Message.createdAt', '>=', oneHourAgo)
+    .executeTakeFirst()
+
+  return result?.count ?? 0
+}

@@ -136,6 +136,12 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       logger.debug('Finished streaming')
       mutate('/api/history')
     },
+    onError: (error) => {
+      console.log('error', error)
+      if (error.message.includes('Rate limit exceeded.')) {
+        setRateLimitError("You've reached the message limit. Please try again later.")
+      }
+    },
     initialMessages,
   })
 
@@ -552,6 +558,14 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     }
   }, [status, latestAssistantMessage, isMobile, chatStarted, isFirstAssistantMessageComplete])
 
+  // Add state for rate limit error
+  const [rateLimitError, setRateLimitError] = useState<string | null>(null)
+
+  // Clear rate limit error when input changes
+  useEffect(() => {
+    setRateLimitError(null)
+  }, [input])
+
   return (
     <div ref={containerRef} className="mx-auto flex h-full w-full flex-col overflow-hidden">
       {session?.data?.user && <Menu />}
@@ -677,6 +691,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                           : {}
                       }
                     >
+                      {rateLimitError && <div className="mb-2 text-center text-sm text-red-500">{rateLimitError}</div>}
                       <ChatInput
                         chatStarted={chatStarted}
                         textareaRef={textareaRef}
