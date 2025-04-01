@@ -12,7 +12,6 @@ export async function resolveImageSrc(
   // Check if this is a service-based image request
   const match = src.match(/^(\w+):(.+)$/)
 
-  console.log(src, orientation)
   if (!match) return src // Return as-is if not a service request
 
   const [_, service, keyword] = match

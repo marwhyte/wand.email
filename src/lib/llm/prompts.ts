@@ -195,7 +195,7 @@ The example below has been specifically chosen to match your email request type 
 2. Appropriate section organization and content flow
 3. Best practices for engagement and conversion
 4. Proper implementation of the XML syntax
-5. Use the styleVariant to match the example
+5. IMPORTANT: Use the styleVariant to match the example
 
 Use this example as your primary reference and starting template. While you can adjust the content and images to fit the user's specific needs, maintain the general structure, layout approach, and component usage shown in the example unless specifically asked to change it.
 </selected_example_guidance>

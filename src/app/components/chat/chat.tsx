@@ -455,27 +455,31 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   const examplePrompts = [
     {
       label: 'Welcome',
-      prompt: 'Create a welcome series for my new customers',
+      prompt:
+        'Create a 3-part welcome series for new customers that introduces our product features, shares success stories, and offers a special first-time discount',
       icon: EnvelopeIcon,
     },
     {
       label: 'E-commerce',
-      prompt: 'Create a marketing email for my ecommerce store',
+      prompt:
+        'Create a promotional email for our summer sale featuring 3 product categories with images, prices, and "Shop Now" buttons for each item',
       icon: ShoppingCartIcon,
     },
     {
       label: 'Transactional',
-      prompt: 'Create a transactional email for my business',
+      prompt:
+        'Create a password reset email with a secure link, clear instructions, and a security notice about link expiration',
       icon: DocumentTextIcon,
     },
     {
       label: 'Newsletter',
-      prompt: 'Create a newsletter for my business',
+      prompt: 'Create a clean, minimalist newsletter featuring multiple stories',
       icon: NewspaperIcon,
     },
     {
       label: 'Cart',
-      prompt: 'Create a cart abandonment email for my business',
+      prompt:
+        'Create a cart abandonment email with a 15% discount code, showing the abandoned items and emphasizing limited-time offer',
       icon: ShoppingCartIcon,
     },
   ]

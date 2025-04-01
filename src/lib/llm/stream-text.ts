@@ -66,14 +66,14 @@ const examplesByType: Record<EmailType, ExampleWithDescription[]> = {
   ],
   newsletter: [
     {
+      template: stocktwitsNewsletterExample,
+      description:
+        'A clean, minimalist newsletter with a header, a body, and a footer. The body contains a list of articles with a title, a short description, and a link to the article.',
+    },
+    {
       template: stripeNewsletterExample,
       description:
         'Professional B2B newsletter featuring company achievements, industry recognition, and upcoming events with multiple call-to-action buttons',
-    },
-    {
-      template: stocktwitsNewsletterExample,
-      description:
-        'Data-driven financial market newsletter with stock updates, performance metrics, charts, and expert insights in a conversational format',
     },
   ],
   invoice: [],

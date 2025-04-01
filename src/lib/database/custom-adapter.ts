@@ -153,7 +153,6 @@ export default function KyselyAdapter(db: Kysely<Database>): Adapter {
       await db.deleteFrom('Session').where('Session.sessionToken', '=', sessionToken).executeTakeFirstOrThrow()
     },
     async createVerificationToken(data) {
-      console.log('Creating verification token:', data)
       await db.insertInto('VerificationToken').values(to(data)).execute()
       return data
     },
