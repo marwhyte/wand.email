@@ -474,7 +474,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     },
     {
       label: 'Newsletter',
-      prompt: 'Create a clean, minimalist newsletter featuring multiple stories',
+      prompt: 'Create a newsletter for my monthly technology updates',
       icon: NewspaperIcon,
     },
     {
