@@ -130,6 +130,7 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       }
       case 'cart': {
         return {
+          verticalAlign: 'middle',
           paddingTop: '2px',
           paddingBottom: '2px',
           backgroundColor: themeColors.light,

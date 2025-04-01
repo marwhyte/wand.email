@@ -144,8 +144,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   const latestAssistantMessage = messagesWithoutSystem.findLast((m) => m.role === 'assistant')
   useMessageParser(latestAssistantMessage ?? { role: 'assistant', content: '', id: '' })
 
-  const [generatingChangeLog, setGeneratingChangeLog] = useState(false)
-  const isLoading = status === 'streaming' || status === 'submitted' || generatingChangeLog
+  const isLoading = status === 'streaming' || status === 'submitted'
 
   // UI and animation refs/state
   const textareaRef = useRef<HTMLTextAreaElement>(null) as React.RefObject<HTMLTextAreaElement>
