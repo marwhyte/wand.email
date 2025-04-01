@@ -455,6 +455,11 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
 
   const examplePrompts = [
     {
+      label: 'Newsletter',
+      prompt: 'Create a newsletter for my monthly technology updates',
+      icon: NewspaperIcon,
+    },
+    {
       label: 'Welcome',
       prompt:
         'Create a welcome series for new customers that introduces our product features, shares success stories, and offers a special first-time discount',
@@ -471,11 +476,6 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       prompt:
         'Create a password reset email with a secure link, clear instructions, and a security notice about link expiration',
       icon: DocumentTextIcon,
-    },
-    {
-      label: 'Newsletter',
-      prompt: 'Create a newsletter for my monthly technology updates',
-      icon: NewspaperIcon,
     },
     {
       label: 'Cart',

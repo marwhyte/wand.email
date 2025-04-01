@@ -62,7 +62,7 @@ export function Footer() {
               and help others create beautiful, consistent, on brand emails without the headache.
             </p>
             <div className="mt-2 text-xs text-blue-600">
-              <Link href="https://marcowhyte.com/blog" target="_blank" rel="noopener noreferrer">
+              <Link href="https://marcowhyte.com" target="_blank" rel="noopener noreferrer">
                 Learn more about me →
               </Link>
             </div>
