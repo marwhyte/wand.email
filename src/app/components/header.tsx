@@ -1,5 +1,7 @@
 'use client'
 
+import { useEmailPreprocessor } from '@/app/hooks/useEmailPreprocessor'
+import { isLocalDev } from '@/constants'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -10,6 +12,7 @@ import {
   ArrowDownTrayIcon,
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
+  EyeIcon,
   PaperAirplaneIcon,
 } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
@@ -53,6 +56,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const saveEmail = useEmailSave()
   const { showSignUpDialog, setShowSignUpDialog, stepType, setStepType } = useAuthStore()
+  const { preprocessAndGetEmail, isProcessing: isPreprocessing } = useEmailPreprocessor()
 
   const exportOpener = useOpener()
   const previewOpener = useOpener()
@@ -111,10 +115,16 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
 
     setEmailStatus('loading')
     try {
+      const processedEmail = await preprocessAndGetEmail(email)
+
+      if (!processedEmail) {
+        throw new Error('Failed to process email')
+      }
+
       const response = await fetch('/api/send', {
         method: 'POST',
         body: JSON.stringify({
-          html: render(EmailRendererFinal({ email: email, company: company })),
+          html: render(EmailRendererFinal({ email: processedEmail, company: company })),
           email: session?.data?.user?.email,
         }),
         headers: {
@@ -204,7 +214,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                   </TabList>
                 </TabGroup>
 
-                {/* {isLocalDev && (
+                {isLocalDev && (
                   <Button
                     onClick={previewOpener.open}
                     tooltipPosition="left"
@@ -213,7 +223,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                   >
                     <EyeIcon className="h-4 w-4" />
                   </Button>
-                )} */}
+                )}
               </>
             )}
 

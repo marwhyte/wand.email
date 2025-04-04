@@ -3,8 +3,11 @@ import { useEmailStore } from '@/lib/stores/emailStore'
 import { getBlockAttributes, getEmailAttributes } from '@/lib/utils/attributes/attributes'
 import { getListProps } from '@/lib/utils/attributes/props'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Email, ListBlock, ListBlockAttributes, RowBlock } from '../types'
+import { Email, ListBlock, RowBlock } from '../types'
 import EditableContent from './editable-content'
+
+// Create a stable cache key that changes only when app is refreshed
+const ICON_CACHE_KEY = Math.floor(Date.now() / 100000)
 
 type Props = {
   block: ListBlock
@@ -14,11 +17,14 @@ type Props = {
 
 const EmailList = ({ block, parentRow, email }: Props) => {
   const { setCurrentBlock } = useEmailStore()
-  const listAttributes = getBlockAttributes(block, parentRow, email) as ListBlockAttributes
+  const listAttributes = getBlockAttributes(block, parentRow, email)
   const emailAttributes = getEmailAttributes(email)
   const saveEmail = useEmailSave()
   const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null)
   const editorRefs = useRef<Array<HTMLLIElement | null>>([])
+  const theme = emailAttributes.theme || 'default'
+
+  console.log('listAttributes', listAttributes)
 
   // Reset refs array when items change
   useEffect(() => {

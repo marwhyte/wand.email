@@ -1,7 +1,7 @@
 export const maxDuration = 60
 
 import { notifySlack } from '@/app/actions/notifySlack'
-import { EmailType } from '@/app/components/email-workspace/types'
+import { EmailTheme, EmailType } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
 import { createChat, getChat, getUserMessageCount, updateChat } from '@/lib/database/queries/chats'
@@ -47,6 +47,8 @@ export async function POST(req: NextRequest) {
       companyDescription,
       companyAddress,
       emailType,
+      emailTheme,
+      isGeneratingOutline = true,
     }: {
       id: string
       messages: Message[]
@@ -55,6 +57,8 @@ export async function POST(req: NextRequest) {
       companyDescription?: string
       companyAddress?: string
       emailType?: EmailType
+      emailTheme: EmailTheme
+      isGeneratingOutline?: boolean
     } = await req.json()
 
     const userMessage = getMostRecentUserMessage(messages)
@@ -72,6 +76,11 @@ export async function POST(req: NextRequest) {
       if (chat.userId !== session.user.id) {
         return new Response('Unauthorized', { status: 401 })
       }
+    }
+
+    // If we're not generating an outline and the outline hasn't been confirmed, return an error
+    if (!isGeneratingOutline && !chat?.hasConfirmedOutline) {
+      return new Response('Email outline must be confirmed before generating the email', { status: 400 })
     }
 
     await updateChat(id, {
@@ -110,38 +119,41 @@ export async function POST(req: NextRequest) {
         console.log(`Reached max token limit (${MAX_TOKENS}): Continuing message (${switchesLeft} switches left)`)
 
         assistantMessageId = uuidv4()
-        // Note: We already added the assistant message above
         messages.push({
           id: uuidv4(),
           role: 'user',
           content: CONTINUE_PROMPT,
         })
 
-        const result = await streamText(
+        const result = await streamText({
           messages,
           options,
           companyName,
           companyDescription,
           companyAddress,
-          DEFAULT_PROVIDER,
+          provider: DEFAULT_PROVIDER,
           assistantMessageId,
-          emailType
-        )
+          emailType,
+          isGeneratingOutline,
+          emailTheme,
+        })
 
         return stream.switchSource(result.toDataStream())
       },
     }
 
-    const result = await streamText(
+    const result = await streamText({
       messages,
       options,
       companyName,
       companyDescription,
       companyAddress,
-      DEFAULT_PROVIDER,
+      provider: DEFAULT_PROVIDER,
       assistantMessageId,
-      emailType
-    )
+      emailType,
+      isGeneratingOutline,
+      emailTheme,
+    })
 
     stream.switchSource(result.toDataStream())
 

@@ -28,6 +28,7 @@ import {
 import parse from 'html-react-parser'
 import React from 'react'
 import { Table } from '../table'
+import EmailIconFinal from './email-components/email-icon-final'
 import EmailSocials from './email-components/email-socials'
 import EmailSpacer from './email-components/email-spacer'
 import EmailSurvey from './email-components/email-survey'
@@ -113,6 +114,8 @@ const RenderBlockFinal = ({
             <Img {...imageProps} />
           </div>
         )
+      case 'icon':
+        return <EmailIconFinal block={block} parentRow={parentRow} email={email} />
       case 'button':
         const buttonProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Button>>
         const buttonAttributes = getBlockAttributes(block, parentRow, email)

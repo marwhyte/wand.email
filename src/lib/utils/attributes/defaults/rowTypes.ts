@@ -1,19 +1,87 @@
-import type { RowBlock } from '@/app/components/email-workspace/types'
+import type { RowBlock, RowBlockType, ThemeColors } from '@/app/components/email-workspace/types'
 import { Email, EmailTheme, themeColorMap } from '@/app/components/email-workspace/types'
 import { getEmailAttributes } from '../attributes'
 
 type RowStyleModifier = Partial<RowBlock['attributes']>
 type VariantRowStyles = Record<string, RowStyleModifier>
 
-// Add variant-specific row styles
+// Base styles for each row type
+export const baseRowStyles: Record<
+  RowBlockType,
+  (row: RowBlock, themeColors: ThemeColors) => Partial<RowBlock['attributes']>
+> = {
+  'key-features': (row, themeColors) => ({}),
+  cards: (row, themeColors) => ({}),
+  article: (row, themeColors) => ({}),
+  list: (row, themeColors) => ({}),
+  cta: (row, themeColors) => ({}),
+  invoice: (row, themeColors) => ({}),
+  hero: (row, themeColors) => ({
+    backgroundColor: themeColors.gradientLight.start,
+    backgroundImage: `linear-gradient(to bottom right, ${themeColors.gradientLight.start}, ${themeColors.gradientLight.end})`,
+    paddingTop: '32px',
+    paddingBottom: '32px',
+    paddingLeft: '24px',
+    paddingRight: '24px',
+  }),
+  header: (row, themeColors) => ({
+    paddingTop: '24px',
+    paddingBottom: '12px',
+    backgroundColor: themeColors.base,
+  }),
+
+  cart: (row, themeColors) => {
+    const hasSingleDivider =
+      row.columns.length === 1 && row.columns[0].blocks.length === 1 && row.columns[0].blocks[0].type === 'divider'
+
+    return {
+      verticalAlign: 'middle',
+      paddingTop: hasSingleDivider ? '0px' : '2px',
+      paddingBottom: hasSingleDivider ? '0px' : '2px',
+      backgroundColor: themeColors.light,
+    }
+  },
+
+  discount: (row, themeColors) => ({
+    backgroundColor: themeColors.light,
+    paddingTop: '30px',
+    paddingBottom: '30px',
+    borderRadius: '8px',
+  }),
+
+  footer: (row, themeColors) => ({
+    paddingTop: '20px',
+    paddingBottom: '48px',
+    backgroundColor: themeColors.light,
+  }),
+
+  gallery: (row, themeColors) => {
+    const defaults: Partial<RowBlock['attributes']> = {
+      backgroundColor: themeColors.base,
+      columnSpacing: 16,
+    }
+
+    if (row.columns.length === 2) {
+      defaults.stackOnMobile = true
+
+      // Check if exactly one column has a photo
+      const photoColumns = row.columns.filter((col) => col.blocks.some((block) => block.type === 'image'))
+      if (photoColumns.length === 1 && row.columns.length >= 2) {
+        defaults.columnSpacing = 24
+      }
+    }
+
+    return defaults
+  },
+
+  default: (row, themeColors) => ({
+    backgroundColor: themeColors.base,
+  }),
+}
+
+// Variant-specific row styles
 export const variantRowDefaults: Record<string, VariantRowStyles> = {
   outline: {
-    header: {
-      backgroundColor: '#ffffff',
-    },
-    footer: {
-      backgroundColor: '#ffffff',
-    },
     default: {
       borderWidth: '1px',
       borderColor: '#dadce0',
@@ -25,182 +93,31 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
       paddingRight: '20px',
     },
   },
-  default: {
-    default: {
-      paddingLeft: '24px',
-      paddingRight: '24px',
-    },
-  },
+  default: {},
   clear: {
     default: {},
   },
 }
 
-// Add email type-specific row styles
-export const emailTypeRowDefaults: Record<string, VariantRowStyles> = {
-  ecommerce: {
-    header: {},
-    footer: {},
-    gallery: {
-      paddingTop: '12px',
-      paddingBottom: '12px',
-    },
-    default: {
-      paddingTop: '12px',
-      paddingBottom: '12px',
-    },
-  },
-  newsletter: {
-    header: {},
-    footer: {},
-    default: {
-      paddingBottom: '40px',
-    },
-  },
-  marketing: {
-    header: {},
-    footer: {},
-    default: {},
-  },
-  transactional: {
-    header: {
-      paddingTop: '20px',
-      paddingBottom: '20px',
-    },
-    footer: {
-      paddingTop: '32px',
-      paddingBottom: '32px',
-    },
-    default: {},
-  },
-}
-
-// Add combination-specific row styles
-export const combinedTypeVariantDefaults: Record<string, Record<string, VariantRowStyles>> = {
-  outline: {
-    newsletter: {
-      header: {},
-      footer: {
-        paddingTop: '8px',
-      },
-      default: {
-        paddingLeft: '18px',
-        paddingRight: '18px',
-        paddingTop: '18px',
-        paddingBottom: '8px',
-      },
-    },
-    // Add other email types for outline variant if needed
-    marketing: {},
-    transactional: {},
-  },
-  // Add other variants if needed
-  clear: {
-    newsletter: {},
-  },
-}
-
-export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> {
-  const emailAttributes = getEmailAttributes(email)
-  const rowAttributes = row.attributes
-  const theme = (emailAttributes?.theme as EmailTheme) || 'default'
-  const themeColors = themeColorMap[theme]
-
-  // Get base styles for the row type
-  const baseStyles: Partial<RowBlock['attributes']> = (() => {
-    // Check if row only contains a spacer
-    const hasSingleSpacer =
-      row.columns.length === 1 && row.columns[0].blocks.length === 1 && row.columns[0].blocks[0].type === 'spacer'
-
-    // If row only has a spacer, remove top and bottom padding
-    if (hasSingleSpacer) {
-      return {
-        paddingTop: '0px',
-        paddingBottom: '0px',
-      }
-    }
-
-    switch (rowAttributes.type) {
-      case 'header': {
-        return {
-          paddingTop: '24px',
-          paddingBottom: '12px',
-          backgroundColor: themeColors.base,
-        }
-      }
-      case 'cart': {
-        return {
-          verticalAlign: 'middle',
-          paddingTop: '2px',
-          paddingBottom: '2px',
-          backgroundColor: themeColors.light,
-          ...(row.columns.length === 1 &&
-            row.columns[0].blocks.length === 1 &&
-            row.columns[0].blocks[0].type === 'divider' && {
-              paddingTop: '0px',
-              paddingBottom: '0px',
-            }),
-        }
-      }
-      case 'discount': {
-        return {
-          backgroundColor: themeColors.light,
-          paddingTop: '30px',
-          paddingBottom: '30px',
-          borderRadius: '8px',
-        }
-      }
-      case 'footer': {
-        return {
-          paddingTop: '20px',
-          paddingBottom: '48px',
-          backgroundColor: themeColors.light,
-        }
-      }
-      case 'gallery': {
-        const defaults: Partial<RowBlock['attributes']> = {
-          backgroundColor: themeColors.base,
-        }
-
-        if (row.columns.length === 2) {
-          defaults.stackOnMobile = true
-
-          // Check if exactly one column has a photo
-          const photoColumns = row.columns.filter((col) => col.blocks.some((block) => block.type === 'image'))
-          if (photoColumns.length === 1 && row.columns.length >= 2) {
-            defaults.columnSpacing = 24
-          }
-        }
-
-        defaults.columnSpacing = defaults.columnSpacing ?? 16
-        return defaults
-      }
-      case undefined:
-      default:
-        return { backgroundColor: themeColors.base } // Default styles with theme base color
-    }
-  })()
-
-  // Get variant styles
-  const variantStyles: Partial<RowBlock['attributes']> = (() => {
-    if (!emailAttributes?.styleVariant) return {}
-
-    const variant = emailAttributes.styleVariant
-    const rowType = rowAttributes.type || 'default'
+// Special variant style overrides
+export const variantStyleOverrides: Record<
+  string,
+  (row: RowBlock, email: Email | null, themeColors: any) => Partial<RowBlock['attributes']>
+> = {
+  default: (row, email, themeColors) => {
+    const rowType = row.attributes.type || 'default'
+    const emailAttributes = getEmailAttributes(email)
 
     // Special handling for default footer to use email background color
-    if (variant === 'default' && rowType === 'footer' && emailAttributes.backgroundColor) {
+    if (rowType === 'footer' && emailAttributes?.backgroundColor) {
       return {
-        ...variantRowDefaults[variant]?.[rowType],
         backgroundColor: emailAttributes.backgroundColor || themeColors.light,
       }
     }
 
-    // Special handling for discount row type when variant is 'default'
-    if ((rowType === 'discount' || rowType === 'cart') && variant === 'default') {
-      // Add borderWidth only for default variant
+    // Special handling for discount and cart rows
+    if (rowType === 'discount' || rowType === 'cart') {
       return {
-        ...(variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}),
         borderRadius: '0px',
         borderColor: themeColors.base,
         borderWidth: '20px',
@@ -209,62 +126,55 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       }
     }
 
-    if (rowType === 'discount') {
-      return {
-        ...(variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}),
-        backgroundColor: themeColors.light,
-      }
-    }
+    return {}
+  },
 
-    // If there's a specific style for this row type in the variant, use it
-    // Otherwise fall back to the 'default' style for this variant
-    const styles = variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}
+  outline: (row, email, themeColors) => {
+    const rowType = row.attributes.type || 'default'
 
-    // Apply theme-specific overrides to variant styles for header and footer
+    // Remove border for header and footer in outline variant
     if (rowType === 'header' || rowType === 'footer') {
       return {
-        ...styles,
-        backgroundColor: rowType === 'header' ? themeColors.base : themeColors.light,
+        borderWidth: '0px',
       }
     }
 
-    return styles
-  })()
+    return {}
+  },
+}
 
-  // Get email type-specific styles
-  const emailTypeStyles = (() => {
-    if (!emailAttributes?.type) return {}
+export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> {
+  const emailAttributes = getEmailAttributes(email)
+  const rowAttributes = row.attributes
+  const theme = (emailAttributes?.theme as EmailTheme) || 'default'
+  const themeColors = themeColorMap[theme]
+  const variant = emailAttributes?.styleVariant || 'default'
+  const rowType = rowAttributes.type || 'default'
 
-    const emailType = emailAttributes.type
-    const rowType = rowAttributes.type || 'default'
+  // Check if row only contains a spacer
+  const hasSingleSpacer =
+    row.columns.length === 1 && row.columns[0].blocks.length === 1 && row.columns[0].blocks[0].type === 'spacer'
 
-    // If there's a specific style for this row type in the email type, use it
-    // Otherwise fall back to the 'default' style for this email type
-    return emailTypeRowDefaults[emailType]?.[rowType] || emailTypeRowDefaults[emailType]?.['default'] || {}
-  })()
+  // Get base styles
+  const baseStyles = baseRowStyles[rowType]?.(row, themeColors) || baseRowStyles.default(row, themeColors)
 
-  // Get combined variant and email type specific styles
-  const combinedStyles = (() => {
-    if (!emailAttributes?.styleVariant || !emailAttributes?.type) return {}
+  // Get variant styles
+  const variantStyles = variantRowDefaults[variant]?.[rowType] || variantRowDefaults[variant]?.['default'] || {}
 
-    const variant = emailAttributes.styleVariant
-    const emailType = emailAttributes.type
-    const rowType = rowAttributes.type || 'default'
+  // Apply variant-specific overrides
+  const variantOverrides = variantStyleOverrides[variant]?.(row, email, themeColors) || {}
 
-    // Look for specific style for this combination
-    // First try the specific row type, then fall back to 'default' if not found
-    return (
-      combinedTypeVariantDefaults[variant]?.[emailType]?.[rowType] ||
-      combinedTypeVariantDefaults[variant]?.[emailType]?.['default'] ||
-      {}
-    )
-  })()
+  // Apply theme-specific overrides for header and footer
+  const themeOverrides =
+    rowType === 'header' || rowType === 'footer'
+      ? { backgroundColor: rowType === 'header' ? themeColors.base : themeColors.light }
+      : {}
 
-  // Merge styles with priority: base < email type < variant < combined
+  // Merge all styles with priority: base < variant < overrides < theme
   return {
     ...baseStyles,
-    ...emailTypeStyles,
     ...variantStyles,
-    ...combinedStyles,
+    ...variantOverrides,
+    ...themeOverrides,
   }
 }

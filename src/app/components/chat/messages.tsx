@@ -20,6 +20,8 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
   const { id, isStreaming = false, messages = [] } = props
   const { data } = useSession()
 
+  console.log(messages)
+
   return (
     <div id={id} ref={ref} className={props.className + ' w-full'}>
       {messages.length > 0

@@ -7,6 +7,7 @@ import {
   DividerBlockAttributes,
   Email,
   HeadingBlockAttributes,
+  IconBlockAttributes,
   ImageBlockAttributes,
   LinkBlockAttributes,
   ListBlockAttributes,
@@ -23,7 +24,6 @@ import {
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
 import { createBlock, createColumn, createRow } from './email-helpers'
-import { resolveImageSrc } from './image-service'
 import { ensurePx } from './misc'
 // ===== Base Parser Types =====
 type RawAttributes = Record<string, string>
@@ -574,7 +574,7 @@ const parseListAttributes: AttributeParser<ListBlockAttributes> = (raw) => {
   }
 
   // FIRST: Check if type is directly specified (this should take precedence)
-  if (raw.type && ['ul', 'ol', 'icon'].includes(raw.type)) {
+  if (raw.type && ['ul', 'ol'].includes(raw.type)) {
     attrs.type = raw.type as ListBlockAttributes['type']
   }
   // SECOND: If listStyle is specified, map it to the correct type
@@ -582,37 +582,6 @@ const parseListAttributes: AttributeParser<ListBlockAttributes> = (raw) => {
     // Map listStyle values to correct type values
     if (raw.listStyle === 'bullet') attrs.type = 'ul'
     else if (raw.listStyle === 'number') attrs.type = 'ol'
-    else if (raw.listStyle === 'icon') attrs.type = 'icon'
-  }
-
-  // Handle icons if present and type is icon
-  if (raw.icons && attrs.type === 'icon') {
-    try {
-      const iconStr = raw.icons.trim()
-
-      // Check if it's a valid JSON array format
-      if (iconStr.startsWith('[') && iconStr.endsWith(']')) {
-        try {
-          // Try parsing as JSON first
-          const rawIcons = JSON.parse(iconStr)
-
-          if (Array.isArray(rawIcons)) {
-            attrs.icons = rawIcons.map((icon) => String(icon))
-          }
-        } catch (jsonError) {
-          // If JSON parsing fails, treat it as a comma-separated list
-          // Remove the brackets first if present
-          const cleanedStr = iconStr.replace(/^\[|\]$/g, '')
-          attrs.icons = cleanedStr.split(',').map((icon) => icon.trim())
-        }
-      } else {
-        // If not JSON format, just split by comma
-        attrs.icons = iconStr.split(',').map((icon) => icon.trim())
-      }
-    } catch (e) {
-      console.error('Failed to parse list icons:', e)
-      console.debug('Raw icons value:', raw.icons)
-    }
   }
 
   return attrs
@@ -624,6 +593,48 @@ const parseSpacerAttributes: AttributeParser<SpacerBlockAttributes> = (raw) => {
   return {
     height: raw.height || '10',
   }
+}
+
+const parseIconAttributes: AttributeParser<IconBlockAttributes> = (raw) => {
+  const attrs: IconBlockAttributes = {
+    ...handlePadding(raw),
+    icon: raw.icon || 'check', // Default to check icon if none provided
+  }
+
+  // Handle title if present
+  if (raw.title) {
+    attrs.title = parseEscapeSequences(raw.title)
+  }
+
+  // Handle description if present
+  if (raw.description) {
+    attrs.description = parseEscapeSequences(raw.description)
+  }
+
+  // Handle color if present
+  if (raw.color) {
+    attrs.color = raw.color
+  }
+
+  // Handle size if present
+  if (raw.size) {
+    attrs.size = raw.size
+  }
+
+  // Handle alignment if present
+  if (raw.align && isAlign(raw.align)) {
+    attrs.align = raw.align
+  }
+
+  // Handle position if present (top or left)
+  if (raw.position && (raw.position === 'top' || raw.position === 'left')) {
+    attrs.position = raw.position
+  } else {
+    // Default to left if not specified
+    attrs.position = 'left'
+  }
+
+  return attrs
 }
 
 const blockParsers = {
@@ -638,70 +649,8 @@ const blockParsers = {
   table: parseTableAttributes,
   list: parseListAttributes,
   spacer: parseSpacerAttributes,
+  icon: parseIconAttributes,
 } as const
-
-// ===== Image Processing Helpers =====
-function determineImageOrientation(row: RowBlock): 'landscape' | 'portrait' | 'square' {
-  // Count image blocks and total blocks in the row
-  let imageCount = 0
-
-  if (row.attributes.type === 'cart') {
-    return 'square'
-  }
-
-  row.columns.forEach((column) => {
-    const hasImage = column.blocks.some((block) => block.type === 'image')
-    if (hasImage) imageCount++
-  })
-
-  // If there are more than 2 columns with images, use square
-  if (imageCount > 2) return 'square'
-
-  // If there's 1 image column and other content, use square
-  if (imageCount === 1 && row.columns.length > imageCount) return 'square'
-
-  // Default to landscape for 1-2 columns of just images
-  return 'landscape'
-}
-
-async function processBlocks(blocks: any[], row: RowBlock): Promise<any[]> {
-  return Promise.all(
-    blocks.map(async (block) => {
-      const orientation = determineImageOrientation(row)
-
-      if (block.type === 'image' && block.attributes?.src?.startsWith('pexels:')) {
-        // Resolve the image source with determined orientation
-        const resolvedSrc = await resolveImageSrc(block.attributes.src, orientation)
-        return {
-          ...block,
-          attributes: {
-            ...block.attributes,
-            src: resolvedSrc,
-          },
-        }
-      }
-      return block
-    })
-  )
-}
-
-async function processColumns(columns: any[], row: RowBlock): Promise<any[]> {
-  return Promise.all(
-    columns.map(async (column) => ({
-      ...column,
-      blocks: column.blocks ? await processBlocks(column.blocks, row) : [],
-    }))
-  )
-}
-
-async function processRows(rows: any[]): Promise<any[]> {
-  return Promise.all(
-    rows.map(async (row) => ({
-      ...row,
-      columns: row.columns ? await processColumns(row.columns, row) : [],
-    }))
-  )
-}
 
 // ===== Main Parser Functions =====
 export function parseEmailScript(script: string): Email {
@@ -739,8 +688,178 @@ export function parseEmailScript(script: string): Email {
       if (!rowMatch) continue
 
       const rowAttrs = parseAttributes(rowMatch[1])
-      currentRow = createRow(parseRowAttributes(rowAttrs))
-      rows.push(currentRow)
+
+      // Special handling for HEADING and TEXT blocks outside of columns in any row type
+      // Look ahead to find HEADING and TEXT blocks before any COLUMN or ICON
+      let j = i + 1
+      let titleComponents = []
+      let foundColumnOrIcon = false
+      let titleLineIndices = new Set<number>()
+
+      while (j < lines.length && !foundColumnOrIcon && !lines[j].trim().startsWith('</ROW>')) {
+        const nextLine = lines[j].trim()
+
+        // Check if we've reached a COLUMN or ICON tag
+        if (nextLine.startsWith('<COLUMN') || nextLine.startsWith('<ICON')) {
+          foundColumnOrIcon = true
+          break
+        }
+
+        // Collect HEADING and TEXT blocks for the title row
+        if (nextLine.startsWith('<HEADING') || nextLine.startsWith('<TEXT')) {
+          titleComponents.push(j)
+          titleLineIndices.add(j)
+
+          // If this is a multi-line block, track all its lines
+          const tagName = nextLine.match(/<(\w+)/)?.[1]?.toLowerCase()
+          const closingTag = `</${tagName?.toUpperCase()}>`
+
+          if (!nextLine.includes(closingTag)) {
+            let k = j + 1
+            while (k < lines.length && !lines[k].trim().includes(closingTag)) {
+              titleLineIndices.add(k)
+              k++
+            }
+            if (k < lines.length) {
+              titleLineIndices.add(k) // Add the line with closing tag
+            }
+          }
+        }
+
+        j++
+      }
+
+      // If we found title components, create a separate row for them
+      if (titleComponents.length > 0) {
+        // Create the title row with the same attributes as the original row
+        const titleRow = createRow({
+          ...parseRowAttributes(rowAttrs),
+        })
+
+        // Add the title row to our email
+        rows.push(titleRow)
+
+        // Create a single column for the title row
+        const titleColumn = createColumn([], '100%', {})
+        titleRow.columns.push(titleColumn)
+
+        // Process the title components (HEADING and TEXT blocks)
+        for (const lineIndex of titleComponents) {
+          const blockLine = lines[lineIndex].trim()
+          const tagName = blockLine.match(/<(\w+)/)?.[1]?.toLowerCase()
+
+          // Skip if no tag name found
+          if (!tagName) continue
+
+          // Handle HEADING
+          if (tagName === 'heading') {
+            // Extract attributes and content
+            const attrMatch = blockLine.match(/<HEADING\s*([^>]*)>/)
+            const attrs = attrMatch ? parseAttributes(attrMatch[1]) : {}
+
+            // Extract content between tags
+            let content = ''
+            const singleLineMatch = blockLine.match(/<HEADING[^>]*>(.*?)<\/HEADING>/)
+
+            if (singleLineMatch) {
+              content = singleLineMatch[1].trim()
+            } else {
+              // Handle multi-line content
+              const openingTagEnd = blockLine.indexOf('>') + 1
+              if (openingTagEnd < blockLine.length) {
+                content = blockLine.substring(openingTagEnd).trim()
+              }
+
+              let k = lineIndex + 1
+              let closingTagFound = false
+
+              while (k < lines.length && !closingTagFound) {
+                const currentLine = lines[k].trim()
+                const closingTagIndex = currentLine.indexOf('</HEADING>')
+
+                if (closingTagIndex !== -1) {
+                  if (closingTagIndex > 0) {
+                    const contentBeforeClosing = currentLine.substring(0, closingTagIndex).trim()
+                    content += (content && contentBeforeClosing ? ' ' : '') + contentBeforeClosing
+                  }
+                  closingTagFound = true
+                } else {
+                  content += (content && currentLine ? ' ' : '') + currentLine
+                }
+
+                k++
+              }
+            }
+
+            // Add content to attributes
+            attrs.content = content
+
+            // Create the HEADING block in the title column
+            createBlock('heading', content, blockParsers.heading(attrs), titleColumn)
+          }
+
+          // Handle TEXT
+          if (tagName === 'text') {
+            // Extract attributes and content
+            const attrMatch = blockLine.match(/<TEXT\s*([^>]*)>/)
+            const attrs = attrMatch ? parseAttributes(attrMatch[1]) : {}
+
+            // Extract content between tags
+            let content = ''
+            const singleLineMatch = blockLine.match(/<TEXT[^>]*>(.*?)<\/TEXT>/)
+
+            if (singleLineMatch) {
+              content = singleLineMatch[1].trim()
+            } else {
+              // Handle multi-line content
+              const openingTagEnd = blockLine.indexOf('>') + 1
+              if (openingTagEnd < blockLine.length) {
+                content = blockLine.substring(openingTagEnd).trim()
+              }
+
+              let k = lineIndex + 1
+              let closingTagFound = false
+
+              while (k < lines.length && !closingTagFound) {
+                const currentLine = lines[k].trim()
+                const closingTagIndex = currentLine.indexOf('</TEXT>')
+
+                if (closingTagIndex !== -1) {
+                  if (closingTagIndex > 0) {
+                    const contentBeforeClosing = currentLine.substring(0, closingTagIndex).trim()
+                    content += (content && contentBeforeClosing ? ' ' : '') + contentBeforeClosing
+                  }
+                  closingTagFound = true
+                } else {
+                  content += (content && currentLine ? ' ' : '') + currentLine
+                }
+
+                k++
+              }
+            }
+
+            // Add content to attributes
+            attrs.content = content
+
+            // Create the TEXT block in the title column
+            createBlock('text', content, blockParsers.text(attrs), titleColumn)
+          }
+        }
+
+        // Create a new row for the columns with the same attributes as the original row
+        currentRow = createRow({
+          ...parseRowAttributes(rowAttrs),
+        })
+        rows.push(currentRow)
+
+        // Skip to the line with the first COLUMN or ICON tag
+        i = j - 1 // Adjust for the loop increment
+      } else {
+        // No title components, create a normal row
+        currentRow = createRow(parseRowAttributes(rowAttrs))
+        rows.push(currentRow)
+      }
+
       depth++
       continue
     }
@@ -1107,6 +1226,28 @@ export function parseEmailScript(script: string): Email {
     if (line.startsWith('</ROW>')) {
       depth--
 
+      // Special handling for rows to ensure equal column widths
+      // This applies to any row with columns that don't have explicit widths set
+      if (currentRow) {
+        const columnsCount = currentRow.columns.length
+
+        // Only apply equal widths if at least one column exists
+        if (columnsCount > 0) {
+          const columnsWithoutWidth = currentRow.columns.filter((column) => !column.attributes.width)
+
+          // If any columns don't have width specified, distribute equally
+          if (columnsWithoutWidth.length > 0) {
+            // Calculate equal width percentage
+            const equalWidth = `${Math.floor(100 / columnsCount)}%`
+
+            // Update columns without width specified
+            columnsWithoutWidth.forEach((column) => {
+              column.attributes.width = equalWidth
+            })
+          }
+        }
+      }
+
       // Special handling for cart rows: adjust the last item
       if (currentRow?.attributes.type === 'cart') {
         // Find all cart rows that were generated
@@ -1152,6 +1293,7 @@ export function parseEmailScript(script: string): Email {
       }
 
       const items: string[] = []
+      const icons: string[] = []
 
       // Check if this is a self-closing LIST tag (items attribute provided directly)
       if (line.endsWith('/>') || attrs.items) {
@@ -1167,9 +1309,18 @@ export function parseEmailScript(script: string): Email {
         const currentLine = lines[j].trim()
 
         // Match LI element - either self-contained on one line or spanning multiple lines
-        if (currentLine.startsWith('<LI>')) {
+        if (currentLine.startsWith('<LI')) {
+          // Extract icon attribute if present
+          const iconMatch = currentLine.match(/icon="([^"]*)"/)
+          if (iconMatch) {
+            icons.push(iconMatch[1])
+          } else {
+            // If no icon specified, add a default icon or empty string
+            icons.push('')
+          }
+
           // Check if opening and closing tags are on same line
-          const singleLineLiMatch = currentLine.match(/<LI>(.*?)<\/LI>/)
+          const singleLineLiMatch = currentLine.match(/<LI[^>]*>(.*?)<\/LI>/)
 
           if (singleLineLiMatch) {
             // Single line LI
@@ -1218,6 +1369,15 @@ export function parseEmailScript(script: string): Email {
 
       // Convert items array to JSON string format for the parser
       attrs.items = JSON.stringify(items)
+
+      // If we found icons, add them to the attributes
+      if (icons.length > 0) {
+        attrs.icons = JSON.stringify(icons)
+        // If type is not already set to 'icon', set it now
+        if (!attrs.type || attrs.type !== 'icon') {
+          attrs.type = 'icon'
+        }
+      }
 
       // Now use the blockParser which will handle converting from string to string[]
       createBlock('list', '', blockParsers.list(attrs), currentColumn)
@@ -1468,33 +1628,54 @@ export function parseEmailScript(script: string): Email {
 
     // Handle other block types (self-closing tags)
     const blockMatch = line.match(/<(\w+)\s*([^>]*)>/)
-    if (blockMatch && currentColumn) {
+    if (blockMatch && currentRow) {
       const [, blockType, blockDef = ''] = blockMatch
       const attrs = parseAttributes(blockDef)
 
-      switch (blockType.toLowerCase() as BlockType) {
-        case 'image':
-          createBlock('image', '', blockParsers.image(attrs), currentColumn)
-          break
-        case 'divider':
-          createBlock('divider', '', blockParsers.divider(attrs), currentColumn)
-          break
-        case 'spacer':
-          createBlock('spacer', '', blockParsers.spacer(attrs), currentColumn)
-          break
-        case 'socials':
-          const socialAttrs = blockParsers.socials(attrs)
-          createBlock('socials', '', socialAttrs, currentColumn)
-          break
-        case 'survey':
-          createBlock('survey', '', blockParsers.survey(attrs), currentColumn)
-          break
-        case 'table':
-          createBlock('table', '', blockParsers.table(attrs), currentColumn)
-          break
-        case 'list':
-          createBlock('list', '', blockParsers.list(attrs), currentColumn)
-          break
+      // Special handling for ICON in any row type when outside a column
+      if (blockType.toLowerCase() === 'icon' && !currentColumn) {
+        // Make sure we have a current row
+        if (!currentRow) {
+          console.warn('Found ICON without a parent ROW, ignoring')
+          continue
+        }
+
+        // Create a new column for this icon
+        const iconColumn = createColumn([], '', {})
+        currentRow.columns.push(iconColumn)
+
+        // Create the icon block in this column
+        createBlock('icon', '', blockParsers.icon(attrs), iconColumn)
+      }
+      // Regular block handling when column exists
+      else if (currentColumn) {
+        switch (blockType.toLowerCase() as BlockType) {
+          case 'image':
+            createBlock('image', '', blockParsers.image(attrs), currentColumn)
+            break
+          case 'divider':
+            createBlock('divider', '', blockParsers.divider(attrs), currentColumn)
+            break
+          case 'spacer':
+            createBlock('spacer', '', blockParsers.spacer(attrs), currentColumn)
+            break
+          case 'socials':
+            const socialAttrs = blockParsers.socials(attrs)
+            createBlock('socials', '', socialAttrs, currentColumn)
+            break
+          case 'survey':
+            createBlock('survey', '', blockParsers.survey(attrs), currentColumn)
+            break
+          case 'table':
+            createBlock('table', '', blockParsers.table(attrs), currentColumn)
+            break
+          case 'list':
+            createBlock('list', '', blockParsers.list(attrs), currentColumn)
+            break
+          case 'icon':
+            createBlock('icon', '', blockParsers.icon(attrs), currentColumn)
+            break
+        }
       }
     }
   }
@@ -1502,55 +1683,5 @@ export function parseEmailScript(script: string): Email {
   return {
     ...emailAttributes,
     rows,
-  }
-}
-
-export async function processEmailImages(email: Email): Promise<Email> {
-  return {
-    ...email,
-
-    rows: await processRows(email.rows),
-  }
-}
-
-// Helper function to parse list items from attribute value
-function parseListItems(itemsStr: string): string[] {
-  if (!itemsStr) return []
-
-  try {
-    // Try parsing as JSON array
-    if (itemsStr.startsWith('[') && itemsStr.endsWith(']')) {
-      try {
-        const rawItems = JSON.parse(itemsStr)
-        if (Array.isArray(rawItems)) {
-          return rawItems.map((item) => String(item).trim())
-        }
-      } catch (e) {
-        // If JSON parsing fails, try to clean up the string
-        const cleanStr = itemsStr
-          .replace(/^\[|\]$/g, '') // Remove outer brackets
-          .replace(/'/g, '"') // Replace single quotes with double quotes
-
-        try {
-          // Try parsing again with fixed quotes
-          const rawItems = JSON.parse(`[${cleanStr}]`)
-          if (Array.isArray(rawItems)) {
-            return rawItems.map((item) => String(item).trim())
-          }
-        } catch {
-          // If that also fails, split by comma
-          return cleanStr
-            .split(',')
-            .map((item) => item.trim())
-            .map((item) => item.replace(/^['"]|['"]$/g, '')) // Remove quotes from each item
-        }
-      }
-    }
-
-    // Handle comma-separated format
-    return itemsStr.split(',').map((item) => item.trim())
-  } catch (e) {
-    console.error('Failed to parse list items:', e)
-    return []
   }
 }

@@ -2,6 +2,7 @@ import type {
   ButtonBlock,
   DividerBlock,
   HeadingBlock,
+  IconBlock,
   ImageBlock,
   LinkBlock,
   ListBlock,
@@ -11,7 +12,7 @@ import type {
   TableBlock,
   TextBlock,
 } from '@/app/components/email-workspace/types'
-import { Email } from '@/app/components/email-workspace/types'
+import { Email, themeColorMap } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
 import { ensurePx, shouldUseDarkText } from '../../misc'
@@ -57,8 +58,8 @@ export const getAdditionalHeadingStyles = (
   email: Email | null
 ): React.ComponentProps<typeof Heading>['style'] => {
   const defaultHeadingSizes = {
-    h1: '32px',
-    h2: '28px',
+    h1: '30px',
+    h2: '26px',
     h3: '20px',
     h4: '16px',
     h5: '12px',
@@ -75,7 +76,7 @@ export const getAdditionalHeadingStyles = (
     fontWeight: 'bold',
     lineHeight: '100%',
     letterSpacing: 'normal',
-    color: emailAttributes.color,
+    color: emailAttributes.theme === 'dark' ? '#ffffff' : '#1f2937',
     fontFamily: emailAttributes.fontFamily,
     fontSize: defaultHeadingSizes[headingBlock.attributes.level as keyof typeof defaultHeadingSizes] ?? '16px',
   }
@@ -83,6 +84,26 @@ export const getAdditionalHeadingStyles = (
   const rowTypeDefaults = getBlockCSSProperties(headingBlock, email, parentRow) || {}
 
   const { level, content, ...styleAttributes } = headingBlock.attributes
+
+  return {
+    ...baseDefaults,
+    ...rowTypeDefaults,
+    ...styleAttributes,
+  }
+}
+
+export const getAdditionalIconStyles = (
+  iconBlock: IconBlock,
+  parentRow: RowBlock,
+  email: Email | null
+): React.ComponentProps<typeof Section>['style'] => {
+  const baseDefaults: React.ComponentProps<typeof Section>['style'] = {
+    paddingLeft: '16px',
+  }
+
+  const rowTypeDefaults = getBlockCSSProperties(iconBlock, email, parentRow) || {}
+
+  const { icon, position, size, color, align, title, description, ...styleAttributes } = iconBlock.attributes
 
   return {
     ...baseDefaults,
@@ -120,15 +141,18 @@ export const getAdditionalButtonStyles = (
   email: Email | null,
   company: Company | null
 ): React.ComponentProps<typeof Button>['style'] => {
+  const emailAttributes = getEmailAttributes(email)
+
   const baseDefaults = {
     display: 'inline-block',
     color: '#ffffff',
-    fontSize: '14px',
-    borderRadius: '24px',
-    paddingTop: '10px',
-    paddingRight: '10px',
-    paddingBottom: '10px',
-    paddingLeft: '10px',
+    fontSize: '16px',
+    borderRadius:
+      emailAttributes.borderRadius === 'rounded' ? '24px' : emailAttributes.borderRadius === 'square' ? '2px' : '8px',
+    paddingTop: '12px',
+    paddingRight: '24px',
+    paddingBottom: '24px',
+    paddingLeft: '12px',
     marginTop: '10px',
     marginBottom: '10px',
     marginLeft: '14px',
@@ -180,13 +204,11 @@ export const getAdditionalButtonStyles = (
         borderBottom: '0px solid transparent',
       }
 
-  const backgroundColor = styleAttributes.backgroundColor || company?.primaryColor || '#3b82f6'
+  const backgroundColor = styleAttributes.backgroundColor || themeColorMap[emailAttributes.theme].action
   const color = styleAttributes.backgroundColor
     ? styleAttributes.color
-    : company?.primaryColor
-      ? shouldUseDarkText(company.primaryColor)
-        ? '#000000'
-        : '#ffffff'
+    : shouldUseDarkText(themeColorMap[emailAttributes.theme].action)
+      ? '#000000'
       : '#ffffff'
 
   return {
@@ -265,12 +287,12 @@ export const getAdditionalListStyles = (
     paddingTop: '5px',
     paddingRight: '0px',
     paddingBottom: '5px',
-    paddingLeft: listBlock.attributes.type === 'icon' ? '16px' : '40px',
+    paddingLeft: '16px',
   }
 
   const rowTypeDefaults = getBlockCSSProperties(listBlock, email, parentRow) || {}
 
-  const { items, icons, type, ...styleAttributes } = listBlock.attributes
+  const { items, type, ...styleAttributes } = listBlock.attributes
 
   return {
     ...baseDefaults,

@@ -10,6 +10,8 @@ import type {
   EmailType,
   HeadingBlock,
   HeadingBlockAttributes,
+  IconBlock,
+  IconBlockAttributes,
   ImageBlock,
   ImageBlockAttributes,
   LinkBlock,
@@ -71,6 +73,7 @@ type EmailAttributes = {
   styleVariant: EmailStyleVariant
   type: EmailType
   theme: EmailTheme
+  borderRadius: 'default' | 'rounded' | 'square'
 }
 
 export function getEmailAttributes(email: Email | null): EmailAttributes {
@@ -79,38 +82,19 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
 
   const defaultAttributes: EmailAttributes = {
     backgroundColor: themeColors.light,
-    color: theme === 'dark' ? '#ffffff' : '#000000',
-    fontFamily: 'Arial, sans-serif',
+    color: theme === 'dark' ? '#ffffff' : '#4b5563',
+    fontFamily: 'Arial, Helvetica, Arial, sans-serif',
     linkColor: themeColors.action,
     rowBackgroundColor: themeColors.base,
     width: email?.type === 'transactional' ? '500' : '600',
     styleVariant: email?.styleVariant ?? 'default',
     type: email?.type ?? 'default',
     theme,
-  }
-
-  if (defaultAttributes?.styleVariant === 'outline') {
-    defaultAttributes.backgroundColor = themeColors.base
-    defaultAttributes.color = theme === 'dark' ? '#ffffff' : '#2d2d2d'
-    defaultAttributes.fontFamily = 'Open Sans, Helvetica, Arial, sans-serif'
+    borderRadius: email?.borderRadius ?? 'default',
   }
 
   if (defaultAttributes?.styleVariant === 'clear') {
     defaultAttributes.backgroundColor = themeColors.base
-  }
-
-  if (defaultAttributes.styleVariant === 'clear' && defaultAttributes.type === 'ecommerce') {
-    defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
-  } else if (defaultAttributes.styleVariant === 'clear') {
-    defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
-  }
-
-  if (defaultAttributes?.type === 'welcome-series') {
-    defaultAttributes.fontFamily = 'Helvetica, Arial, sans-serif'
-  }
-
-  if (defaultAttributes?.type === 'cart') {
-    defaultAttributes.fontFamily = 'Trebuchet MS, Trebuchet, Arial, sans-serif'
   }
 
   return {
@@ -232,15 +216,6 @@ export function getListAttributes(block: ListBlock, parentRow: RowBlock, email: 
     ...block.attributes,
     type: block.attributes.type ?? defaults.type ?? 'ul',
     items: block.attributes.items ?? defaults.items ?? [],
-    ...(block.attributes.type === 'icon'
-      ? {
-          icons: Array.isArray(block.attributes.icons)
-            ? block.attributes.icons.length > 0
-              ? block.attributes.icons
-              : Array(block.attributes.items?.length || defaults.items?.length || 0).fill('check')
-            : Array(block.attributes.items?.length || defaults.items?.length || 0).fill('check'),
-        }
-      : {}),
   }
 }
 
@@ -251,6 +226,21 @@ export function getSpacerAttributes(
 ): SpacerBlockAttributes {
   const defaults = getBlockDefaultAttributes(block, email, parentRow)
   return {
+    ...defaults,
+    ...block.attributes,
+  }
+}
+
+export function getIconAttributes(block: IconBlock, parentRow: RowBlock, email: Email | null): IconBlockAttributes {
+  const baseDefaults: IconBlockAttributes = {
+    icon: 'check',
+    size: '64',
+    position: 'left',
+    align: 'center',
+  }
+  const defaults = getBlockDefaultAttributes(block, email, parentRow)
+  return {
+    ...baseDefaults,
     ...defaults,
     ...block.attributes,
   }
@@ -285,6 +275,8 @@ export function getBlockAttributes<T extends EmailBlock>(
       return getListAttributes(block, parentRow, email)
     case 'spacer':
       return getSpacerAttributes(block, parentRow, email)
+    case 'icon':
+      return getIconAttributes(block, parentRow, email)
     default:
       return {} as never
   }

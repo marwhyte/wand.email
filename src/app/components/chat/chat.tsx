@@ -117,6 +117,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   useChatHistory({ chat: chat, chatId: id, company: chatCompany })
 
   // Chat state and handlers
+  const [hasConfirmedOutline, setHasConfirmedOutline] = useState(chat?.hasConfirmedOutline ?? false)
   const { messages, status, input, handleInputChange, setInput, stop, append } = useChat({
     id,
     experimental_throttle: 100,
@@ -131,6 +132,8 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       companyDescription: company?.description,
       companyAddress: company?.address,
       emailType: email?.type,
+      isGeneratingOutline: !hasConfirmedOutline,
+      emailTheme: email?.theme,
     },
     onFinish: () => {
       logger.debug('Finished streaming')
@@ -152,8 +155,6 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
 
   const isLoading = status === 'streaming' || status === 'submitted'
 
-  console.log(chat)
-
   // UI and animation refs/state
   const textareaRef = useRef<HTMLTextAreaElement>(null) as React.RefObject<HTMLTextAreaElement>
   const TEXTAREA_MAX_HEIGHT = initialMessages.length > 0 ? 400 : 200
@@ -164,7 +165,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   // Auth and session
 
   const [pendingAction, setPendingAction] = useState<{
-    type: 'send-message' | 'open-company-dialog' | 'enhance-prompt'
+    type: 'send-message' | 'open-company-dialog' | 'enhance-prompt' | 'confirm-outline'
     messageInput?: string
   } | null>(null)
 
@@ -304,6 +305,8 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
             setInput(input)
             scrollTextArea()
           })
+        } else if (pendingAction.type === 'confirm-outline') {
+          handleConfirmOutline()
         }
 
         // Clear pending action
@@ -371,6 +374,25 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     setChatStarted(true)
   }
 
+  // Add function to handle outline confirmation
+  const handleConfirmOutline = async () => {
+    if (!session.data?.user?.id) {
+      setPendingAction({ type: 'confirm-outline' })
+      setShowSignUpDialog(true)
+      return
+    }
+
+    try {
+      await updateChat(id, { hasConfirmedOutline: true })
+      setHasConfirmedOutline(true)
+      // Send a message to generate the email
+      sendMessageImpl('Generate the email based on the confirmed outline.', false)
+    } catch (error) {
+      console.error('Error confirming outline:', error)
+    }
+  }
+
+  // Update the sendMessage function to handle outline confirmation
   const sendMessage = async (messageInput?: string) => {
     if (!session.data?.user?.id) {
       setPendingAction({ type: 'send-message', messageInput: messageInput || input })
@@ -392,12 +414,15 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       return
     }
 
+    // If we have a confirmed outline, we're generating the email
+    const isGeneratingOutline = !hasConfirmedOutline
+
     // Continue with normal message sending
-    sendMessageImpl(_input)
+    sendMessageImpl(_input, isGeneratingOutline)
   }
 
-  // Actual implementation of message sending
-  const sendMessageImpl = async (_input: string) => {
+  // Update sendMessageImpl to include isGeneratingOutline
+  const sendMessageImpl = async (_input: string, isGeneratingOutline: boolean = true) => {
     setKey('aborted', false)
 
     runAnimation()
@@ -416,8 +441,22 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       messageContent = `<email_state>\n${emailScript}\n</email_state>\n\n${_input}`
     }
 
-    // Append the message
-    append({ role: 'user', content: messageContent })
+    // Append the message with the body parameter
+    append(
+      { role: 'user', content: messageContent },
+      {
+        body: {
+          id,
+          companyName: company?.name,
+          companyId: company?.id,
+          companyDescription: company?.description,
+          companyAddress: company?.address,
+          emailType: email?.type,
+          isGeneratingOutline,
+          emailTheme: email?.theme || 'default',
+        },
+      }
+    )
 
     if (!title) {
       const title = await generateTitleFromUserMessage({
@@ -566,6 +605,18 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     setRateLimitError(null)
   }, [input])
 
+  // Add a button to confirm the outline when it's ready
+  const renderOutlineConfirmation = () => {
+    if (!hasConfirmedOutline && chatStarted && !isLoading) {
+      return (
+        <div className="mt-4 flex justify-center">
+          <Button onClick={handleConfirmOutline}>Confirm Outline & Generate Email</Button>
+        </div>
+      )
+    }
+    return null
+  }
+
   return (
     <div ref={containerRef} className="mx-auto flex h-full w-full flex-col overflow-hidden">
       {session?.data?.user && <Menu />}
@@ -633,10 +684,10 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
             >
               <div
                 className={classNames('flex h-full shrink-0 flex-col', {
-                  'border-r border-gray-200': chatStarted && !isMobile,
+                  'border-r border-gray-200': chatStarted && !isMobile && hasConfirmedOutline,
                   'w-full sm:w-[370px] sm:min-w-[370px] sm:max-w-[370px] wide:w-[420px] wide:min-w-[420px] wide:max-w-[420px]':
-                    chatStarted,
-                  'w-full max-w-[600px]': !chatStarted,
+                    chatStarted && hasConfirmedOutline,
+                  'w-full max-w-[600px]': !chatStarted || !hasConfirmedOutline,
                   hidden: chatStarted && isMobile && showEmailPreview,
                 })}
               >
@@ -651,7 +702,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                       'h-[calc(100vh-95px)]': chatStarted && !isMobile,
                       'h-[calc(100vh-140px)]': chatStarted && isMobile,
                       'h-[calc(var(--vh, 1vh) * 100 - 140px)]': chatStarted && isMobile,
-                      'pl-[30px]': chatStarted && !isMobile,
+                      'pl-[30px]': chatStarted && !isMobile && hasConfirmedOutline,
                     })}
                     resize="smooth"
                     initial="instant"
@@ -671,6 +722,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                           messages={messagesWithoutSystem}
                           isStreaming={isLoading}
                         />
+                        {renderOutlineConfirmation()}
                       </div>
                     </StickToBottom.Content>
                     <ScrollToBottom textareaHeight={textareaHeight} />
@@ -693,6 +745,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                     >
                       {rateLimitError && <div className="mb-2 text-center text-sm text-red-500">{rateLimitError}</div>}
                       <ChatInput
+                        hasConfirmedOutline={hasConfirmedOutline}
                         chatStarted={chatStarted}
                         textareaRef={textareaRef}
                         input={input}
@@ -763,7 +816,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                   />
                 )}
               </div>
-              {chatStarted && (
+              {chatStarted && hasConfirmedOutline && (
                 <div
                   className={classNames('w-full overflow-auto', {
                     hidden: isMobile && !showEmailPreview,

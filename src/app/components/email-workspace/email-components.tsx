@@ -10,6 +10,7 @@ import {
   ListBulletIcon,
   PhotoIcon,
   QuestionMarkCircleIcon,
+  Square3Stack3DIcon,
   TableCellsIcon,
 } from '@heroicons/react/20/solid'
 import { QueueListIcon } from '@heroicons/react/24/solid'
@@ -30,6 +31,7 @@ export default function EmailComponents() {
     'survey',
     'table',
     'spacer',
+    'icon',
   ]
 
   const iconForType = (type: EmailBlockType) => {
@@ -56,6 +58,8 @@ export default function EmailComponents() {
         return <TableCellsIcon className="h-10 w-10" />
       case 'spacer':
         return <ArrowsUpDownIcon className="h-10 w-10" />
+      case 'icon':
+        return <Square3Stack3DIcon className="h-10 w-10" />
     }
   }
 

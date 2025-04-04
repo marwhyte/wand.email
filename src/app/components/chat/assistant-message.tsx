@@ -1,6 +1,7 @@
 import { EmailProcessingStatus } from '@/app/components/chat/email-processing-status'
 import type { Message } from 'ai'
 import { memo } from 'react'
+import { OutlineViewer } from './outline-viewer'
 
 interface AssistantMessageProps {
   content: string
@@ -16,6 +17,13 @@ export const AssistantMessage = memo(({ content, message, messages }: AssistantM
     .replace(/^`{1,3}(?:.*?)(?:\n|$)/, '') // Remove partial backticks at the beginning
     .replace(/```xml\b(?:\n[\s\S]*?```|(?!\n[\s\S]*?```))/g, '') // Remove XML code blocks (complete or incomplete)
     .replace(/```(?:html|markup)\b(?:\n[\s\S]*?```|(?!\n[\s\S]*?```))/g, '') // Also handle html/markup blocks (complete or incomplete)
+
+  // Check if this is an outline message
+  const isOutline = cleanedContent.includes('Email Type:') && cleanedContent.includes('1.')
+
+  if (isOutline) {
+    return <OutlineViewer content={cleanedContent} />
+  }
 
   // Split content at first EMAIL tag - updated regex to not require name attribute
   const [beforeEmail, afterEmail] = cleanedContent.split(/<EMAIL\s*[^>]*>/)

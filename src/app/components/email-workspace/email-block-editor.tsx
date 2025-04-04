@@ -13,6 +13,7 @@ import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { capitalizeFirstLetter, safeParseInt } from '@/lib/utils/misc'
 import { useMemo } from 'react'
 import { Select } from '../select'
+import IconEditor from './icon-editor'
 import ListEditor from './list-editor'
 import SocialsEditor from './socials-editor'
 import SurveyEditor from './survey-editor'
@@ -24,6 +25,8 @@ import {
   DividerBlockAttributes,
   HeadingBlock,
   HeadingBlockAttributes,
+  IconBlock,
+  IconBlockAttributes,
   ImageBlock,
   ImageBlockAttributes,
   LinkBlock,
@@ -74,6 +77,7 @@ type EmailBlockEditorProps = {
     | TableBlock
     | ListBlock
     | SpacerBlock
+    | IconBlock
   onChange: (
     attributes: Partial<
       | PaddingAttributes
@@ -87,6 +91,7 @@ type EmailBlockEditorProps = {
       | ListBlockAttributes
       | DividerBlockAttributes
       | SpacerBlockAttributes
+      | IconBlockAttributes
     >
   ) => void
 }
@@ -153,6 +158,8 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         return [Options.TEXT_PROPERTIES, Options.PADDING]
       case 'spacer':
         return [Options.HEIGHT]
+      case 'icon':
+        return [Options.PADDING, Options.ALIGN]
       default:
         return []
     }
@@ -189,6 +196,9 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
             )}
             {block.type === 'list' && email && (
               <ListEditor parentRow={parentRow} block={block} onChange={onChange} email={email} />
+            )}
+            {block.type === 'icon' && email && (
+              <IconEditor parentRow={parentRow} block={block} onChange={onChange} email={email} />
             )}
             {options.includes(Options.HEADING_LEVEL) && block.type === 'heading' && (
               <Field>

@@ -23,6 +23,7 @@ interface ChatInputProps {
   handleInputChange?: (event: React.ChangeEvent<HTMLTextAreaElement>) => void
   enhancePrompt?: () => void
   handleStop?: () => void
+  hasConfirmedOutline: boolean
 }
 
 export function ChatInput({
@@ -36,6 +37,7 @@ export function ChatInput({
   handleInputChange,
   enhancePrompt,
   handleStop,
+  hasConfirmedOutline,
 }: ChatInputProps) {
   const isMobile = useIsMobile()
 
@@ -61,7 +63,7 @@ export function ChatInput({
       }}
       className={classNames(
         'z-40 mx-auto w-full flex-shrink-0',
-        isMobile && chatStarted ? 'max-w-[95%] pb-3' : 'max-w-[552px]'
+        isMobile && chatStarted && hasConfirmedOutline ? 'max-w-[95%] pb-3' : 'max-w-[552px]'
       )}
     >
       <div

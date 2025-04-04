@@ -130,10 +130,8 @@ function stringifyAttributes(attributes: Record<string, any>): string {
 
     // Handle icons for icon list style
     if (key === 'icons' && Array.isArray(value)) {
-      // For simplicity, just join the array with commas and wrap in brackets
-      // No need for full JSON stringification
-      const iconsStr = value.join(',')
-      result.push(`icons="[${iconsStr}]"`)
+      // For icon lists, icons should only be on individual LI elements,
+      // not on the LIST element itself, so we'll skip this attribute
       continue
     }
 
@@ -245,6 +243,19 @@ function generateBlock(block: EmailBlock, indent: number = 2): string {
     return `${spaces}<${type}${attrsStr}>\n${spaces}  ${content}\n${spaces}</${type}>`
   }
 
+  // Handle ICON elements specially
+  if (block.type === 'icon') {
+    // The ICON is self-closing but has its title and description as attributes
+    const iconAttrs = { ...attrsObj }
+
+    // Generate the attributes string
+    const attrs = stringifyAttributes(iconAttrs)
+    const attrsStr = attrs ? ` ${attrs}` : ''
+
+    // Return the self-closing tag
+    return `${spaces}<${type}${attrsStr} />`
+  }
+
   // Handle LIST elements specially, based on whether they have items or not
   if (block.type === 'list') {
     if ('items' in attrsObj && Array.isArray(attrsObj.items) && attrsObj.items.length > 0) {
@@ -263,12 +274,6 @@ function generateBlock(block: EmailBlock, indent: number = 2): string {
       // We should never modify the type, just use what's already there or default to 'ul'
       if (!listAttrs.type) {
         listAttrs.type = 'ul'
-      }
-
-      // Fix: Ensure icons are preserved for icon lists
-      // This is critical for icon lists to work correctly
-      if (listAttrs.type === 'icon' && 'icons' in attrsObj && Array.isArray(attrsObj.icons)) {
-        listAttrs.icons = attrsObj.icons
       }
 
       // Generate the opening LIST tag

@@ -1,3 +1,5 @@
+import { Email } from '@/app/components/email-workspace/types'
+import { useEmailPreprocessor } from '@/app/hooks/useEmailPreprocessor'
 import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { isLocalDev } from '@/constants'
 import { addExport } from '@/lib/database/queries/exports'
@@ -5,11 +7,10 @@ import { ExportType } from '@/lib/database/types'
 import { useAccountStore } from '@/lib/stores/accountStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { getReactEmailCode } from '@/lib/utils/code-generation'
 import { ChevronLeftIcon, CodeBracketIcon, PencilIcon } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
 import { useSession } from 'next-auth/react'
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { dracula as draculaSyntaxHighlighter } from 'react-syntax-highlighter/dist/cjs/styles/prism'
 import { useSWRConfig } from 'swr'
@@ -131,14 +132,49 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
   const [isEditingPreview, setIsEditingPreview] = useState(false)
   const [previewText, setPreviewText] = useState(email?.preview || '')
+  const [processedEmail, setProcessedEmail] = useState<Email | null>(null)
+  const { preprocessAndGetEmail, isProcessing } = useEmailPreprocessor()
   const canExport = plan === 'pro' || (monthlyExportCount !== null && monthlyExportCount < 5) || isLocalDev
 
   const handleExport = async (type: ExportType) => {
     if (!email) return
     if (!canExport) return
-    setExportType(type)
-    await addExport(email, type)
-    mutate('/api/exports/count')
+
+    setNotificationMessage('Preprocessing email content...')
+    setNotificationStatus('success')
+
+    try {
+      // Preprocess the email to upload all icons to S3 using our hook
+      const emailWithIcons = await preprocessAndGetEmail(email, true)
+
+      if (!emailWithIcons) {
+        throw new Error('Failed to process email')
+      }
+
+      // Save the processed email
+      setProcessedEmail(emailWithIcons)
+
+      // Continue with the export
+      setExportType(type)
+      await addExport(emailWithIcons, type)
+      mutate('/api/exports/count')
+
+      // Only save the updated email with S3 URLs if we successfully exported
+      saveEmail(emailWithIcons)
+
+      // Show a success message if we're not displaying the HTML code
+      if (type !== 'html') {
+        setNotificationMessage('Email exported successfully with all icons optimized.')
+        // Close the dialog after a short delay
+        setTimeout(() => {
+          onClose()
+        }, 1500)
+      }
+    } catch (error) {
+      console.error('Error preprocessing email:', error)
+      setNotificationMessage('Failed to preprocess email content.')
+      setNotificationStatus('failure')
+    }
   }
 
   const handlePreviewChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,21 +187,17 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
     setIsEditingPreview(false)
   }
 
-  const htmlEmailCode = open ? formatHTML(render(EmailRendererFinal({ email: email, company: company }))) : ''
-  const reactEmailCode = open ? getReactEmailCode(company, email) : ''
-
-  const handleCopyReact = useCallback(async () => {
-    try {
-      if (!reactEmailCode) return
-      await navigator.clipboard.writeText(reactEmailCode)
-      setNotificationMessage('Code copied to clipboard')
-      setNotificationStatus('success')
-    } catch (err) {
-      console.error('Failed to copy: ', err)
-      setNotificationMessage('Failed to copy code')
-      setNotificationStatus('failure')
-    }
-  }, [reactEmailCode])
+  const htmlEmailCode =
+    open && exportType === 'html'
+      ? formatHTML(
+          render(
+            EmailRendererFinal({
+              email: processedEmail || email,
+              company: company,
+            })
+          )
+        )
+      : ''
 
   if (!monthlyExportCount) {
     return (
@@ -209,9 +241,28 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                 : `You have made ${monthlyExportCount} out of 5 monthly exports.`}
             </AlertBox>
           </div>
+          {notificationMessage && (
+            <div className="mt-2">
+              <Notification
+                title={notificationMessage}
+                status={notificationStatus}
+                onClose={() => setNotificationMessage(null)}
+                skipClose={false}
+              />
+            </div>
+          )}
         </DialogTitle>
         <DialogBody>
-          {exportType === null && (
+          {isProcessing && (
+            <div className="flex flex-col items-center justify-center py-10">
+              <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+              <Text className="mt-4">Processing email content...</Text>
+              <Text className="mt-2 text-sm text-gray-500">
+                Uploading icons to ensure your email looks perfect when delivered.
+              </Text>
+            </div>
+          )}
+          {!isProcessing && exportType === null && (
             <>
               <ButtonCard
                 icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
@@ -297,15 +348,6 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
           )}
         </DialogBody>
       </Dialog>
-      {notificationMessage && (
-        <Notification
-          onClose={() => setNotificationMessage(null)}
-          title={notificationMessage}
-          status={notificationStatus}
-          duration={4000}
-          skipClose
-        />
-      )}
     </>
   )
 }

@@ -10,6 +10,19 @@ export const turbotaxTemplateScript = `
       <IMAGE alt="Intuit TurboTax Logo" src="${getPhotoUrl('intuit-turbotax.png', 'turbotax')}" width="160px" />
     </COLUMN>
   </ROW>
+  <ROW>
+    <HEADING>This heading appears before columns, spanning full width</HEADING>
+    <TEXT>This text appears before columns, spanning full width too</TEXT>
+    <COLUMN>
+      <ICON icon="bolt" title="Feature Title" description="Feature description goes here" position="top" />
+    </COLUMN>
+    <COLUMN>
+      <ICON icon="bolt" title="Feature Title" description="Feature description goes here" position="top" />
+    </COLUMN>
+    <COLUMN>
+      <ICON icon="house" />
+    </COLUMN>
+  </ROW>
   <ROW backgroundColor="#fcfcfc" hideOnMobile="true" padding="0,16,30,16">
     <COLUMN>
       <LINK color="#393a3d" fontSize="14" fontWeight="bold" href="#" align="center">

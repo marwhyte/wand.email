@@ -2,7 +2,6 @@ import { updateChat } from '@/lib/database/queries/chats'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { generateEmailScript } from '@/lib/utils/email-script-generator'
-import { processEmailImages } from '@/lib/utils/email-script-parser'
 import { createScopedLogger } from '@/lib/utils/logger'
 import { getEmailFromMessage } from '@/lib/utils/misc'
 import { Message } from 'ai'
@@ -19,6 +18,12 @@ export function useMessageParser(message: Message) {
   const [processedMessageIds, setProcessedMessageIds] = useState<Set<string>>(new Set())
 
   useEffect(() => {
+    if (!chatId) return
+    const emailObject = getEmailFromMessage(message)
+    console.log('emailObject', emailObject)
+    if (emailObject) {
+      handleEmailUpdate(emailObject)
+    }
     // Skip if we've already processed this message
     if (processedMessageIds.has(message.id)) {
       return
@@ -44,7 +49,7 @@ export function useMessageParser(message: Message) {
       processEmailContent(message)
       setProcessingMessageId(null)
     }
-  }, [message.content, message.id])
+  }, [message.content, message.id, chatId])
 
   // New helper function to handle email updates
   const handleEmailUpdate = (emailData: Email) => {
@@ -61,20 +66,7 @@ export function useMessageParser(message: Message) {
     const emailObject = getEmailFromMessage(message)
 
     if (emailObject && chatId) {
-      // Process images before updating the email
-      processEmailImages(emailObject)
-        .then((processedEmail) => {
-          handleEmailUpdate(processedEmail)
-        })
-        .catch((error) => {
-          console.error('Error processing email images:', error)
-          // Still update with original email if image processing fails
-          handleEmailUpdate(emailObject)
-        })
-        .finally(() => {
-          // Mark this message as processed to prevent duplicate processing
-          setProcessedMessageIds((prev) => new Set([...prev, message.id]))
-        })
+      handleEmailUpdate(emailObject)
     } else {
       // Even if we couldn't process it, mark it as processed to avoid infinite loops
       logger.warn(

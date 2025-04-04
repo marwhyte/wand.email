@@ -3,6 +3,7 @@ import { getListProps, getSocialsProps, getSurveyProps } from '@/lib/utils/attri
 import EmailButton from './email-components/email-button'
 import EmailDivider from './email-components/email-divider'
 import EmailHeading from './email-components/email-heading'
+import EmailIcon from './email-components/email-icon'
 import EmailImage from './email-components/email-image'
 import EmailLink from './email-components/email-link'
 import EmailList from './email-components/email-list'
@@ -50,6 +51,9 @@ const RenderBlock = ({ block, parentRow }: Props) => {
         <EmailList block={block} parentRow={parentRow} email={email} />
       </div>
     )
+  }
+  if (block.type === 'icon') {
+    return <EmailIcon block={block} parentRow={parentRow} email={email} />
   }
   if (block.type === 'divider') {
     return <EmailDivider block={block} parentRow={parentRow} />

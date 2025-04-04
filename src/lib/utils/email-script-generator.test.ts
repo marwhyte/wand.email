@@ -7,7 +7,9 @@ import {
   turbotaxTemplate,
   turbotaxTemplateScript,
 } from '@/app/components/email-workspace/templates/marketing/turbotax-template'
+import { createEmail } from './email-helpers'
 import { generateEmailScript } from './email-script-generator'
+import { parseEmailScript } from './email-script-parser'
 
 // Helper function to normalize scripts for comparison
 function normalizeScript(script: string): string {
@@ -137,28 +139,31 @@ function removeIds<T>(obj: T): T {
 }
 
 describe('Email Script Generator', () => {
-  // it('should generate script that parses back to the same email structure', () => {
-  //   // Get the original email structure
-  //   const originalEmail = turbotaxTemplate()
+  it('should generate script that parses back to the same email structure', () => {
+    // Get the original email structure
+    const originalEmail = turbotaxTemplate()
 
-  //   // Generate script from the email structure
-  //   const generatedScript = generateEmailScript(originalEmail)
+    // Generate script from the email structure
+    const generatedScript = generateEmailScript(originalEmail)
 
-  //   // Parse the generated script back to an email structure
-  //   const parsedRows = parseEmailScript(generatedScript, originalEmail)
-  //   const parsedEmail = createEmail(
-  //     parsedRows,
-  //     originalEmail.color ?? '#000000',
-  //     originalEmail.linkColor ?? '#0066cc',
-  //     originalEmail.fontFamily ?? 'Arial, sans-serif',
-  //     originalEmail.backgroundColor ?? '#f7f7f7',
-  //     originalEmail.rowBackgroundColor ?? '#f7f7f7',
-  //     originalEmail.width ?? '600'
-  //   )
+    // Parse the generated script back to an email structure
+    const parsedRows = parseEmailScript(generatedScript)
 
-  //   // Compare the structures without ids
-  //   expect(removeIds(parsedEmail)).toEqual(removeIds(originalEmail))
-  // })
+    console.log('parsedRows', JSON.stringify(parsedRows, null, 2))
+    const parsedEmail = createEmail(
+      parsedRows,
+      originalEmail.color ?? '#000000',
+      originalEmail.linkColor ?? '#0066cc',
+      originalEmail.fontFamily ?? 'Arial, sans-serif',
+      originalEmail.backgroundColor ?? '#f7f7f7',
+      originalEmail.rowBackgroundColor ?? '#f7f7f7',
+      originalEmail.width ?? '600'
+    )
+
+    // Compare the structures without ids
+
+    expect(removeIds(parsedEmail)).toEqual(removeIds(originalEmail))
+  })
 
   it('should generate equivalent script to the original template', () => {
     const email = turbotaxTemplate()

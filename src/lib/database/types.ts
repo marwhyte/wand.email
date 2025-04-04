@@ -50,6 +50,7 @@ export interface ChatTable {
   updatedAt: Generated<Date>
   deletedAt: Date | null
   companyId: string | null
+  hasConfirmedOutline: boolean
 }
 
 export type Chat = Omit<ChatTable, 'id' | 'createdAt' | 'updatedAt'> & {

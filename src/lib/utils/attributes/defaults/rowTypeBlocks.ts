@@ -4,10 +4,12 @@ import type {
   Email,
   EmailBlock,
   HeadingBlockAttributes,
+  IconBlockAttributes,
   ImageBlockAttributes,
   LinkBlockAttributes,
   ListBlockAttributes,
   RowBlock,
+  RowBlockType,
   SocialsBlockAttributes,
   SpacerBlockAttributes,
   SurveyBlockAttributes,
@@ -31,6 +33,7 @@ type BlockAttributeMap = {
   table: TableBlockAttributes
   list: ListBlockAttributes
   spacer: SpacerBlockAttributes
+  icon: IconBlockAttributes
 }
 
 type BlockStyleModifier = {
@@ -45,204 +48,40 @@ type BlockStyleModifier = {
   spacer?: Partial<SpacerBlockAttributes>
   survey?: Partial<SurveyBlockAttributes>
   list?: Partial<ListBlockAttributes>
+  icon?: Partial<IconBlockAttributes>
 }
 
 type VariantBlockStyles = Record<string, BlockStyleModifier>
 
-// Add variant-specific styles
-export const variantBlockDefaults: Record<string, VariantBlockStyles> = {
-  outline: {
-    default: {
-      heading: {
-        textAlign: 'center',
-      },
-      text: {
-        textAlign: 'center',
-      },
-      image: {
-        align: 'center',
-      },
-      button: {
-        fontSize: '14px',
-        paddingTop: '10px',
-        paddingBottom: '10px',
-        paddingLeft: '24px',
-        paddingRight: '24px',
-        backgroundColor: '#4184f3',
-        borderRadius: '5px',
-      },
-      link: {
-        align: 'center',
-        fontSize: '14px',
-        color: '#4184f3',
-      },
-      socials: {},
+export const rowTypeBlockDefaults: Record<RowBlockType, BlockStyleModifier> = {
+  default: {},
+  hero: {
+    heading: {
+      textAlign: 'center',
+      paddingTop: '0px',
+      paddingBottom: '16px',
     },
-    h1: {
-      heading: {
-        fontSize: '28px',
-      },
+    text: {
+      textAlign: 'center',
+      paddingTop: '0px',
+      paddingBottom: '32px',
     },
-    h2: {
-      heading: {
-        fontSize: '24px',
-      },
+    image: {
+      align: 'center',
+      paddingTop: '0px',
+      paddingBottom: '32px',
     },
-    footer: {
-      text: {
-        fontSize: '12px',
-        color: '#8b8b8b',
-      },
+    button: {
+      paddingTop: '0px',
+      paddingBottom: '0px',
     },
   },
-  default: {
-    footer: {
-      text: {
-        color: '#696969',
-      },
-    },
-    default: {
-      link: {
-        align: 'center',
-      },
-      button: {
-        paddingLeft: '0',
-        contentPaddingLeft: '24px',
-        contentPaddingRight: '24px',
-        fontWeight: 'bold',
-      },
-    },
-  },
-  clear: {
-    footer: {
-      text: {
-        color: '#696969',
-      },
-      link: {
-        align: 'center',
-      },
-    },
-    default: {
-      button: {
-        paddingLeft: '0',
-        contentPaddingLeft: '24px',
-        contentPaddingRight: '24px',
-        fontWeight: 'bold',
-      },
-    },
-    h1: {
-      heading: {
-        fontSize: '36px',
-      },
-    },
-    h2: {
-      heading: {
-        fontSize: '32px',
-      },
-    },
-    h3: {
-      heading: {
-        fontSize: '20px',
-      },
-    },
-    h4: {},
-  },
-}
-
-// Add email type-specific styles
-export const emailTypeBlockDefaults: Record<string, VariantBlockStyles> = {
-  cart: {
-    default: {
-      text: {
-        textAlign: 'center',
-      },
-      heading: {
-        textAlign: 'center',
-      },
-    },
-  },
-  ecommerce: {
-    default: {
-      button: {
-        align: 'center',
-        paddingLeft: '0',
-        contentPaddingLeft: '24px',
-        contentPaddingRight: '24px',
-        fontWeight: 'bold',
-      },
-    },
-  },
-  newsletter: {
-    default: {
-      heading: {
-        color: '#0a2540',
-        textAlign: 'left',
-        paddingBottom: '10px',
-        paddingTop: '10px',
-      },
-      text: {
-        textAlign: 'left',
-        fontSize: '16px',
-        color: '#3f4b66',
-      },
-      list: {
-        color: '#3f4b66',
-      },
-      button: {
-        backgroundColor: '#635bff',
-        fontWeight: 'bold',
-        paddingLeft: '0',
-        paddingRight: '0',
-      },
-      image: {
-        paddingTop: '10px',
-      },
-    },
-    header: {
-      heading: {},
-    },
-    footer: {
-      heading: {
-        textAlign: 'center',
-      },
-      text: {
-        fontSize: '12px',
-        textAlign: 'center',
-      },
-    },
-  },
-  marketing: {
-    default: {
-      heading: {},
-      text: {},
-      button: {},
-    },
-    header: {
-      image: {},
-    },
-  },
-  transactional: {
-    default: {
-      heading: {},
-      text: {
-        fontSize: '14px',
-      },
-      button: {},
-    },
-    h1: {
-      heading: {
-        fontSize: '28px',
-      },
-    },
-    h2: {
-      heading: {
-        fontSize: '24px',
-      },
-    },
-  },
-}
-
-export const rowTypeBlockDefaults: Record<string, BlockStyleModifier> = {
+  'key-features': {},
+  cards: {},
+  article: {},
+  list: {},
+  cta: {},
+  invoice: {},
   cart: {
     image: {
       paddingRight: '16px',
@@ -357,48 +196,9 @@ function getMergedStyleDefaults(
     ? rowTypeBlockDefaults[parentRow.attributes.type]?.[block.type as keyof BlockStyleModifier]
     : {}
 
-  // Get variant-specific styles
-  const variantStyles = emailAttributes?.styleVariant
-    ? variantBlockDefaults[emailAttributes.styleVariant]?.default?.[block.type as keyof BlockStyleModifier] || {}
-    : {}
-
-  // Get row-type specific variant styles
-  const rowTypeVariantStyles =
-    emailAttributes?.styleVariant && parentRow.attributes.type
-      ? variantBlockDefaults[emailAttributes.styleVariant]?.[parentRow.attributes.type]?.[
-          block.type as keyof BlockStyleModifier
-        ] || {}
-      : {}
-
-  // Get email type-specific styles
-  const emailTypeStyles = emailAttributes?.type
-    ? emailTypeBlockDefaults[emailAttributes.type]?.default?.[block.type as keyof BlockStyleModifier] || {}
-    : {}
-
-  // Get row-type specific email type styles
-  const rowTypeEmailTypeStyles =
-    emailAttributes?.type && parentRow.attributes.type
-      ? emailTypeBlockDefaults[emailAttributes.type]?.[parentRow.attributes.type]?.[
-          block.type as keyof BlockStyleModifier
-        ] || {}
-      : {}
-
-  // Apply variant-specific styles for heading levels
-  if (block.type === 'heading' && emailAttributes?.styleVariant) {
-    const headingLevel = block.attributes.level
-    const levelSpecificStyles = variantBlockDefaults[emailAttributes.styleVariant]?.[headingLevel]?.heading || {}
-    const emailTypeLevelSpecificStyles = emailTypeBlockDefaults[emailAttributes.type]?.[headingLevel]?.heading || {}
-    Object.assign(variantStyles, levelSpecificStyles)
-    Object.assign(variantStyles, emailTypeLevelSpecificStyles)
-  }
-
   // Merge styles with priority: base < email type < variant < row-specific
   return {
     ...baseDefaults,
-    ...variantStyles,
-    ...rowTypeVariantStyles,
-    ...emailTypeStyles,
-    ...rowTypeEmailTypeStyles,
   } as BlockStyleModifier
 }
 
@@ -459,12 +259,6 @@ function getBlockSpecificOverrides(
         }
 
         return { image: additionalStyles }
-      }
-      break
-
-    case 'heading':
-      if (parentRow.attributes.type === 'footer' && parentRow.columns.length === 1) {
-        return { heading: { textAlign: 'center' } }
       }
       break
   }

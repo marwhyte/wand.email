@@ -7,14 +7,14 @@ import { magicLinkExample } from '@/app/components/email-workspace/templates/tra
 import { googleTransactionalExample } from '@/app/components/email-workspace/templates/transactional/outline-google'
 import { shippingExample } from '@/app/components/email-workspace/templates/transactional/shipping'
 import { defaultWelcomeSeriesExample } from '@/app/components/email-workspace/templates/welcome/default'
-import { EmailType, emailTypes } from '@/app/components/email-workspace/types'
+import { EmailTheme, EmailType, emailTypes, themeColorMap } from '@/app/components/email-workspace/types'
 import { MAX_TOKENS } from '@/constants'
 import { anthropic } from '@ai-sdk/anthropic'
 import { google } from '@ai-sdk/google'
 import { openai } from '@ai-sdk/openai'
 import { streamText as _streamText, convertToCoreMessages, generateText, Message } from 'ai'
 import { v4 as uuidv4 } from 'uuid'
-import { getSystemPrompt } from './prompts'
+import { getOutlinePrompt, getSystemPrompt } from './prompts'
 
 export type Messages = Message[]
 
@@ -177,16 +177,34 @@ export async function getRelevantExample(userMessage: string): Promise<{ emailTy
 // Get the model provider from environment variable, default to 'google'
 export const DEFAULT_PROVIDER = (process.env.LLM_PROVIDER as ModelProvider) || 'google'
 
-export async function streamText(
-  messages: Messages,
-  options?: StreamingOptions,
-  companyName?: string,
-  companyDescription?: string,
-  companyAddress?: string,
-  provider: ModelProvider = DEFAULT_PROVIDER,
-  assistantMessageId?: string,
+// Define a type for the streamText parameters
+export type StreamTextParams = {
+  messages: Messages
+  options?: StreamingOptions
+  companyName?: string
+  companyDescription?: string
+  companyAddress?: string
+  provider?: ModelProvider
+  assistantMessageId?: string
   emailType?: EmailType
-) {
+  isGeneratingOutline?: boolean
+  emailTheme: EmailTheme
+}
+
+export async function streamText(params: StreamTextParams) {
+  const {
+    messages,
+    options,
+    companyName,
+    companyDescription,
+    companyAddress,
+    provider = DEFAULT_PROVIDER,
+    assistantMessageId,
+    emailType,
+    isGeneratingOutline = true,
+    emailTheme,
+  } = params
+
   // Find the first and last user messages
   const userMessages = messages.filter((msg) => msg.role === 'user')
   const firstUserMessage = userMessages[0]
@@ -195,44 +213,63 @@ export async function streamText(
     firstUserMessage?.id !== lastUserMessage?.id ? lastUserMessage?.content || '' : ''
   }`
 
-  // Check if examples are already in messages
-  const examplesInMessages = messages.some((msg) => msg.content.includes('<examples_for_email_type>'))
-
-  // Determine email type and relevant example in a single request
+  // Determine email type
   let detectedEmailType = emailType
-  let initialExample = ''
 
-  if (!examplesInMessages) {
+  // If no email type is provided, determine it based on the user's question
+  if (!detectedEmailType) {
     try {
-      const { emailType: detectedType, example } = await getRelevantExample(combinedUserPrompt)
-      detectedEmailType = detectedType
-      initialExample = `
-      <examples_for_email_type>
-        ${example}
-      </examples_for_email_type>
-      `
+      const { text } = await generateText({
+        model: google('gemini-2.0-flash-001'),
+        system: `You are analyzing a user's email creation request to determine the most appropriate email TYPE from: ${emailTypes.join(', ')}.
+        
+        Respond with ONLY the email type name, nothing else.`,
+        prompt: combinedUserPrompt,
+      })
+
+      // Clean up the response to get just the email type
+      const cleanResponse = text.trim().toLowerCase()
+
+      // Try to extract the email type from the response
+      // First, check if the response directly contains a valid email type
+      let extractedType: EmailType | null = null
+
+      // Check if any of the email types are in the response
+      for (const type of emailTypes) {
+        if (cleanResponse.includes(type.toLowerCase())) {
+          extractedType = type as EmailType
+          break
+        }
+      }
+
+      // If we found a valid email type, use it
+      if (extractedType) {
+        detectedEmailType = extractedType
+      } else {
+        // If no valid email type was found, use default
+        detectedEmailType = 'default'
+      }
     } catch (error) {
-      console.error('Error getting relevant example:', error)
-      detectedEmailType = detectedEmailType || 'default'
-      // Fallback to eBay example if there's an error
-      initialExample = `
-      <examples_for_email_type>
-        ${ebayEcommerceExample}
-      </examples_for_email_type>
-      `
+      console.error('Error determining email type:', error)
+      detectedEmailType = 'default'
     }
   }
 
-  const systemPrompt = getSystemPrompt(
-    initialExample,
-    companyName,
-    companyDescription,
-    companyAddress,
-    detectedEmailType
-  )
+  console.log('detectedEmailType', detectedEmailType)
+
+  // Use different prompts based on whether we're generating an outline or the actual email
+  const systemPrompt = isGeneratingOutline
+    ? getOutlinePrompt({ companyName, companyDescription, companyAddress, emailType: detectedEmailType as EmailType })
+    : getSystemPrompt({
+        emailTheme: themeColorMap[emailTheme].name,
+        emailType: detectedEmailType as EmailType,
+        companyName,
+        companyDescription,
+        companyAddress,
+      })
 
   // Process messages to only include email states from the 2 most recent user messages
-  const processedMessages = messages.map((msg, index) => {
+  const processedMessages = messages.map((msg) => {
     if (msg.role !== 'user') return msg
 
     const emailStateMatch = msg.content.match(/<email_state>\n(.*?)\n<\/email_state>/s)
@@ -265,20 +302,6 @@ export async function streamText(
     system: systemPrompt,
     maxTokens: MAX_TOKENS,
     messages: convertToCoreMessages(processedMessages),
-    // tools: {
-    //   getExamples: tool({
-    //     description:
-    //       'Fetch example email templates based on the specified email type. Only use this if the current email type is different from what was initially provided, or if no email type was initially provided.',
-    //     parameters: z.object({
-    //       emailType: z.string().describe('The type of email template to fetch examples for'),
-    //     }),
-    //     execute: async ({ emailType }: { emailType: string }) => {
-    //       console.log('Tool executed with email type:', emailType)
-    //       return getExamplesByType(emailType as EmailType)
-    //     },
-    //   }),
-    // },
-    // maxSteps: 5,
     ...options,
   })
 }

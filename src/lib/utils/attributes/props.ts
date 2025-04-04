@@ -5,6 +5,7 @@ import type {
   Email,
   EmailBlock,
   HeadingBlock,
+  IconBlock,
   ImageBlock,
   LinkBlock,
   ListBlock,
@@ -30,13 +31,14 @@ import type {
   Section,
   Text,
 } from '@react-email/components'
-import { getImgSrc } from '../misc'
+import { ensurePx, getImgSrc } from '../misc'
 import { getBlockAttributes, getEmailAttributes, getRowAttributes } from './attributes'
 import { applyPaddingAttributes, applyTextAttributes } from './common'
 import {
   getAdditionalButtonStyles,
   getAdditionalDividerStyles,
   getAdditionalHeadingStyles,
+  getAdditionalIconStyles,
   getAdditionalImageStyles,
   getAdditionalLinkStyles,
   getAdditionalListStyles,
@@ -235,6 +237,23 @@ export function getSpacerProps(
   }
 }
 
+export function getIconProps(
+  block: IconBlock,
+  parentRow: RowBlock,
+  email: Email | null
+): OmitChildren<React.ComponentProps<'img'>> {
+  const iconAttributes = getBlockAttributes(block, parentRow, email)
+
+  return {
+    style: {
+      height: ensurePx(iconAttributes.size ?? '24'),
+      width: ensurePx(iconAttributes.size ?? '24'),
+      ...applyPaddingAttributes(block.attributes),
+      ...getAdditionalIconStyles(block, parentRow, email),
+    },
+  }
+}
+
 export function getBlockProps<T extends EmailBlock>(
   block: T,
   parentRow: RowBlock,
@@ -284,6 +303,8 @@ export function getBlockProps<T extends EmailBlock>(
       return getListProps(block as ListBlock, parentRow, email) as any
     case 'spacer':
       return getSpacerProps(block as SpacerBlock, parentRow, email) as any
+    case 'icon':
+      return getIconProps(block as IconBlock, parentRow, email) as any
     default:
       return {} as never
   }

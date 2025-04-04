@@ -4,6 +4,7 @@ import {
   EmailBlock,
   EmailBlockType,
   HeadingBlock,
+  IconBlock,
   ImageBlock,
   LinkBlock,
   ListBlock,
@@ -234,6 +235,18 @@ export function createNewBlock<T extends EmailBlockType>(type: T): Extract<Email
           height: '10',
         },
       }
+      return block as Extract<EmailBlock, { type: T }>
+    }
+
+    case 'icon': {
+      const block: IconBlock = {
+        ...baseBlock,
+        type: 'icon',
+        attributes: {
+          icon: 'check',
+        },
+      }
+
       return block as Extract<EmailBlock, { type: T }>
     }
 

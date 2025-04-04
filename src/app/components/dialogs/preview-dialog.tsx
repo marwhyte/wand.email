@@ -1,8 +1,10 @@
+import { Email } from '@/app/components/email-workspace/types'
+import { useEmailPreprocessor } from '@/app/hooks/useEmailPreprocessor'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { generateEmailScript } from '@/lib/utils/email-script-generator'
 import { render } from '@react-email/components'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import EmailRendererFinal from '../email-workspace/email-renderer-final'
 import { Tab, TabGroup, TabList } from '../tab'
 import { Dialog, DialogBody, DialogTitle } from './dialog'
@@ -17,10 +19,32 @@ const PreviewDialog = ({ open, onClose }: Props) => {
   const { company } = useChatStore()
   const [selectedWidth, setSelectedWidth] = useState<'600' | '750'>('750')
   const [selectedTab, setSelectedTab] = useState<'preview' | 'script'>('preview')
-  const emailScript = open && email ? generateEmailScript(email) : ''
+  const [processedEmail, setProcessedEmail] = useState<Email | null>(null)
+  const { preprocessAndGetEmail, isProcessing } = useEmailPreprocessor()
 
-  // Generate the complete HTML string
-  const htmlContent = open ? render(EmailRendererFinal({ email: email, company: company })) : ''
+  // Process the email when the dialog opens or when the email changes
+  useEffect(() => {
+    if (!open || !email) return
+
+    const processIcons = async () => {
+      // Preprocess all icons in the email using our hook
+      const emailWithIcons = await preprocessAndGetEmail(email)
+
+      // Update the state with the processed email
+      if (emailWithIcons) {
+        setProcessedEmail(emailWithIcons)
+      }
+    }
+
+    processIcons()
+  }, [open, email, preprocessAndGetEmail])
+
+  // Use the processed email for the script generation
+  const emailScript = open && processedEmail ? generateEmailScript(processedEmail) : ''
+
+  // Generate the complete HTML string from the processed email
+  const htmlContent =
+    open && processedEmail ? render(EmailRendererFinal({ email: processedEmail, company: company })) : ''
 
   const widthOptions = [
     { name: '600px', value: '600' },
@@ -65,7 +89,15 @@ const PreviewDialog = ({ open, onClose }: Props) => {
         </TabGroup>
       </DialogTitle>
       <DialogBody>
-        {selectedTab === 'preview' ? (
+        {isProcessing ? (
+          <div className="flex h-[70vh] flex-col items-center justify-center">
+            <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+            <p className="mt-4">Processing email content...</p>
+            <p className="mt-2 text-sm text-gray-500">
+              Uploading icons to ensure your email looks perfect when delivered.
+            </p>
+          </div>
+        ) : selectedTab === 'preview' ? (
           <iframe
             srcDoc={htmlContent}
             className="h-[70vh] border-0"

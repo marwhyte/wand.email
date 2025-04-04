@@ -30,6 +30,7 @@ export async function createChat({
         title: title ?? '',
         email,
         companyId: companyId,
+        hasConfirmedOutline: false,
       })
       .returningAll()
       .executeTakeFirst()
@@ -108,7 +109,7 @@ export async function deleteMessagesAfterId(id: string, chatId: string) {
 
 export async function updateChat(
   id: string,
-  updates: { messages?: Message[]; title?: string; email?: string; parsed?: boolean }
+  updates: { messages?: Message[]; title?: string; email?: string; parsed?: boolean; hasConfirmedOutline?: boolean }
 ) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -136,6 +137,18 @@ export async function updateChat(
           .updateTable('Chat')
           .set({
             email: updates.email,
+            updatedAt: new Date(),
+          })
+          .where('id', '=', id)
+          .where('userId', '=', session.user.id)
+          .execute()
+      }
+
+      if (updates.hasConfirmedOutline !== undefined) {
+        await trx
+          .updateTable('Chat')
+          .set({
+            hasConfirmedOutline: updates.hasConfirmedOutline,
             updatedAt: new Date(),
           })
           .where('id', '=', id)
