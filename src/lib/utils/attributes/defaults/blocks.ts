@@ -12,10 +12,11 @@ import type {
   TableBlock,
   TextBlock,
 } from '@/app/components/email-workspace/types'
-import { Email, themeColorMap } from '@/app/components/email-workspace/types'
+import { Email } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
-import { ensurePx, shouldUseDarkText } from '../../misc'
+import { shouldUseDarkText } from '../../colors'
+import { ensurePx } from '../../misc'
 import { getButtonAttributes, getEmailAttributes } from '../attributes'
 import { getBlockCSSProperties } from './rowTypeBlocks'
 
@@ -26,7 +27,7 @@ export const getAdditionalTextStyles = (
 ): React.ComponentProps<typeof Text>['style'] => {
   const emailAttributes = getEmailAttributes(email)
   const baseDefaults: React.ComponentProps<typeof Text>['style'] = {
-    textAlign: 'left',
+    textAlign: 'center',
     paddingTop: '10px',
     paddingRight: '0',
     paddingBottom: '10px',
@@ -68,7 +69,7 @@ export const getAdditionalHeadingStyles = (
   const emailAttributes = getEmailAttributes(email)
 
   const baseDefaults: React.ComponentProps<typeof Heading>['style'] = {
-    textAlign: 'left',
+    textAlign: 'center',
     paddingTop: '12px',
     paddingRight: '0',
     paddingBottom: '12px',
@@ -76,7 +77,7 @@ export const getAdditionalHeadingStyles = (
     fontWeight: 'bold',
     lineHeight: '100%',
     letterSpacing: 'normal',
-    color: emailAttributes.theme === 'dark' ? '#ffffff' : '#1f2937',
+    color: emailAttributes.color,
     fontFamily: emailAttributes.fontFamily,
     fontSize: defaultHeadingSizes[headingBlock.attributes.level as keyof typeof defaultHeadingSizes] ?? '16px',
   }
@@ -204,10 +205,10 @@ export const getAdditionalButtonStyles = (
         borderBottom: '0px solid transparent',
       }
 
-  const backgroundColor = styleAttributes.backgroundColor || themeColorMap[emailAttributes.theme].action
+  const backgroundColor = styleAttributes.backgroundColor || emailAttributes.themeColor
   const color = styleAttributes.backgroundColor
     ? styleAttributes.color
-    : shouldUseDarkText(themeColorMap[emailAttributes.theme].action)
+    : shouldUseDarkText(emailAttributes.themeColor)
       ? '#000000'
       : '#ffffff'
 

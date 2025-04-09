@@ -198,4 +198,8 @@ export const ebayEcommerceExample = `
 </example>
 `
 
-export const defaultEbayTemplate = createEmail(parseEmailScript(defaultEbayTemplateScript(true)), '#000000', '#000000')
+export const defaultEbayTemplate = createEmail(
+  parseEmailScript(defaultEbayTemplateScript(true), '#000000', 'rounded'),
+  '#000000',
+  '#000000'
+)

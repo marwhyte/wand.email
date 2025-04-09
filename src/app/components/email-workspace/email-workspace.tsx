@@ -7,6 +7,7 @@ import { DndProvider } from 'react-dnd'
 import { HTML5Backend } from 'react-dnd-html5-backend'
 import EmailEditor from './email-editor'
 import EmailRenderer from './email-renderer'
+import { EmailWorkspaceFooter } from './email-workspace-footer'
 
 type Props = {
   isStreaming: boolean
@@ -34,8 +35,13 @@ export default function Workspace({ isStreaming }: Props) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: 'easeOut' }}
       >
-        <div className="flex flex-row" style={{ height: 'calc(100vh - 65px)' }}>
-          <EmailRenderer email={email} />
+        <div className="flex flex-row" style={{ height: 'calc(100vh - 78px)' }}>
+          <div className="relative flex flex-1 flex-col overflow-hidden">
+            <EmailRenderer email={email} />
+            <div className="flex-shrink-0">
+              <EmailWorkspaceFooter />
+            </div>
+          </div>
           {!isMobile && <EmailEditor email={email} />}
         </div>
       </motion.div>

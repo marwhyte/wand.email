@@ -26,6 +26,9 @@ export default function PaddingForm({ padding, label, onChange }: PaddingFormPro
   })
 
   useEffect(() => {
+    setIsAdvanced(Object.values(padding).some((value) => value !== padding.top))
+  }, [padding])
+  useEffect(() => {
     setLocalPadding(padding)
   }, [padding])
 

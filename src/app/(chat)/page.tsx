@@ -26,7 +26,7 @@ export default async function HomePage() {
   return (
     <div className="relative isolate flex h-[100dvh] flex-col">
       <div className="flex h-full flex-1 overflow-hidden">
-        <Chat key={id} initialMessages={[]} id={id} />
+        <Chat key={id} initialMessages={[]} id={id} initialChatStarted={false} />
       </div>
       <Footer />
     </div>

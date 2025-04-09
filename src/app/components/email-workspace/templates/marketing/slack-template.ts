@@ -127,6 +127,6 @@ export const slackTemplateScript = `
 `
 
 export const slackTemplate = (): Email => {
-  const rows = parseEmailScript(slackTemplateScript)
+  const rows = parseEmailScript(slackTemplateScript, '#333333', 'rounded')
   return createEmail(rows, '#333333', '#333333', 'Lato, Arial, sans-serif', '#ffffff', '500')
 }

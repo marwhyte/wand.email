@@ -11,13 +11,15 @@ type Props = {
 }
 
 export function useChatHistory({ chat, chatId, company }: Props) {
-  const { setChatId, setTitle, setCompany } = useChatStore()
+  const { setChatId, setTitle, setCompany, setThemeColor, setBorderRadius } = useChatStore()
   const { setEmail } = useEmailStore()
 
   useEffect(() => {
     if (chat) {
-      setEmail(chat.email ? parseEmailScript(chat.email) : null)
+      setEmail(chat.email ? parseEmailScript(chat.email, chat.color, chat.borderRadius) : null)
       setTitle(chat.title)
+      setThemeColor(chat.color)
+      setBorderRadius(chat.borderRadius)
     } else {
       setEmail(null)
       setTitle(undefined)

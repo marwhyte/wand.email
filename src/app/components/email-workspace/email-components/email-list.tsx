@@ -22,9 +22,6 @@ const EmailList = ({ block, parentRow, email }: Props) => {
   const saveEmail = useEmailSave()
   const [selectedItemIndex, setSelectedItemIndex] = useState<number | null>(null)
   const editorRefs = useRef<Array<HTMLLIElement | null>>([])
-  const theme = emailAttributes.theme || 'default'
-
-  console.log('listAttributes', listAttributes)
 
   // Reset refs array when items change
   useEffect(() => {

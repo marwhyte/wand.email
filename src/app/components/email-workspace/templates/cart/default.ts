@@ -131,4 +131,8 @@ export const defaultCartSeriesExample = `
 </example>
 `
 
-export const defaultCartTemplate = createEmail(parseEmailScript(defaultCartTemplateScript(true)), '#000000', '#000000')
+export const defaultCartTemplate = createEmail(
+  parseEmailScript(defaultCartTemplateScript(true), '#000000', 'rounded'),
+  '#000000',
+  '#000000'
+)

@@ -1,8 +1,8 @@
 'use client'
 
+import { Chat } from '@/lib/database/types'
 import { classNames } from '@/lib/utils/misc'
 import type { Message } from 'ai'
-import { useSession } from 'next-auth/react'
 import React from 'react'
 import { Logo } from '../Logo'
 import { UserAvatar } from '../user-avatar'
@@ -14,13 +14,11 @@ interface MessagesProps {
   className?: string
   isStreaming?: boolean
   messages?: Message[]
+  chat: Chat | null | undefined
 }
 
 export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: MessagesProps, ref) => {
-  const { id, isStreaming = false, messages = [] } = props
-  const { data } = useSession()
-
-  console.log(messages)
+  const { id, isStreaming = false, messages = [], chat } = props
 
   return (
     <div id={id} ref={ref} className={props.className + ' w-full'}>
@@ -47,7 +45,13 @@ export const Messages = React.forwardRef<HTMLDivElement, MessagesProps>((props: 
                     {isUserMessage ? (
                       <UserMessage content={content} />
                     ) : (
-                      <AssistantMessage content={content} message={message} messages={messages} />
+                      <AssistantMessage
+                        isStreaming={isStreaming}
+                        content={content}
+                        message={message}
+                        messages={messages}
+                        chat={chat}
+                      />
                     )}
                   </div>
                 </div>

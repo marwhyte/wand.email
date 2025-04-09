@@ -11,20 +11,6 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
-export function shouldUseDarkText(backgroundColor: string) {
-  // Convert hex to RGB
-  const hex = backgroundColor.replace('#', '')
-  const r = parseInt(hex.substring(0, 2), 16)
-  const g = parseInt(hex.substring(2, 4), 16)
-  const b = parseInt(hex.substring(4, 6), 16)
-
-  // Calculate relative luminance
-  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
-
-  // Use dark text if background is light (luminance > 0.65)
-  return luminance > 0.65
-}
-
 // export const renderSocialIcons = () => {
 //   return FOLDERS.map(({ name, title }) => (
 //     <div key={name} className="flex flex-col items-center gap-8">
@@ -100,7 +86,11 @@ export const parseText = (text: string, linkColor: string) => {
   return parse(text, options)
 }
 
-export function getEmailFromMessage(message: Message) {
+export function getEmailFromMessage(
+  message: Message,
+  themeColor: string,
+  borderRadius: 'default' | 'rounded' | 'square'
+) {
   const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+[^>]*>/)
   const hasCloseTag = message.content.includes('</EMAIL>')
 
@@ -110,7 +100,7 @@ export function getEmailFromMessage(message: Message) {
 
     if (emailMatch) {
       const emailString = emailMatch[0] // This gets the entire match including tags
-      const emailObject = parseEmailScript(emailString)
+      const emailObject = parseEmailScript(emailString, themeColor, borderRadius)
       return emailObject
     }
   }

@@ -34,10 +34,9 @@ import { outlineStocktwitsTemplate } from './email-workspace/templates/newslette
 import { defaultNikeVerificationTemplate } from './email-workspace/templates/transactional/default-nike-verification'
 import { magicLinkTemplate } from './email-workspace/templates/transactional/magic-link'
 import { outlineGoogleTemplate } from './email-workspace/templates/transactional/outline-google'
-import { Email, EmailStyleVariant } from './email-workspace/types'
+import { Email } from './email-workspace/types'
 import Loading from './loading'
 import Notification from './notification'
-import { Select } from './select'
 import { Tab, TabGroup, TabList } from './tab'
 
 type Props = {
@@ -48,10 +47,9 @@ type Props = {
 export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()
   const { email, setEmail } = useEmailStore()
-  const { chatId } = useChatStore()
+  const { chatId, hasConfirmedOutline, title, setTitle, company } = useChatStore()
   const isMobile = useIsMobile()
   const emailAttributes = getEmailAttributes(email)
-  const { title, setTitle, company } = useChatStore()
   const { mobileView, setMobileView } = useMobileViewStore()
   const [emailStatus, setEmailStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const saveEmail = useEmailSave()
@@ -177,28 +175,16 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
 
         {email && session?.data?.user && (
           <div className={classNames('flex items-center', isMobile && chatStarted ? 'space-x-2' : 'space-x-4')}>
-            {/* {process.env.NODE_ENV === 'development' && !isMobile && (
-              <Select
-                value={emailAttributes.styleVariant}
-                onChange={(e) => setEmail(templates.find((t) => t.name === e.target.value)?.value ?? null)}
-              >
-                <option value="default">Default</option>
-                {templates.map((template) => (
-                  <option key={template.name}>{template.name}</option>
-                ))}
-              </Select>
-            )} */}
-
             {(!isMobile || !chatStarted) && (
               <>
-                <Select
+                {/* <Select
                   value={emailAttributes.styleVariant}
                   onChange={(e) => handleChange({ styleVariant: e.target.value as EmailStyleVariant })}
                 >
                   <option value="default">Default</option>
                   <option value="outline">Outline</option>
                   <option value="clear">Clear</option>
-                </Select>
+                </Select> */}
 
                 <TabGroup
                   value={selectedDevice}

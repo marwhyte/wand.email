@@ -77,15 +77,21 @@ export const Input = forwardRef(function Input(
                 '[&::-webkit-datetime-edit-meridiem-field]:p-0',
               ],
             // Color input classes
-            props.type === 'color' && ['h-8 w-8 cursor-pointer p-0.5'],
+            props.type === 'color' && [
+              'h-10 w-10 cursor-pointer overflow-hidden bg-gray-50 p-0',
+              '[&::-webkit-color-swatch-wrapper]:!m-0 [&::-webkit-color-swatch-wrapper]:h-full [&::-webkit-color-swatch-wrapper]:w-full [&::-webkit-color-swatch-wrapper]:bg-gray-50 [&::-webkit-color-swatch-wrapper]:!p-2',
+              '[&::-webkit-color-swatch]:!m-0 [&::-webkit-color-swatch]:h-full [&::-webkit-color-swatch]:w-full [&::-webkit-color-swatch]:rounded-lg [&::-webkit-color-swatch]:!border-0',
+              '[&::-moz-color-swatch]:!m-0 [&::-moz-color-swatch]:h-full [&::-moz-color-swatch]:w-full [&::-moz-color-swatch]:rounded-lg [&::-moz-color-swatch]:!border-0',
+            ],
             // Basic layout
             'relative block w-full appearance-none rounded-lg px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing[3])-1px)] sm:py-[calc(theme(spacing[1.5])-1px)]',
             // Override padding for color inputs
-            props.type === 'color' && 'px-0.5 py-0.5 sm:px-0.5 sm:py-0.5',
+            props.type === 'color' && '!border-0 !p-0 sm:!p-0',
             // Typography
             'text-base/6 text-zinc-950 placeholder:text-zinc-500 dark:text-white sm:text-sm/6',
             // Border
-            'border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20',
+            props.type !== 'color' &&
+              'border border-zinc-950/10 data-[hover]:border-zinc-950/20 dark:border-white/10 dark:data-[hover]:border-white/20',
             // Background color
             'bg-transparent dark:bg-white/5',
             // Hide default focus styles

@@ -7,7 +7,7 @@ import { magicLinkExample } from '@/app/components/email-workspace/templates/tra
 import { googleTransactionalExample } from '@/app/components/email-workspace/templates/transactional/outline-google'
 import { shippingExample } from '@/app/components/email-workspace/templates/transactional/shipping'
 import { defaultWelcomeSeriesExample } from '@/app/components/email-workspace/templates/welcome/default'
-import { EmailTheme, EmailType, emailTypes, themeColorMap } from '@/app/components/email-workspace/types'
+import { EmailTheme, EmailType, emailTypes } from '@/app/components/email-workspace/types'
 import { MAX_TOKENS } from '@/constants'
 import { anthropic } from '@ai-sdk/anthropic'
 import { google } from '@ai-sdk/google'
@@ -255,13 +255,11 @@ export async function streamText(params: StreamTextParams) {
     }
   }
 
-  console.log('detectedEmailType', detectedEmailType)
-
   // Use different prompts based on whether we're generating an outline or the actual email
   const systemPrompt = isGeneratingOutline
     ? getOutlinePrompt({ companyName, companyDescription, companyAddress, emailType: detectedEmailType as EmailType })
     : getSystemPrompt({
-        emailTheme: themeColorMap[emailTheme].name,
+        emailTheme: emailTheme,
         emailType: detectedEmailType as EmailType,
         companyName,
         companyDescription,

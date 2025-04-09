@@ -3,11 +3,14 @@ import AlertBox from '@/app/components/alert-box'
 import { Button } from '@/app/components/button'
 import Loading from '@/app/components/loading'
 import { File } from '@/lib/database/types'
+import { formatFileSize } from '@/lib/utils/misc'
 import { useRef, useState } from 'react'
 
 type Props = {
   onUpload: (file: File) => void
 }
+
+const MAX_FILE_SIZE = 1024 * 1024 // 1MB in bytes
 
 const LogoUploader = ({ onUpload }: Props) => {
   const [isUploading, setIsUploading] = useState(false)
@@ -24,13 +27,38 @@ const LogoUploader = ({ onUpload }: Props) => {
       setError('Please upload only JPG or PNG image files.')
       return
     }
+    if (file.size > MAX_FILE_SIZE) {
+      setError(
+        `File size exceeds the maximum limit of ${formatFileSize(MAX_FILE_SIZE)}. This is the maximum size recommended for images.`
+      )
+      return
+    }
 
     setIsUploading(true)
     setError(null)
-    const formData = new FormData()
-    formData.append('file', file)
+
+    // Get image dimensions
+    const img = new Image()
+    const imgUrl = URL.createObjectURL(file)
 
     try {
+      const dimensions = await new Promise<{ width: number; height: number }>((resolve, reject) => {
+        img.onload = () => {
+          resolve({ width: img.width, height: img.height })
+          URL.revokeObjectURL(imgUrl)
+        }
+        img.onerror = () => {
+          reject(new Error('Failed to load image'))
+          URL.revokeObjectURL(imgUrl)
+        }
+        img.src = imgUrl
+      })
+
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('width', dimensions.width.toString())
+      formData.append('height', dimensions.height.toString())
+
       const result = await uploadFile(formData, false)
       if (result.success && result.file) {
         onUpload(result.file)

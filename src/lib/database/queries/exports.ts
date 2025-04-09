@@ -1,5 +1,6 @@
 'use server'
 
+import { notifySlack } from '@/app/actions/notifySlack'
 import { Email } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import { db } from '../db'
@@ -29,6 +30,8 @@ export async function addExport(content: Email, type: ExportType) {
   if (!session?.user?.id) {
     throw new Error('User not authenticated')
   }
+
+  notifySlack(`${session.user.email} exported with type ${type}`, 'upgrade')
 
   const newExport = await db
     .insertInto('Export')

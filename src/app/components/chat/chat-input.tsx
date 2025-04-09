@@ -1,10 +1,13 @@
 import { useIsMobile } from '@/app/hooks'
+import { Chat } from '@/lib/database/types'
 import { classNames } from '@/lib/utils/misc'
 import { SparklesIcon } from '@heroicons/react/24/outline'
 import { motion } from 'motion/react'
 import React from 'react'
 import { IconButton } from '../icon-button'
 import Loading from '../loading'
+import { ThemeColorPickerPopover } from '../theme-color-picker-popover'
+import { CompanySection } from './company-section'
 import { SendButton } from './send-button'
 
 const TEXTAREA_MIN_HEIGHT = 76
@@ -13,6 +16,7 @@ const TEXTAREA_MAX_HEIGHT = 200
 const MOBILE_CHAT_STARTED_MIN_HEIGHT = 50
 
 interface ChatInputProps {
+  chat: Chat | null
   chatStarted: boolean
   textareaRef: React.RefObject<HTMLTextAreaElement>
   input: string
@@ -24,9 +28,13 @@ interface ChatInputProps {
   enhancePrompt?: () => void
   handleStop?: () => void
   hasConfirmedOutline: boolean
+  onThemeChange?: (theme: any) => void
+  onColorChange?: (color: string) => void
+  onBorderRadiusChange?: (radius: any) => void
 }
 
 export function ChatInput({
+  chat,
   chatStarted,
   textareaRef,
   input,
@@ -38,6 +46,9 @@ export function ChatInput({
   enhancePrompt,
   handleStop,
   hasConfirmedOutline,
+  onThemeChange,
+  onColorChange,
+  onBorderRadiusChange,
 }: ChatInputProps) {
   const isMobile = useIsMobile()
 
@@ -68,7 +79,7 @@ export function ChatInput({
     >
       <div
         className={classNames(
-          'overflow-hidden rounded-lg border border-blue-200 bg-white shadow-sm backdrop-blur-[8px] backdrop-filter',
+          'rounded-lg border border-blue-200 bg-white shadow-sm backdrop-blur-[8px] backdrop-filter',
           'relative w-full',
           isMobile && chatStarted ? 'scale-90 transform' : ''
         )}
@@ -129,6 +140,9 @@ export function ChatInput({
                 title="Enhance prompt"
                 disabled={input.length === 0 || enhancingPrompt}
                 onClick={() => enhancePrompt?.()}
+                tooltip="Improve your prompt"
+                tooltipPosition="top"
+                tooltipId="enhance-prompt-tooltip"
               >
                 {enhancingPrompt ? (
                   <div className="flex items-center">
@@ -161,12 +175,13 @@ export function ChatInput({
               </IconButton>
             )}
           </div>
-          {input.length > 3 && !isMobile ? (
-            <div className="text-xs text-gray-500">
-              Use <kbd className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold">Shift</kbd> +{' '}
-              <kbd className="rounded bg-gray-100 px-2 py-1 text-xs font-semibold">Return</kbd> for a new line
+
+          {!chatStarted && (
+            <div className="flex items-center gap-2">
+              <ThemeColorPickerPopover tooltip="Select theme" tooltipPosition="top" popoverDirection="down" />
+              <CompanySection chat={chat} tooltip="Select branding" tooltipPosition="top" popoverDirection="down" />
             </div>
-          ) : null}
+          )}
         </div>
       </div>
     </motion.div>

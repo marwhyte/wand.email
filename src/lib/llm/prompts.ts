@@ -214,129 +214,6 @@ ${
 }
 
 ${templateStructureDefinition}
-
-<email_outline_guidance>
-Based on the email type, follow this outline structure:
-
-Welcome Series:
-1. Header
-   • Company branding and navigation
-   • Social links (if appropriate)
-
-2. Hero
-   • Welcome message and image
-   • Primary call-to-action
-
-3. Key Features (2-3)
-   • Main value proposition
-   • Key benefits or features
-
-4. CTA
-   • Next step or action
-   • Clear call-to-action
-
-5. Footer
-   • Company information and address
-   • Social links and unsubscribe
-
-Ecommerce:
-1. Header
-   • Company branding and navigation
-   • Social links (if appropriate)
-
-2. Hero
-   • Main promotional message
-   • Featured product or category
-   • Call to action button
-
-3. Key Features (2-3)
-   • Main value proposition
-   • Key benefits or features
-
-4. Cards (2-4)
-   • Category highlights
-   • Featured collections
-
-5. Discount
-   • Special offer
-   • Promo code or deal
-
-6. Footer
-   • Company information and address
-   • Social links and unsubscribe
-
-Newsletter:
-1. Header
-   • Company branding and navigation
-   • Social links (if appropriate)
-
-2. Article (2-3)
-   • Main content sections
-   • Key topics or updates
-
-3. CTA
-   • Newsletter signup
-   • Social sharing
-
-4. Footer
-   • Company information and address
-   • Social links and unsubscribe
-
-Transactional:
-1. Header
-   • Company branding
-   • Minimal navigation
-
-2. Content
-   • Main message or confirmation
-   • Important details
-
-3. CTA
-   • Next steps
-   • Action required
-
-4. Footer
-   • Company information and address
-   • Social links and unsubscribe
-
-Cart Abandonment:
-1. Header
-   • Company branding
-   • Social links (if appropriate)
-
-2. Cart
-   • Abandoned items
-   • Price and details
-
-3. Discount
-   • Recovery offer
-   • Special code
-
-4. CTA
-   • Return to cart
-   • Checkout button
-
-5. Footer
-   • Company information and address
-   • Social links and unsubscribe
-
-Default (if no specific type matches):
-1. Header
-   • Company branding
-   • Navigation (if needed)
-
-2. Content
-   • Main message
-   • Key information
-
-3. CTA
-   • Primary action
-   • Next steps
-
-4. Footer
-   • Company information and address
-   • Social links and unsubscribe
-</email_outline_guidance>
 `
 }
 
@@ -359,7 +236,7 @@ Email Type: [type]
 
 1. Header
    • Company branding and navigation
-   • Social links (if appropriate)
+   • Social links
 
 2. [Section Title]
    • First bullet point
@@ -375,7 +252,7 @@ Recommended sections based on email type:
 Welcome Series:
 1. Header
    • Company branding and navigation
-   • Social links (if appropriate)
+   • Social links
 
 2. Hero
    • Welcome message and image
@@ -396,7 +273,7 @@ Welcome Series:
 Ecommerce:
 1. Header
    • Company branding and navigation
-   • Social links (if appropriate)
+   • Social links
 
 2. Hero
    • Main promotional message
@@ -422,7 +299,7 @@ Ecommerce:
 Newsletter:
 1. Header
    • Company branding and navigation
-   • Social links (if appropriate)
+   • Social links
 
 2. Article (2-3)
    • Main content sections
@@ -456,7 +333,7 @@ Transactional:
 Cart Abandonment:
 1. Header
    • Company branding
-   • Social links (if appropriate)
+   • Social links
 
 2. Cart
    • Abandoned items
@@ -477,7 +354,7 @@ Cart Abandonment:
 Default (if no specific type matches):
 1. Header
    • Company branding
-   • Navigation (if needed)
+   • Navigation
 
 2. Content
    • Main message
@@ -498,6 +375,9 @@ Remember to:
 • Focus on main purpose
 • Include key actions
 • Always include header and footer sections
+• Include social links when they enhance the email's purpose
+• Include navigation when it improves user experience
+• Add sections that best serve the email's primary goal
 </instructions>
 
 ${

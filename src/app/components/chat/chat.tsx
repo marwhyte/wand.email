@@ -6,7 +6,6 @@ import { useChatHistory } from '@/app/hooks/useChatHistory'
 import { useLocalStorage } from '@/app/hooks/useLocalStorage'
 import { useMessageParser } from '@/app/hooks/useMessageParser'
 import { updateChat } from '@/lib/database/queries/chats'
-import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat as ChatType, Company } from '@/lib/database/types'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { chatStore } from '@/lib/stores/chat'
@@ -34,21 +33,20 @@ import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { v4 as uuidv4 } from 'uuid'
 import { BackgroundGradients } from '../background-gradients'
 import { Button } from '../button'
-import CompanyDialog from '../dialogs/company-dialog'
-import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
 import { MobileWarningDialog } from '../dialogs/mobile-warning-dialog'
 import UpgradeDialog from '../dialogs/upgrade-dialog'
 import Workspace from '../email-workspace/email-workspace'
 import { Menu } from '../sidebar/menu'
+import { Text } from '../text'
 import { ChatInput } from './chat-input'
 import { ChatIntro } from './chat-intro'
-import { CompanySection } from './company-section'
 import { Messages } from './messages'
 
 const logger = createScopedLogger('Chat')
 
 type Props = {
   id: string
+  initialChatStarted?: boolean
   chat?: ChatType
   chatCompany?: Company | null
   initialMessages: Message[]
@@ -94,9 +92,10 @@ function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
   )
 }
 
-export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
+export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarted = false }: Props) {
   // Add email store access
-  const { email, setEmail } = useEmailStore()
+  const { email } = useEmailStore()
+  const { themeColor, borderRadius } = useChatStore()
 
   const session = useSession()
 
@@ -108,16 +107,23 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     }
   )
 
-  const { data: companies } = useSWR<Company[]>(session?.data?.user?.id ? '/api/companies' : null, fetcher, {
-    fallbackData: [],
-  })
-
   const { mutate } = useSWRConfig()
-  const { setTitle, setCompany, company, title } = useChatStore()
+  const { setTitle, setCompany, company, title, hasConfirmedOutline, setHasConfirmedOutline } = useChatStore()
   useChatHistory({ chat: chat, chatId: id, company: chatCompany })
 
   // Chat state and handlers
-  const [hasConfirmedOutline, setHasConfirmedOutline] = useState(chat?.hasConfirmedOutline ?? false)
+  useEffect(() => {
+    if (chat?.hasConfirmedOutline !== undefined) {
+      setHasConfirmedOutline(chat.hasConfirmedOutline)
+    }
+  }, [chat?.hasConfirmedOutline, setHasConfirmedOutline])
+
+  useEffect(() => {
+    if (!chat?.id) {
+      setHasConfirmedOutline(false)
+    }
+  }, [chat?.id])
+
   const { messages, status, input, handleInputChange, setInput, stop, append } = useChat({
     id,
     experimental_throttle: 100,
@@ -133,14 +139,15 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       companyAddress: company?.address,
       emailType: email?.type,
       isGeneratingOutline: !hasConfirmedOutline,
-      emailTheme: email?.theme,
+      emailThemeColor: themeColor,
+      emailBorderRadius: borderRadius,
     },
     onFinish: () => {
       logger.debug('Finished streaming')
       mutate('/api/history')
     },
     onError: (error) => {
-      console.log('error', error)
+      console.error('error', error)
       if (error.message.includes('Rate limit exceeded.')) {
         setRateLimitError("You've reached the message limit. Please try again later.")
       }
@@ -169,17 +176,6 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
     messageInput?: string
   } | null>(null)
 
-  // Company management
-  const [activeCompany, setActiveCompany] = useState<Company | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-
-  const { showSignUpDialog, setShowSignUpDialog, stepType, setStepType } = useAuthStore()
-
-  // Dialog openers
-  const companyOpener = useOpener()
-  const deleteOpener = useOpener()
-  const mobileWarningOpener = useOpener()
-
   // Check if on mobile
   const isMobile = useIsMobile()
 
@@ -189,7 +185,9 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   // Store pending message to be sent after mobile warning confirmation
   const [pendingMessage, setPendingMessage] = useState<string | undefined>()
 
-  const { chatStarted, setChatStarted } = useChatStore()
+  const { chatStarted: chatStartedFromStore, setChatStarted } = useChatStore()
+
+  const chatStarted = initialChatStarted || chatStartedFromStore
 
   useEffect(() => {
     setChatStarted(initialMessages.length > 0)
@@ -277,29 +275,12 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   renderLogger.trace('Chat')
 
   useEffect(() => {
-    if (chat) return // Early return if chat exists
-
-    // Only update company if necessary to avoid infinite loops
-    if (companies?.length && !company) {
-      setCompany(companies[0])
-    } else if (!companies?.length && company) {
-      // Only clear company if companies is empty and we have a company set
-      setCompany(undefined)
-    } else if (company && companies?.length && !companies.find((c) => c.id === company.id)) {
-      // Only clear company if it no longer exists in the companies list
-      setCompany(undefined)
-    }
-  }, [companies, company, chat])
-
-  useEffect(() => {
     if (session.data?.user) {
       setShowSignUpDialog(false)
       // Execute pending action after successful authentication
       if (pendingAction) {
         if (pendingAction.type === 'send-message') {
           sendMessage(pendingAction.messageInput)
-        } else if (pendingAction.type === 'open-company-dialog') {
-          companyOpener.open()
         } else if (pendingAction.type === 'enhance-prompt') {
           enhancePrompt(input, (input) => {
             setInput(input)
@@ -365,10 +346,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
       return
     }
 
-    await Promise.all([
-      animate('#companyDetails', { opacity: 0, display: 'none' }, { duration: 0.1 }),
-      animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn }),
-    ])
+    await Promise.all([animate('#intro', { opacity: 0, flex: 1 }, { duration: 0.2, ease: cubicEasingFn })])
 
     setKey('started', true)
     setChatStarted(true)
@@ -427,7 +405,9 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
 
     runAnimation()
 
-    window.history.replaceState({}, '', `/chat/${id}`)
+    if (isGeneratingOutline) {
+      window.history.replaceState({}, '', `/chat/${id}`)
+    }
 
     let messageContent = _input
 
@@ -453,7 +433,8 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
           companyAddress: company?.address,
           emailType: email?.type,
           isGeneratingOutline,
-          emailTheme: email?.theme || 'default',
+          emailThemeColor: themeColor,
+          emailBorderRadius: borderRadius,
         },
       }
     )
@@ -467,35 +448,6 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
 
       await updateChat(id, { title })
     }
-  }
-
-  const handleDeleteCompany = async (companyId: string) => {
-    setActiveCompany(companies?.find((c) => c.id === companyId) || null)
-    deleteOpener.open()
-  }
-
-  const confirmDeleteCompany = async () => {
-    if (!activeCompany) return
-
-    try {
-      setIsDeleting(true)
-      await deleteCompany(activeCompany.id)
-      mutate('/api/companies')
-      setActiveCompany(null)
-    } catch (error) {
-    } finally {
-      setIsDeleting(false)
-
-      setCompany(undefined)
-
-      setActiveCompany(null)
-
-      deleteOpener.close()
-    }
-  }
-
-  const handleSelectCompany = (company: Company) => {
-    setCompany(company)
   }
 
   const examplePrompts = [
@@ -609,13 +561,21 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
   const renderOutlineConfirmation = () => {
     if (!hasConfirmedOutline && chatStarted && !isLoading) {
       return (
-        <div className="mt-4 flex justify-center">
-          <Button onClick={handleConfirmOutline}>Confirm Outline & Generate Email</Button>
+        <div className="mt-4 text-center">
+          <Button color="purple" onClick={handleConfirmOutline}>
+            Generate
+          </Button>
+          <Text className="mt-2 text-sm text-gray-500">
+            Click generate to create your email or tell me what you want to change.
+          </Text>
         </div>
       )
     }
     return null
   }
+
+  const { setShowSignUpDialog } = useAuthStore()
+  const mobileWarningOpener = useOpener()
 
   return (
     <div ref={containerRef} className="mx-auto flex h-full w-full flex-col overflow-hidden">
@@ -721,6 +681,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                           className={classNames('z-1 mx-auto flex h-full w-full max-w-[552px] flex-col', {})}
                           messages={messagesWithoutSystem}
                           isStreaming={isLoading}
+                          chat={chat}
                         />
                         {renderOutlineConfirmation()}
                       </div>
@@ -745,6 +706,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                     >
                       {rateLimitError && <div className="mb-2 text-center text-sm text-red-500">{rateLimitError}</div>}
                       <ChatInput
+                        chat={chat ?? null}
                         hasConfirmedOutline={hasConfirmedOutline}
                         chatStarted={chatStarted}
                         textareaRef={textareaRef}
@@ -798,27 +760,10 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
                     })}
                   </div>
                 )}
-                {!chatStarted && (
-                  <CompanySection
-                    companies={companies}
-                    selectedCompany={company}
-                    showCompanyDialog={(company) => {
-                      setPendingAction({ type: 'open-company-dialog' })
-                      if (session.data?.user?.id) {
-                        setActiveCompany(company ?? null)
-                        companyOpener.open()
-                      } else {
-                        setShowSignUpDialog(true)
-                      }
-                    }}
-                    handleSelectCompany={handleSelectCompany}
-                    handleDeleteCompany={handleDeleteCompany}
-                  />
-                )}
               </div>
               {chatStarted && hasConfirmedOutline && (
                 <div
-                  className={classNames('w-full overflow-auto', {
+                  className={classNames('w-full', {
                     hidden: isMobile && !showEmailPreview,
                   })}
                 >
@@ -841,30 +786,7 @@ export function Chat({ id, chatCompany, initialMessages, chat }: Props) {
               }}
             />
 
-            <CompanyDialog
-              company={activeCompany}
-              isOpen={companyOpener.isOpen}
-              onClose={companyOpener.close}
-              onSuccess={(updatedCompany) => {
-                companyOpener.close()
-                setActiveCompany(null)
-                setCompany(updatedCompany)
-                mutate('/api/companies')
-              }}
-            />
-
             <UpgradeDialog />
-
-            <DeleteCompanyDialog
-              open={deleteOpener.isOpen}
-              onClose={() => {
-                deleteOpener.close()
-                setActiveCompany(null)
-              }}
-              company={activeCompany}
-              isDeleting={isDeleting}
-              onConfirmDelete={confirmDeleteCompany}
-            />
           </div>
         </>
       </div>

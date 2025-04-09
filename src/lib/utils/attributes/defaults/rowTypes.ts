@@ -1,5 +1,6 @@
-import type { RowBlock, RowBlockType, ThemeColors } from '@/app/components/email-workspace/types'
-import { Email, EmailTheme, themeColorMap } from '@/app/components/email-workspace/types'
+import type { RowBlock, RowBlockType } from '@/app/components/email-workspace/types'
+import { Email } from '@/app/components/email-workspace/types'
+import { ThemeColors, getThemeColors } from '@/lib/utils/colors'
 import { getEmailAttributes } from '../attributes'
 
 type RowStyleModifier = Partial<RowBlock['attributes']>
@@ -19,10 +20,6 @@ export const baseRowStyles: Record<
   hero: (row, themeColors) => ({
     backgroundColor: themeColors.gradientLight.start,
     backgroundImage: `linear-gradient(to bottom right, ${themeColors.gradientLight.start}, ${themeColors.gradientLight.end})`,
-    paddingTop: '32px',
-    paddingBottom: '32px',
-    paddingLeft: '24px',
-    paddingRight: '24px',
   }),
   header: (row, themeColors) => ({
     paddingTop: '24px',
@@ -102,7 +99,7 @@ export const variantRowDefaults: Record<string, VariantRowStyles> = {
 // Special variant style overrides
 export const variantStyleOverrides: Record<
   string,
-  (row: RowBlock, email: Email | null, themeColors: any) => Partial<RowBlock['attributes']>
+  (row: RowBlock, email: Email | null, themeColors: ThemeColors) => Partial<RowBlock['attributes']>
 > = {
   default: (row, email, themeColors) => {
     const rowType = row.attributes.type || 'default'
@@ -143,13 +140,30 @@ export const variantStyleOverrides: Record<
   },
 }
 
+// Helper function to find the position of a row in the email
+function findRowPosition(
+  row: RowBlock,
+  email: Email | null
+): { index: number; prevRow?: RowBlock; nextRow?: RowBlock } {
+  if (!email || !email.rows) return { index: -1 }
+
+  const index = email.rows.findIndex((r) => r.id === row.id)
+  return {
+    index,
+    prevRow: index > 0 ? email.rows[index - 1] : undefined,
+    nextRow: index < email.rows.length - 1 ? email.rows[index + 1] : undefined,
+  }
+}
+
 export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> {
   const emailAttributes = getEmailAttributes(email)
   const rowAttributes = row.attributes
-  const theme = (emailAttributes?.theme as EmailTheme) || 'default'
-  const themeColors = themeColorMap[theme]
+  const themeValue = emailAttributes?.themeColor || 'default'
   const variant = emailAttributes?.styleVariant || 'default'
   const rowType = rowAttributes.type || 'default'
+
+  // Get theme colors using the dynamic function
+  const themeColors = getThemeColors(themeValue)
 
   // Check if row only contains a spacer
   const hasSingleSpacer =
@@ -170,11 +184,31 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       ? { backgroundColor: rowType === 'header' ? themeColors.base : themeColors.light }
       : {}
 
-  // Merge all styles with priority: base < variant < overrides < theme
+  // Check for adjacent rows with the same type
+  const { prevRow, nextRow } = findRowPosition(row, email)
+  const adjacentRowOverrides: Partial<RowBlock['attributes']> = {}
+
+  // If the previous row has the same type, remove bottom padding from previous row
+  if (prevRow && prevRow.attributes.type === rowType) {
+    adjacentRowOverrides.paddingTop = '0px'
+  }
+
+  // If the next row has the same type, remove bottom padding from this row
+  if (nextRow && nextRow.attributes.type === rowType) {
+    adjacentRowOverrides.paddingBottom = '0px'
+  }
+
+  if (hasSingleSpacer) {
+    adjacentRowOverrides.paddingTop = '0px'
+    adjacentRowOverrides.paddingBottom = '0px'
+  }
+
+  // Merge all styles with priority: base < variant < overrides < theme < adjacent row overrides
   return {
     ...baseStyles,
     ...variantStyles,
     ...variantOverrides,
     ...themeOverrides,
+    ...adjacentRowOverrides,
   }
 }

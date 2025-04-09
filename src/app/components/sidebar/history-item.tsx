@@ -47,6 +47,7 @@ export function HistoryItem({ item, onDelete }: HistoryItemProps) {
           {hovering && (
             <div className="flex items-center p-1 text-gray-600 hover:text-red-600">
               <IconButton
+                title="Delete"
                 onClick={(event) => {
                   event.preventDefault()
                   onDelete?.(event)

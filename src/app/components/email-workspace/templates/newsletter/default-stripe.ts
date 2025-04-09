@@ -98,7 +98,7 @@ export const stripeNewsletterExample = `
 `
 
 export const defaultStripeTemplate = (): Email => {
-  const email = parseEmailScript(defaultStripeTemplateScript(true))
+  const email = parseEmailScript(defaultStripeTemplateScript(true), '#0a2540', 'rounded')
 
   return createEmail(email)
 }

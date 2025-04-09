@@ -3,7 +3,7 @@ import { Kysely } from 'kysely'
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .alterTable('Chat')
-    .addColumn('hasConfirmedOutline', 'boolean', (col) => col.notNull().defaultTo(false))
+    .addColumn('hasConfirmedOutline', 'boolean', (col) => col.notNull().defaultTo(true))
     .execute()
 }
 

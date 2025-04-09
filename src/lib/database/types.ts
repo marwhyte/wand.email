@@ -51,6 +51,8 @@ export interface ChatTable {
   deletedAt: Date | null
   companyId: string | null
   hasConfirmedOutline: boolean
+  color: string
+  borderRadius: 'rounded' | 'square' | 'default'
 }
 
 export type Chat = Omit<ChatTable, 'id' | 'createdAt' | 'updatedAt'> & {
@@ -76,6 +78,8 @@ export type Company = Omit<CompanyTable, 'id' | 'createdAt' | 'updatedAt'> & {
   createdAt: Date
   updatedAt: Date
   logoImageKey: string | null
+  logoWidth: number | null
+  logoHeight: number | null
 }
 
 export interface ExportTable {
@@ -101,6 +105,8 @@ export interface FileTable {
   createdAt: GeneratedAlways<Date>
   updatedAt: Generated<Date>
   sizeBytes: number
+  width: number | null
+  height: number | null
 }
 
 export type File = Omit<FileTable, 'id' | 'createdAt' | 'updatedAt'> & {

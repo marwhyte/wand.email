@@ -1,6 +1,6 @@
 'use client'
 
-import { getBlockAttributes, getEmailAttributes, getIconProps } from '@/lib/utils/attributes'
+import { getBlockAttributes, getIconProps } from '@/lib/utils/attributes'
 import { Column, Row, Section, Text } from '@react-email/components'
 import { Email, IconBlock, RowBlock } from '../types'
 
@@ -12,24 +12,16 @@ type Props = {
 
 export default function EmailIconFinal({ block, parentRow, email }: Props) {
   const blockAttributes = getBlockAttributes(block, parentRow, email)
-  const blockProps = getIconProps(block, parentRow, email)
-  const emailAttributes = getEmailAttributes(email)
+  const { style, ...blockProps } = getIconProps(block, parentRow, email)
+  const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
 
-  const { icon, title, description, size = '64', position = 'center', align = 'center' } = blockAttributes
-  const theme = emailAttributes.theme
+  const { icon, title, description, size, position = 'center', align = 'center' } = blockAttributes
 
   // Use the S3 URL if available, otherwise fall back to the API URL
-  const iconUrl = block.attributes.s3IconUrl || `/api/icon?icon=${icon}&theme=${theme}&size=${size}`
+  const iconUrl = block.attributes.s3IconUrl
 
   return (
-    <Section
-      style={{
-        paddingTop: block.attributes.paddingTop,
-        paddingRight: block.attributes.paddingRight,
-        paddingBottom: block.attributes.paddingBottom,
-        paddingLeft: block.attributes.paddingLeft,
-      }}
-    >
+    <Section>
       <Row>
         <Column align={align}>
           <table>
@@ -38,7 +30,7 @@ export default function EmailIconFinal({ block, parentRow, email }: Props) {
                 <>
                   <tr>
                     <td align={align} style={{ paddingBottom: '12px' }}>
-                      <img alt={`${icon} icon`} src={iconUrl} {...blockProps} />
+                      <img alt={`${icon} icon`} src={iconUrl} {...blockProps} style={restStyles} />
                     </td>
                   </tr>
                   <tr>
@@ -65,7 +57,7 @@ export default function EmailIconFinal({ block, parentRow, email }: Props) {
                 <tr>
                   {position === 'left' && (
                     <td valign="top" style={{ paddingRight: '16px' }}>
-                      <img alt={`${icon} icon`} src={iconUrl} {...blockProps} />
+                      <img alt={`${icon} icon`} src={iconUrl} {...blockProps} style={restStyles} />
                     </td>
                   )}
                   <td valign="top">

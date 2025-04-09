@@ -1,172 +1,340 @@
-import { Company } from '@/lib/database/types'
-import { classNames, getImgFromKey } from '@/lib/utils/misc'
-import { PencilSquareIcon, PlusCircleIcon, TrashIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import { motion } from 'motion/react'
-import { useEffect, useState } from 'react'
-import { Badge } from '../badge'
+import { useOpener } from '@/app/hooks'
+import { deleteCompany } from '@/lib/database/queries/companies'
+import { Chat, Company } from '@/lib/database/types'
+import { useChatStore } from '@/lib/stores/chatStore'
+import { fetcher, getImgFromKey } from '@/lib/utils/misc'
+import { Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react'
+import { PencilSquareIcon, PlusCircleIcon, TagIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { clsx } from 'clsx'
+import { useSession } from 'next-auth/react'
+import { Fragment, useEffect, useState } from 'react'
+import useSWR, { useSWRConfig } from 'swr'
 import { Button } from '../button'
-import { Heading } from '../heading'
+import CompanyDialog from '../dialogs/company-dialog'
+import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
+import { Text } from '../text'
+import { Tooltip } from '../tooltip'
 
 interface CompanySectionProps {
-  companies?: Company[] | null
-  selectedCompany?: Company | null
-  showCompanyDialog?: (company?: Company) => void
-  handleSelectCompany?: (company: Company) => void
-  handleDeleteCompany?: (companyId: string) => void
+  chat: Chat | null | undefined
+  tooltip?: string
+  tooltipPosition?: 'top' | 'bottom' | 'left' | 'right'
+  children?: React.ReactNode
+  popoverDirection?: 'up' | 'down'
+  size?: 'default' | 'large'
 }
 
 export function CompanySection({
-  companies,
-  selectedCompany,
-  showCompanyDialog,
-  handleSelectCompany,
-  handleDeleteCompany,
+  chat,
+  tooltip,
+  tooltipPosition = 'top',
+  children,
+  popoverDirection = 'down',
+  size = 'default',
 }: CompanySectionProps) {
-  const [showTooltip, setShowTooltip] = useState(false)
+  const session = useSession()
+  const { mutate } = useSWRConfig()
+  const { company, setCompany } = useChatStore()
+  const [tempCompany, setTempCompany] = useState<Company | null>(null)
+  const [activeCompany, setActiveCompany] = useState<Company | null>(null)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  // Dialog openers
+  const companyOpener = useOpener()
+  const deleteOpener = useOpener()
+
+  const { data: companies } = useSWR<Company[]>(session?.data?.user?.id ? '/api/companies' : null, fetcher, {
+    fallbackData: [],
+  })
 
   useEffect(() => {
-    // Check if the tooltip has been dismissed before
-    const tooltipDismissed = localStorage.getItem('companyTooltipDismissed')
+    if (chat) return // Early return if chat exists
 
-    // Only show tooltip if there are no companies and it wasn't dismissed before
-    if (!companies?.length && !tooltipDismissed) {
-      setShowTooltip(true)
+    // Only update company if necessary to avoid infinite loops
+    if (companies?.length && !company) {
+      setCompany(companies[0])
+    } else if (!companies?.length && company) {
+      // Only clear company if companies is empty and we have a company set
+      setCompany(undefined)
+    } else if (company && companies?.length && !companies.find((c) => c.id === company.id)) {
+      // Only clear company if it no longer exists in the companies list
+      setCompany(undefined)
     }
-  }, [companies])
+  }, [companies, company, chat])
 
-  const dismissTooltip = () => {
-    setShowTooltip(false)
-    localStorage.setItem('companyTooltipDismissed', 'true')
+  // Update temporary state when store values change
+  useEffect(() => {
+    setTempCompany(company)
+  }, [company])
+
+  // Reset temp values when popover opens
+  const handlePopoverOpen = () => {
+    setTempCompany(company)
   }
 
+  const handleCompanySelect = (selectedCompany: Company | null, close: () => void) => {
+    setCompany(selectedCompany || undefined)
+    setTempCompany(selectedCompany)
+    close()
+  }
+
+  const handleDeleteCompany = async (companyId: string) => {
+    setActiveCompany(companies?.find((c) => c.id === companyId) || null)
+    deleteOpener.open()
+  }
+
+  const confirmDeleteCompany = async () => {
+    if (!activeCompany) return
+
+    try {
+      setIsDeleting(true)
+      await deleteCompany(activeCompany.id)
+      mutate('/api/companies')
+      setActiveCompany(null)
+    } catch (error) {
+      console.error('Failed to delete company:', error)
+    } finally {
+      setIsDeleting(false)
+      setCompany(undefined)
+      setActiveCompany(null)
+      deleteOpener.close()
+    }
+  }
+
+  const handleCompanySuccess = (updatedCompany: Company) => {
+    companyOpener.close()
+    setActiveCompany(null)
+    setCompany(updatedCompany)
+    mutate('/api/companies')
+  }
+
+  const tooltipId = `company-section`
+  const iconSize = size === 'large' ? 'h-6 w-6' : 'h-4 w-4'
+  const textSize = size === 'large' ? 'text-sm' : 'text-xs'
+
   return (
-    <motion.div
-      id="companyDetails"
-      className="relative mx-auto hidden w-full md:block"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <div className="relative mb-10 mt-10 flex items-center justify-center">
-        <hr className="flex-grow border-gray-200" />
-
-        <span className="px-6 text-sm font-medium leading-6 text-gray-600">
-          {companies?.length ? 'Your brands' : 'Optionally'}
-        </span>
-
-        <hr className="flex-grow border-gray-200" />
-      </div>
-
-      {companies?.length ? (
-        <div className="mx-auto max-w-[600px] space-y-4 px-4">
-          {companies.map((company) => (
-            <div
-              key={company.id}
-              onClick={(e) => {
-                if ((e.target as HTMLElement).closest('button')) return
-                handleSelectCompany?.(company)
-              }}
-              className={classNames(
-                'flex cursor-pointer items-center justify-between rounded-lg border p-4 transition-colors hover:bg-gray-50',
-                {
-                  'border-blue-500 bg-blue-50/50': selectedCompany?.id === company.id,
-                  'border-gray-200': selectedCompany?.id !== company.id,
-                }
-              )}
-            >
-              <div className="flex items-center space-x-4">
-                {company.logoImageKey && (
-                  <img
-                    src={getImgFromKey(company.logoImageKey)}
-                    alt={`${company.name} logo`}
-                    className="h-8 min-w-8 max-w-[70px] bg-white object-contain"
-                  />
-                )}
-                <div className="flex items-center gap-2">
-                  <span className="font-medium text-gray-900">{company.name}</span>
-                  {company.primaryColor && (
-                    <div
-                      className="h-4 w-4 rounded-full border border-gray-200"
-                      style={{ backgroundColor: company.primaryColor }}
-                      title={`Primary color: ${company.primaryColor}`}
-                    />
+    <>
+      <div className="relative">
+        <Popover className="relative">
+          {({ open, close }) => (
+            <>
+              {children ? (
+                <PopoverButton
+                  className="flex h-full w-full items-center justify-center focus:outline-none"
+                  aria-label="Company settings"
+                  onClick={() => {
+                    if (!open) {
+                      if (!companies?.length) {
+                        setActiveCompany(null)
+                        companyOpener.open()
+                        return
+                      }
+                      handlePopoverOpen()
+                    }
+                  }}
+                  data-tooltip-id={tooltipId}
+                  data-tooltip-hidden={open}
+                >
+                  {children}
+                </PopoverButton>
+              ) : tooltip ? (
+                <Tooltip id="company-section" place={tooltipPosition} content={tooltip}>
+                  <PopoverButton
+                    className={clsx(
+                      'flex items-center space-x-1.5 rounded-md px-2 py-1 hover:bg-gray-200 focus:outline-none',
+                      company ? 'bg-purple-100' : 'bg-gray-100'
+                    )}
+                    aria-label="Company settings"
+                    onClick={() => {
+                      if (!open) {
+                        if (!companies?.length) {
+                          setActiveCompany(null)
+                          companyOpener.open()
+                          return
+                        }
+                        handlePopoverOpen()
+                      }
+                    }}
+                  >
+                    <div className="flex items-center space-x-1.5">
+                      <span className={clsx(textSize, 'font-medium text-indigo-700')}>
+                        {company ? company.name : 'Branding'}
+                      </span>
+                      <TagIcon className={iconSize + ' !text-gray-500'} />
+                    </div>
+                    {!company && <span className="sr-only">No company selected</span>}
+                  </PopoverButton>
+                </Tooltip>
+              ) : (
+                <PopoverButton
+                  className={clsx(
+                    'flex items-center space-x-1.5 rounded-md px-2 py-1 hover:bg-gray-200 focus:outline-none',
+                    company ? 'bg-purple-100' : 'bg-gray-100'
                   )}
-                </div>
-              </div>
-              <div className="flex items-center space-x-1">
-                {selectedCompany?.id === company.id && <Badge color="blue">Selected</Badge>}
-
-                <Button
-                  plain
-                  tooltip="Edit company"
-                  onClick={() => showCompanyDialog?.(company)}
-                  tooltipId="edit-company"
+                  aria-label="Company settings"
+                  onClick={() => {
+                    if (!open) {
+                      if (!companies?.length) {
+                        setActiveCompany(null)
+                        companyOpener.open()
+                        return
+                      }
+                      handlePopoverOpen()
+                    }
+                  }}
                 >
-                  <PencilSquareIcon className="h-5 w-5 !text-gray-500" />
-                </Button>
-                <Button
-                  plain
-                  tooltip="Delete company"
-                  onClick={() => handleDeleteCompany?.(company.id)}
-                  tooltipId="delete-company"
-                >
-                  <TrashIcon className="h-5 w-5 !text-red-500" />
-                </Button>
-              </div>
-            </div>
-          ))}
+                  <div className="flex items-center space-x-1.5">
+                    <span className={clsx(textSize, 'font-medium text-indigo-700')}>
+                      {company ? company.name : 'Branding'}
+                    </span>
+                    <TagIcon className={iconSize + ' !text-gray-500'} />
+                  </div>
+                  {!company && <span className="sr-only">No company selected</span>}
+                </PopoverButton>
+              )}
 
-          <Button outline className="mt-4" onClick={() => showCompanyDialog?.()}>
-            <PlusCircleIcon className="h-5 w-5" />
-            <span>Add another brand</span>
-          </Button>
-        </div>
-      ) : (
-        <div className="mt-4 flex flex-col items-center space-y-4 pb-4">
-          <Heading className="max-w-[440px] text-center text-gray-600" level={4}>
-            Add your brand identity to create professional, personalized emails
-          </Heading>
-          <div className="relative">
-            <button
-              onClick={() => showCompanyDialog?.()}
-              className="relative inline-flex h-12 w-48 overflow-hidden rounded-full p-[1px] focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
-            >
-              <span className="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#3B82F6_0%,#A855F7_50%,#EC4899_100%)]" />
-              <span className="absolute inset-0 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 opacity-75 blur-sm" />
-              <span className="relative inline-flex h-full w-full items-center justify-center rounded-full bg-white/90 px-3 py-1 text-sm font-medium text-gray-600 transition-all hover:bg-white/80">
-                Get started
-              </span>
-            </button>
-
-            {showTooltip && (
-              <motion.div
-                className="absolute -left-8 right-0 top-16 z-10 mx-auto w-64 rounded-lg bg-blue-600 p-3 pr-5 text-center text-sm text-white shadow-lg"
-                initial={{ opacity: 0, y: -10 }}
-                animate={{
-                  opacity: 1,
-                  y: 0,
-                  translateY: [0, 5, 0],
-                }}
-                transition={{
-                  y: { duration: 0.3 },
-                  translateY: {
-                    duration: 1.5,
-                    repeat: Infinity,
-                    repeatType: 'reverse',
-                    ease: 'easeInOut',
-                  },
-                }}
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 translate-y-1"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-1"
               >
-                <button onClick={dismissTooltip} className="absolute right-2 top-2 text-white hover:text-blue-200">
-                  <XMarkIcon className="h-4 w-4" />
-                </button>
-                <span>Doing this helps make your emails more personalized</span>
-                <div className="absolute -top-2 left-1/2 h-3 w-3 rotate-45 bg-blue-600"></div>
-              </motion.div>
-            )}
-          </div>
-        </div>
-      )}
-    </motion.div>
+                <PopoverPanel
+                  className={`absolute left-1/2 z-50 w-64 -translate-x-1/2 transform px-4 sm:px-0 ${
+                    popoverDirection === 'up' ? 'bottom-full mb-2' : 'top-full mt-2'
+                  }`}
+                >
+                  <div className="overflow-hidden rounded-lg shadow-xl ring-1 ring-black ring-opacity-5">
+                    <div className="relative bg-white p-3">
+                      <div className="space-y-4">
+                        {/* Company List */}
+                        <div>
+                          <Text className="!text-sm">Select Branding</Text>
+                          <div className="mt-2 space-y-2">
+                            {companies?.map((c) => (
+                              <div
+                                key={c.id}
+                                onClick={() => handleCompanySelect(c, close)}
+                                className={`flex w-full items-center justify-between rounded-lg p-2 ${
+                                  tempCompany?.id === c.id ? 'bg-blue-50' : 'hover:bg-gray-50'
+                                }`}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    handleCompanySelect(c, close)
+                                  }
+                                }}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <img
+                                    src={
+                                      c.logoImageKey ? getImgFromKey(c.logoImageKey) : getImgFromKey('dummy-logo.png')
+                                    }
+                                    alt={`${c.name} logo`}
+                                    className={clsx(
+                                      'h-14 object-contain',
+                                      c.logoWidth != null && c.logoHeight != null
+                                        ? c.logoWidth > c.logoHeight
+                                          ? 'w-20' // Wider image
+                                          : c.logoWidth === c.logoHeight
+                                            ? 'w-14' // Square image
+                                            : 'w-14' // Taller image
+                                        : 'w-14' // Default to wider for dummy logo
+                                    )}
+                                  />
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <Button
+                                    plain
+                                    tooltip="Edit company"
+                                    onClick={(e: React.MouseEvent) => {
+                                      e.preventDefault()
+                                      e.stopPropagation()
+                                      setActiveCompany(c)
+                                      companyOpener.open()
+                                    }}
+                                    tooltipId="edit-company"
+                                  >
+                                    <PencilSquareIcon className={iconSize + ' !text-gray-500'} />
+                                  </Button>
+                                  <Button
+                                    plain
+                                    tooltip="Delete company"
+                                    onClick={(e: React.MouseEvent) => {
+                                      e.preventDefault()
+                                      e.stopPropagation()
+                                      handleDeleteCompany(c.id)
+                                    }}
+                                    tooltipId="delete-company"
+                                  >
+                                    <TrashIcon className={iconSize + ' !text-red-500'} />
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Add Company Button */}
+                        <Button
+                          outline
+                          className="w-full"
+                          onClick={() => {
+                            setActiveCompany(null)
+                            companyOpener.open()
+                            close()
+                          }}
+                        >
+                          <PlusCircleIcon className={iconSize} />
+                          <span>Add Company</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </PopoverPanel>
+              </Transition>
+            </>
+          )}
+        </Popover>
+      </div>
+      {tooltip && <Tooltip id="company-section" place={tooltipPosition} content={tooltip} />}
+
+      {/* Company Dialog */}
+      <CompanyDialog
+        company={activeCompany}
+        isOpen={companyOpener.isOpen}
+        onClose={() => {
+          companyOpener.close()
+          setActiveCompany(null)
+          // Reopen the popover
+          const popoverButton = document.querySelector('[aria-label="Company settings"]')
+          if (popoverButton) {
+            ;(popoverButton as HTMLElement).click()
+          }
+        }}
+        onSuccess={handleCompanySuccess}
+      />
+
+      {/* Delete Company Dialog */}
+      <DeleteCompanyDialog
+        open={deleteOpener.isOpen}
+        onClose={() => {
+          deleteOpener.close()
+          setActiveCompany(null)
+          // Reopen the popover
+          const popoverButton = document.querySelector('[aria-label="Company settings"]')
+          if (popoverButton) {
+            ;(popoverButton as HTMLElement).click()
+          }
+        }}
+        company={activeCompany}
+        isDeleting={isDeleting}
+        onConfirmDelete={confirmDeleteCompany}
+      />
+    </>
   )
 }

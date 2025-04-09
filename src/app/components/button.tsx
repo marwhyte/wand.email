@@ -1,8 +1,8 @@
 import * as Headless from '@headlessui/react'
 import clsx from 'clsx'
 import React, { forwardRef } from 'react'
-import { Tooltip } from 'react-tooltip'
 import { Link } from './link'
+import { Tooltip } from './tooltip'
 
 const styles = {
   base: [
@@ -240,11 +240,12 @@ export const Button = forwardRef(function Button(
       </Headless.Button>
     )
 
-  return (
-    <>
+  return tooltip && tooltipId ? (
+    <Tooltip id={tooltipId} place={tooltipPosition} content={tooltip}>
       {buttonElement}
-      {tooltip && tooltipId && <Tooltip place={tooltipPosition} id={tooltipId} content={tooltip} />}
-    </>
+    </Tooltip>
+  ) : (
+    buttonElement
   )
 })
 

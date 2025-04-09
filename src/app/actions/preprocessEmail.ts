@@ -1,5 +1,7 @@
 'use client'
 
+import { getEmailAttributes, getIconAttributes } from '@/lib/utils/attributes'
+import { uploadIconToS3 } from '@/lib/utils/icon-uploader'
 import { Email } from '../components/email-workspace/types'
 
 /**
@@ -9,26 +11,42 @@ import { Email } from '../components/email-workspace/types'
  * @param email The email to preprocess
  * @returns The processed email with all icons uploaded to S3
  */
+
+type IconToUpdate = {
+  icon: string
+  size: string
+  theme: string
+}
+
 export async function preprocessEmail(email: Email): Promise<Email> {
-  try {
-    const response = await fetch('/api/preprocess-email', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email }),
-    })
+  const emailAttributes = getEmailAttributes(email)
+  const theme = emailAttributes.themeColor
 
-    if (!response.ok) {
-      const errorData = await response.json()
-      throw new Error(errorData.error || 'Failed to preprocess email')
+  const updatedEmail = { ...email }
+
+  for (const row of updatedEmail.rows) {
+    for (const column of row.columns) {
+      for (let i = 0; i < column.blocks.length; i++) {
+        const block = column.blocks[i]
+
+        if (block.type !== 'icon') continue
+
+        if (block.attributes.s3IconUrl) continue
+
+        const iconAttributes = getIconAttributes(block, row, email)
+
+        const iconToUpdate: IconToUpdate = {
+          icon: iconAttributes.icon,
+          size: iconAttributes.size || '64',
+          theme,
+        }
+
+        const s3IconUrl = await uploadIconToS3(iconToUpdate)
+
+        block.attributes.s3IconUrl = s3IconUrl
+      }
     }
-
-    const data = await response.json()
-    return data.email
-  } catch (error) {
-    console.error('Error preprocessing email:', error)
-    // Return the original email if preprocessing fails
-    return email
   }
+
+  return updatedEmail
 }

@@ -57,17 +57,14 @@ export const rowTypeBlockDefaults: Record<RowBlockType, BlockStyleModifier> = {
   default: {},
   hero: {
     heading: {
-      textAlign: 'center',
       paddingTop: '0px',
       paddingBottom: '16px',
     },
     text: {
-      textAlign: 'center',
       paddingTop: '0px',
       paddingBottom: '32px',
     },
     image: {
-      align: 'center',
       paddingTop: '0px',
       paddingBottom: '32px',
     },
@@ -125,37 +122,23 @@ export const rowTypeBlockDefaults: Record<RowBlockType, BlockStyleModifier> = {
   discount: {
     text: {
       fontSize: '14px',
-      textAlign: 'center',
     },
     heading: {
-      textAlign: 'center',
       fontSize: '16px',
       fontWeight: 'bold',
       color: '#4184f3',
     },
   },
   footer: {
-    heading: {
-      textAlign: 'center',
-    },
     image: {
       borderRadius: '0',
-      align: 'center',
     },
     text: {
       color: '#414141',
       fontSize: '12px',
       paddingTop: '4px',
       paddingBottom: '4px',
-      textAlign: 'center',
     },
-    button: {
-      align: 'center',
-    },
-    link: {
-      align: 'center',
-    },
-    socials: {},
   },
 }
 
@@ -215,21 +198,6 @@ function getBlockSpecificOverrides(
 
   if (parentRow.attributes.type === 'cart' && block.type === 'heading') {
     return { heading: { textAlign: 'left' } }
-  }
-
-  // Gallery row with multiple columns and images - center text and headings
-  if (parentRow.attributes.type === 'gallery' && parentRow.columns.length >= 2) {
-    // Check if there are at least 2 columns with images
-    const columnsWithImages = parentRow.columns.filter((column) => column.blocks.some((b) => b.type === 'image'))
-
-    if (columnsWithImages.length >= 2) {
-      if (block.type === 'text') {
-        return { text: { textAlign: 'center' } }
-      }
-      if (block.type === 'heading') {
-        return { heading: { textAlign: 'center' } }
-      }
-    }
   }
 
   // Existing overrides logic

@@ -13,7 +13,7 @@ import Loading from '../loading'
 import { Text } from '../text'
 import { Dialog, DialogActions, DialogBody, DialogTitle } from './dialog'
 
-const MAX_FILE_SIZE = 15 * 1024 * 1024 // 15MB in bytes
+const MAX_FILE_SIZE = 1024 * 1024 // 1MB in bytes
 
 type Props = {
   opener: Opener
@@ -34,16 +34,37 @@ export default function FileUploaderDialog({ opener, onUpload }: Props) {
     if (!file) return
 
     if (file.size > MAX_FILE_SIZE) {
-      setError(`File size exceeds the maximum limit of ${formatFileSize(MAX_FILE_SIZE)}.`)
+      setError(
+        `File size exceeds the maximum limit of ${formatFileSize(MAX_FILE_SIZE)}. This is the maximum size recommended for images.`
+      )
       return
     }
 
     setIsUploading(true)
     setError(null)
-    const formData = new FormData()
-    formData.append('file', file)
+
+    // Get image dimensions
+    const img = new Image()
+    const imgUrl = URL.createObjectURL(file)
 
     try {
+      const dimensions = await new Promise<{ width: number; height: number }>((resolve, reject) => {
+        img.onload = () => {
+          resolve({ width: img.width, height: img.height })
+          URL.revokeObjectURL(imgUrl)
+        }
+        img.onerror = () => {
+          reject(new Error('Failed to load image'))
+          URL.revokeObjectURL(imgUrl)
+        }
+        img.src = imgUrl
+      })
+
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('width', dimensions.width.toString())
+      formData.append('height', dimensions.height.toString())
+
       const result = await uploadFile(formData)
       if (result.success) {
         mutate('files') // Revalidate the SWR cache

@@ -22,6 +22,8 @@ const getCompaniesInternal = unstable_cache(
         'Company.primaryColor',
         'Company.userId',
         'File.imageKey as logoImageKey',
+        'File.width as logoWidth',
+        'File.height as logoHeight',
       ])
       .where('Company.userId', '=', userId)
       .execute()
@@ -51,6 +53,8 @@ const getCompanyInternal = unstable_cache(
         'Company.createdAt',
         'Company.updatedAt',
         'File.imageKey as logoImageKey',
+        'File.width as logoWidth',
+        'File.height as logoHeight',
       ])
       .where('Company.id', '=', companyId)
       .where('Company.userId', '=', userId)
@@ -138,6 +142,8 @@ export async function addCompany({
           'Company.createdAt',
           'Company.updatedAt',
           'File.imageKey as logoImageKey',
+          'File.width as logoWidth',
+          'File.height as logoHeight',
         ])
         .where('Company.id', '=', newCompany.id)
         .executeTakeFirst()
@@ -197,6 +203,8 @@ export async function updateCompany(
           'Company.createdAt',
           'Company.updatedAt',
           'File.imageKey as logoImageKey',
+          'File.width as logoWidth',
+          'File.height as logoHeight',
         ])
         .where('Company.id', '=', updatedCompany.id)
         .executeTakeFirst()

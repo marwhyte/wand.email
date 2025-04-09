@@ -1,15 +1,18 @@
 import { EmailProcessingStatus } from '@/app/components/chat/email-processing-status'
+import { Chat } from '@/lib/database/types'
 import type { Message } from 'ai'
 import { memo } from 'react'
 import { OutlineViewer } from './outline-viewer'
 
 interface AssistantMessageProps {
+  isStreaming: boolean
   content: string
   message: Message
   messages: Message[]
+  chat: Chat | null | undefined
 }
 
-export const AssistantMessage = memo(({ content, message, messages }: AssistantMessageProps) => {
+export const AssistantMessage = memo(({ isStreaming, content, message, messages, chat }: AssistantMessageProps) => {
   // Remove triple backticks wrapping content if they exist
   // Also handle partial backticks at the beginning during streaming
   const cleanedContent = content
@@ -22,7 +25,7 @@ export const AssistantMessage = memo(({ content, message, messages }: AssistantM
   const isOutline = cleanedContent.includes('Email Type:') && cleanedContent.includes('1.')
 
   if (isOutline) {
-    return <OutlineViewer content={cleanedContent} />
+    return <OutlineViewer isStreaming={isStreaming} content={cleanedContent} chat={chat} />
   }
 
   // Split content at first EMAIL tag - updated regex to not require name attribute
@@ -30,7 +33,7 @@ export const AssistantMessage = memo(({ content, message, messages }: AssistantM
 
   // If no EMAIL tag found, show full content
   if (!afterEmail) {
-    return <div className="w-full overflow-hidden">{cleanedContent}</div>
+    return <div className="w-full">{cleanedContent}</div>
   }
 
   // Check if there's a closing tag
@@ -40,7 +43,7 @@ export const AssistantMessage = memo(({ content, message, messages }: AssistantM
   const textAfterEnd = hasEmailEnd ? afterEmail.split('</EMAIL>')[1] : ''
 
   return (
-    <div className="w-full overflow-hidden">
+    <div className="w-full">
       {beforeEmail}
       <EmailProcessingStatus
         isComplete={hasEmailEnd}

@@ -93,6 +93,10 @@ function isFontWeight(value: string | undefined): value is TextAttributes['fontW
   return typeof value === 'string' && ['normal', 'bold', 'lighter', 'bolder'].includes(value)
 }
 
+function isBorderRadius(value: string | undefined): value is RowBlockAttributes['borderRadius'] {
+  return typeof value === 'string' && ['default', 'rounded', 'square'].includes(value)
+}
+
 function isBorderStyle(value: string | undefined): value is NonNullable<RowBlockAttributes['borderStyle']> {
   return typeof value === 'string' && ['solid', 'dashed', 'dotted'].includes(value)
 }
@@ -626,6 +630,10 @@ const parseIconAttributes: AttributeParser<IconBlockAttributes> = (raw) => {
     attrs.align = raw.align
   }
 
+  if (raw.s3IconUrl) {
+    attrs.s3IconUrl = raw.s3IconUrl
+  }
+
   // Handle position if present (top or left)
   if (raw.position && (raw.position === 'top' || raw.position === 'left')) {
     attrs.position = raw.position
@@ -653,7 +661,11 @@ const blockParsers = {
 } as const
 
 // ===== Main Parser Functions =====
-export function parseEmailScript(script: string): Email {
+export function parseEmailScript(
+  script: string,
+  themeColor: string,
+  borderRadius: 'default' | 'rounded' | 'square'
+): Email {
   const rows: RowBlock[] = []
   const lines = script.trim().split('\n')
   let currentRow: RowBlock | null = null
@@ -665,8 +677,11 @@ export function parseEmailScript(script: string): Email {
   let buttonBlockCount = 0
   let headingBlockCount = 0
 
-  // Initialize email attributes
-  const emailAttributes: Partial<Email> = {}
+  // Initialize email attributes with the default theme color
+  const emailAttributes: Partial<Email> = {
+    themeColor: themeColor,
+    borderRadius: borderRadius,
+  }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim()
@@ -678,6 +693,15 @@ export function parseEmailScript(script: string): Email {
       if (!emailMatch) continue
 
       const emailAttrs = parseAttributes(emailMatch[1])
+      // Only override theme if explicitly set in the email script
+      if (emailAttrs.themeColor) {
+        emailAttributes.themeColor = emailAttrs.themeColor
+      }
+
+      if (emailAttrs.borderRadius && isBorderRadius(emailAttrs.borderRadius)) {
+        emailAttributes.borderRadius = emailAttrs.borderRadius as 'default' | 'rounded' | 'square'
+      }
+
       Object.assign(emailAttributes, emailAttrs)
       continue
     }

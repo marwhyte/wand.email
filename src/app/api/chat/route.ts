@@ -28,7 +28,6 @@ export async function POST(req: NextRequest) {
 
     // Check rate limit
     const messageCount = await getUserMessageCount(session.user.id)
-    console.log('messageCount', messageCount)
 
     if (messageCount >= MAX_MESSAGES_PER_HOUR) {
       return new Response('Rate limit exceeded. Please try again later.', {

@@ -118,6 +118,6 @@ export const goingTemplateScript = `
 `
 
 export const goingTemplate = (): Email => {
-  const rows = parseEmailScript(goingTemplateScript)
+  const rows = parseEmailScript(goingTemplateScript, '#004449', 'rounded')
   return createEmail(rows, '#004449', '#004449')
 }

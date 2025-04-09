@@ -128,7 +128,7 @@ export const defaultWelcomeSeriesExample = `
 `
 
 export const defaultWelcomeTemplate = createEmail(
-  parseEmailScript(defaultWelcomeTemplateScript(true)),
+  parseEmailScript(defaultWelcomeTemplateScript(true), '#000000', 'rounded'),
   '#000000',
   '#000000'
 )

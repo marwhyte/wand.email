@@ -83,7 +83,7 @@ const SocialsEditor = ({ block, onChange, parentRow, email }: SocialIconsEditorP
                 alt={link.alt}
                 className="h-6 w-6"
               />
-              <IconButton onClick={() => handleDeleteSocial(index)} disabled={links.length === 1}>
+              <IconButton title="Delete" onClick={() => handleDeleteSocial(index)} disabled={links.length === 1}>
                 <TrashIcon className="h-4 w-4 text-red-500" />
               </IconButton>
             </div>

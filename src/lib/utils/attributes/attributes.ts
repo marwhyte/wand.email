@@ -6,7 +6,6 @@ import type {
   Email,
   EmailBlock,
   EmailStyleVariant,
-  EmailTheme,
   EmailType,
   HeadingBlock,
   HeadingBlockAttributes,
@@ -30,18 +29,18 @@ import type {
   TextBlock,
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
-import { themeColorMap } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
+import { getThemeColors } from '@/lib/utils/colors'
 import { getTypeDefaults } from './defaults'
 import { getBlockDefaultAttributes } from './defaults/rowTypeBlocks'
 
 // LAYOUT ATTRIBUTES
 export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> => {
   const baseRowDefaults: Partial<RowBlock['attributes']> = {
-    paddingLeft: '16px',
-    paddingRight: '16px',
-    paddingBottom: '16px',
-    paddingTop: '16px',
+    paddingTop: '32px',
+    paddingBottom: '32px',
+    paddingLeft: '24px',
+    paddingRight: '24px',
     borderSide: 'all',
     verticalAlign: 'top',
     stackOnMobile: true,
@@ -72,24 +71,24 @@ type EmailAttributes = {
   width: string
   styleVariant: EmailStyleVariant
   type: EmailType
-  theme: EmailTheme
+  themeColor: string
   borderRadius: 'default' | 'rounded' | 'square'
 }
 
 export function getEmailAttributes(email: Email | null): EmailAttributes {
-  const theme = email?.theme ?? 'default'
-  const themeColors = themeColorMap[theme]
+  const themeColor = email?.themeColor ?? '#8e6ff7' // Default to purple
+  const themeColors = getThemeColors(themeColor)
 
   const defaultAttributes: EmailAttributes = {
-    backgroundColor: themeColors.light,
-    color: theme === 'dark' ? '#ffffff' : '#4b5563',
+    backgroundColor: '#f6f6f6',
+    color: '#4b5563',
     fontFamily: 'Arial, Helvetica, Arial, sans-serif',
     linkColor: themeColors.action,
     rowBackgroundColor: themeColors.base,
     width: email?.type === 'transactional' ? '500' : '600',
     styleVariant: email?.styleVariant ?? 'default',
     type: email?.type ?? 'default',
-    theme,
+    themeColor: themeColor,
     borderRadius: email?.borderRadius ?? 'default',
   }
 
@@ -234,7 +233,7 @@ export function getSpacerAttributes(
 export function getIconAttributes(block: IconBlock, parentRow: RowBlock, email: Email | null): IconBlockAttributes {
   const baseDefaults: IconBlockAttributes = {
     icon: 'check',
-    size: '64',
+    size: '56',
     position: 'left',
     align: 'center',
   }

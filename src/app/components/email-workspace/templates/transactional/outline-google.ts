@@ -61,7 +61,7 @@ export const googleTransactionalExample = `
 `
 
 export const outlineGoogleTemplate = (): Email => {
-  const email = parseEmailScript(outlineGoogleTemplateScript(true))
+  const email = parseEmailScript(outlineGoogleTemplateScript(true), '#000000', 'rounded')
 
   return createEmail(email)
 }

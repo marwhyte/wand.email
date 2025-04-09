@@ -10,12 +10,16 @@ export async function createChat({
   title = '',
   email = null,
   companyId = null,
+  color = '#FED776',
+  borderRadius = 'rounded',
 }: {
   id: string
   messages?: Message[]
   title?: string
   email?: string | null
   companyId?: string | null
+  color?: string
+  borderRadius?: 'rounded' | 'square' | 'default'
 }) {
   const session = await auth()
 
@@ -31,6 +35,8 @@ export async function createChat({
         email,
         companyId: companyId,
         hasConfirmedOutline: false,
+        color,
+        borderRadius,
       })
       .returningAll()
       .executeTakeFirst()
@@ -109,7 +115,15 @@ export async function deleteMessagesAfterId(id: string, chatId: string) {
 
 export async function updateChat(
   id: string,
-  updates: { messages?: Message[]; title?: string; email?: string; parsed?: boolean; hasConfirmedOutline?: boolean }
+  updates: {
+    messages?: Message[]
+    title?: string
+    email?: string
+    parsed?: boolean
+    hasConfirmedOutline?: boolean
+    color?: string
+    borderRadius?: string
+  }
 ) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -151,6 +165,25 @@ export async function updateChat(
             hasConfirmedOutline: updates.hasConfirmedOutline,
             updatedAt: new Date(),
           })
+          .where('id', '=', id)
+          .where('userId', '=', session.user.id)
+          .execute()
+      }
+
+      if (updates.color !== undefined || updates.borderRadius !== undefined) {
+        const updateData: any = { updatedAt: new Date() }
+
+        if (updates.color !== undefined) {
+          updateData.color = updates.color
+        }
+
+        if (updates.borderRadius !== undefined) {
+          updateData.borderRadius = updates.borderRadius
+        }
+
+        await trx
+          .updateTable('Chat')
+          .set(updateData)
           .where('id', '=', id)
           .where('userId', '=', session.user.id)
           .execute()

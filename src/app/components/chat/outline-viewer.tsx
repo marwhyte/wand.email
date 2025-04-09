@@ -1,3 +1,8 @@
+import { Chat } from '@/lib/database/types'
+import { motion } from 'motion/react'
+import { Heading } from '../heading'
+import { OutlineHeader } from './outline-header'
+
 interface OutlineSection {
   title: string
   items: string[]
@@ -6,6 +11,12 @@ interface OutlineSection {
 interface Outline {
   emailType: string
   sections: OutlineSection[]
+}
+
+interface OutlineViewerProps {
+  content: string
+  isStreaming: boolean
+  chat: Chat | null | undefined
 }
 
 function parseOutline(content: string): Outline {
@@ -78,29 +89,63 @@ function parseOutline(content: string): Outline {
   }
 }
 
-export function OutlineViewer({ content }: { content: string }) {
+export function OutlineViewer({ content, chat, isStreaming }: OutlineViewerProps) {
   const outline = parseOutline(content)
 
   return (
     <div className="prose prose-sm max-w-none">
-      <div className="mb-4 text-sm text-gray-500">
-        <span className="font-medium">Email Type:</span> {outline.emailType}
+      <div className="mb-3">
+        <Heading className="!text-lg font-semibold text-gray-900" level={2}>
+          Here's what I'm thinking for your email
+        </Heading>
+        <p className="mt-0.5 text-sm text-gray-600">
+          I've outlined the key sections and points below. Let me know if you'd like to adjust anything before we
+          proceed.
+        </p>
       </div>
 
-      <ol className="list-decimal space-y-4 pl-5">
-        {outline.sections.map((section, index) => (
-          <li key={index} className="text-sm">
-            <span className="font-medium">{section.title}</span>
-            <ul className="mt-1 list-none space-y-1 pl-4">
-              {section.items.map((item, itemIndex) => (
-                <li key={itemIndex} className="text-gray-600">
-                  • {item}
-                </li>
-              ))}
-            </ul>
-          </li>
-        ))}
-      </ol>
+      <div className="rounded-lg border border-gray-200 bg-white p-3 shadow-sm">
+        <ol className="list-decimal space-y-2 pl-4">
+          {outline.sections.map((section, index) => (
+            <li key={index} className="text-sm">
+              <span className="font-medium text-gray-900">{section.title}</span>
+              <ul className="mt-1 list-none space-y-1 pl-3">
+                {section.items.map((item, itemIndex) => (
+                  <li key={itemIndex} className="flex items-start text-gray-600">
+                    <span className="mr-1.5 mt-1 h-1 w-1 rounded-full bg-gray-400" />
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      {!isStreaming && (
+        <>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: 'easeOut', delay: 0.2 }}
+            className="mb-2 mt-4 rounded-md border border-violet-200 bg-violet-100 p-2 shadow-md ring-1 ring-violet-200/50"
+          >
+            <p className="text-sm text-violet-800">
+              <span className="font-medium">Customize your email:</span> You can update the theme colors and branding by
+              clicking the options below.
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut', delay: 0.4 }}
+            className="mt-3"
+          >
+            <OutlineHeader emailType={outline.emailType} chat={chat} />
+          </motion.div>
+        </>
+      )}
     </div>
   )
 }

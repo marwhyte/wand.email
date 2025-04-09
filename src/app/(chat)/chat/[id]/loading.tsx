@@ -1,19 +1,24 @@
-import { Header } from '@/app/components/header'
 import { classNames } from '@/lib/utils/misc'
 
 const Loading = () => {
-  const chatStarted = true
-
   return (
     <div className="mx-auto w-full">
-      <Header monthlyExportCount={null} chatStarted={chatStarted} />
+      {/* Skeleton header */}
+      <div className="z-100 flex min-h-[71px] w-full items-center justify-between border-b border-gray-200 bg-white px-4 py-4 pt-5">
+        <div className="flex items-center space-x-2">
+          <div className="h-8 w-24 animate-pulse rounded bg-gray-200"></div>
+        </div>
+        <div className="absolute left-1/2 h-5 w-48 -translate-x-1/2 animate-pulse rounded bg-gray-200"></div>
+        <div className="flex items-center space-x-4">
+          <div className="h-9 w-24 animate-pulse rounded bg-gray-200"></div>
+          <div className="h-9 w-20 animate-pulse rounded bg-gray-200"></div>
+          <div className="h-9 w-24 animate-pulse rounded-md bg-gray-300"></div>
+        </div>
+      </div>
+
       <div className="flex flex-1">
         <div className="relative mx-auto flex w-full items-center overflow-hidden" data-chat-visible={true}>
-          <div
-            className={classNames(`flex w-full justify-center`, {
-              '-mb-2': chatStarted,
-            })}
-          >
+          <div className={classNames(`-mb-2 flex w-full justify-center`)}>
             {/* Chat section */}
             <div className="flex w-[370px] min-w-[370px] max-w-[370px] shrink-0 flex-col border-r border-gray-200">
               <div className="flex flex-col px-6 pt-6">

@@ -1,0 +1,22 @@
+.rc-tooltip {
+  opacity: 1 !important;
+  position: absolute;
+  z-index: 1070;
+}
+
+.rc-tooltip-inner {
+  min-height: unset !important;
+  padding: 4px 8px !important;
+  color: white !important;
+  background-color: rgba(0, 0, 0, 0.8) !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+}
+
+/* Remove the arrow */
+.rc-tooltip-arrow, 
+.rc-tooltip-arrow-inner {
+  display: none !important;
+} 

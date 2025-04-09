@@ -37,8 +37,8 @@ export const FOLDERS: { name: SocialIconFolders; title: string }[] = [
   },
 ]
 
-export type EmailTheme = 'default' | 'dark' | 'creme' | 'wood' | 'pink' | 'blue' | 'green'
-export const emailThemes = ['default', 'dark', 'creme', 'wood', 'pink', 'blue', 'green'] as const
+export type EmailTheme = string
+export const emailThemes = ['#8e6ff7', '#fcf8f2', '#059669', '#3b82f6', '#fed776']
 
 export type EmailType =
   | 'default'
@@ -461,122 +461,6 @@ export type AllowedBlocks<T extends ComponentType> = (typeof componentLibrary)[T
 export type EmailStyleVariant = 'default' | 'outline' | 'clear'
 export const emailStyleVariants = ['default', 'outline', 'clear'] as const
 
-export type ThemeColors = {
-  name: string
-  light: string
-  base: string
-  action: string
-  gradientLight: {
-    start: string
-    end: string
-  }
-  gradientDark: {
-    start: string
-    end: string
-  }
-}
-
-export const themeColorMap: Record<EmailTheme, ThemeColors> = {
-  default: {
-    name: 'purple',
-    light: '#f8f9fa',
-    base: '#ffffff',
-    action: '#8e6ff7',
-    gradientLight: {
-      start: '#faf5ff',
-      end: '#e0e7ff',
-    },
-    gradientDark: {
-      start: '#e0e7ff',
-      end: '#e9d5ff',
-    },
-  },
-  dark: {
-    name: 'dark',
-    light: '#2c3032',
-    base: '#1a1c1e',
-    action: '#90caf9',
-    gradientLight: {
-      start: '#90caf9',
-      end: '#6633ff',
-    },
-    gradientDark: {
-      start: '#e0e7ff',
-      end: '#e9d5ff',
-    },
-  },
-  creme: {
-    name: 'creme',
-    light: '#f8f5ee',
-    base: '#fcf9f2',
-    action: '#d4a373',
-    gradientLight: {
-      start: '#d4a373',
-      end: '#b38248',
-    },
-    gradientDark: {
-      start: '#f8f5ee',
-      end: '#fcf9f2',
-    },
-  },
-  wood: {
-    name: 'wood',
-    light: '#e4d5c3',
-    base: '#d9c5ad',
-    action: '#774936',
-    gradientLight: {
-      start: '#774936',
-      end: '#553322',
-    },
-    gradientDark: {
-      start: '#e4d5c3',
-      end: '#f8f5ee',
-    },
-  },
-  pink: {
-    name: 'pink',
-    light: '#fce9f1',
-    base: '#ffd6e9',
-    action: '#ff69b4',
-    gradientLight: {
-      start: '#ff69b4',
-      end: '#ff3385',
-    },
-    gradientDark: {
-      start: '#fce9f1',
-      end: '#f8f5ee',
-    },
-  },
-  blue: {
-    name: 'blue',
-    light: '#e6f2ff',
-    base: '#dbeafe',
-    action: '#3b82f6',
-    gradientLight: {
-      start: '#3b82f6',
-      end: '#2563eb',
-    },
-    gradientDark: {
-      start: '#e6f2ff',
-      end: '#dbeafe',
-    },
-  },
-  green: {
-    name: 'green',
-    light: '#ecfdf5',
-    base: '#d1fae5',
-    action: '#059669',
-    gradientLight: {
-      start: '#059669',
-      end: '#047857',
-    },
-    gradientDark: {
-      start: '#ecfdf5',
-      end: '#d1fae5',
-    },
-  },
-}
-
 export type Email = {
   backgroundColor?: string
   color?: string
@@ -587,7 +471,7 @@ export type Email = {
   rows: RowBlock[]
   width?: string
   styleVariant?: EmailStyleVariant
-  theme?: EmailTheme
+  themeColor?: string
   borderRadius?: 'default' | 'rounded' | 'square'
   type?: EmailType
 }

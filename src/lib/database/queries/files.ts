@@ -31,7 +31,14 @@ export async function getFile(fileId: string) {
   return file
 }
 
-export async function addFile(userId: string | null, fileName: string, imageKey: string, sizeBytes: number) {
+export async function addFile(
+  userId: string | null,
+  fileName: string,
+  imageKey: string,
+  sizeBytes: number,
+  width: number,
+  height: number
+) {
   const file = await db
     .insertInto('File')
     .values({
@@ -39,6 +46,8 @@ export async function addFile(userId: string | null, fileName: string, imageKey:
       fileName,
       imageKey,
       sizeBytes,
+      width,
+      height,
     })
     .returningAll()
     .executeTakeFirst()

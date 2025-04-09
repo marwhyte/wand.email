@@ -56,5 +56,5 @@ export const magicLinkExample = `
 `
 
 export const magicLinkTemplate = (): Email => {
-  return parseEmailScript(magicLinkTemplateScript(true))
+  return parseEmailScript(magicLinkTemplateScript(true), '#000000', 'rounded')
 }

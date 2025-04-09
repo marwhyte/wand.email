@@ -1,89 +1,104 @@
-import { updateChat } from '@/lib/database/queries/chats'
+import { getMessage, updateChat } from '@/lib/database/queries/chats'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { generateEmailScript } from '@/lib/utils/email-script-generator'
 import { createScopedLogger } from '@/lib/utils/logger'
 import { getEmailFromMessage } from '@/lib/utils/misc'
 import { Message } from 'ai'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { updateEmailForMessage } from '../(chat)/actions'
-import { Email } from '../components/email-workspace/types'
 
 const logger = createScopedLogger('MessageParser')
 
 export function useMessageParser(message: Message) {
-  const { setEmail, email } = useEmailStore()
-  const { chatId } = useChatStore()
-  const [processingMessageId, setProcessingMessageId] = useState<string | null>(null)
-  const [processedMessageIds, setProcessedMessageIds] = useState<Set<string>>(new Set())
+  const { setEmail } = useEmailStore()
+  const { chatId, themeColor, borderRadius } = useChatStore()
+  const processedIds = useRef<Set<string>>(new Set())
+  const lastContentRef = useRef<string>('')
+  const [initialCheckDone, setInitialCheckDone] = useState(false)
 
+  // One-time check to see if this message has already been processed
   useEffect(() => {
-    if (!chatId) return
-    const emailObject = getEmailFromMessage(message)
-    console.log('emailObject', emailObject)
-    if (emailObject) {
-      handleEmailUpdate(emailObject)
-    }
-    // Skip if we've already processed this message
-    if (processedMessageIds.has(message.id)) {
+    if (!chatId || !message.id || initialCheckDone || processedIds.current.has(message.id)) {
       return
     }
 
-    const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+[^>]*>/)
-    const hasCloseTag = message.content.includes('</EMAIL>')
+    const checkIfProcessed = async () => {
+      try {
+        const storedMessage = await getMessage(message.id)
+        if (storedMessage?.email) {
+          // Message already has email content in database, mark as processed
+          processedIds.current.add(message.id)
+        }
+        setInitialCheckDone(true)
+      } catch (error) {
+        logger.error('Error checking message status:', error)
+        setInitialCheckDone(true) // Mark as done even on error to avoid infinite retries
+      }
+    }
 
-    // Case 1: Message has open tag but no close tag - mark it for processing
-    if (hasOpenTag && !hasCloseTag && processingMessageId !== message.id) {
-      setProcessingMessageId(message.id)
+    checkIfProcessed()
+  }, [chatId, message.id, initialCheckDone])
+
+  // Process message when it gets a closing tag
+  useEffect(() => {
+    if (!chatId || !message.content || processedIds.current.has(message.id) || !initialCheckDone) {
       return
     }
 
-    // Case 2: Message has both open and close tags in a single message
-    if (hasOpenTag && hasCloseTag && !processedMessageIds.has(message.id)) {
-      processEmailContent(message)
-      return
+    // Check if new content contains a closing tag that wasn't there before
+    const hasNewCloseTag = message.content.includes('</EMAIL>') && !lastContentRef.current.includes('</EMAIL>')
+
+    // Update the last seen content
+    lastContentRef.current = message.content
+
+    // Only process when we see a new closing tag
+    if (hasNewCloseTag) {
+      const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+[^>]*>/)
+
+      // Only process if we have both opening and closing tags
+      if (hasOpenTag) {
+        // Mark as processed immediately to prevent reprocessing
+        processedIds.current.add(message.id)
+        processEmailContent(message)
+      }
     }
+  }, [message.content, message.id, chatId, initialCheckDone])
 
-    // Case 3: This message has the close tag for a previously marked message
-    if (hasCloseTag && processingMessageId) {
-      processEmailContent(message)
-      setProcessingMessageId(null)
-    }
-  }, [message.content, message.id, chatId])
-
-  // New helper function to handle email updates
-  const handleEmailUpdate = (emailData: Email) => {
-    if (!chatId) return
-
-    setEmail(emailData)
-    updateChat(chatId, { email: generateEmailScript(emailData) }).then(() => {
-      updateEmailForMessage(chatId, message, emailData)
-    })
-  }
-
-  // Helper function to process email content and avoid duplication
   const processEmailContent = (message: Message) => {
-    const emailObject = getEmailFromMessage(message)
+    const emailObject = getEmailFromMessage(message, themeColor, borderRadius)
 
     if (emailObject && chatId) {
-      handleEmailUpdate(emailObject)
+      // Batch the state updates and database operations
+      Promise.all([
+        // Update store
+        new Promise<void>((resolve) => {
+          setEmail(emailObject)
+          resolve()
+        }),
+        // Update database
+        (async () => {
+          await updateChat(chatId, { email: generateEmailScript(emailObject) })
+          await updateEmailForMessage(chatId, message, emailObject)
+          logger.debug(`Successfully processed email from message ${message.id}`)
+        })(),
+      ]).catch((error) => {
+        logger.error(`Error updating email for message ${message.id}:`, error)
+      })
     } else {
-      // Even if we couldn't process it, mark it as processed to avoid infinite loops
+      // Log failure for debugging
       logger.warn(
         `Failed to process email from message ${message.id}: ${
           !emailObject ? 'No email object could be extracted' : 'No chatId available'
         }`
       )
 
-      // For debugging purposes, log message content that caused the processing failure
       if (!emailObject) {
         logger.debug('Message content that failed to process:', {
-          contentPreview: message.content,
+          contentPreview: message.content.substring(0, 200),
           hasEmailTags: message.content.includes('<EMAIL') && message.content.includes('</EMAIL>'),
         })
       }
-
-      setProcessedMessageIds((prev) => new Set([...prev, message.id]))
     }
   }
 }

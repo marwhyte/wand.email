@@ -92,6 +92,6 @@ export const turbotaxTemplateScript = `
 `
 
 export const turbotaxTemplate = (): Email => {
-  const rows = parseEmailScript(turbotaxTemplateScript)
+  const rows = parseEmailScript(turbotaxTemplateScript, '#333333', 'rounded')
   return createEmail(rows, '#333333', '#205ea3', 'Lato, Arial, sans-serif', '#dfdfd8', '#fcfcfc', '600')
 }

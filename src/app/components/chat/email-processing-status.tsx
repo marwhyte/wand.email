@@ -30,7 +30,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
 }) => {
   const revertOpener = useOpener()
   const { email, setEmail } = useEmailStore()
-  const { chatId } = useChatStore()
+  const { chatId, borderRadius, themeColor } = useChatStore()
 
   const { setMessages } = useChat({
     id: chatId,
@@ -45,7 +45,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
     .filter((msg) => msg.role === 'assistant' && msg.content.includes('<EMAIL')).length
 
   // Determine margin classes based on content before/after
-  const marginClasses = `${hasContentBefore ? 'mt-4' : ''} ${hasContentAfter ? 'mb-4' : ''} max-w-sm rounded-lg border border-gray-200 bg-white p-3 shadow-sm`
+  const marginClasses = `${hasContentBefore ? 'mt-4' : ''} ${hasContentAfter ? 'mb-4' : ''} w-full rounded-lg border border-gray-200 bg-white p-3 shadow-sm`
 
   // Count total email versions for comparison
   const totalEmailVersions = messages.filter((msg) => msg.role === 'assistant' && msg.content.includes('<EMAIL')).length
@@ -76,7 +76,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
           .then(() => {
             deleteMessagesAfterId(newMessage.id, chatId).then((messages) => {
               if (newMessage.email) {
-                setEmail(parseEmailScript(newMessage.email))
+                setEmail(parseEmailScript(newMessage.email, themeColor, borderRadius))
               }
               setMessages(messages)
             })
@@ -90,7 +90,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
 
   return (
     <div className={marginClasses}>
-      <div className="flex items-center justify-between pb-3 pl-1">
+      <div className="flex w-full items-center justify-between pb-3 pl-1">
         <span className="text-xs font-medium text-gray-900">Version {version + 1}</span>
         <Button
           onClick={revertOpener.open}
@@ -98,7 +98,7 @@ export const EmailProcessingStatus: React.FC<EmailProcessingStatusProps> = ({
           outline
           disabled={buttonDisabled}
           tooltip={buttonTooltip}
-          tooltipId="revert-email"
+          tooltipId={`revert-email-${message.id}`}
         >
           {buttonLabel}
         </Button>

@@ -5,7 +5,7 @@ export default function Loading() {
   return (
     <div className="relative isolate flex min-h-screen flex-col">
       <BackgroundGradients />
-      <Header chatStarted={false} monthlyExportCount={null} />\{' '}
+      <Header chatStarted={false} monthlyExportCount={null} />
     </div>
   )
 }

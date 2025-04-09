@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@/app/components/button'
-import { ColorInput } from '@/app/components/color-input'
 import { Field, FieldGroup, Label } from '@/app/components/fieldset'
 import { Input } from '@/app/components/input'
 import LogoUploader from '@/app/components/logo-uploader'
@@ -12,10 +11,13 @@ import { Company, File } from '@/lib/database/types'
 import { formatFileSize, getImgFromKey } from '@/lib/utils/misc'
 import clsx from 'clsx'
 import { useEffect, useState } from 'react'
-import { Textarea } from '../textarea'
 import { Dialog, DialogTitle } from './dialog'
 
-type FormData = Omit<Company, 'id' | 'userId' | 'createdAt' | 'updatedAt' | 'logoImageKey'>
+interface FormData {
+  name: string
+  logoFileId: string
+  address: string
+}
 
 interface CompanyDialogProps {
   isOpen: boolean
@@ -27,9 +29,7 @@ interface CompanyDialogProps {
 export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: CompanyDialogProps) {
   const [formData, setFormData] = useState<FormData>({
     name: '',
-    primaryColor: '#000000',
     logoFileId: '',
-    description: '',
     address: '',
   })
   const [fileDetails, setFileDetails] = useState<File | null>(null)
@@ -41,13 +41,15 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
 
   useEffect(() => {
     if (company) {
-      setFormData(company)
+      setFormData({
+        name: company.name,
+        logoFileId: company.logoFileId || '',
+        address: company.address || '',
+      })
     } else {
       setFormData({
         name: '',
-        primaryColor: '#000000',
         logoFileId: '',
-        description: '',
         address: '',
       })
     }
@@ -87,9 +89,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
       if (company) {
         const updatedCompany = await updateCompany(company.id, {
           name: formData.name,
-          primaryColor: formData.primaryColor ?? undefined,
           logoFileId: formData.logoFileId ?? undefined,
-          description: formData.description ?? null,
           address: formData.address ?? null,
         })
         if (updatedCompany) {
@@ -99,10 +99,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
       } else {
         const newCompany = await addCompany({
           name: formData.name,
-          primaryColor: formData.primaryColor ?? undefined,
-          description: formData.description ?? null,
-          address: formData.address ?? null,
           logoFileId: formData.logoFileId ?? undefined,
+          address: formData.address ?? null,
         })
         if (newCompany) {
           onSuccess(newCompany)
@@ -126,7 +124,9 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
 
         <FieldGroup>
           <Field>
-            <Label htmlFor="company_name">Brand Name</Label>
+            <Label htmlFor="company_name">
+              Brand Name <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="company_name"
               value={formData.name}
@@ -138,7 +138,9 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
           </Field>
 
           <Field>
-            <Label>Brand Logo</Label>
+            <Label>
+              Brand Logo <span className="text-red-500">*</span>
+            </Label>
             <LogoUploader
               onUpload={(file) => {
                 setFormData({ ...formData, logoFileId: file.id })
@@ -149,8 +151,21 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
             {fieldErrors.logo && <Text className="mt-1 !text-sm !text-red-500">{fieldErrors.logo}</Text>}
             {fileDetails?.imageKey && (
               <div className="mt-2 flex">
-                <div className="bg-checkerboard w-fit rounded-md p-2">
-                  <img className="h-12 w-auto" src={getImgFromKey(fileDetails?.imageKey)} alt="Logo" />
+                <div className="w-fit rounded-md p-2">
+                  <img
+                    className={clsx(
+                      'h-14 rounded-lg object-contain', // Scaled down from h-32 to h-21
+                      fileDetails.width && fileDetails.height
+                        ? fileDetails.width > fileDetails.height
+                          ? 'w-auto' // Wider image
+                          : fileDetails.width === fileDetails.height
+                            ? 'w-21' // Scaled down from w-32 to w-21 for square image
+                            : 'w-auto' // Taller image
+                        : 'w-32' // Scaled down from w-48 to w-32 for default wider logo
+                    )}
+                    src={getImgFromKey(fileDetails?.imageKey)}
+                    alt="Logo"
+                  />
                 </div>
                 <div className="ml-2">
                   <Text className="max-w-[200px] truncate !text-sm font-bold">
@@ -160,34 +175,19 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
                     <Text className="!text-xs text-gray-500">
                       {fileDetails?.sizeBytes ? formatFileSize(fileDetails.sizeBytes) : ''}
                     </Text>
+                    {fileDetails?.width && fileDetails?.height && (
+                      <Text className="!text-xs text-gray-500">
+                        {fileDetails.width} × {fileDetails.height}px
+                      </Text>
+                    )}
                   </div>
                 </div>
               </div>
             )}
           </Field>
 
-          <Field>
-            <Label htmlFor="primary_color">Primary Color</Label>
-            <ColorInput
-              showTransparent={false}
-              className={clsx('mt-1')}
-              id="primary_color"
-              value={formData.primaryColor ?? undefined}
-              onChange={(value) => setFormData({ ...formData, primaryColor: value })}
-            />
-          </Field>
-
           <Field labelPosition="top">
-            <Label htmlFor="description">Optional: Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description ?? ''}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-          </Field>
-
-          <Field labelPosition="top">
-            <Label htmlFor="address">Optional: Address</Label>
+            <Label htmlFor="address">Address</Label>
             <Input
               id="address"
               value={formData.address ?? ''}

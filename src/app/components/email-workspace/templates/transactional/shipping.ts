@@ -115,5 +115,5 @@ export const shippingExample = `
 `
 
 export const shippingTemplate = () => {
-  return createEmail(parseEmailScript(shippingTemplateScript(true)))
+  return createEmail(parseEmailScript(shippingTemplateScript(true), '#000000', 'rounded'))
 }

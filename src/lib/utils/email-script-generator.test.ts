@@ -147,9 +147,12 @@ describe('Email Script Generator', () => {
     const generatedScript = generateEmailScript(originalEmail)
 
     // Parse the generated script back to an email structure
-    const parsedRows = parseEmailScript(generatedScript)
+    const parsedRows = parseEmailScript(
+      generatedScript,
+      originalEmail.color ?? '#000000',
+      originalEmail.borderRadius ?? 'rounded'
+    )
 
-    console.log('parsedRows', JSON.stringify(parsedRows, null, 2))
     const parsedEmail = createEmail(
       parsedRows,
       originalEmail.color ?? '#000000',

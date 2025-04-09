@@ -156,6 +156,6 @@ export const stripeTemplateScript = `
 `
 
 export const stripeTemplate = (): Email => {
-  const rows = parseEmailScript(stripeTemplateScript)
+  const rows = parseEmailScript(stripeTemplateScript, '#0a2540', 'rounded')
   return createEmail(rows, '#0a2540', '#635BFF', 'Arial, sans-serif', 'transparent')
 }

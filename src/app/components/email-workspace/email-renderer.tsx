@@ -327,7 +327,7 @@ const EmailRenderer = ({ email }: Props) => {
   }, [currentBlock])
 
   return (
-    <div className="relative w-full min-w-0 overflow-x-auto overflow-y-auto pt-4" data-email-container>
+    <div className="relative w-full min-w-0 overflow-x-auto overflow-y-auto" data-email-container>
       {/* @ts-ignore */}
       <div {...getBodyProps(email)} className="mx-auto">
         <div {...getContentProps(email)}>

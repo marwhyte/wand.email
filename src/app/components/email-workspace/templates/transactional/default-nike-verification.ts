@@ -73,5 +73,5 @@ export const nikeTransactionalExample = `
 </example>
 `
 export const defaultNikeVerificationTemplate = (): Email => {
-  return createEmail(parseEmailScript(defaultNikeVerificationTemplateScript(true)))
+  return createEmail(parseEmailScript(defaultNikeVerificationTemplateScript(true), '#000000', 'rounded'))
 }
