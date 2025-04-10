@@ -157,7 +157,6 @@ export interface UserTable {
   plan: Plan
   stripeCustomerId: string | null
   stripeSubscriptionExpiresAt: Date | null
-  aiImageCount: number
   createdAt: GeneratedAlways<Date>
   updatedAt: Generated<Date>
 }
