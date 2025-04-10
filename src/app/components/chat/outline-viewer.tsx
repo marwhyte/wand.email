@@ -96,11 +96,11 @@ export function OutlineViewer({ content, chat, isStreaming }: OutlineViewerProps
     <div className="prose prose-sm max-w-none">
       <div className="mb-3">
         <Heading className="!text-lg font-semibold text-gray-900" level={2}>
-          Here's what I'm thinking for your email
+          Here&apos;s what I&apos;m thinking for your email
         </Heading>
         <p className="mt-0.5 text-sm text-gray-600">
-          I've outlined the key sections and points below. Let me know if you'd like to adjust anything before we
-          proceed.
+          I&apos;ve outlined the key sections and points below. Let me know if you&apos;d like to adjust anything before
+          we proceed.
         </p>
       </div>
 
