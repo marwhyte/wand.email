@@ -2,6 +2,7 @@ import { useOpener } from '@/app/hooks'
 import { updateChat } from '@/lib/database/queries/chats'
 import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat, Company } from '@/lib/database/types'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { fetcher, getImgFromKey } from '@/lib/utils/misc'
 import { Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react'
@@ -39,6 +40,7 @@ export function CompanySection({
   const [tempCompany, setTempCompany] = useState<Company | null>(null)
   const [activeCompany, setActiveCompany] = useState<Company | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
+  const { setShowSignUpDialog } = useAuthStore()
 
   // Dialog openers
   const companyOpener = useOpener()
@@ -70,10 +72,23 @@ export function CompanySection({
 
   // Reset temp values when popover opens
   const handlePopoverOpen = () => {
+    // Check if user is signed in before opening popover
+    if (!session?.data?.user?.id) {
+      setShowSignUpDialog(true)
+      return false
+    }
+
     setTempCompany(company)
+    return true
   }
 
   const handleCompanySelect = (selectedCompany: Company | null, close: () => void) => {
+    // Check if user is signed in
+    if (!session?.data?.user?.id) {
+      setShowSignUpDialog(true)
+      return
+    }
+
     setCompany(selectedCompany || undefined)
     setTempCompany(selectedCompany)
 
@@ -134,14 +149,21 @@ export function CompanySection({
                 <PopoverButton
                   className="flex h-full w-full items-center justify-center focus:outline-none"
                   aria-label="Company settings"
-                  onClick={() => {
+                  onClick={(e) => {
                     if (!open) {
                       if (!companies?.length) {
+                        if (!session?.data?.user?.id) {
+                          setShowSignUpDialog(true)
+                          e.preventDefault()
+                          return
+                        }
                         setActiveCompany(null)
                         companyOpener.open()
                         return
                       }
-                      handlePopoverOpen()
+                      if (!handlePopoverOpen()) {
+                        e.preventDefault()
+                      }
                     }
                   }}
                   data-tooltip-id={tooltipId}
@@ -157,14 +179,21 @@ export function CompanySection({
                       company ? 'bg-purple-100' : 'bg-gray-100'
                     )}
                     aria-label="Company settings"
-                    onClick={() => {
+                    onClick={(e) => {
                       if (!open) {
                         if (!companies?.length) {
+                          if (!session?.data?.user?.id) {
+                            setShowSignUpDialog(true)
+                            e.preventDefault()
+                            return
+                          }
                           setActiveCompany(null)
                           companyOpener.open()
                           return
                         }
-                        handlePopoverOpen()
+                        if (!handlePopoverOpen()) {
+                          e.preventDefault()
+                        }
                       }
                     }}
                   >
@@ -184,14 +213,21 @@ export function CompanySection({
                     company ? 'bg-purple-100' : 'bg-gray-100'
                   )}
                   aria-label="Company settings"
-                  onClick={() => {
+                  onClick={(e) => {
                     if (!open) {
                       if (!companies?.length) {
+                        if (!session?.data?.user?.id) {
+                          setShowSignUpDialog(true)
+                          e.preventDefault()
+                          return
+                        }
                         setActiveCompany(null)
                         companyOpener.open()
                         return
                       }
-                      handlePopoverOpen()
+                      if (!handlePopoverOpen()) {
+                        e.preventDefault()
+                      }
                     }
                   }}
                 >

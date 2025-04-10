@@ -1,9 +1,11 @@
 'use client'
 
 import { updateChat } from '@/lib/database/queries/chats'
+import { useAuthStore } from '@/lib/stores/authStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react'
+import { useSession } from 'next-auth/react'
 import React, { Fragment, useEffect, useState } from 'react'
 import { ColorInput } from './color-input'
 import { Text } from './text'
@@ -34,6 +36,8 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
 }) => {
   const { themeColor, borderRadius, chatId, chatStarted, setThemeColor, setBorderRadius } = useChatStore()
   const { email, setEmail } = useEmailStore()
+  const { setShowSignUpDialog } = useAuthStore()
+  const session = useSession()
 
   // Temporary state (what's shown in the popover until saved)
   const [tempTheme, setTempTheme] = useState<string | null>(null)
@@ -52,12 +56,19 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
 
   // Reset temp values when popover opens
   const handlePopoverOpen = () => {
+    // Check if user is signed in before opening popover
+    if (!session.data?.user?.id) {
+      setShowSignUpDialog(true)
+      return false
+    }
+
     setTempColor(themeColor)
     setTempBorderRadius(borderRadius as BorderRadiusOption)
 
     // Try to determine if this color matches a theme
     const foundTheme = availableThemes.find((theme) => theme.toLowerCase() === themeColor.toLowerCase())
     setTempTheme(foundTheme || null)
+    return true
   }
 
   const handleThemeSelect = (theme: string | null) => {
@@ -151,9 +162,11 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
                 <PopoverButton
                   className="flex h-full w-full items-center justify-center focus:outline-none"
                   aria-label="Theme settings"
-                  onClick={() => {
+                  onClick={(e) => {
                     if (!open) {
-                      handlePopoverOpen()
+                      if (!handlePopoverOpen()) {
+                        e.preventDefault()
+                      }
                     }
                   }}
                   data-tooltip-id="123"
@@ -165,9 +178,11 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
                   <PopoverButton
                     className="flex items-center space-x-1.5 rounded-md bg-gray-100 px-2 py-1 hover:bg-gray-200 focus:outline-none"
                     aria-label="Theme settings"
-                    onClick={() => {
+                    onClick={(e) => {
                       if (!open) {
-                        handlePopoverOpen()
+                        if (!handlePopoverOpen()) {
+                          e.preventDefault()
+                        }
                       }
                     }}
                     data-tooltip-id="123"
@@ -195,9 +210,11 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
                 <PopoverButton
                   className="flex items-center space-x-1.5 rounded-md bg-gray-100 px-2 py-1 hover:bg-gray-200 focus:outline-none"
                   aria-label="Theme settings"
-                  onClick={() => {
+                  onClick={(e) => {
                     if (!open) {
-                      handlePopoverOpen()
+                      if (!handlePopoverOpen()) {
+                        e.preventDefault()
+                      }
                     }
                   }}
                   data-tooltip-id="1234"
