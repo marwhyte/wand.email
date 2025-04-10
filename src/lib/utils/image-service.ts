@@ -13,11 +13,24 @@ const pexelsClient = createClient(process.env.PEXELS_API_KEY || '')
 
 // Create Google auth client from environment variables
 const getGoogleAuthClient = () => {
+  // Process the private key to ensure newlines are properly formatted
+  // This fixes the "DECODER routines::unsupported" error in production
+  // Also remove any surrounding quotes that might have been included
+  let privateKey = process.env.GCP_PRIVATE_KEY || ''
+
+  // Remove surrounding quotes if present
+  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = privateKey.slice(1, -1)
+  }
+
+  // Replace escaped newlines with actual newlines
+  privateKey = privateKey.replace(/\\n/g, '\n')
+
   const credentials = {
     type: 'service_account',
     project_id: process.env.GCP_PROJECT_ID,
     private_key_id: process.env.GCP_PRIVATE_KEY_ID,
-    private_key: process.env.GCP_PRIVATE_KEY,
+    private_key: privateKey,
     client_email: process.env.GCP_CLIENT_EMAIL,
     client_id: process.env.GCP_CLIENT_ID,
     auth_uri: 'https://accounts.google.com/o/oauth2/auth',
