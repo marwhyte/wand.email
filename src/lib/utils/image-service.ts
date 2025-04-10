@@ -2,13 +2,46 @@
 
 import { uploadFile } from '@/app/actions/uploadFile'
 import { getImgFromKey } from '@/lib/utils/misc'
-import { vertex } from '@ai-sdk/google-vertex'
+import { createVertex } from '@ai-sdk/google-vertex'
 import { experimental_generateImage as generateImage } from 'ai'
 import namer from 'color-namer'
+import { auth } from 'google-auth-library'
 import { createClient } from 'pexels'
 
 // Initialize the Pexels client
 const pexelsClient = createClient(process.env.PEXELS_API_KEY || '')
+
+// Create Google auth client from environment variables
+const getGoogleAuthClient = () => {
+  const credentials = {
+    type: 'service_account',
+    project_id: process.env.GCP_PROJECT_ID,
+    private_key_id: process.env.GCP_PRIVATE_KEY_ID,
+    private_key: process.env.GCP_PRIVATE_KEY,
+    client_email: process.env.GCP_CLIENT_EMAIL,
+    client_id: process.env.GCP_CLIENT_ID,
+    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: 'https://oauth2.googleapis.com/token',
+    auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+    universe_domain: process.env.GCP_UNIVERSE_DOMAIN,
+  }
+
+  // Create auth client from credentials JSON
+  const client = auth.fromJSON(credentials)
+
+  // Set scopes for the client - the cast is needed because TypeScript doesn't recognize scopes on JSONClient
+  // @ts-ignore - Adding scopes to GoogleAuth client
+  client.scopes = ['https://www.googleapis.com/auth/cloud-platform']
+  return client
+}
+
+const vertex = createVertex({
+  project: process.env.GCP_PROJECT_ID,
+  location: 'us-central1',
+  googleAuthOptions: {
+    authClient: getGoogleAuthClient(),
+  },
+})
 
 // Get descriptive color name for prompting
 const getColorDescription = (hexColor: string): string => {

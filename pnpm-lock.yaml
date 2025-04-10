@@ -127,6 +127,9 @@ importers:
       dotenv:
         specifier: ^16.4.5
         version: 16.4.7
+      google-auth-library:
+        specifier: ^9.15.1
+        version: 9.15.1
       html-react-parser:
         specifier: ^5.1.12
         version: 5.2.2(@types/react@19.0.10)(react@19.0.0)

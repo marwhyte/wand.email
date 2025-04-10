@@ -54,6 +54,7 @@
     "color-namer": "^1.4.0",
     "date-fns": "^4.1.0",
     "dotenv": "^16.4.5",
+    "google-auth-library": "^9.15.1",
     "html-react-parser": "^5.1.12",
     "import-in-the-middle": "^1.13.1",
     "isomorphic-dompurify": "^2.19.0",

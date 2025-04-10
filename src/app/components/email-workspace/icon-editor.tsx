@@ -100,18 +100,6 @@ const IconEditor = ({ block, parentRow, onChange, email }: IconEditorProps) => {
           <option value="top">Top</option>
         </Select>
       </Field>
-
-      <Field>
-        <Label>Alignment</Label>
-        <Select
-          value={iconAttributes.align || 'center'}
-          onChange={(e) => onChange({ align: e.target.value as 'left' | 'center' | 'right' })}
-        >
-          <option value="left">Left</option>
-          <option value="center">Center</option>
-          <option value="right">Right</option>
-        </Select>
-      </Field>
     </FieldGroup>
   )
 }
