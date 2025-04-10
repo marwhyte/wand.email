@@ -3,11 +3,11 @@ import path from 'path'
 import sharp from 'sharp'
 import { getThemeColors } from './colors'
 
-// Get the path to the material icons package
-const BASE_ICONS_DIR = path.join(process.cwd(), 'node_modules/@material-design-icons/svg')
+// Get the path to the icons in the public folder
+const BASE_ICONS_DIR = path.join(process.cwd(), 'public/icons')
 
-// Different style variants available in the package
-const ICON_VARIANTS = ['outlined', 'filled', 'round', 'sharp', 'two-tone']
+// Only using outlined icons as specified
+const ICON_VARIANT = 'outlined'
 
 /**
  * Generates an icon as a PNG buffer
@@ -21,28 +21,22 @@ export async function generateIconPng(iconName: string, themeColor: string, size
     const theme = getThemeColors(themeColor)
 
     console.log('generating icon', iconName, themeColor, size)
-    // Try to find the icon in different variants
-    let svgContent = null
-    let foundVariant = null
-
     // Convert kebab-case to camelCase for the filename (e.g., local-shipping -> local_shipping)
     const normalizedIconName = iconName.replace(/-/g, '_')
 
-    // Look for the icon in each variant directory
-    for (const variant of ICON_VARIANTS) {
-      const variantDir = path.join(BASE_ICONS_DIR, variant)
-      const iconPath = path.join(variantDir, `${normalizedIconName}.svg`)
+    // Look for the icon in the outlined variant directory
+    const variantDir = path.join(BASE_ICONS_DIR, ICON_VARIANT)
+    const iconPath = path.join(variantDir, `${normalizedIconName}.svg`)
 
-      if (fs.existsSync(iconPath)) {
-        svgContent = fs.readFileSync(iconPath, 'utf8')
-        foundVariant = variant
-        break
-      }
+    // Check if the file exists
+    let svgContent = null
+    if (fs.existsSync(iconPath)) {
+      svgContent = fs.readFileSync(iconPath, 'utf8')
     }
 
     // If we couldn't find the icon, fall back to a generic one
     if (!svgContent) {
-      console.error(`Icon ${normalizedIconName} not found in any variant`)
+      console.error(`Icon ${normalizedIconName} not found in the public icons directory`)
       return generateFallbackIconPng(normalizedIconName, size, themeColor)
     }
 
