@@ -1,0 +1,2 @@
+# Ignore credentials file to prevent automatic formatting
+credentials.json 
