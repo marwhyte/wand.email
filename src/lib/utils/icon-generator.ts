@@ -5,6 +5,7 @@ import { getThemeColors } from './colors'
 
 // Get the path to the icons in the public folder
 const BASE_ICONS_DIR = path.join(process.cwd(), 'public/icons')
+console.log('BASE_ICONS_DIR path:', BASE_ICONS_DIR)
 
 // Only using outlined icons as specified
 const ICON_VARIANT = 'outlined'
@@ -24,20 +25,88 @@ export async function generateIconPng(iconName: string, themeColor: string, size
     // Convert kebab-case to camelCase for the filename (e.g., local-shipping -> local_shipping)
     const normalizedIconName = iconName.replace(/-/g, '_')
 
+    // Debug: Check if public directory exists and its contents
+    const publicDir = path.join(process.cwd(), 'public')
+    if (fs.existsSync(publicDir)) {
+      try {
+        const publicContents = fs.readdirSync(publicDir)
+        console.log('Public directory contents:', publicContents)
+      } catch (err) {
+        console.error('Error reading public directory:', err)
+      }
+    } else {
+      console.error('Public directory does not exist:', publicDir)
+    }
+
     // Look for the icon in the outlined variant directory
     const variantDir = path.join(BASE_ICONS_DIR, ICON_VARIANT)
     const iconPath = path.join(variantDir, `${normalizedIconName}.svg`)
+
+    console.log('Looking for icon at path:', iconPath)
+
+    // Debug: Check if the directory exists and list available icons
+    if (fs.existsSync(variantDir)) {
+      try {
+        const files = fs.readdirSync(variantDir)
+        console.log(
+          `Found ${files.length} icons in directory. Examples:`,
+          files.slice(0, 5),
+          files.includes(`${normalizedIconName}.svg`)
+            ? 'Target icon found in directory!'
+            : 'Target icon NOT found in directory'
+        )
+      } catch (readErr) {
+        console.error('Error reading directory:', readErr)
+      }
+    } else {
+      console.error('Icon directory does not exist:', variantDir)
+    }
 
     // Check if the file exists
     let svgContent = null
     if (fs.existsSync(iconPath)) {
       svgContent = fs.readFileSync(iconPath, 'utf8')
+    } else {
+      // Try with .png extension as fallback
+      const pngPath = path.join(variantDir, `${normalizedIconName}.png`)
+      if (fs.existsSync(pngPath)) {
+        // If we find a PNG, we can use that directly
+        console.log('Found PNG version of icon')
+        return await sharp(pngPath).resize(size, size).png({ quality: 100 }).toBuffer()
+      }
     }
 
-    // If we couldn't find the icon, fall back to a generic one
+    // If we couldn't find the icon, try to find a similar icon or fall back to a generic one
     if (!svgContent) {
-      console.error(`Icon ${normalizedIconName} not found in the public icons directory`)
-      return generateFallbackIconPng(normalizedIconName, size, themeColor)
+      console.warn(`Icon ${normalizedIconName} not found in the public icons directory, trying fallback options`)
+
+      // Try some common alternatives (e.g., if star isn't found, try star_rate or grade or favorite)
+      const alternatives: Record<string, string[]> = {
+        star: ['star_rate', 'grade', 'favorite'],
+        check: ['done', 'task_alt', 'check_circle'],
+        heart: ['favorite', 'favorite_border'],
+        user: ['person', 'account_circle'],
+        home: ['house', 'home_filled'],
+        // Add more common alternatives as needed
+      }
+
+      // Try the alternatives if available
+      if (alternatives[iconName]) {
+        for (const alt of alternatives[iconName]) {
+          const altPath = path.join(variantDir, `${alt}.svg`)
+          if (fs.existsSync(altPath)) {
+            console.log(`Using alternative icon: ${alt} instead of ${iconName}`)
+            svgContent = fs.readFileSync(altPath, 'utf8')
+            break
+          }
+        }
+      }
+
+      // If still no icon found, use fallback
+      if (!svgContent) {
+        console.error(`Icon ${normalizedIconName} and alternatives not found, using fallback`)
+        return generateFallbackIconPng(normalizedIconName, size, theme)
+      }
     }
 
     // Extract the viewBox to understand original dimensions
@@ -48,7 +117,7 @@ export async function generateIconPng(iconName: string, themeColor: string, size
     const pathMatches = [...svgContent.matchAll(/<path[^>]*d="([^"]*)"/g)]
     if (pathMatches.length === 0) {
       console.error('Could not extract path from SVG')
-      return generateFallbackIconPng(normalizedIconName, size, themeColor)
+      return generateFallbackIconPng(normalizedIconName, size, theme)
     }
 
     // Collect all paths with their attributes
@@ -92,19 +161,27 @@ export async function generateIconPng(iconName: string, themeColor: string, size
  * @returns PNG buffer of the fallback icon
  */
 async function generateFallbackIconPng(iconName: string, size: number, themeColor: any): Promise<Buffer> {
-  // Create a simple fallback icon with the first letter of the icon name
-  const letter = iconName.charAt(0).toUpperCase()
+  try {
+    // Create a simple fallback icon with the first letter of the icon name
+    const letter = iconName.charAt(0).toUpperCase()
 
-  const fallbackSvg = `
-    <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
-      <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${themeColor.light}" />
-      <text x="${size / 2}" y="${size / 2 + size / 10}" 
-            font-family="Arial" font-size="${size / 3}" 
-            text-anchor="middle" font-weight="bold" fill="${themeColor.action}">
-        ${letter}
-      </text>
-    </svg>
-  `
+    const fallbackSvg = `
+      <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" shape-rendering="geometricPrecision">
+        <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${themeColor.light}" />
+        <text x="${size / 2}" y="${size / 2 + size / 10}" 
+              font-family="Arial" font-size="${size / 3}" 
+              text-anchor="middle" font-weight="bold" fill="${themeColor.action}">
+          ${letter}
+        </text>
+      </svg>
+    `
 
-  return await sharp(Buffer.from(fallbackSvg), { density: 300 }).png({ quality: 100 }).toBuffer()
+    return await sharp(Buffer.from(fallbackSvg), { density: 300 }).png({ quality: 100 }).toBuffer()
+  } catch (fallbackError) {
+    console.error('Error generating fallback icon, using ultra fallback:', fallbackError)
+
+    // Ultra fallback - a simple colored square if even the SVG generation fails
+    const ultraFallbackSvg = `<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><rect width="${size}" height="${size}" fill="blue"/></svg>`
+    return Buffer.from(ultraFallbackSvg)
+  }
 }
