@@ -14,4 +14,17 @@ Sentry.init({
   debug: false,
 
   enabled: process.env.NODE_ENV === 'production', // Disable in non-production environments
+
+  // Enable automatic error capturing
+  autoSessionTracking: true,
+  attachStacktrace: true,
+
+  // Capture errors in console logs
+  enableTracing: true,
+
+  // Set a higher sample rate to ensure errors are captured
+  replaysOnErrorSampleRate: 1.0,
+
+  // Capture all errors, even those that might be filtered out by default
+  ignoreErrors: [],
 })

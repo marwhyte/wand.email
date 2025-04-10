@@ -9,9 +9,24 @@ Sentry.init({
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,
-
+  integrations: [
+    Sentry.captureConsoleIntegration({
+      levels: ['error'],
+    }),
+  ],
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,
 
   enabled: process.env.NODE_ENV === 'production', // Disable in non-production environments
+
+  // Enable automatic error capturing
+  autoSessionTracking: true,
+  attachStacktrace: true,
+
+  // Set a higher sample rate to ensure errors are captured
+  // This ensures that errors in server components and server actions are captured
+  profilesSampleRate: 1.0,
+
+  // Enable tracing to get more context about errors
+  enableTracing: true,
 })
