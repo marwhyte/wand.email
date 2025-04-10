@@ -3,40 +3,19 @@ import path from 'path'
 import sharp from 'sharp'
 import { getThemeColors } from './colors'
 
-// For Vercel production environment
-function getPublicPath() {
-  const cwd = process.cwd()
-  console.log('Current working directory:', cwd)
-
-  // Try different possible paths for the public directory
-  const possiblePaths = [
-    path.join(cwd, 'public'), // Local development
-    path.join(cwd, '..', 'public'), // One level up
-    '/var/task/public', // Vercel serverless
-    path.join(cwd, '..', '..', 'public'), // Two levels up
-    path.join(cwd, '.next', 'server', 'public'), // Next.js production
-    path.join(cwd, '.next', 'public'), // Another Next.js production possibility
-  ]
-
-  for (const p of possiblePaths) {
-    if (fs.existsSync(p)) {
-      console.log('Found public directory at:', p)
-      return p
-    }
-  }
-
-  // If no public directory is found, use the current directory as fallback
-  console.warn('Public directory not found in any expected location, using fallback')
-  return cwd
-}
-
-// Get the path to the icons in the public folder
-const PUBLIC_DIR = getPublicPath()
-const BASE_ICONS_DIR = path.join(PUBLIC_DIR, 'icons')
-console.log('BASE_ICONS_DIR path:', BASE_ICONS_DIR)
-
 // Only using outlined icons as specified
 const ICON_VARIANT = 'outlined'
+
+// Built-in SVG paths for the most commonly used icons as emergency fallbacks
+const BUILT_IN_ICONS: Record<string, string> = {
+  star: '<path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>',
+  home: '<path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>',
+  check: '<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>',
+}
+
+// Local development paths
+const BASE_ICONS_DIR = path.join(process.cwd(), 'public/icons')
+console.log('BASE_ICONS_DIR path:', BASE_ICONS_DIR)
 
 /**
  * Generates an icon as a PNG buffer
@@ -53,88 +32,50 @@ export async function generateIconPng(iconName: string, themeColor: string, size
     // Convert kebab-case to camelCase for the filename (e.g., local-shipping -> local_shipping)
     const normalizedIconName = iconName.replace(/-/g, '_')
 
-    // Debug: Check if public directory exists and its contents
-    const publicDir = path.join(process.cwd(), 'public')
-    if (fs.existsSync(publicDir)) {
-      try {
-        const publicContents = fs.readdirSync(publicDir)
-        console.log('Public directory contents:', publicContents)
-      } catch (err) {
-        console.error('Error reading public directory:', err)
-      }
-    } else {
-      console.error('Public directory does not exist:', publicDir)
-    }
-
-    // Look for the icon in the outlined variant directory
-    const variantDir = path.join(BASE_ICONS_DIR, ICON_VARIANT)
-    const iconPath = path.join(variantDir, `${normalizedIconName}.svg`)
-
-    console.log('Looking for icon at path:', iconPath)
-
-    // Debug: Check if the directory exists and list available icons
-    if (fs.existsSync(variantDir)) {
-      try {
-        const files = fs.readdirSync(variantDir)
-        console.log(
-          `Found ${files.length} icons in directory. Examples:`,
-          files.slice(0, 5),
-          files.includes(`${normalizedIconName}.svg`)
-            ? 'Target icon found in directory!'
-            : 'Target icon NOT found in directory'
-        )
-      } catch (readErr) {
-        console.error('Error reading directory:', readErr)
-      }
-    } else {
-      console.error('Icon directory does not exist:', variantDir)
-    }
-
-    // Check if the file exists
+    // First check if we have a built-in emergency fallback icon
     let svgContent = null
-    if (fs.existsSync(iconPath)) {
-      svgContent = fs.readFileSync(iconPath, 'utf8')
+    const iconNameKey = iconName.toLowerCase()
+
+    // Try to get SVG content based on environment
+    if (process.env.NODE_ENV === 'development') {
+      // In development, try to read from the file system first
+      try {
+        const variantDir = path.join(BASE_ICONS_DIR, ICON_VARIANT)
+        const iconPath = path.join(variantDir, `${normalizedIconName}.svg`)
+
+        if (fs.existsSync(iconPath)) {
+          svgContent = fs.readFileSync(iconPath, 'utf8')
+        }
+      } catch (err) {
+        console.warn('Error reading icon from file system:', err)
+      }
     } else {
-      // Try with .png extension as fallback
-      const pngPath = path.join(variantDir, `${normalizedIconName}.png`)
-      if (fs.existsSync(pngPath)) {
-        // If we find a PNG, we can use that directly
-        console.log('Found PNG version of icon')
-        return await sharp(pngPath).resize(size, size).png({ quality: 100 }).toBuffer()
+      // In production, try to fetch from the CDN URL
+      try {
+        // Use global fetch to get the SVG from the deployed CDN
+        const iconUrl = `/icons/${ICON_VARIANT}/${normalizedIconName}.svg`
+        const response = await fetch(iconUrl)
+
+        if (response.ok) {
+          svgContent = await response.text()
+        } else {
+          console.warn(`Icon not found at URL: ${iconUrl}, status: ${response.status}`)
+        }
+      } catch (fetchErr) {
+        console.warn('Error fetching icon from CDN:', fetchErr)
       }
     }
 
-    // If we couldn't find the icon, try to find a similar icon or fall back to a generic one
+    // If we still don't have SVG content, use our built-in fallbacks
+    if (!svgContent && BUILT_IN_ICONS[iconNameKey]) {
+      console.log(`Using built-in fallback icon for ${iconName}`)
+      svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${BUILT_IN_ICONS[iconNameKey]}</svg>`
+    }
+
+    // If still no SVG content, use the letter fallback
     if (!svgContent) {
-      console.warn(`Icon ${normalizedIconName} not found in the public icons directory, trying fallback options`)
-
-      // Try some common alternatives (e.g., if star isn't found, try star_rate or grade or favorite)
-      const alternatives: Record<string, string[]> = {
-        star: ['star_rate', 'grade', 'favorite'],
-        check: ['done', 'task_alt', 'check_circle'],
-        heart: ['favorite', 'favorite_border'],
-        user: ['person', 'account_circle'],
-        home: ['house', 'home_filled'],
-        // Add more common alternatives as needed
-      }
-
-      // Try the alternatives if available
-      if (alternatives[iconName]) {
-        for (const alt of alternatives[iconName]) {
-          const altPath = path.join(variantDir, `${alt}.svg`)
-          if (fs.existsSync(altPath)) {
-            console.log(`Using alternative icon: ${alt} instead of ${iconName}`)
-            svgContent = fs.readFileSync(altPath, 'utf8')
-            break
-          }
-        }
-      }
-
-      // If still no icon found, use fallback
-      if (!svgContent) {
-        console.error(`Icon ${normalizedIconName} and alternatives not found, using fallback`)
-        return generateFallbackIconPng(normalizedIconName, size, theme)
-      }
+      console.log(`Icon ${normalizedIconName} not found, using letter fallback`)
+      return generateFallbackIconPng(normalizedIconName, size, theme)
     }
 
     // Extract the viewBox to understand original dimensions
