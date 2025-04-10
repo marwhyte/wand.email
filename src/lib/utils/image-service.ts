@@ -11,8 +11,8 @@ import { createClient } from 'pexels'
 // Initialize the Pexels client
 const pexelsClient = createClient(process.env.PEXELS_API_KEY || '')
 
-// Create Google auth client from environment variables
-const getGoogleAuthClient = () => {
+// Create Google auth client and vertex instance
+const getVertexInstance = () => {
   // Process the private key to ensure newlines are properly formatted
   // This fixes the "DECODER routines::unsupported" error in production
   // Also remove any surrounding quotes that might have been included
@@ -25,6 +25,8 @@ const getGoogleAuthClient = () => {
 
   // Replace escaped newlines with actual newlines
   privateKey = privateKey.replace(/\\n/g, '\n')
+
+  console.log('privateKey', privateKey)
 
   const credentials = {
     type: 'service_account',
@@ -45,16 +47,19 @@ const getGoogleAuthClient = () => {
   // Set scopes for the client - the cast is needed because TypeScript doesn't recognize scopes on JSONClient
   // @ts-ignore - Adding scopes to GoogleAuth client
   client.scopes = ['https://www.googleapis.com/auth/cloud-platform']
-  return client
+
+  // Create and return the vertex instance with the auth client
+  return createVertex({
+    project: process.env.GCP_PROJECT_ID,
+    location: 'us-central1',
+    googleAuthOptions: {
+      authClient: client,
+    },
+  })
 }
 
-const vertex = createVertex({
-  project: process.env.GCP_PROJECT_ID,
-  location: 'us-central1',
-  googleAuthOptions: {
-    authClient: getGoogleAuthClient(),
-  },
-})
+// Get vertex instance for use throughout the file
+const vertex = getVertexInstance()
 
 // Get descriptive color name for prompting
 const getColorDescription = (hexColor: string): string => {
@@ -283,39 +288,61 @@ async function uploadAiGeneratedImage(
           // Use the base64Data if available
           if (file.base64Data && typeof file.base64Data === 'string') {
             console.log('Using base64Data from DefaultGeneratedFile')
+
+            // If base64Data doesn't have the data:image prefix, add it
+            let base64DataWithPrefix = file.base64Data
+            if (!base64DataWithPrefix.startsWith('data:')) {
+              base64DataWithPrefix = `data:${file.mimeType};base64,${base64DataWithPrefix}`
+              console.log('Added prefix to base64Data')
+            }
+
             // Base64 data is already a proper data URL, use it directly
-            if (file.base64Data.startsWith('data:')) {
-              const matches = file.base64Data.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
+            if (base64DataWithPrefix.startsWith('data:')) {
+              const matches = base64DataWithPrefix.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
               if (matches && matches.length === 3) {
                 const type = matches[1]
                 const base64Data = matches[2]
-                const binaryString = atob(base64Data)
-                const bytes = new Uint8Array(binaryString.length)
-                for (let i = 0; i < binaryString.length; i++) {
-                  bytes[i] = binaryString.charCodeAt(i)
+
+                // Log some diagnostics about the data received
+                console.log('Data type:', type, 'base64 length:', base64Data.length)
+
+                try {
+                  const binaryString = atob(base64Data)
+                  const bytes = new Uint8Array(binaryString.length)
+                  for (let i = 0; i < binaryString.length; i++) {
+                    bytes[i] = binaryString.charCodeAt(i)
+                  }
+                  blob = new Blob([bytes], { type })
+                  mimeType = type
+                  console.log('Successfully created Blob from base64Data with length:', bytes.length)
+                } catch (atobError) {
+                  console.error('Error decoding base64 data:', atobError)
+                  throw new Error('Invalid base64 data format')
                 }
-                blob = new Blob([bytes], { type })
-                mimeType = type
-                console.log('Successfully created Blob from base64Data')
               } else {
                 throw new Error('Invalid data URL format in base64Data')
               }
             }
             // Base64 data is just the encoded string without the data URL prefix
             else {
-              const binaryString = atob(file.base64Data)
-              const bytes = new Uint8Array(binaryString.length)
-              for (let i = 0; i < binaryString.length; i++) {
-                bytes[i] = binaryString.charCodeAt(i)
+              try {
+                const binaryString = atob(file.base64Data)
+                const bytes = new Uint8Array(binaryString.length)
+                for (let i = 0; i < binaryString.length; i++) {
+                  bytes[i] = binaryString.charCodeAt(i)
+                }
+                blob = new Blob([bytes], { type: file.mimeType })
+                mimeType = file.mimeType
+                console.log('Successfully created Blob from raw base64Data with length:', bytes.length)
+              } catch (atobError) {
+                console.error('Error decoding raw base64 data:', atobError)
+                throw new Error('Invalid base64 encoding')
               }
-              blob = new Blob([bytes], { type: file.mimeType })
-              mimeType = file.mimeType
-              console.log('Successfully created Blob from raw base64Data')
             }
           }
           // Fall back to uint8ArrayData if base64Data processing failed
           else if (file.uint8ArrayData && file.uint8ArrayData instanceof Uint8Array) {
-            console.log('Using uint8ArrayData from DefaultGeneratedFile')
+            console.log('Using uint8ArrayData from DefaultGeneratedFile with length:', file.uint8ArrayData.length)
             blob = new Blob([file.uint8ArrayData], { type: file.mimeType })
             mimeType = file.mimeType
             console.log('Successfully created Blob from uint8ArrayData')
@@ -324,8 +351,13 @@ async function uploadAiGeneratedImage(
           }
         } catch (vertexError: any) {
           console.error('Error processing Vertex AI DefaultGeneratedFile:', vertexError.message)
-          // Try to use the object as a blob anyway
-          blob = file as unknown as Blob
+          // If we can't process it properly, try using JSON.stringify to inspect the object
+          try {
+            console.log('Object inspection:', JSON.stringify(file, null, 2))
+          } catch (stringifyError) {
+            console.log('Could not stringify object for inspection')
+          }
+          throw vertexError
         }
       }
       // Try to handle common formats that might not be properly detected
