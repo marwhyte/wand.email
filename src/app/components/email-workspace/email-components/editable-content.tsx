@@ -144,6 +144,7 @@ export default function EditableContent({
   }, [debouncedOnChange])
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         bulletList: forceListItem ? {} : false,

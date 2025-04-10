@@ -103,12 +103,23 @@ export const getAdditionalIconStyles = (
   }
 
   const rowTypeDefaults = getBlockCSSProperties(iconBlock, email, parentRow) || {}
+  const { ...cleanRowTypeDefaults } = rowTypeDefaults
+  delete (cleanRowTypeDefaults as any).align
 
-  const { icon, position, size, color, align, title, description, ...styleAttributes } = iconBlock.attributes
+  const {
+    icon,
+    position,
+    size,
+    color,
+    align: attributeAlign,
+    title,
+    description,
+    ...styleAttributes
+  } = iconBlock.attributes
 
   return {
     ...baseDefaults,
-    ...rowTypeDefaults,
+    ...cleanRowTypeDefaults,
     ...styleAttributes,
   }
 }
@@ -126,12 +137,14 @@ export const getAdditionalImageStyles = (
   }
 
   const rowTypeDefaults = getBlockCSSProperties(imageBlock, email, parentRow, company)
+  const { ...cleanRowTypeDefaults } = rowTypeDefaults
+  delete (cleanRowTypeDefaults as any).align
 
   const { src, alt, ...styleAttributes } = imageBlock.attributes
 
   return {
     ...baseDefaults,
-    ...rowTypeDefaults,
+    ...cleanRowTypeDefaults,
     ...styleAttributes,
   }
 }
@@ -151,9 +164,9 @@ export const getAdditionalButtonStyles = (
     borderRadius:
       emailAttributes.borderRadius === 'rounded' ? '24px' : emailAttributes.borderRadius === 'square' ? '2px' : '8px',
     paddingTop: '12px',
-    paddingRight: '24px',
-    paddingBottom: '24px',
-    paddingLeft: '12px',
+    paddingRight: '0px',
+    paddingBottom: '12px',
+    paddingLeft: '0px',
     marginTop: '10px',
     marginBottom: '10px',
     marginLeft: '14px',
@@ -163,6 +176,9 @@ export const getAdditionalButtonStyles = (
   }
 
   const rowTypeDefaults = getBlockCSSProperties(buttonBlock, email, parentRow) || {}
+  const { ...cleanRowTypeDefaults } = rowTypeDefaults
+  delete (cleanRowTypeDefaults as any).align
+
   const buttonAttributes = getButtonAttributes(buttonBlock, parentRow, email, company)
 
   const {
@@ -170,7 +186,7 @@ export const getAdditionalButtonStyles = (
     borderColor,
     borderWidth,
     borderStyle,
-    align,
+    align: attributeAlign,
     content,
     paddingLeft,
     paddingRight,
@@ -214,7 +230,7 @@ export const getAdditionalButtonStyles = (
 
   return {
     ...baseDefaults,
-    ...rowTypeDefaults,
+    ...cleanRowTypeDefaults,
     ...styleAttributes,
     ...borderStyles,
     ...margins,
@@ -240,12 +256,14 @@ export const getAdditionalLinkStyles = (
   }
 
   const rowTypeDefaults = getBlockCSSProperties(linkBlock, email, parentRow) || {}
+  const { ...cleanRowTypeDefaults } = rowTypeDefaults
+  delete (cleanRowTypeDefaults as any).align
 
-  const { href, align, content, ...styleAttributes } = linkBlock.attributes
+  const { href, align: attributeAlign, content, ...styleAttributes } = linkBlock.attributes
 
   return {
     ...baseDefaults,
-    ...rowTypeDefaults,
+    ...cleanRowTypeDefaults,
     ...styleAttributes,
   }
 }
@@ -315,12 +333,14 @@ export const getAdditionalSocialsStyles = (
   }
 
   const rowTypeDefaults = getBlockCSSProperties(socialsBlock, email, parentRow) || {}
+  const { ...cleanRowTypeDefaults } = rowTypeDefaults
+  delete (cleanRowTypeDefaults as any).align
 
-  const { align, folder, links, ...styleAttributes } = socialsBlock.attributes
+  const { align: attributeAlign, folder, links, ...styleAttributes } = socialsBlock.attributes
 
   return {
     ...baseDefaults,
-    ...rowTypeDefaults,
+    ...cleanRowTypeDefaults,
     ...styleAttributes,
   }
 }
@@ -364,12 +384,14 @@ export const getAdditionalTableStyles = (
   }
 
   const rowTypeDefaults = getBlockCSSProperties(tableBlock, email, parentRow) || {}
+  const { ...cleanRowTypeDefaults } = rowTypeDefaults
+  delete (cleanRowTypeDefaults as any).align
 
   const { rows, ...styleAttributes } = tableBlock.attributes
 
   return {
     ...baseDefaults,
-    ...rowTypeDefaults,
+    ...cleanRowTypeDefaults,
     ...styleAttributes,
   }
 }

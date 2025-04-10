@@ -3,6 +3,7 @@
 import { auth } from '@/auth'
 import type { Message } from 'ai'
 import { db } from '../db'
+import { BorderRadius } from '../types'
 
 export async function createChat({
   id,
@@ -19,7 +20,7 @@ export async function createChat({
   email?: string | null
   companyId?: string | null
   color?: string
-  borderRadius?: 'rounded' | 'square' | 'default'
+  borderRadius?: BorderRadius
 }) {
   const session = await auth()
 
@@ -355,4 +356,23 @@ export async function getUserMessageCount(userId: string): Promise<number> {
     .executeTakeFirst()
 
   return result?.count ?? 0
+}
+
+export async function getLastChat() {
+  const session = await auth()
+  if (!session?.user?.id) {
+    return null
+  }
+
+  // Get the most recent chat for this user
+  const lastChat = await db
+    .selectFrom('Chat')
+    .select(['color', 'borderRadius'])
+    .where('userId', '=', session.user.id)
+    .where('deletedAt', 'is', null)
+    .orderBy('updatedAt', 'desc')
+    .limit(1)
+    .executeTakeFirst()
+
+  return lastChat || null
 }

@@ -5,15 +5,11 @@ export const runtime = 'nodejs' // Ensure this runs in Node.js runtime
 export const dynamic = 'force-dynamic' // Prevent static generation
 
 export async function GET(request: NextRequest) {
-  console.log('Icon API route called')
-
   try {
     // Get icon name and theme from query parameters
     const searchParams = request.nextUrl.searchParams
     const iconName = searchParams.get('icon') || 'check' // Use 'check' as default icon if none provided
     const theme = searchParams.get('theme') || '#8e6ff7'
-
-    console.log('Generating icon:', { iconName, theme })
 
     // Get size parameter from query or use default
     const size = parseInt(searchParams.get('size') || '128', 10)

@@ -3,7 +3,7 @@ import { generateIconAction } from '@/lib/actions/iconActions'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { getBlockAttributes, getEmailAttributes, getIconProps } from '@/lib/utils/attributes'
-import { Column, Row, Section, Text } from '@react-email/components'
+import { Column, Row, Section } from '@react-email/components'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Email, IconBlock, RowBlock } from '../types'
 import EditableContent from './editable-content'
@@ -47,9 +47,8 @@ export default function EmailIcon({ block, parentRow, email }: Props) {
     try {
       generatingRef.current = true
       setIsLoading(true)
-      console.log('Generating icon:', { icon, themeColor, iconSize })
 
-      const result = await generateIconAction(icon, themeColor, iconSize)
+      const result = await generateIconAction(icon, themeColor || '#8e6ff7', iconSize)
       setIconData(result)
     } catch (error) {
       console.error('Failed to generate icon:', error)
@@ -62,8 +61,6 @@ export default function EmailIcon({ block, parentRow, email }: Props) {
   // Clear s3IconUrl when icon or theme changes
   const clearS3IconUrl = useCallback(() => {
     if (!email) return
-
-    console.log('Theme or icon changed, clearing s3IconUrl for block:', block.id)
 
     const updatedBlock = {
       ...block,
@@ -91,8 +88,6 @@ export default function EmailIcon({ block, parentRow, email }: Props) {
   // Theme change detection - critical effect that runs first
   useEffect(() => {
     if (themeColor !== prevThemeRef.current) {
-      console.log('Theme changed from', prevThemeRef.current, 'to', themeColor, 'for block:', block.id)
-
       // Force clear s3IconUrl if theme changed and we have an s3IconUrl
       if (s3IconUrl) {
         clearS3IconUrl()
@@ -116,41 +111,26 @@ export default function EmailIcon({ block, parentRow, email }: Props) {
     // Skip if already generating
     if (generatingRef.current) return
 
-    console.log('Icon component updated:', {
-      blockId: block.id,
-      iconChanged,
-      s3IconUrlChanged,
-      initialLoad,
-      forceRegenerate,
-      icon,
-      s3IconUrl,
-    })
-
     // Handle different cases
     if (initialLoad) {
       // Case: Initial load without s3IconUrl
-      console.log('Initial load without s3IconUrl - generating icon for block:', block.id)
       generateIcon()
       initialLoadCompletedRef.current = true
     } else if (iconChanged) {
       // Case: Icon changed
       if (s3IconUrl) {
         // If we have an s3IconUrl, clear it first
-        console.log('Icon changed with s3IconUrl - clearing URL for block:', block.id)
         clearS3IconUrl()
       } else {
         // If s3IconUrl is already cleared, generate new icon
-        console.log('Icon changed without s3IconUrl - generating new icon for block:', block.id)
         generateIcon()
       }
     } else if (forceRegenerate && !s3IconUrl) {
       // Case: Force regenerate (e.g., after theme change cleared s3IconUrl)
-      console.log('Force regenerating icon for block:', block.id)
       generateIcon()
       setForceRegenerate(false)
     } else if (s3IconUrlChanged && !s3IconUrl) {
       // Handle case when s3IconUrl was cleared by another process
-      console.log('s3IconUrl was cleared - generating new icon for block:', block.id)
       generateIcon()
     }
 
@@ -327,16 +307,12 @@ export default function EmailIcon({ block, parentRow, email }: Props) {
     () => (
       <tr>
         {position === 'left' && (
-          <td valign="top" style={{ paddingRight: '16px' }}>
+          <td valign="top" style={{ paddingRight: '8px' }}>
             <IconImage />
           </td>
         )}
         <td valign="top">
-          {title && (
-            <Text style={{ textAlign: align }}>
-              <ContentBlock />
-            </Text>
-          )}
+          <ContentBlock />
         </td>
       </tr>
     ),

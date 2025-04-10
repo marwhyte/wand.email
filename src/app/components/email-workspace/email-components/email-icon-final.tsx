@@ -56,7 +56,7 @@ export default function EmailIconFinal({ block, parentRow, email }: Props) {
               ) : (
                 <tr>
                   {position === 'left' && (
-                    <td valign="top" style={{ paddingRight: '16px' }}>
+                    <td valign="top" style={{ paddingRight: '8px' }}>
                       <img alt={`${icon} icon`} src={iconUrl} {...blockProps} style={restStyles} />
                     </td>
                   )}

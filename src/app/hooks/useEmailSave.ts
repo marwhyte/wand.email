@@ -11,7 +11,6 @@ export function useEmailSave() {
   const { chatId } = useChatStore()
   const debouncedUpdateChat = useCallback(
     debounce((updatedTemplate: Email) => {
-      console.log('updatedTemplate', chatId)
       if (chatId) {
         updateChat(chatId, { email: generateEmailScript(updatedTemplate) })
       }

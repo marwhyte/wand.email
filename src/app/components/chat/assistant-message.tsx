@@ -15,6 +15,7 @@ interface AssistantMessageProps {
 export const AssistantMessage = memo(({ isStreaming, content, message, messages, chat }: AssistantMessageProps) => {
   // Remove triple backticks wrapping content if they exist
   // Also handle partial backticks at the beginning during streaming
+
   const cleanedContent = content
     .replace(/^```(?:.*?)\n([\s\S]*?)```$/m, '$1')
     .replace(/^`{1,3}(?:.*?)(?:\n|$)/, '') // Remove partial backticks at the beginning

@@ -131,15 +131,6 @@ export default function EmailRow({
 
   const isMobile = useIsMobile()
 
-  // Define border radius styles
-  const borderRadiusStyle =
-    needsRounding && (isFirstRow || isLastRow)
-      ? {
-          borderRadius: isFirstRow ? '8px 8px 0 0' : isLastRow ? '0 0 8px 8px' : undefined,
-          overflow: 'hidden',
-        }
-      : {}
-
   return (
     <div onClick={handleRowOrColumnClick} ref={ref} className="group relative w-full px-4" style={{ opacity }}>
       {/* Outline pseudo-element */}
@@ -189,7 +180,7 @@ export default function EmailRow({
       </div>
 
       {/* Wrap the content in a relative div */}
-      <div className="relative" style={{ zIndex: 2, ...borderRadiusStyle }}>
+      <div className="relative" style={{ zIndex: 2 }}>
         <Container
           bgcolor={emailAttributes.backgroundColor}
           width={isMobile ? '100%' : mobileView ? '360' : `${emailAttributes.width}`}
@@ -198,7 +189,6 @@ export default function EmailRow({
             backgroundColor: emailAttributes.backgroundColor,
             width: isMobile ? '100%' : emailAttributes.width,
             maxWidth: isMobile ? '100%' : emailAttributes.width,
-            ...borderRadiusStyle,
           }}
         >
           {/* Simplified row rendering that matches email-renderer-final.tsx approach */}

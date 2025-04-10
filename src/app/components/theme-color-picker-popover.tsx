@@ -86,8 +86,6 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
     if (email) {
       // Clear all s3IconUrls from all icons in the email when theme changes
       if (email.themeColor !== tempColor) {
-        console.log('Theme changed, clearing all icon s3IconUrls')
-
         // Deep clone the email and remove all s3IconUrls from icon blocks
         const updatedEmail = {
           ...email,
@@ -100,7 +98,6 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
               blocks: column.blocks.map((block) => {
                 // If this is an icon block with s3IconUrl, remove the URL
                 if (block.type === 'icon' && block.attributes.s3IconUrl) {
-                  console.log(`Clearing s3IconUrl for icon: ${block.attributes.icon}`)
                   return {
                     ...block,
                     attributes: {
@@ -128,7 +125,6 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
 
     // If chat has started, update the chat in the database
     if (chatStarted && chatId) {
-      console.log('updating chat theme settings')
       try {
         await updateChat(chatId, {
           color: tempColor,
@@ -282,11 +278,11 @@ export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = (
                             {[
                               { value: 'square', element: <div className="h-4 w-4 border-2 border-gray-400"></div> },
                               {
-                                value: 'rounded',
+                                value: 'default',
                                 element: <div className="h-4 w-4 rounded-md border-2 border-gray-400"></div>,
                               },
                               {
-                                value: 'rounded-full',
+                                value: 'rounded',
                                 element: <div className="h-4 w-4 rounded-full border-2 border-gray-400"></div>,
                               },
                             ].map((option) => (

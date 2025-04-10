@@ -14,7 +14,7 @@ type Props = {
 }
 
 export default function Workspace({ isStreaming }: Props) {
-  const { email } = useEmailStore()
+  const email = useEmailStore((state) => state.email)
   const isMobile = useIsMobile()
 
   if (!email) {

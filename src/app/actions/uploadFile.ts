@@ -7,7 +7,6 @@ import { generatePresignedUrl } from './generatePresignedUrl'
 const MAX_FILE_SIZE = 15 * 1024 * 1024 // 15MB
 
 export async function uploadFile(formData: FormData, allowUnauthorized = false) {
-  console.log('uploadFile', formData)
   const session = await auth()
   if (!session?.user?.id && !allowUnauthorized) {
     return { success: false, error: 'Unauthorized' }

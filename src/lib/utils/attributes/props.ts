@@ -18,21 +18,10 @@ import type {
 } from '@/app/components/email-workspace/types'
 import { Table } from '@/app/components/table'
 import { Company } from '@/lib/database/types'
-import type {
-  Body,
-  Button,
-  Column,
-  Container,
-  Heading,
-  Hr,
-  Img,
-  Link,
-  Row,
-  Section,
-  Text,
-} from '@react-email/components'
+import { Body, Button, Column, Container, Heading, Hr, Img, Link, Row, Section, Text } from '@react-email/components'
+import React from 'react'
 import { ensurePx, getImgSrc } from '../misc'
-import { getBlockAttributes, getEmailAttributes, getRowAttributes } from './attributes'
+import { getBlockAttributes, getColumnAttributes, getEmailAttributes, getRowAttributes } from './attributes'
 import { applyPaddingAttributes, applyTextAttributes } from './common'
 import {
   getAdditionalButtonStyles,
@@ -128,6 +117,7 @@ export function getImageProps(
 
   return final
 }
+
 export function getLinkProps(
   block: LinkBlock,
   parentRow: RowBlock,
@@ -349,15 +339,15 @@ export function getColumnProps(
   row: RowBlock,
   email: Email | null
 ): OmitChildren<React.ComponentProps<typeof Column>> {
-  // Get column-specific defaults based on row type
-  const defaultColumnAttributes: Partial<ColumnBlock['attributes']> = {}
+  // Find the index of the column in the row
+  const columnIndex = row.columns.findIndex((c) => c.id === column.id)
 
-  const mergedAttributes = { ...defaultColumnAttributes, ...column.attributes }
+  // Use the enhanced column attributes that consider row type defaults
+  const attributes = getColumnAttributes(column, row, columnIndex, email)
+  const styles = getAdditionalColumnStyles(attributes, row)
 
   return {
-    style: {
-      ...getAdditionalColumnStyles(mergedAttributes, row),
-    },
+    style: styles,
     className: 'column',
   }
 }
@@ -388,10 +378,12 @@ export function getContentProps(email: Email): OmitChildren<React.ComponentProps
 
   if (emailAttributes.styleVariant === 'outline') {
     defaultStyles.paddingTop = '20px'
+    defaultStyles.paddingBottom = '20px'
   }
 
   if (emailAttributes.styleVariant === 'default') {
     defaultStyles.paddingTop = '20px'
+    defaultStyles.paddingBottom = '20px'
     defaultStyles.paddingLeft = '6px'
     defaultStyles.paddingRight = '6px'
   }

@@ -664,7 +664,8 @@ const blockParsers = {
 export function parseEmailScript(
   script: string,
   themeColor: string,
-  borderRadius: 'default' | 'rounded' | 'square'
+  borderRadius: 'default' | 'rounded' | 'square',
+  organizeFooter: boolean = false
 ): Email {
   const rows: RowBlock[] = []
   const lines = script.trim().split('\n')
@@ -712,6 +713,24 @@ export function parseEmailScript(
       if (!rowMatch) continue
 
       const rowAttrs = parseAttributes(rowMatch[1])
+
+      // Special handling for footers if organizeFooter is true
+      if (rowAttrs.type === 'footer' && organizeFooter) {
+        console.log(`🦶 Found footer row at line ${i}, organizingFooter=${organizeFooter}`)
+        console.log(`🔍 Row attributes:`, rowAttrs)
+
+        // Process the footer row specially to organize content
+        const footerRowResult = processOrganizedFooterRow(i, lines, rowAttrs)
+
+        // Add all footer rows to our email
+        rows.push(...footerRowResult.rows)
+
+        // Update our line index to skip processed lines
+        i = footerRowResult.newIndex - 1 // Adjust for the loop increment
+        continue
+      } else if (rowAttrs.type === 'footer') {
+        console.log(`🦶 Found footer row at line ${i}, but not organizing it (organizeFooter=${organizeFooter})`)
+      }
 
       // Special handling for HEADING and TEXT blocks outside of columns in any row type
       // Look ahead to find HEADING and TEXT blocks before any COLUMN or ICON
@@ -1618,17 +1637,17 @@ export function parseEmailScript(
 
         // Handle SOCIAL element - must be self-closing
         if (currentLine.startsWith('<SOCIAL')) {
-          const socialMatch = currentLine.match(/<SOCIAL\s+([^>]*)(?:\/>|>)/)
+          const socialMatch = currentLine.match(/<SOCIAL\s+([^>\/]*)(?:\/>|>)/)
 
           if (socialMatch) {
             const socialAttrs = parseAttributes(socialMatch[1])
 
             // Only process if we have an icon
-            if (socialAttrs.icon) {
+            if (isSocialIconName(socialAttrs.icon)) {
               socialLinks.push({
-                icon: socialAttrs.icon,
+                icon: socialAttrs.icon as SocialIconName,
                 url: socialAttrs.url || '#',
-                title: socialAttrs.title || socialAttrs.icon.charAt(0).toUpperCase() + socialAttrs.icon.slice(1),
+                title: socialAttrs.title || socialAttrs.icon,
                 alt: socialAttrs.alt || socialAttrs.title || socialAttrs.icon,
               })
             }
@@ -1708,4 +1727,622 @@ export function parseEmailScript(
     ...emailAttributes,
     rows,
   }
+}
+
+// Special handling for footer rows
+function processFooterRow(
+  startIndex: number,
+  lines: string[],
+  rowAttributes: RawAttributes
+): { rows: RowBlock[]; newIndex: number } {
+  const footerRows: RowBlock[] = []
+
+  // Create two rows for the footer
+  const headerRow = createRow(parseRowAttributes(rowAttributes))
+  const contentRow = createRow(parseRowAttributes(rowAttributes))
+
+  // Create columns for both rows
+  const logoColumn = createColumn([], '50%', {})
+  const socialsColumn = createColumn([], '50%', {})
+  const contentColumn = createColumn([], '100%', {})
+
+  // Add columns to rows
+  headerRow.columns.push(logoColumn)
+  headerRow.columns.push(socialsColumn)
+  contentRow.columns.push(contentColumn)
+
+  // Add divider at the top of the content row
+  createBlock('divider', '', blockParsers.divider({}), contentColumn)
+
+  // Add rows to footer
+  footerRows.push(headerRow)
+  footerRows.push(contentRow)
+
+  let i = startIndex + 1
+  let depth = 1 // Start at 1 for the ROW tag
+  let inColumn = false
+
+  // Arrays to categorize footer content for proper distribution
+  const logoBlocks: number[] = []
+  const socialsBlocks: number[] = []
+  const contentBlocks: number[] = []
+
+  // First pass: categorize all blocks in the footer
+  let scanIndex = i
+  while (scanIndex < lines.length) {
+    const line = lines[scanIndex].trim()
+
+    // Skip empty lines
+    if (!line) {
+      scanIndex++
+      continue
+    }
+
+    // End of row
+    if (line.startsWith('</ROW>')) {
+      if (depth === 1) break
+      depth--
+    } else if (line.startsWith('<ROW')) {
+      depth++
+    } else if (line.startsWith('<COLUMN')) {
+      inColumn = true
+    } else if (line.startsWith('</COLUMN>')) {
+      inColumn = false
+    }
+    // Look for content elements
+    else if (line.startsWith('<')) {
+      // Extract tag name
+      const tagMatch = line.match(/<(\w+)/)
+      if (tagMatch) {
+        const blockType = tagMatch[1].toLowerCase()
+        if (blockType !== 'row' && blockType !== 'column') {
+          // Categorize by block type
+          if (blockType === 'image') {
+            const attrMatch = line.match(/<IMAGE\s*([^>\/]*)(?:\/>|>)/)
+            if (attrMatch) {
+              const attrs = parseAttributes(attrMatch[1])
+              if (attrs.src === 'logo') {
+                logoBlocks.push(scanIndex)
+              } else {
+                contentBlocks.push(scanIndex)
+              }
+            }
+          } else if (blockType === 'socials') {
+            socialsBlocks.push(scanIndex)
+          } else {
+            contentBlocks.push(scanIndex)
+          }
+        }
+      }
+    }
+
+    scanIndex++
+  }
+
+  // Second pass: process blocks in the right order and place them in the correct columns
+
+  // 1. Process logo blocks for the top-left
+  for (const blockIndex of logoBlocks) {
+    const line = lines[blockIndex].trim()
+    const tagMatch = line.match(/<(\w+)/)
+    if (tagMatch) {
+      const blockType = tagMatch[1].toLowerCase()
+      processBlockInColumn(blockType, blockIndex, lines, logoColumn)
+    }
+  }
+
+  // 2. Process socials blocks for the top-right
+  for (const blockIndex of socialsBlocks) {
+    const line = lines[blockIndex].trim()
+    const tagMatch = line.match(/<(\w+)/)
+    if (tagMatch) {
+      const blockType = tagMatch[1].toLowerCase()
+      processBlockInColumn(blockType, blockIndex, lines, socialsColumn)
+    }
+  }
+
+  // 3. Process all other content for the bottom row
+  for (const blockIndex of contentBlocks) {
+    const line = lines[blockIndex].trim()
+    const tagMatch = line.match(/<(\w+)/)
+    if (tagMatch) {
+      const blockType = tagMatch[1].toLowerCase()
+      processBlockInColumn(blockType, blockIndex, lines, contentColumn)
+    }
+  }
+
+  // Return the last line index and the generated rows
+  return { rows: footerRows, newIndex: scanIndex }
+}
+
+// Special handling for footer rows with organization
+function processOrganizedFooterRow(
+  startIndex: number,
+  lines: string[],
+  rowAttributes: RawAttributes
+): { rows: RowBlock[]; newIndex: number } {
+  console.log('🔍 Starting footer organization...')
+  console.log('📌 Row attributes:', rowAttributes)
+
+  // Find the closing row tag to determine the full content range
+  let i = startIndex + 1
+  let endRowIndex = i
+  let rowDepth = 1
+
+  while (endRowIndex < lines.length) {
+    const line = lines[endRowIndex].trim()
+    if (line.startsWith('<ROW')) rowDepth++
+    else if (line.startsWith('</ROW>')) {
+      rowDepth--
+      if (rowDepth === 0) break
+    }
+    endRowIndex++
+  }
+
+  console.log(`📋 Scanning content from line ${startIndex + 1} to ${endRowIndex}`)
+
+  // Scan the content to identify logo, socials, and other content
+  let hasLogo = false
+  let hasSocials = false
+  const contentElements: { type: string; lineIndex: number }[] = []
+
+  // Special check for the problematic footer pattern
+  let footerContent = ''
+  for (let j = i; j < endRowIndex; j++) {
+    footerContent += lines[j].trim() + '\n'
+  }
+
+  // Log the entire footer content for inspection
+  console.log('📄 FOOTER CONTENT:\n', footerContent)
+
+  // Check for the specific pattern in the example
+  if (
+    footerContent.includes('<COLUMN>') &&
+    footerContent.includes('<IMAGE src="logo"') &&
+    footerContent.includes('<SOCIALS')
+  ) {
+    console.log('🚨 Found the problematic footer pattern with COLUMN, logo, and SOCIALS in one column!')
+  }
+
+  for (let j = i; j < endRowIndex; j++) {
+    const line = lines[j].trim()
+    if (!line) continue
+
+    // Skip COLUMN tags but keep track of them
+    if (line.startsWith('<COLUMN') || line.startsWith('</COLUMN')) {
+      continue
+    }
+
+    if (line.startsWith('<IMAGE')) {
+      const attrMatch = line.match(/<IMAGE\s*([^>\/]*)(?:\/>|>)/)
+      if (attrMatch) {
+        const attrs = parseAttributes(attrMatch[1])
+        console.log('🔍 Checking image attributes:', attrs)
+        if (attrs.src === 'logo') {
+          console.log(`🖼️ Found logo image at line ${j}: ${line}`)
+          hasLogo = true
+          // Add to content for processing
+          contentElements.push({ type: 'logo', lineIndex: j })
+          continue
+        } else {
+          console.log(`🖼️ Found non-logo image at line ${j}: ${line} with src=${attrs.src || 'undefined'}`)
+          contentElements.push({
+            type: 'image',
+            lineIndex: j,
+          })
+        }
+      }
+    }
+
+    if (line.startsWith('<SOCIALS')) {
+      console.log(`🔗 Found socials at line ${j}: ${line}`)
+      hasSocials = true
+      // Add to content for processing
+      contentElements.push({ type: 'socials', lineIndex: j })
+      continue
+    }
+
+    // Look for other content tags (skip COLUMN, ROW tags and comments)
+    if (
+      line.startsWith('<') &&
+      !line.startsWith('</') &&
+      !line.startsWith('<COLUMN') &&
+      !line.startsWith('</COLUMN') &&
+      !line.startsWith('<ROW') &&
+      !line.startsWith('</ROW') &&
+      !line.startsWith('<!--')
+    ) {
+      // Get tag name for proper categorization
+      const tagMatch = line.match(/<(\w+)/)
+      if (tagMatch && tagMatch[1]) {
+        console.log(`📄 Found content element ${tagMatch[1]} at line ${j}: ${line}`)
+        contentElements.push({
+          type: tagMatch[1].toLowerCase(),
+          lineIndex: j,
+        })
+      }
+    }
+  }
+
+  console.log(`📊 Content summary: logo=${hasLogo}, socials=${hasSocials}, other elements=${contentElements.length}`)
+  console.log('📑 All content elements:', contentElements)
+
+  // Prepare the rows based on content
+  const footerRows: RowBlock[] = []
+
+  // If we have both logo and socials, create a top row with two columns
+  if (hasLogo && hasSocials) {
+    console.log('✅ Creating organized footer with logo and socials')
+
+    // Special handling for the case where both logo and socials were inside a single column
+    if (
+      footerContent.includes('<COLUMN>') &&
+      footerContent.includes('<IMAGE src="logo"') &&
+      footerContent.includes('<SOCIALS')
+    ) {
+      console.log('🔧 Applying special fix for logo+socials in one column pattern')
+
+      // Create more targeted content extraction
+      const logoElements: number[] = []
+      const socialsElements: number[] = []
+      const otherElements: { type: string; lineIndex: number }[] = []
+
+      // Re-analyze content elements to better separate them
+      for (const element of contentElements) {
+        if (element.type === 'logo') {
+          logoElements.push(element.lineIndex)
+        } else if (element.type === 'socials') {
+          socialsElements.push(element.lineIndex)
+        } else {
+          otherElements.push(element)
+        }
+      }
+
+      console.log(
+        `🔍 After extraction: logo=${logoElements.length}, socials=${socialsElements.length}, other=${otherElements.length}`
+      )
+    }
+
+    const headerRow = createRow(parseRowAttributes({ ...rowAttributes, type: 'footer' }))
+    const logoColumn = createColumn([], '50%', {})
+    const socialsColumn = createColumn([], '50%', {})
+
+    headerRow.columns.push(logoColumn)
+    headerRow.columns.push(socialsColumn)
+    footerRows.push(headerRow)
+
+    // Create a second row for all other content
+    const contentRow = createRow(parseRowAttributes({ ...rowAttributes, type: 'footer' }))
+    const fullWidthColumn = createColumn([], '100%', {})
+    contentRow.columns.push(fullWidthColumn)
+
+    // Add divider at the top of content row
+    createBlock('divider', '', blockParsers.divider({}), fullWidthColumn)
+    footerRows.push(contentRow)
+
+    // Process each content element
+    for (const element of contentElements) {
+      switch (element.type) {
+        case 'logo':
+          console.log(`🔄 Processing logo at line ${element.lineIndex}`)
+          processImageBlock(element.lineIndex, lines, logoColumn)
+          break
+        case 'socials':
+          console.log(`🔄 Processing socials at line ${element.lineIndex}`)
+          processSocialsBlock(element.lineIndex, lines, socialsColumn)
+          break
+        default:
+          // All other content goes to the full width column
+          console.log(`🔄 Processing ${element.type} content at line ${element.lineIndex}`)
+          processBlockInColumn(element.type, element.lineIndex, lines, fullWidthColumn)
+          break
+      }
+    }
+  } else {
+    // If we don't have both logo and socials, create a regular row and process normally
+    console.log('ℹ️ Creating regular footer (missing logo or socials)')
+    const row = createRow(parseRowAttributes(rowAttributes))
+    const column = createColumn([], '100%', {})
+    row.columns.push(column)
+    footerRows.push(row)
+
+    // Process each content element in the normal column
+    for (const element of contentElements) {
+      console.log(`🔄 Processing ${element.type} in regular column at line ${element.lineIndex}`)
+      processBlockInColumn(element.type, element.lineIndex, lines, column)
+    }
+  }
+
+  console.log(`🏁 Footer processing complete. Created ${footerRows.length} rows.`)
+  return { rows: footerRows, newIndex: endRowIndex + 1 }
+}
+
+// Helper function to process a block and add it to a column
+function processBlockInColumn(blockType: string, lineIndex: number, lines: string[], column: ColumnBlock) {
+  const blockLine = lines[lineIndex].trim()
+
+  // Handle different block types
+  switch (blockType.toLowerCase()) {
+    case 'text':
+      processTextBlock(lineIndex, lines, column)
+      break
+    case 'heading':
+      processHeadingBlock(lineIndex, lines, column)
+      break
+    case 'image':
+      processImageBlock(lineIndex, lines, column)
+      break
+    case 'button':
+      processButtonBlock(lineIndex, lines, column)
+      break
+    case 'socials':
+      processSocialsBlock(lineIndex, lines, column)
+      break
+    case 'link':
+      processLinkBlock(lineIndex, lines, column)
+      break
+    case 'divider':
+      processDividerBlock(lineIndex, lines, column)
+      break
+    // Add more block types as needed
+  }
+}
+
+// Process text blocks
+function processTextBlock(lineIndex: number, lines: string[], column: ColumnBlock) {
+  const blockLine = lines[lineIndex].trim()
+  const attrMatch = blockLine.match(/<TEXT\s*([^>]*)>/)
+  const attrs = attrMatch ? parseAttributes(attrMatch[1]) : {}
+
+  // Extract content between tags
+  let content = ''
+  const singleLineMatch = blockLine.match(/<TEXT[^>]*>(.*?)<\/TEXT>/)
+
+  if (singleLineMatch) {
+    content = singleLineMatch[1].trim()
+  } else {
+    // Handle multi-line content
+    const openingTagEnd = blockLine.indexOf('>') + 1
+    if (openingTagEnd < blockLine.length) {
+      content = blockLine.substring(openingTagEnd).trim()
+    }
+
+    let k = lineIndex + 1
+    let closingTagFound = false
+
+    while (k < lines.length && !closingTagFound) {
+      const currentLine = lines[k].trim()
+      const closingTagIndex = currentLine.indexOf('</TEXT>')
+
+      if (closingTagIndex !== -1) {
+        if (closingTagIndex > 0) {
+          const contentBeforeClosing = currentLine.substring(0, closingTagIndex).trim()
+          content += (content && contentBeforeClosing ? ' ' : '') + contentBeforeClosing
+        }
+        closingTagFound = true
+      } else {
+        content += (content && currentLine ? ' ' : '') + currentLine
+      }
+
+      k++
+    }
+  }
+
+  // Add content to attributes
+  attrs.content = content
+
+  // Create the TEXT block
+  createBlock('text', content, blockParsers.text(attrs), column)
+}
+
+// Process heading blocks
+function processHeadingBlock(lineIndex: number, lines: string[], column: ColumnBlock) {
+  const blockLine = lines[lineIndex].trim()
+  const attrMatch = blockLine.match(/<HEADING\s*([^>]*)>/)
+  const attrs = attrMatch ? parseAttributes(attrMatch[1]) : {}
+
+  // Extract content between tags
+  let content = ''
+  const singleLineMatch = blockLine.match(/<HEADING[^>]*>(.*?)<\/HEADING>/)
+
+  if (singleLineMatch) {
+    content = singleLineMatch[1].trim()
+  } else {
+    // Handle multi-line content
+    const openingTagEnd = blockLine.indexOf('>') + 1
+    if (openingTagEnd < blockLine.length) {
+      content = blockLine.substring(openingTagEnd).trim()
+    }
+
+    let k = lineIndex + 1
+    let closingTagFound = false
+
+    while (k < lines.length && !closingTagFound) {
+      const currentLine = lines[k].trim()
+      const closingTagIndex = currentLine.indexOf('</HEADING>')
+
+      if (closingTagIndex !== -1) {
+        if (closingTagIndex > 0) {
+          const contentBeforeClosing = currentLine.substring(0, closingTagIndex).trim()
+          content += (content && contentBeforeClosing ? ' ' : '') + contentBeforeClosing
+        }
+        closingTagFound = true
+      } else {
+        content += (content && currentLine ? ' ' : '') + currentLine
+      }
+
+      k++
+    }
+  }
+
+  // Add content to attributes
+  attrs.content = content
+
+  // Create the HEADING block
+  createBlock('heading', content, blockParsers.heading(attrs), column)
+}
+
+// Process image blocks
+function processImageBlock(lineIndex: number, lines: string[], column: ColumnBlock) {
+  const blockLine = lines[lineIndex].trim()
+  const attrMatch = blockLine.match(/<IMAGE\s*([^>\/]*)(?:\/>|>)/)
+
+  if (attrMatch) {
+    const attrs = parseAttributes(attrMatch[1])
+    createBlock('image', '', blockParsers.image(attrs), column)
+  }
+}
+
+// Process button blocks
+function processButtonBlock(lineIndex: number, lines: string[], column: ColumnBlock) {
+  const blockLine = lines[lineIndex].trim()
+  const attrMatch = blockLine.match(/<BUTTON\s*([^>]*)>/)
+  const attrs = attrMatch ? parseAttributes(attrMatch[1]) : {}
+
+  // Extract content between tags
+  let content = ''
+  const singleLineMatch = blockLine.match(/<BUTTON[^>]*>(.*?)<\/BUTTON>/)
+
+  if (singleLineMatch) {
+    content = singleLineMatch[1].trim()
+  } else {
+    // Handle multi-line content
+    const openingTagEnd = blockLine.indexOf('>') + 1
+    if (openingTagEnd < blockLine.length) {
+      content = blockLine.substring(openingTagEnd).trim()
+    }
+
+    let k = lineIndex + 1
+    let closingTagFound = false
+
+    while (k < lines.length && !closingTagFound) {
+      const currentLine = lines[k].trim()
+      const closingTagIndex = currentLine.indexOf('</BUTTON>')
+
+      if (closingTagIndex !== -1) {
+        if (closingTagIndex > 0) {
+          const contentBeforeClosing = currentLine.substring(0, closingTagIndex).trim()
+          content += (content && contentBeforeClosing ? ' ' : '') + contentBeforeClosing
+        }
+        closingTagFound = true
+      } else {
+        content += (content && currentLine ? ' ' : '') + currentLine
+      }
+
+      k++
+    }
+  }
+
+  // Add content to attributes
+  attrs.content = content
+
+  // Create the BUTTON block
+  createBlock('button', content, blockParsers.button(attrs), column)
+}
+
+// Process link blocks
+function processLinkBlock(lineIndex: number, lines: string[], column: ColumnBlock) {
+  const blockLine = lines[lineIndex].trim()
+  const attrMatch = blockLine.match(/<LINK\s*([^>]*)>/)
+  const attrs = attrMatch ? parseAttributes(attrMatch[1]) : {}
+
+  // Extract content between tags
+  let content = ''
+  const singleLineMatch = blockLine.match(/<LINK[^>]*>(.*?)<\/LINK>/)
+
+  if (singleLineMatch) {
+    content = singleLineMatch[1].trim()
+  } else {
+    // Handle multi-line content
+    const openingTagEnd = blockLine.indexOf('>') + 1
+    if (openingTagEnd < blockLine.length) {
+      content = blockLine.substring(openingTagEnd).trim()
+    }
+
+    let k = lineIndex + 1
+    let closingTagFound = false
+
+    while (k < lines.length && !closingTagFound) {
+      const currentLine = lines[k].trim()
+      const closingTagIndex = currentLine.indexOf('</LINK>')
+
+      if (closingTagIndex !== -1) {
+        if (closingTagIndex > 0) {
+          const contentBeforeClosing = currentLine.substring(0, closingTagIndex).trim()
+          content += (content && contentBeforeClosing ? ' ' : '') + contentBeforeClosing
+        }
+        closingTagFound = true
+      } else {
+        content += (content && currentLine ? ' ' : '') + currentLine
+      }
+
+      k++
+    }
+  }
+
+  // Add content to attributes
+  attrs.content = content
+
+  // Create the LINK block
+  createBlock('link', content, blockParsers.link(attrs), column)
+}
+
+// Process divider blocks
+function processDividerBlock(lineIndex: number, lines: string[], column: ColumnBlock) {
+  const blockLine = lines[lineIndex].trim()
+  const attrMatch = blockLine.match(/<DIVIDER\s*([^>\/]*)(?:\/>|>)/)
+
+  if (attrMatch) {
+    const attrs = parseAttributes(attrMatch[1])
+    createBlock('divider', '', blockParsers.divider(attrs), column)
+  }
+}
+
+// Process socials blocks
+function processSocialsBlock(lineIndex: number, lines: string[], column: ColumnBlock) {
+  const blockLine = lines[lineIndex].trim()
+  const attrMatch = blockLine.match(/<SOCIALS\s*([^>]*)>/)
+
+  if (!attrMatch) return
+
+  const attrs = parseAttributes(attrMatch[1])
+
+  // Check if this is a self-closing SOCIALS tag
+  if (blockLine.endsWith('/>')) {
+    createBlock('socials', '', blockParsers.socials(attrs), column)
+    return
+  }
+
+  // If not self-closing, collect all SOCIAL elements
+  const links: { icon: SocialIconName; url: string; title: string; alt: string }[] = []
+
+  let j = lineIndex + 1
+  while (j < lines.length && !lines[j].trim().startsWith('</SOCIALS>')) {
+    const currentLine = lines[j].trim()
+
+    if (currentLine.startsWith('<SOCIAL')) {
+      const socialMatch = currentLine.match(/<SOCIAL\s*([^>\/]*)(?:\/>|>)/)
+
+      if (socialMatch) {
+        const socialAttrs = parseAttributes(socialMatch[1])
+
+        if (isSocialIconName(socialAttrs.icon)) {
+          links.push({
+            icon: socialAttrs.icon as SocialIconName,
+            url: socialAttrs.url || '#',
+            title: socialAttrs.title || socialAttrs.icon,
+            alt: socialAttrs.alt || socialAttrs.title || socialAttrs.icon,
+          })
+        }
+      }
+    }
+
+    j++
+  }
+
+  // Add links to the attributes
+  attrs.links = JSON.stringify(links)
+
+  // Create the SOCIALS block
+  createBlock('socials', '', blockParsers.socials(attrs), column)
 }

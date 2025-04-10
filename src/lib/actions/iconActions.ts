@@ -8,8 +8,6 @@ import { generateIconPng } from '@/lib/utils/icon-generator'
  */
 export async function generateIconAction(icon: string, theme: string, size: number = 64) {
   try {
-    console.log('Server action: generating icon', { icon, theme, size })
-
     // Generate the icon
     const iconBuffer = await generateIconPng(icon, theme, size)
 

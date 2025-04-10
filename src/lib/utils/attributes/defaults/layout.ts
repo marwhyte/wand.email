@@ -47,11 +47,19 @@ export function getAdditionalRowStyles(attributes: RowBlockAttributes): React.CS
 }
 
 export function getAdditionalColumnStyles(attributes: ColumnBlockAttributes, row: RowBlock): React.CSSProperties {
-  const { width, ...rest } = attributes
+  const { width, backgroundColor, borderRadius, ...rest } = attributes
   const styles: React.CSSProperties = { ...rest }
 
   if (width) {
     styles.width = `${width}%`
+  }
+
+  if (backgroundColor) {
+    styles.backgroundColor = backgroundColor
+  }
+
+  if (borderRadius) {
+    styles.borderRadius = ensurePx(borderRadius)
   }
 
   return styles

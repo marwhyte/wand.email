@@ -37,8 +37,6 @@ export async function uploadIconToS3({
     // Upload the file to S3
     const result = await uploadFile(formData, true) // Allow unauthorized upload
 
-    console.log('S3 upload result:', result)
-
     if (!result.success || !result.file) {
       throw new Error(result.error || 'Failed to upload icon to S3')
     }

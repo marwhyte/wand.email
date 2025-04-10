@@ -193,6 +193,8 @@ export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarte
     setChatStarted(initialMessages.length > 0)
   }, [])
 
+  console.log(messages)
+
   // Global state
   const showChat = chatStore((state) => state.showChat)
   const setKey = chatStore((state) => state.setKey)

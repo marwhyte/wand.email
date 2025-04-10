@@ -20,8 +20,7 @@ export async function generateIconPng(iconName: string, themeColor: string, size
   try {
     const theme = getThemeColors(themeColor)
 
-    console.log('theme', theme)
-
+    console.log('generating icon', iconName, themeColor, size)
     // Try to find the icon in different variants
     let svgContent = null
     let foundVariant = null
@@ -76,7 +75,7 @@ export async function generateIconPng(iconName: string, themeColor: string, size
     // Create our styled SVG with the path data - with high precision
     const styledSvg = `
       <svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" shape-rendering="geometricPrecision">
-        <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${theme.light}" />
+        <circle cx="${size / 2}" cy="${size / 2}" r="${size / 2}" fill="${theme.gradientLight.start}" />
         <g transform="translate(${iconPadding}, ${iconPadding}) scale(${(size - 2 * iconPadding) / originalViewBox[2]})">
           ${paths.map((path) => `<path d="${path.d}" fill="${theme.action}" />`).join('')}
         </g>

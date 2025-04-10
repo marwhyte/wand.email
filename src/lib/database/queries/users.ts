@@ -107,3 +107,62 @@ export async function updateUserSubscriptionExpiry(userId: string, stripeSubscri
     .where('id', '=', userId)
     .execute()
 }
+
+// AI Image Usage Related Functions
+export async function recordAIImageUsage(chatId: string, prompt: string): Promise<void> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+
+  await db
+    .insertInto('AIImageUsage')
+    .values({
+      userId: session.user.id,
+      chatId,
+      prompt,
+    })
+    .execute()
+}
+
+export async function getUserAIImageCountForCurrentMonth(userId: string): Promise<number> {
+  // Get the first day of the current month
+  const now = new Date()
+  const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+
+  const result = await db
+    .selectFrom('AIImageUsage')
+    .select(db.fn.count<number>('id').as('count'))
+    .where('userId', '=', userId)
+    .where('createdAt', '>=', firstDayOfMonth)
+    .executeTakeFirst()
+
+  return parseInt(result?.count?.toString() || '0', 10)
+}
+
+export async function hasHitMonthlyImageLimit(limit = 15): Promise<boolean> {
+  const session = await auth()
+  if (!session?.user?.id) {
+    throw new Error('User not authenticated')
+  }
+
+  const plan = await getUserPlan(session.user.id)
+
+  // If user is on a paid plan, they have no limit
+  if (plan !== 'free') {
+    return false
+  }
+
+  const count = await getUserAIImageCountForCurrentMonth(session.user.id)
+  return count >= limit
+}
+
+// This helper function gets the user's current plan
+async function getUserPlan(userId: string): Promise<string> {
+  const user = await db.selectFrom('User').select('plan').where('id', '=', userId).executeTakeFirst()
+
+  return user?.plan || 'free'
+}
+
+// For convenience, aliasing the new function to maintain compatibility
+export const hasHitImageLimit = hasHitMonthlyImageLimit

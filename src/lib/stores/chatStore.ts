@@ -26,7 +26,7 @@ export const useChatStore = create<ChatStore>((set) => ({
   company: null,
   title: undefined,
   themeColor: '#8e6ff7',
-  borderRadius: 'rounded',
+  borderRadius: 'default',
   hasConfirmedOutline: false,
   setChatId: (id) => set({ chatId: id }),
   setTitle: (title) => set({ title }),

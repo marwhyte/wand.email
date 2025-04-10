@@ -50,6 +50,7 @@ export default function KyselyAdapter(db: Kysely<Database>): Adapter {
             createdAt: new Date(),
             updatedAt: new Date(),
             plan: 'free',
+            aiImageCount: 0,
           })
         )
         .executeTakeFirstOrThrow()

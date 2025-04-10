@@ -3,6 +3,7 @@ import { Generated, GeneratedAlways } from 'kysely'
 
 export interface Database {
   Account: AccountTable
+  AIImageUsage: AIImageUsageTable
   Chat: ChatTable
   Company: CompanyTable
   Export: ExportTable
@@ -17,6 +18,7 @@ export type ExportType = 'react' | 'html'
 
 export type Plan = 'free' | 'starter' | 'pro'
 export type BillingCycle = 'monthly' | 'yearly'
+export type BorderRadius = 'rounded' | 'square' | 'default'
 
 export interface AccountTable {
   id: GeneratedAlways<string>
@@ -52,7 +54,7 @@ export interface ChatTable {
   companyId: string | null
   hasConfirmedOutline: boolean
   color: string
-  borderRadius: 'rounded' | 'square' | 'default'
+  borderRadius: BorderRadius
 }
 
 export type Chat = Omit<ChatTable, 'id' | 'createdAt' | 'updatedAt'> & {
@@ -155,6 +157,7 @@ export interface UserTable {
   plan: Plan
   stripeCustomerId: string | null
   stripeSubscriptionExpiresAt: Date | null
+  aiImageCount: number
   createdAt: GeneratedAlways<Date>
   updatedAt: Generated<Date>
 }
@@ -169,4 +172,17 @@ export interface VerificationTokenTable {
   identifier: string
   token: string
   expires: Date
+}
+
+export interface AIImageUsageTable {
+  id: GeneratedAlways<string>
+  userId: string
+  chatId: string
+  prompt: string
+  createdAt: GeneratedAlways<Date>
+}
+
+export type AIImageUsage = Omit<AIImageUsageTable, 'id' | 'createdAt'> & {
+  id: string
+  createdAt: Date
 }

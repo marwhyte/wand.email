@@ -1,3 +1,5 @@
+import { BorderRadius } from '@/lib/database/types'
+
 export const FOLDERS: { name: SocialIconFolders; title: string }[] = [
   {
     name: 'socials-blue',
@@ -65,71 +67,79 @@ export type RowBlockType =
   | 'header'
   | 'footer'
   | 'hero'
-  | 'key-features'
+  | 'feature-list'
   | 'cards'
   | 'article'
   | 'gallery'
-  | 'list'
   | 'discount'
   | 'cta'
   | 'invoice'
   | 'cart'
   | 'default'
 
-export const componentLibrary: Record<RowBlockType, { note?: string; example: string; allowedBlocks: string[] }> = {
+export const componentLibrary: Record<RowBlockType, { note?: string; examples: string[]; allowedBlocks: string[] }> = {
   default: {
     note: 'Use the default row type to define a row with no specific type.',
-    example: `
+    examples: [
+      `
       <ROW type="default">
         <COLUMN>
           <IMAGE src="logo" alt="Logo" />
         </COLUMN>
       </ROW>
     `,
+    ],
     allowedBlocks: ['IMAGE'],
   },
   cart: {
-    example: `
+    examples: [
+      `
       <ROW type="cart">
         <COLUMN>
           <CART_ITEM image="imagegen:product image" name="Product Name" description="Product description here" quantity="1" price="$19.99" />
         </COLUMN>
       </ROW>
     `,
+    ],
     allowedBlocks: ['CART_ITEM'],
   },
   header: {
-    example: `
+    examples: [
+      `
       <ROW type="header">
         <COLUMN>
           <IMAGE src="logo" alt="Logo" />
         </COLUMN>
       </ROW>
     `,
+    ],
     allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   footer: {
-    note: 'The footer should always have a logo, social media links, and address unless otherwise specified.',
-    example: `
+    note: 'The footer must include an address for all commercial emails.',
+    examples: [
+      `
       <ROW type="footer">
         <COLUMN>
           <IMAGE src="logo" alt="Logo" />
-          <TEXT>Company Name</TEXT>
           <SOCIALS folder="socials-color">
             <SOCIAL icon="facebook" url="#" title="Facebook" alt="Facebook" />
             <SOCIAL icon="x" url="#" title="X" alt="X" />
             <SOCIAL icon="instagram" url="#" title="Instagram" alt="Instagram" />
           </SOCIALS>
           <TEXT>123 Main Street Anytown, CA 12345<br>United States</TEXT>
-          <TEXT>mail@company.com</TEXT>
           <TEXT>© 2024 Company Name. All rights reserved.</TEXT>
+          <TEXT><a href="/">Unsubscribe</a> | <a href="/">Privacy Policy</a></TEXT>
+          <TEXT>This email was sent to you because you signed up for updates from Company Name.</TEXT>
         </COLUMN>
       </ROW>
     `,
+    ],
     allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   gallery: {
-    example: `
+    examples: [
+      `
       <ROW type="gallery">
         <COLUMN>
           <IMAGE src="imagegen:bed in a room" alt="Bed in room" />
@@ -141,10 +151,12 @@ export const componentLibrary: Record<RowBlockType, { note?: string; example: st
         </COLUMN>
       </ROW>
     `,
+    ],
     allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
   },
   discount: {
-    example: `
+    examples: [
+      `
   <ROW type="discount">
     <COLUMN>
       <TEXT>
@@ -162,24 +174,29 @@ export const componentLibrary: Record<RowBlockType, { note?: string; example: st
     </COLUMN>
   </ROW>
     `,
+    ],
     allowedBlocks: ['TEXT', 'BUTTON', 'HEADING'],
   },
   hero: {
-    example: `
+    examples: [
+      `
       <ROW type="hero">
         <COLUMN>
+          <IMAGE src="imagegen:A description of the image" alt="Image description" />
           <HEADING level="h1">Welcome to Our Service</HEADING>
           <TEXT>Discover amazing features that will transform your experience.</TEXT>
           <BUTTON href="/">Get Started</BUTTON>
         </COLUMN>
       </ROW>
     `,
+    ],
     allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'BUTTON'],
   },
-  'key-features': {
-    note: 'Use ICON components to create a visually appealing feature list with icons, titles, and descriptions. Icons can be positioned above (position="top") or to the left (position="left") of the text.',
-    example: `
-      <ROW type="key-features">
+  'feature-list': {
+    note: 'Use ICON components to create a visually appealing feature list with icons, titles, and descriptions. Icons can be positioned above (position="top") or to the left (position="left") of the text. If there are more than 3 features, position the icons to the left.',
+    examples: [
+      `
+      <ROW type="feature-list">
         <HEADING level="h2">Key Features</HEADING>
         <COLUMN>
           <ICON icon="bolt" title="Lightning Fast" description="Experience blazing fast performance" position="top" />
@@ -192,83 +209,122 @@ export const componentLibrary: Record<RowBlockType, { note?: string; example: st
         </COLUMN>
       </ROW>
     `,
+      `
+      <ROW type="feature-list">
+        <HEADING level="h2">Key Features</HEADING>
+        <COLUMN>
+          <ICON icon="bolt" title="Lightning Fast" description="Experience blazing fast performance" position="top" />
+          <ICON icon="shield" title="Secure" description="Your data is always protected" position="left" />
+          <ICON icon="star" title="Premium" description="Get access to exclusive features" />
+          <ICON icon="check" title="Easy to Use" description="Simple interface for quick setup" />
+          <ICON icon="settings" title="Customizable" description="Tailor your experience to your needs" />
+        </COLUMN>
+      </ROW>
+    `,
+    ],
     allowedBlocks: ['HEADING', 'TEXT', 'LIST', 'IMAGE', 'ICON'],
   },
   cards: {
-    example: `
+    examples: [
+      `
       <ROW type="cards">
         <HEADING level="h2">Card Title</HEADING>
-        <TEXT>Card description goes here.</TEXT>
         <COLUMN>
-          <IMAGE src="imagegen:card image" alt="Card image" />
-          <HEADING level="h3">Card Title</HEADING>
-          <TEXT>Card description goes here.</TEXT>
+          <IMAGE src="imagegen:product 1" alt="Product 1" />
+          <HEADING level="h3">Product 1</HEADING>
+          <TEXT>This is the description for product 1.</TEXT>
+          <BUTTON href="/">Shop Now</BUTTON>
         </COLUMN>
         <COLUMN>
-          <IMAGE src="imagegen:card image" alt="Card image" />
-          <HEADING level="h3">Card Title</HEADING>
-          <TEXT>Card description goes here.</TEXT>
-        </COLUMN>
-        <COLUMN>
-          <IMAGE src="imagegen:card image" alt="Card image" />
-          <HEADING level="h3">Card Title</HEADING>
-          <TEXT>Card description goes here.</TEXT>
+          <IMAGE src="imagegen:product 2" alt="Product 2" />
+          <HEADING level="h3">Product 2</HEADING>
+          <TEXT>This is the description for product 2.</TEXT>
+          <BUTTON href="/">Shop Now</BUTTON>
         </COLUMN>
       </ROW>
     `,
-    allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'BUTTON'],
+    ],
+    allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'BUTTON', 'LINK'],
   },
   article: {
-    example: `
+    note: 'Use a DIVIDER component to separate a single article from the rest of the email.',
+    examples: [
+      `
       <ROW type="article">
         <COLUMN>
           <HEADING level="h2">Article Title</HEADING>
-          <TEXT>Article content goes here with paragraphs of text.</TEXT>
-          <TEXT>More content in another paragraph.</TEXT>
+          <TEXT>This is the content of the article. It can contain multiple paragraphs and describe various topics in detail.</TEXT>
+          <BUTTON href="/">Read More</BUTTON>
+          <DIVIDER />
         </COLUMN>
       </ROW>
-    `,
-    allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'LINK'],
-  },
-  list: {
-    example: `
-      <ROW type="list">
+      `,
+      `
+      <ROW type="article">
+        <HEADING level="h2">Latest Articles</HEADING>
         <COLUMN>
-          <HEADING level="h2">List Title</HEADING>
-          <LIST type="ul">
-            <LI>List item 1</LI>
-            <LI>List item 2</LI>
-            <LI>List item 3</LI>
-          </LIST>
+          <IMAGE src="imagegen:article 1 topic" alt="Article 1" />
+          <HEADING level="h3">Article 1 Title</HEADING>
+          <TEXT>A brief summary of the first article content. This introduces the reader to the topic.</TEXT>
+          <LINK href="/">Read more</LINK>
+        </COLUMN>
+        <COLUMN>
+          <IMAGE src="imagegen:article 2 topic" alt="Article 2" />
+          <HEADING level="h3">Article 2 Title</HEADING>
+          <TEXT>A brief summary of the second article content. This gives readers a preview of what to expect.</TEXT>
+          <LINK href="/">Read more</LINK>
         </COLUMN>
       </ROW>
-    `,
-    allowedBlocks: ['HEADING', 'TEXT', 'LIST'],
+      `,
+    ],
+    allowedBlocks: ['IMAGE', 'HEADING', 'TEXT', 'BUTTON', 'LINK'],
   },
   cta: {
-    example: `
+    examples: [
+      `
       <ROW type="cta">
         <COLUMN>
-          <HEADING level="h2">Ready to get started?</HEADING>
-          <TEXT>Join thousands of satisfied customers today.</TEXT>
+          <HEADING level="h2">Ready to Get Started?</HEADING>
+          <TEXT>Join thousands of satisfied customers who have already chosen our service.</TEXT>
           <BUTTON href="/">Sign Up Now</BUTTON>
         </COLUMN>
       </ROW>
     `,
-    allowedBlocks: ['HEADING', 'TEXT', 'BUTTON', 'IMAGE'],
+    ],
+    allowedBlocks: ['HEADING', 'TEXT', 'BUTTON'],
   },
   invoice: {
-    example: `
+    examples: [
+      `
       <ROW type="invoice">
         <COLUMN>
-          <HEADING level="h2">Invoice #12345</HEADING>
-          <TEXT>Date: January 1, 2024</TEXT>
-          <TEXT>Amount: $99.99</TEXT>
-          <BUTTON href="/">View Invoice</BUTTON>
+          <TABLE>
+            <TR>
+              <TD>Item</TD>
+              <TD>Quantity</TD>
+              <TD>Price</TD>
+            </TR>
+            <TR>
+              <TD>Product 1</TD>
+              <TD>1</TD>
+              <TD>$19.99</TD>
+            </TR>
+            <TR>
+              <TD>Product 2</TD>
+              <TD>2</TD>
+              <TD>$29.99</TD>
+            </TR>
+            <TR>
+              <TD>Total</TD>
+              <TD></TD>
+              <TD>$79.97</TD>
+            </TR>
+          </TABLE>
         </COLUMN>
       </ROW>
     `,
-    allowedBlocks: ['HEADING', 'TEXT', 'BUTTON', 'TABLE'],
+    ],
+    allowedBlocks: ['TABLE', 'HEADING', 'TEXT'],
   },
 } as const
 
@@ -278,6 +334,8 @@ export const blockLibrary = {
     attributes: {
       styleVariant: ['default', 'outline', 'clear'],
       type: emailTypes,
+      themeColor: ['#8e6ff7'],
+      borderRadius: ['4'],
       preview: ['This is a preview text'],
       width: ['600'],
       backgroundColor: ['#ffffff'],
@@ -348,7 +406,7 @@ export const blockLibrary = {
     },
   },
   ICON: {
-    note: "Use any icon from Google's material symbols. The icon component includes a title and description. The position attribute controls if the icon appears above the text (top) or to the left of the text (left).",
+    note: 'Use any icon from the Material Symbols icon library. The icon component includes a title and description. The position attribute controls if the icon appears above the text (top) or to the left of the text (left).',
     example: `
       <ICON icon="bolt" title="Fast Performance" description="Lightning-fast loading speeds for your website" position="top" />
     `,
@@ -472,7 +530,7 @@ export type Email = {
   width?: string
   styleVariant?: EmailStyleVariant
   themeColor?: string
-  borderRadius?: 'default' | 'rounded' | 'square'
+  borderRadius?: BorderRadius
   type?: EmailType
 }
 
@@ -650,6 +708,8 @@ export type RowBlockAttributes = PaddingAttributes & {
 
 export type ColumnBlockAttributes = {
   width?: string
+  backgroundColor?: string
+  borderRadius?: string
 }
 
 // ===== Block-Specific Attributes =====

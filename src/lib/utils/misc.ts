@@ -4,8 +4,10 @@ import { v4 as uuidv4 } from 'uuid'
 import { Company } from '../database/types'
 import { parseEmailScript } from './email-script-parser'
 
+import { RowBlock } from '@/app/components/email-workspace/types'
 import { ClassValue, clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
+import { ImageAspectRatio } from './image-service'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -70,7 +72,9 @@ export function getPhotoUrl(name: string, template: string) {
 }
 
 export function getImgFromKey(imageKey: string, thumbnail = false) {
-  return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${imageKey}`
+  // Ensure the imageKey doesn't start with a slash
+  const cleanedKey = imageKey.startsWith('/') ? imageKey.substring(1) : imageKey
+  return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${cleanedKey}`
 }
 
 export const parseText = (text: string, linkColor: string) => {
@@ -89,7 +93,8 @@ export const parseText = (text: string, linkColor: string) => {
 export function getEmailFromMessage(
   message: Message,
   themeColor: string,
-  borderRadius: 'default' | 'rounded' | 'square'
+  borderRadius: 'default' | 'rounded' | 'square',
+  organizeFooter: boolean = false
 ) {
   const hasOpenTag = message.content.includes('<EMAIL') && message.content.match(/<EMAIL\s+[^>]*>/)
   const hasCloseTag = message.content.includes('</EMAIL>')
@@ -100,12 +105,35 @@ export function getEmailFromMessage(
 
     if (emailMatch) {
       const emailString = emailMatch[0] // This gets the entire match including tags
-      const emailObject = parseEmailScript(emailString, themeColor, borderRadius)
+      // Always organize footer for newly created emails from message
+      const emailObject = parseEmailScript(emailString, themeColor, borderRadius, organizeFooter)
       return emailObject
     }
   }
 
   return null
+}
+
+// Helper function to determine the best aspect ratio for an image based on its context
+export function determineAspectRatio(row: RowBlock): ImageAspectRatio {
+  // Check if this is a gallery row with exactly two columns
+  if (row.attributes?.type === 'gallery' && row.columns && row.columns.length === 2) {
+    // Check if one column has an image and one doesn't
+    const hasOneImageColumn =
+      row.columns.filter((col) => col.blocks && col.blocks.some((b) => b.type === 'image')).length === 1
+
+    if (hasOneImageColumn) {
+      return '1:1'
+    }
+  }
+
+  // For cards layout, use 4:3 aspect ratio
+  if (row.attributes?.type === 'cards') {
+    return '4:3'
+  }
+
+  // Default to 16:9 for all other cases
+  return '16:9'
 }
 
 export function getImgSrc(src: string, company?: Company | null) {

@@ -1,6 +1,7 @@
 import type {
   ButtonBlock,
   ButtonBlockAttributes,
+  ColumnBlock,
   DividerBlock,
   DividerBlockAttributes,
   Email,
@@ -29,10 +30,10 @@ import type {
   TextBlock,
   TextBlockAttributes,
 } from '@/app/components/email-workspace/types'
-import { Company } from '@/lib/database/types'
+import { BorderRadius, Company } from '@/lib/database/types'
 import { getThemeColors } from '@/lib/utils/colors'
 import { getTypeDefaults } from './defaults'
-import { getBlockDefaultAttributes } from './defaults/rowTypeBlocks'
+import { getBlockDefaultAttributes, getColumnDefaultAttributes } from './defaults/rowTypeBlocks'
 
 // LAYOUT ATTRIBUTES
 export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<RowBlock['attributes']> => {
@@ -62,6 +63,22 @@ export const getRowAttributes = (row: RowBlock, email: Email | null): Partial<Ro
   return mergedAttributes
 }
 
+export const getColumnAttributes = (
+  column: ColumnBlock,
+  parentRow: RowBlock,
+  columnIndex: number,
+  email: Email | null
+): Partial<ColumnBlock['attributes']> => {
+  // Get default attributes based on row type and column position
+  const defaults = getColumnDefaultAttributes(columnIndex, parentRow, email)
+
+  // Merge with explicit attributes, giving priority to explicit attributes
+  return {
+    ...defaults,
+    ...column.attributes,
+  }
+}
+
 type EmailAttributes = {
   backgroundColor: string
   color: string
@@ -72,7 +89,7 @@ type EmailAttributes = {
   styleVariant: EmailStyleVariant
   type: EmailType
   themeColor: string
-  borderRadius: 'default' | 'rounded' | 'square'
+  borderRadius: BorderRadius
 }
 
 export function getEmailAttributes(email: Email | null): EmailAttributes {
@@ -80,8 +97,8 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
   const themeColors = getThemeColors(themeColor)
 
   const defaultAttributes: EmailAttributes = {
-    backgroundColor: '#f6f6f6',
-    color: '#4b5563',
+    backgroundColor: '#F9FAFB',
+    color: '#111827',
     fontFamily: 'Arial, Helvetica, Arial, sans-serif',
     linkColor: themeColors.action,
     rowBackgroundColor: themeColors.base,

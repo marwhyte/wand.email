@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { SessionProvider } from 'next-auth/react'
 import { Inter } from 'next/font/google'
 
+import { ImageLimitBanner } from '@/app/components/image-limit-banner'
 import 'react-tooltip/dist/react-tooltip.css'
 import { fetchUser } from './actions'
 import PlanProvider from './components/payment/plan-provider'
@@ -48,6 +49,7 @@ export default async function RootLayout({
               expiresAt={initialUser?.stripeSubscriptionExpiresAt}
             >
               {children}
+              <ImageLimitBanner />
             </PlanProvider>
           </SessionProvider>
         </main>
