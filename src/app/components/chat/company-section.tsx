@@ -1,4 +1,5 @@
 import { useOpener } from '@/app/hooks'
+import { updateChat } from '@/lib/database/queries/chats'
 import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat, Company } from '@/lib/database/types'
 import { useChatStore } from '@/lib/stores/chatStore'
@@ -75,6 +76,12 @@ export function CompanySection({
   const handleCompanySelect = (selectedCompany: Company | null, close: () => void) => {
     setCompany(selectedCompany || undefined)
     setTempCompany(selectedCompany)
+
+    if (chat) {
+      updateChat(chat.id, {
+        companyId: selectedCompany?.id,
+      })
+    }
     close()
   }
 
@@ -105,6 +112,11 @@ export function CompanySection({
     companyOpener.close()
     setActiveCompany(null)
     setCompany(updatedCompany)
+    if (chat) {
+      updateChat(chat.id, {
+        companyId: updatedCompany.id,
+      })
+    }
     mutate('/api/companies')
   }
 

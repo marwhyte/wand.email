@@ -122,6 +122,7 @@ export async function updateChat(
     email?: string
     parsed?: boolean
     hasConfirmedOutline?: boolean
+    companyId?: string
     color?: string
     borderRadius?: string
   }
@@ -140,6 +141,18 @@ export async function updateChat(
           .updateTable('Chat')
           .set({
             title: updates.title,
+            updatedAt: new Date(),
+          })
+          .where('id', '=', id)
+          .where('userId', '=', session.user.id)
+          .execute()
+      }
+
+      if (updates.companyId !== undefined) {
+        await trx
+          .updateTable('Chat')
+          .set({
+            companyId: updates.companyId,
             updatedAt: new Date(),
           })
           .where('id', '=', id)

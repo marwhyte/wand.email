@@ -28,7 +28,6 @@ export function useChatHistory({ chat, chatId, company }: Props) {
       if (themeColor === '#8e6ff7') {
         console.log('getting last chat')
         getLastChat().then((lastChat) => {
-          console.log('lastChat', lastChat)
           if (lastChat) {
             setThemeColor(lastChat.color)
             setBorderRadius(lastChat.borderRadius)
