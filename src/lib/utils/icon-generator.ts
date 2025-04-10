@@ -3,8 +3,36 @@ import path from 'path'
 import sharp from 'sharp'
 import { getThemeColors } from './colors'
 
+// For Vercel production environment
+function getPublicPath() {
+  const cwd = process.cwd()
+  console.log('Current working directory:', cwd)
+
+  // Try different possible paths for the public directory
+  const possiblePaths = [
+    path.join(cwd, 'public'), // Local development
+    path.join(cwd, '..', 'public'), // One level up
+    '/var/task/public', // Vercel serverless
+    path.join(cwd, '..', '..', 'public'), // Two levels up
+    path.join(cwd, '.next', 'server', 'public'), // Next.js production
+    path.join(cwd, '.next', 'public'), // Another Next.js production possibility
+  ]
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) {
+      console.log('Found public directory at:', p)
+      return p
+    }
+  }
+
+  // If no public directory is found, use the current directory as fallback
+  console.warn('Public directory not found in any expected location, using fallback')
+  return cwd
+}
+
 // Get the path to the icons in the public folder
-const BASE_ICONS_DIR = path.join(process.cwd(), 'public/icons')
+const PUBLIC_DIR = getPublicPath()
+const BASE_ICONS_DIR = path.join(PUBLIC_DIR, 'icons')
 console.log('BASE_ICONS_DIR path:', BASE_ICONS_DIR)
 
 // Only using outlined icons as specified
