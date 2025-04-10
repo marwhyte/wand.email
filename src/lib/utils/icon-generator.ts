@@ -1,17 +1,10 @@
-import fs from 'fs'
 import path from 'path'
 import sharp from 'sharp'
 import { getThemeColors } from './colors'
+import { getImgFromKey } from './misc'
 
 // Only using outlined icons as specified
 const ICON_VARIANT = 'outlined'
-
-// Built-in SVG paths for the most commonly used icons as emergency fallbacks
-const BUILT_IN_ICONS: Record<string, string> = {
-  star: '<path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>',
-  home: '<path d="M12 5.69l5 4.5V18h-2v-6H9v6H7v-7.81l5-4.5M12 3L2 12h3v8h6v-6h2v6h6v-8h3L12 3z"/>',
-  check: '<path d="M9 16.17 4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>',
-}
 
 // Local development paths
 const BASE_ICONS_DIR = path.join(process.cwd(), 'public/icons')
@@ -32,49 +25,46 @@ export async function generateIconPng(iconName: string, themeColor: string, size
     // Convert kebab-case to camelCase for the filename (e.g., local-shipping -> local_shipping)
     const normalizedIconName = iconName.replace(/-/g, '_')
 
-    // First check if we have a built-in emergency fallback icon
     let svgContent = null
-    const iconNameKey = iconName.toLowerCase()
 
-    // Try to get SVG content based on environment
-    if (process.env.NODE_ENV === 'development') {
-      // In development, try to read from the file system first
-      try {
-        const variantDir = path.join(BASE_ICONS_DIR, ICON_VARIANT)
-        const iconPath = path.join(variantDir, `${normalizedIconName}.svg`)
+    // // For development: try to read from the local file system
+    // if (process.env.NODE_ENV === 'development') {
+    //   try {
+    //     const variantDir = path.join(BASE_ICONS_DIR, ICON_VARIANT)
+    //     const iconPath = path.join(variantDir, `${normalizedIconName}.svg`)
 
-        if (fs.existsSync(iconPath)) {
-          svgContent = fs.readFileSync(iconPath, 'utf8')
-        }
-      } catch (err) {
-        console.warn('Error reading icon from file system:', err)
-      }
-    } else {
-      // In production, try to fetch from the CDN URL
+    //     if (fs.existsSync(iconPath)) {
+    //       svgContent = fs.readFileSync(iconPath, 'utf8')
+    //       console.log(`Found icon ${normalizedIconName} in development environment`)
+    //     }
+    //   } catch (err) {
+    //     console.warn('Error reading icon from file system:', err)
+    //   }
+    // }
+
+    // If still no SVG content, try to fetch from CloudFront/S3
+    if (!svgContent) {
       try {
-        // Use global fetch to get the SVG from the deployed CDN
-        const iconUrl = `/icons/${ICON_VARIANT}/${normalizedIconName}.svg`
+        // Build the path to the icon in CloudFront
+        const iconKey = `icons/outlined/${normalizedIconName}.svg`
+        const iconUrl = getImgFromKey(iconKey)
+        console.log(`Fetching icon from CloudFront: ${iconUrl}`)
+
         const response = await fetch(iconUrl)
-
         if (response.ok) {
           svgContent = await response.text()
+          console.log(`Successfully fetched icon ${normalizedIconName} from CloudFront`)
         } else {
-          console.warn(`Icon not found at URL: ${iconUrl}, status: ${response.status}`)
+          console.warn(`Icon ${normalizedIconName} not found in CloudFront, status: ${response.status}`)
         }
       } catch (fetchErr) {
-        console.warn('Error fetching icon from CDN:', fetchErr)
+        console.error('Error fetching icon from CloudFront:', fetchErr)
       }
     }
 
-    // If we still don't have SVG content, use our built-in fallbacks
-    if (!svgContent && BUILT_IN_ICONS[iconNameKey]) {
-      console.log(`Using built-in fallback icon for ${iconName}`)
-      svgContent = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${BUILT_IN_ICONS[iconNameKey]}</svg>`
-    }
-
-    // If still no SVG content, use the letter fallback
+    // If still no SVG content, use fallback
     if (!svgContent) {
-      console.log(`Icon ${normalizedIconName} not found, using letter fallback`)
+      console.log(`Using fallback for icon: ${iconName} (not found in any source)`)
       return generateFallbackIconPng(normalizedIconName, size, theme)
     }
 
