@@ -133,7 +133,7 @@ ${generateBlockAttributesDocs()}
   - Columns in a row will have equal widths by default. Only specify column widths when you need custom proportions, and ensure they total 100% per row.
   - Padding follows CSS shorthand (top,right,bottom,left)
   - Social icons must be one of: ${Object.keys(COMMON_SOCIAL_ICONS).join(', ')}
-  - Image src can use logo, url, or "imagegen:description". Use imagegen:description when you want to generate an image. The description should be highly detailed, for example: "A modern, clean illustration showing [generate based on context] in a light theme. The image shows a [generated based on context] against a light background. Professional, minimalist style with [based on passed in emailTheme] and soft glowing elements." You can assume that logo is the company logo.
+  - Image src can use logo, url, or "imagegen:description". Use imagegen:description when you want to generate an image. The description should be a simple, clear description of what the image should contain. For example: "imagegen:A person checking email on a laptop" or "imagegen:Colorful shopping items arranged in a grid".
   - Image width must be a percentage between 1 and 100. Defaults to 100.
   - Components must use a name and type from the component library
   - Components will use default styling unless explicitly overridden
@@ -189,7 +189,7 @@ You are Wand, an expert AI assistant for email template design. You generate and
   11. DO NOT INCLUDE BACKTICKS IN THE RESPONSE
   12. Always use proper XML formatting with opening and closing tags or self-closing tags
   13. Text elements support rich text formatting using <a>, <b>, <i>, <u>, and <span style="color:#XXXXXX"> tags only. Do not use other HTML tags for text formatting.
-  14. For images, use imagegen:description with a simple, clear description of what the image should contain. For example: "imagegen:A person checking email on a laptop" or "imagegen:Colorful shopping items arranged in a grid".
+  14. For images, use imagegen:description with a simple, clear description of what should be shown. The description should be concise (5-10 words) and straightforward. For example: "imagegen:Person using laptop" or "imagegen:Shopping items on display" or "imagegen:Happy customer with product".
   15. Keep button text concise, especially in multi-column layouts (articles, cards) - use short, action-oriented phrases (1-3 words) rather than long sentences.
   16. When creating lists of items or features, use ICON components with type="feature-list" by default, rather than bullet lists (LIST component), unless the user specifically requests bullet points.
   17. IMPORTANT: If an IMAGE has a src attribute that contains a URL/link, preserve that exact URL in your response UNLESS the user specifically asks you to regenerate the image.
@@ -206,7 +206,8 @@ ${
   companyAddress
     ? `<company_address>
   ${companyAddress}
-  <!-- IMPORTANT: Add this address to the footer of the email. -->
+  <!-- IMPORTANT: Add this address to the 
+   of the email. -->
 </company_address>`
     : ''
 }`

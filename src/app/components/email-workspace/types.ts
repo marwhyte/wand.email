@@ -96,7 +96,7 @@ export const componentLibrary: Record<RowBlockType, { note?: string; examples: s
       `
       <ROW type="cart">
         <COLUMN>
-          <CART_ITEM image="imagegen:product image" name="Product Name" description="Product description here" quantity="1" price="$19.99" />
+          <CART_ITEM image="imagegen:Product package" name="Product Name" description="Product description here" quantity="1" price="$19.99" />
         </COLUMN>
       </ROW>
     `,
@@ -142,7 +142,7 @@ export const componentLibrary: Record<RowBlockType, { note?: string; examples: s
       `
       <ROW type="gallery">
         <COLUMN>
-          <IMAGE src="imagegen:bed in a room" alt="Bed in room" />
+          <IMAGE src="imagegen:Cozy bedroom interior" alt="Bed in room" />
         </COLUMN>
         <COLUMN>
           <HEADING level="h2">Deck out your dorm</HEADING>
@@ -182,7 +182,7 @@ export const componentLibrary: Record<RowBlockType, { note?: string; examples: s
       `
       <ROW type="hero">
         <COLUMN>
-          <IMAGE src="imagegen:A description of the image" alt="Image description" />
+          <IMAGE src="imagegen:Person using service happily" alt="Image description" />
           <HEADING level="h1">Welcome to Our Service</HEADING>
           <TEXT>Discover amazing features that will transform your experience.</TEXT>
           <BUTTON href="/">Get Started</BUTTON>
@@ -230,13 +230,13 @@ export const componentLibrary: Record<RowBlockType, { note?: string; examples: s
       <ROW type="cards">
         <HEADING level="h2">Card Title</HEADING>
         <COLUMN>
-          <IMAGE src="imagegen:product 1" alt="Product 1" />
+          <IMAGE src="imagegen:Product display" alt="Product 1" />
           <HEADING level="h3">Product 1</HEADING>
           <TEXT>This is the description for product 1.</TEXT>
           <BUTTON href="/">Shop Now</BUTTON>
         </COLUMN>
         <COLUMN>
-          <IMAGE src="imagegen:product 2" alt="Product 2" />
+          <IMAGE src="imagegen:Product closeup" alt="Product 2" />
           <HEADING level="h3">Product 2</HEADING>
           <TEXT>This is the description for product 2.</TEXT>
           <BUTTON href="/">Shop Now</BUTTON>
@@ -263,13 +263,13 @@ export const componentLibrary: Record<RowBlockType, { note?: string; examples: s
       <ROW type="article">
         <HEADING level="h2">Latest Articles</HEADING>
         <COLUMN>
-          <IMAGE src="imagegen:article 1 topic" alt="Article 1" />
+          <IMAGE src="imagegen:Business news" alt="Article 1" />
           <HEADING level="h3">Article 1 Title</HEADING>
           <TEXT>A brief summary of the first article content. This introduces the reader to the topic.</TEXT>
           <LINK href="/">Read more</LINK>
         </COLUMN>
         <COLUMN>
-          <IMAGE src="imagegen:article 2 topic" alt="Article 2" />
+          <IMAGE src="imagegen:Technology concept" alt="Article 2" />
           <HEADING level="h3">Article 2 Title</HEADING>
           <TEXT>A brief summary of the second article content. This gives readers a preview of what to expect.</TEXT>
           <LINK href="/">Read more</LINK>
@@ -420,7 +420,7 @@ export const blockLibrary = {
     },
   },
   IMAGE: {
-    note: 'Use imagegen:description to generate an image with a detailed description. Use logo to use the company logo. Use https://images.pexels.com/photos/example.png to use a placeholder image.',
+    note: 'Use imagegen:description to generate an image with a concise description (5-10 words). Keep it simple and direct. Use logo to use the company logo. Use a full URL to use an existing image.',
     attributes: {
       align: ['left', 'center', 'right'],
       alt: ['Image description'],
