@@ -2,62 +2,13 @@
 
 import { uploadFile } from '@/app/actions/uploadFile'
 import { getImgFromKey } from '@/lib/utils/misc'
-import { createVertex } from '@ai-sdk/google-vertex'
-import { experimental_generateImage as generateImage, NoImageGeneratedError } from 'ai'
+import { google } from '@ai-sdk/google'
+import { generateText, NoImageGeneratedError } from 'ai'
 import namer from 'color-namer'
-import { auth } from 'google-auth-library'
 import { createClient } from 'pexels'
 
 // Initialize the Pexels client
 const pexelsClient = createClient(process.env.PEXELS_API_KEY || '')
-
-// Create Google auth client and vertex instance
-const getVertexInstance = () => {
-  // Process the private key to ensure newlines are properly formatted
-  // This fixes the "DECODER routines::unsupported" error in production
-  // Also remove any surrounding quotes that might have been included
-  let privateKey = process.env.GCP_PRIVATE_KEY || ''
-
-  // Remove surrounding quotes if present
-  if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
-    privateKey = privateKey.slice(1, -1)
-  }
-
-  // Replace escaped newlines with actual newlines
-  privateKey = privateKey.replace(/\\n/g, '\n')
-
-  const credentials = {
-    type: 'service_account',
-    project_id: process.env.GCP_PROJECT_ID,
-    private_key_id: process.env.GCP_PRIVATE_KEY_ID,
-    private_key: privateKey,
-    client_email: process.env.GCP_CLIENT_EMAIL,
-    client_id: process.env.GCP_CLIENT_ID,
-    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-    token_uri: 'https://oauth2.googleapis.com/token',
-    auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-    universe_domain: process.env.GCP_UNIVERSE_DOMAIN,
-  }
-
-  // Create auth client from credentials JSON
-  const client = auth.fromJSON(credentials)
-
-  // Set scopes for the client - the cast is needed because TypeScript doesn't recognize scopes on JSONClient
-  // @ts-ignore - Adding scopes to GoogleAuth client
-  client.scopes = ['https://www.googleapis.com/auth/cloud-platform']
-
-  // Create and return the vertex instance with the auth client
-  return createVertex({
-    project: process.env.GCP_PROJECT_ID,
-    location: 'us-central1',
-    googleAuthOptions: {
-      authClient: client,
-    },
-  })
-}
-
-// Get vertex instance for use throughout the file
-const vertex = getVertexInstance()
 
 // Get descriptive color name for prompting
 const getColorDescription = (hexColor: string): string => {
@@ -82,8 +33,6 @@ export async function resolveImageSrc(
 
   const [_, service, keyword] = match
 
-  return getFallbackPexelsImage(keyword, aspectRatio)
-
   // If user has hit the limit, use Pexels regardless of the requested service
   if (hasHitLimit && service.toLowerCase() === 'imagegen') {
     console.log(`User has hit image limit, using Pexels instead for: ${keyword}`)
@@ -99,39 +48,29 @@ export async function resolveImageSrc(
         const colorDescription = getColorDescription(themeColor)
         console.log('Generating image with prompt for color:', colorDescription)
 
-        const { image } = await generateImage({
-          model: vertex.image('imagen-3.0-generate-001'),
+        // Use Google's generative AI model for image generation
+        const result = await generateText({
+          model: google('gemini-2.0-flash-exp'),
+          providerOptions: {
+            google: { responseModalities: ['TEXT', 'IMAGE'] },
+          },
           prompt: `Create a marketing-style visual that shows: ${keyword}. 
                   Modern, clean illustration in a light theme with ${colorDescription} color accents.
                   Professional, minimalist style with soft glowing elements and a clean background.`,
-          aspectRatio,
         })
 
-        // Handle the generated image - generateImage returns an array of images
-        if (image) {
+        // Handle the generated image
+        const files = result.files || []
+
+        if (files && files.length > 0) {
           try {
-            console.log(
-              'Image successfully generated:',
-              JSON.stringify({
-                type: typeof image,
-                isBlob: image instanceof Blob,
-                isNull: image === null,
-                isUndefined: image === undefined,
-              })
-            )
+            console.log('Image successfully generated, processing first file')
 
-            // Just dump the full image information safely
-            try {
-              console.log('Image details:', JSON.stringify(image))
-            } catch (logError: any) {
-              console.log('Cannot stringify image, error:', logError.message)
-            }
-
-            // Get the first generated image
-            const imageData = image
+            // Get the first generated image file
+            const imageFile = files[0]
 
             // Upload the image to S3
-            const imageUrl = await uploadAiGeneratedImage(imageData, keyword, aspectRatio)
+            const imageUrl = await uploadAiGeneratedImage(imageFile, keyword, aspectRatio)
 
             // Store the URL
             console.log(`Setting image URL for ${src} to`, imageUrl.substring(0, 50) + '...')
