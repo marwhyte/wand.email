@@ -82,6 +82,8 @@ export async function resolveImageSrc(
 
   const [_, service, keyword] = match
 
+  return getFallbackPexelsImage(keyword, aspectRatio)
+
   // If user has hit the limit, use Pexels regardless of the requested service
   if (hasHitLimit && service.toLowerCase() === 'imagegen') {
     console.log(`User has hit image limit, using Pexels instead for: ${keyword}`)
