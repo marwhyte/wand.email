@@ -59,8 +59,20 @@ export async function resolveImageSrc(
                   Professional, minimalist style with soft glowing elements and a clean background.`,
         })
 
+        // Capture a reference to the result for error handling
+        const resultRef = result
+
         // Handle the generated image
         const files = result.files || []
+
+        console.log(
+          'Generated result structure:',
+          JSON.stringify({
+            hasFiles: !!files,
+            fileCount: files?.length || 0,
+            resultKeys: Object.keys(result),
+          })
+        )
 
         if (files && files.length > 0) {
           try {
@@ -68,6 +80,11 @@ export async function resolveImageSrc(
 
             // Get the first generated image file
             const imageFile = files[0]
+            console.log('First file type:', typeof imageFile)
+
+            if (typeof imageFile === 'object' && imageFile !== null) {
+              console.log('File object keys:', Object.keys(imageFile))
+            }
 
             // Upload the image to S3
             const imageUrl = await uploadAiGeneratedImage(imageFile, keyword, aspectRatio)
@@ -116,6 +133,12 @@ export async function resolveImageSrc(
           console.log('Responses from model:', error.responses)
         } else {
           console.error('Error generating AI image:', error)
+
+          // Provide more detailed diagnostics for the specific type error
+          if (error.message?.includes('Cannot read properties') || error.message?.includes('type')) {
+            console.log('This appears to be a DefaultGeneratedFile handling error.')
+          }
+
           console.error('Error details:', {
             errorMessage: error.message,
             errorName: error.name,
@@ -200,6 +223,14 @@ async function uploadAiGeneratedImage(
 ): Promise<string> {
   try {
     console.log('uploadAiGeneratedImage received file of type:', typeof file)
+
+    // Log environment info for debugging
+    console.log('Environment:', {
+      NODE_ENV: process.env.NODE_ENV,
+      isVercel: !!process.env.VERCEL,
+      isS3Available: !!process.env.AWS_S3_BUCKET_NAME,
+    })
+
     // Handle the image data based on its type
     let blob: Blob
     let mimeType = 'image/png' // Default mime type
@@ -247,32 +278,36 @@ async function uploadAiGeneratedImage(
       }
 
       // Handle DefaultGeneratedFile from Vertex AI
-      if (
-        file &&
-        typeof file === 'object' &&
-        'base64Data' in file &&
-        'mimeType' in file &&
-        file.constructor?.name === 'DefaultGeneratedFile'
-      ) {
+      if (file && typeof file === 'object' && 'base64Data' in file && 'mimeType' in file) {
         console.log('Processing DefaultGeneratedFile from Vertex AI')
         try {
+          // Create a variable to hold the Blob
+          let vertexBlob: Blob | null = null
+          let vertexMimeType = file.mimeType || 'image/png'
+
           // Use the base64Data if available
           if (file.base64Data && typeof file.base64Data === 'string') {
-            console.log('Using base64Data from DefaultGeneratedFile')
+            console.log('Using base64Data from DefaultGeneratedFile, length:', file.base64Data.length)
+
+            // Check if the base64 data is prefixed
+            const hasPrefix = file.base64Data.startsWith('data:')
 
             // If base64Data doesn't have the data:image prefix, add it
             let base64DataWithPrefix = file.base64Data
-            if (!base64DataWithPrefix.startsWith('data:')) {
-              base64DataWithPrefix = `data:${file.mimeType};base64,${base64DataWithPrefix}`
+            if (!hasPrefix) {
+              base64DataWithPrefix = `data:${file.mimeType};base64,${file.base64Data}`
               console.log('Added prefix to base64Data')
             }
 
-            // Base64 data is already a proper data URL, use it directly
-            if (base64DataWithPrefix.startsWith('data:')) {
-              const matches = base64DataWithPrefix.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
-              if (matches && matches.length === 3) {
-                const type = matches[1]
-                const base64Data = matches[2]
+            try {
+              // Parse the data URL
+              const matches = hasPrefix
+                ? base64DataWithPrefix.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
+                : [null, file.mimeType, file.base64Data]
+
+              if ((hasPrefix && matches && matches.length === 3) || !hasPrefix) {
+                const type = hasPrefix ? matches[1] : file.mimeType
+                const base64Data = hasPrefix ? matches[2] : file.base64Data
 
                 // Log some diagnostics about the data received
                 console.log('Data type:', type, 'base64 length:', base64Data.length)
@@ -283,27 +318,27 @@ async function uploadAiGeneratedImage(
                   for (let i = 0; i < binaryString.length; i++) {
                     bytes[i] = binaryString.charCodeAt(i)
                   }
-                  blob = new Blob([bytes], { type })
-                  mimeType = type
+                  vertexBlob = new Blob([bytes], { type })
+                  vertexMimeType = type
                   console.log('Successfully created Blob from base64Data with length:', bytes.length)
                 } catch (atobError) {
                   console.error('Error decoding base64 data:', atobError)
                   throw new Error('Invalid base64 data format')
                 }
-              } else {
+              } else if (hasPrefix) {
                 throw new Error('Invalid data URL format in base64Data')
               }
-            }
-            // Base64 data is just the encoded string without the data URL prefix
-            else {
+            } catch (parseError) {
+              console.error('Error parsing base64 data:', parseError)
+              // Fall back to direct base64 conversion
               try {
                 const binaryString = atob(file.base64Data)
                 const bytes = new Uint8Array(binaryString.length)
                 for (let i = 0; i < binaryString.length; i++) {
                   bytes[i] = binaryString.charCodeAt(i)
                 }
-                blob = new Blob([bytes], { type: file.mimeType })
-                mimeType = file.mimeType
+                vertexBlob = new Blob([bytes], { type: file.mimeType })
+                vertexMimeType = file.mimeType
                 console.log('Successfully created Blob from raw base64Data with length:', bytes.length)
               } catch (atobError) {
                 console.error('Error decoding raw base64 data:', atobError)
@@ -314,20 +349,22 @@ async function uploadAiGeneratedImage(
           // Fall back to uint8ArrayData if base64Data processing failed
           else if (file.uint8ArrayData && file.uint8ArrayData instanceof Uint8Array) {
             console.log('Using uint8ArrayData from DefaultGeneratedFile with length:', file.uint8ArrayData.length)
-            blob = new Blob([file.uint8ArrayData], { type: file.mimeType })
-            mimeType = file.mimeType
+            vertexBlob = new Blob([file.uint8ArrayData], { type: file.mimeType })
+            vertexMimeType = file.mimeType
             console.log('Successfully created Blob from uint8ArrayData')
           } else {
             throw new Error('Neither base64Data nor uint8ArrayData are valid')
           }
+
+          // If we successfully created a blob, use it
+          if (vertexBlob) {
+            blob = vertexBlob
+            mimeType = vertexMimeType
+          } else {
+            throw new Error('Failed to create blob from Vertex AI data')
+          }
         } catch (vertexError: any) {
           console.error('Error processing Vertex AI DefaultGeneratedFile:', vertexError.message)
-          // If we can't process it properly, try using JSON.stringify to inspect the object
-          try {
-            console.log('Object inspection:', JSON.stringify(file, null, 2))
-          } catch (stringifyError) {
-            console.log('Could not stringify object for inspection')
-          }
           throw vertexError
         }
       }
