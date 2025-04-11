@@ -221,6 +221,8 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       adjacentRowOverrides.paddingTop = '24px'
       if (nextRow && nextRow.attributes.type === 'footer') {
         adjacentRowOverrides.paddingBottom = '0px'
+        // Remove bottom border radius if this is the first of two footers
+        adjacentRowOverrides.borderRadius = '0px'
       } else {
         adjacentRowOverrides.paddingBottom = '24px'
       }
@@ -228,6 +230,8 @@ export function getTypeDefaults(row: RowBlock, email: Email | null): Partial<Row
       // Second footer has no top padding but normal bottom padding
       adjacentRowOverrides.paddingTop = '0px'
       adjacentRowOverrides.paddingBottom = '24px'
+      // Ensure the second footer has the bottom border radius
+      adjacentRowOverrides.borderRadius = '0 0 16px 16px'
     }
   }
   // Default adjacent row handling for non-footer rows
