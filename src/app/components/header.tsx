@@ -1,7 +1,6 @@
 'use client'
 
 import { useEmailPreprocessor } from '@/app/hooks/useEmailPreprocessor'
-import { isLocalDev } from '@/constants'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
@@ -12,7 +11,6 @@ import {
   ArrowDownTrayIcon,
   ComputerDesktopIcon,
   DevicePhoneMobileIcon,
-  EyeIcon,
   PaperAirplaneIcon,
 } from '@heroicons/react/20/solid'
 import { render } from '@react-email/components'
@@ -25,7 +23,6 @@ import { Logo } from './Logo'
 import { Button } from './button'
 import { AuthDialog } from './dialogs/auth-dialog'
 import ExportDialog from './dialogs/export-dialog'
-import PreviewDialog from './dialogs/preview-dialog'
 import ContentValidator from './email-workspace/content-validator'
 import EmailRendererFinal from './email-workspace/email-renderer-final'
 import { defaultEbayTemplate } from './email-workspace/templates/ecommerce/default-ebay-template'
@@ -47,7 +44,7 @@ type Props = {
 export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()
   const { email, setEmail } = useEmailStore()
-  const { chatId, hasConfirmedOutline, title, setTitle, company } = useChatStore()
+  const { title, setTitle, company } = useChatStore()
   const isMobile = useIsMobile()
   const emailAttributes = getEmailAttributes(email)
   const { mobileView, setMobileView } = useMobileViewStore()
@@ -57,7 +54,6 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
   const { preprocessAndGetEmail, isProcessing: isPreprocessing } = useEmailPreprocessor()
 
   const exportOpener = useOpener()
-  const previewOpener = useOpener()
 
   const [selectedDevice, setSelectedDevice] = useState<'desktop' | 'mobile'>(mobileView ? 'mobile' : 'desktop')
 
@@ -199,17 +195,6 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
                     ))}
                   </TabList>
                 </TabGroup>
-
-                {isLocalDev && (
-                  <Button
-                    onClick={previewOpener.open}
-                    tooltipPosition="left"
-                    tooltip="Preview email"
-                    tooltipId="preview-email"
-                  >
-                    <EyeIcon className="h-4 w-4" />
-                  </Button>
-                )}
               </>
             )}
 
@@ -283,7 +268,6 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
       {emailStatus === 'success' && <Notification title="Test email sent successfully!" status="success" />}
       {emailStatus === 'error' && <Notification title="Failed to send test email" status="failure" />}
       <ExportDialog open={exportOpener.isOpen} onClose={exportOpener.close} monthlyExportCount={monthlyExportCount} />
-      <PreviewDialog open={previewOpener.isOpen} onClose={previewOpener.close} />
 
       <AuthDialog
         open={showSignUpDialog}

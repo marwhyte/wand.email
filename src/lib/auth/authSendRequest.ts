@@ -20,8 +20,8 @@ export async function sendVerificationRequest(params: Params) {
     body: JSON.stringify({
       from: provider.from,
       to,
-      subject: `Sign in to wand.email`,
-      html: html({ url, host }),
+      subject: `Your secure sign-in link for wand.email`,
+      html: html({ url, host, email: to }),
       text: text({ url, host }),
     }),
   })
@@ -29,77 +29,77 @@ export async function sendVerificationRequest(params: Params) {
   if (!res.ok) throw new Error('Resend error: ' + JSON.stringify(await res.json()))
 }
 
-function html(params: { url: string; host: string }) {
-  const { url } = params
+function html(params: { url: string; host: string; email: string }) {
+  const { url, email } = params
 
   return `
   <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
   <html dir="ltr" lang="en">
     <head>
       <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
-        <meta name="x-apple-disable-message-reformatting"/>
-          <style>
-          p, h1, h2, h3, h3, h4, h5 {
-            margin: 0 !important;
+      <meta name="x-apple-disable-message-reformatting"/>
+      <style>
+        p, h1, h2, h3, h3, h4, h5 {
+          margin: 0 !important;
+        }
+
+        p {
+          line-height: inherit
+        }
+
+        p a {
+          text-decoration: underline !important;
+        }
+        
+        * {
+          box-sizing: border-box;
+        }
+
+        body {
+          margin: 0;
+          padding: 0;
+        }
+
+        a[x-apple-data-detectors] {
+          color: inherit !important;
+          text-decoration: inherit !important;
+        }
+
+        #MessageViewBody a {
+          color: inherit;
+          text-decoration: none;
+        }
+
+        .row-content {
+          width: 100% !important;
+        }
+
+        .desktop_hide,
+        .desktop_hide table {
+          mso-hide: all;
+          display: none;
+          max-height: 0px;
+          overflow: hidden;
+        }
+
+        @media screen and (max-width: 600px) {
+          .mobile_hide {
+            display: none !important;
           }
 
-          p {
-            line-height: inherit
-          }
-
-          p a {
-            text-decoration: underline !important;
+          .mobile_hide {
+            min-height: 0;
+            max-height: 0;
+            max-width: 0;
+            overflow: hidden;
+            font-size: 0px;
           }
           
-          * {
-            box-sizing: border-box;
+          .stack .column {
+            width: 100% !important;
+            display: block !important;
+            padding-bottom: 20px !important;
           }
-
-          body {
-            margin: 0;
-            padding: 0;
-          }
-
-          a[x-apple-data-detectors] {
-            color: inherit !important;
-            text-decoration: inherit !important;
-          }
-
-          #MessageViewBody a {
-            color: inherit;
-            text-decoration: none;
-          }
-
-          .row-content {
-				    width: 100% !important;
-			    }
-
-          .desktop_hide,
-          .desktop_hide table {
-            mso-hide: all;
-            display: none;
-            max-height: 0px;
-            overflow: hidden;
-          }
-
-          @media screen and (max-width: 600px) {
-            .mobile_hide {
-              display: none !important;
-            }
-
-            .mobile_hide {
-              min-height: 0;
-              max-height: 0;
-              max-width: 0;
-              overflow: hidden;
-              font-size: 0px;
-            }
-            
-            .stack .column {
-              width: 100% !important;
-              display: block !important;
-              padding-bottom: 20px !important;
-            }
 
             .stack .spacer-column {
               display: none !important;
@@ -116,7 +116,7 @@ function html(params: { url: string; host: string }) {
           </style>
         </head>
         <body style="background-color:#f4f4f4;color:#000000;font-family:Arial, sans-serif;id:a10f4982-2bc1-4780-936b-e17ec63bbdf9;margin:0;-webkit-text-size-adjust:none;-moz-text-size-adjust:none">
-          <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0">Sign up or log in to our app!
+          <div style="display:none;overflow:hidden;line-height:1px;opacity:0;max-height:0;max-width:0">Your secure sign-in link for wand.email - click to access your account
             <div> ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿ ‌​‍‎‏﻿
             </div>
           </div>
@@ -178,7 +178,7 @@ function html(params: { url: string; host: string }) {
                                   <table width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="border-radius:10px">
                                     <tr>
                                       <td style="width:100%;padding-top:10px;padding-right:0;padding-bottom:10px;padding-left:0">
-                                        <p style="font-size:14px;line-height:120%;margin:0;color:#787878;text-align:left;overflow-wrap:break-word;word-break:break-word;letter-spacing:normal">This link will automatically detect if you have an existing account. If not, it will guide you through the sign-up process.
+                                        <p style="font-size:14px;line-height:120%;margin:0;color:#787878;text-align:left;overflow-wrap:break-word;word-break:break-word;letter-spacing:normal">This link will automatically detect if you have an existing account. If not, it will create a new account for you.
                                         </p>
                                       </td>
                                     </tr>
@@ -212,7 +212,7 @@ function html(params: { url: string; host: string }) {
                                   <table width="100%" border="0" cellPadding="0" cellSpacing="0" role="presentation" style="border-radius:10px">
                                     <tr>
                                       <td style="width:100%;padding-top:4px;padding-right:0;padding-bottom:4px;padding-left:0">
-                                        <p style="font-size:14px;line-height:120%;margin:0;text-align:center;overflow-wrap:break-word;word-break:break-word;letter-spacing:normal;color:#696969">You&#x27;ve received this email because you signed up for wand.email
+                                        <p style="font-size:14px;line-height:120%;margin:0;text-align:center;overflow-wrap:break-word;word-break:break-word;letter-spacing:normal;color:#696969">You&#x27;ve received this email because you signed up for <a href="https://wand.email" style="color:#3b82f6;text-decoration:none;font-size:14px;font-weight:normal;cursor:pointer;align:center" target="_blank">wand.email</a>
                                         </p>
                                       </td>
                                     </tr>
@@ -240,5 +240,5 @@ function html(params: { url: string; host: string }) {
 
 // Email Text body (fallback for email clients that don't render HTML, e.g. feature phones)
 function text({ url, host }: { url: string; host: string }) {
-  return `Sign in to ${host}\n${url}\n\n`
+  return `Sign in to ${host}\n${url}\n\nIf you didn't request this email, please ignore it.\n\n`
 }

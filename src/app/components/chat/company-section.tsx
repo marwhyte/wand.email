@@ -338,7 +338,7 @@ export function CompanySection({
                           }}
                         >
                           <PlusCircleIcon className={iconSize} />
-                          <span>Add Company</span>
+                          <span>Add Brand</span>
                         </Button>
                       </div>
                     </div>

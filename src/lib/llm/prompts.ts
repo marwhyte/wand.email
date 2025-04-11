@@ -315,7 +315,7 @@ Ecommerce:
 
 Newsletter:
 1. Header
-   • Company branding and navigation
+   • Company branding
    • Social links
 
 2. Hero
@@ -346,7 +346,6 @@ Newsletter:
 Transactional:
 1. Header
    • Company branding
-   • Minimal navigation
 
 2. Content
    • Main message or confirmation
@@ -427,7 +426,6 @@ Remember to:
 • Include key actions
 • Always include header and footer sections
 • Include social links when they enhance the email's purpose
-• Include navigation when it improves user experience
 • Add sections that best serve the email's primary goal
 </instructions>
 
