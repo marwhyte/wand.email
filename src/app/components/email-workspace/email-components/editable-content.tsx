@@ -9,7 +9,7 @@ import Underline from '@tiptap/extension-underline'
 import { Editor, EditorContent, Extension, useEditor } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import debounce from 'lodash.debounce'
-import { useCallback, useEffect, useMemo, useRef } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { create } from 'zustand'
 
 type ToolbarState = {
@@ -17,20 +17,22 @@ type ToolbarState = {
   italic: boolean
   underline: boolean
   link: boolean
+  linkUrl: string | null
 }
 
 // New toolbar state store
 export const useToolbarStateStore = create<{
   state: ToolbarState
-  setState: (state: ToolbarState) => void
+  setState: (state: Partial<ToolbarState>) => void
 }>((set) => ({
   state: {
     bold: false,
     italic: false,
     underline: false,
     link: false,
+    linkUrl: null,
   },
-  setState: (state) => set({ state }),
+  setState: (state) => set(({ state: prevState }) => ({ state: { ...prevState, ...state } })),
 }))
 
 // Create a custom extension to prevent empty lines
@@ -55,6 +57,7 @@ const PreventEmptyLines = Extension.create({
 })
 
 type Props = {
+  block: EmailBlock
   content: string
   isSelected: boolean
   onSelect: () => void
@@ -68,6 +71,7 @@ type Props = {
 }
 
 export default function EditableContent({
+  block,
   content,
   isSelected,
   onSelect,
@@ -79,46 +83,48 @@ export default function EditableContent({
   forceListItem = false,
   listType = 'bullet',
 }: Props) {
-  const { email, editorCommand, clearCommand, currentBlock, setCurrentBlock, executeCommand } = useEmailStore()
+  const { email, editorCommand, clearCommand, setCurrentBlock, executeCommand } = useEmailStore()
   const { show, hide } = useToolbarStore()
   const saveEmail = useEmailSave()
   const { setState: setToolbarState } = useToolbarStateStore()
   const editorRef = useRef<Editor | null>(null)
+  const [selectedLinkUrl, setSelectedLinkUrl] = useState<string | null>(null)
 
   const onChangeInternal = useCallback(
     (attributes: Partial<TextBlockAttributes>) => {
-      if (currentBlock) {
-        const updatedBlock = {
-          ...currentBlock,
-          attributes: { ...currentBlock.attributes, ...attributes },
-        } as EmailBlock
+      const updatedBlock: EmailBlock = {
+        ...block,
+        attributes: { ...block.attributes, ...attributes },
+      } as EmailBlock
 
-        // Check if there's an actual change
-        if (JSON.stringify(updatedBlock) !== JSON.stringify(currentBlock)) {
-          setCurrentBlock(updatedBlock)
+      console.log('updatedBlock', updatedBlock)
 
-          if (!email) return
-          const updatedEmail = {
-            ...email,
-            rows: email.rows.map((row) => ({
-              ...row,
-              columns: row.columns.map((column) => ({
-                ...column,
-                blocks: column.blocks.map((block) => (block.id === updatedBlock.id ? updatedBlock : block)),
-              })),
-            })),
-          }
+      // Check if there's an actual change
 
-          saveEmail(updatedEmail)
-        }
+      setCurrentBlock(updatedBlock)
+
+      if (!email) return
+      const updatedEmail = {
+        ...email,
+        rows: email.rows.map((row) => ({
+          ...row,
+          columns: row.columns.map((column) => ({
+            ...column,
+            blocks: column.blocks.map((block) => (block.id === updatedBlock.id ? updatedBlock : block)),
+          })),
+        })),
       }
+
+      console.log('updatedEmail', updatedEmail)
+
+      saveEmail(updatedEmail)
     },
-    [currentBlock, executeCommand]
+    [block, executeCommand]
   )
 
   // Determine if we're editing a button or link
-  const isButton = currentBlock?.type === 'button'
-  const isLink = currentBlock?.type === 'link'
+  const isButton = block.type === 'button'
+  const isLink = block.type === 'link'
 
   // Create a debounced onChange function with useMemo
   const debouncedOnChange = useMemo(() => {
@@ -176,6 +182,11 @@ export default function EditableContent({
       attributes: {
         class: `focus:outline-none ${isButton || isLink ? 'inline-block' : ''}`,
       },
+      handleClick: (view, pos, event) => {
+        // Check if a link was clicked
+        checkForLinkClick(event)
+        return false // Let the default behavior continue
+      },
       handleKeyDown: (view, event) => {
         if (event.key === 'Enter' && !event.shiftKey && forceListItem && onEnterKey) {
           const { state } = view
@@ -208,7 +219,7 @@ export default function EditableContent({
 
           const isEmptyNode = $head.parent.textContent.trim() === ''
 
-          if (isButton || isLink || currentBlock?.type === 'heading') {
+          if (isButton || isLink || block.type === 'heading') {
             event.preventDefault()
             return true
           }
@@ -238,15 +249,54 @@ export default function EditableContent({
     onSelectionUpdate: ({ editor }) => {
       // Update toolbar state when selection changes
       if (isSelected) {
+        const linkAttrs = editor.getAttributes('link')
         setToolbarState({
           bold: editor.isActive('bold'),
           italic: editor.isActive('italic'),
           underline: editor.isActive('underline'),
           link: editor.isActive('link'),
+          linkUrl: linkAttrs.href || null,
         })
+
+        // Update the selected link URL state
+        setSelectedLinkUrl(linkAttrs.href || null)
       }
     },
   })
+
+  // Function to check if a link is clicked
+  const checkForLinkClick = useCallback(
+    (event: MouseEvent) => {
+      if (!editor || !isSelected) return
+
+      // Get the DOM node
+      const domNode = event.target as HTMLElement
+      const linkNode = domNode.closest('a')
+
+      if (linkNode) {
+        // Get the link URL and update the toolbar state
+        const href = linkNode.getAttribute('href')
+
+        // Select the link node in the editor
+        const { view } = editor
+        const { state } = view
+        const { doc, selection } = state
+
+        // Update toolbar state with link information
+        setToolbarState({
+          link: true,
+          linkUrl: href,
+        })
+
+        // Set the selected link URL for immediate access
+        setSelectedLinkUrl(href)
+
+        // Prevent the default behavior
+        event.preventDefault()
+      }
+    },
+    [editor, isSelected, setToolbarState]
+  )
 
   // Update editor reference
   useEffect(() => {
@@ -266,31 +316,31 @@ export default function EditableContent({
           chain.toggleBold().run()
           // Immediately update toolbar state to reflect the change
           setToolbarState({
-            ...editor.getAttributes('textStyle'),
             bold: editor.isActive('bold'),
             italic: editor.isActive('italic'),
             underline: editor.isActive('underline'),
             link: editor.isActive('link'),
+            linkUrl: editor.getAttributes('link').href || null,
           })
           break
         case 'italic':
           chain.toggleItalic().run()
           setToolbarState({
-            ...editor.getAttributes('textStyle'),
             bold: editor.isActive('bold'),
             italic: editor.isActive('italic'),
             underline: editor.isActive('underline'),
             link: editor.isActive('link'),
+            linkUrl: editor.getAttributes('link').href || null,
           })
           break
         case 'underline':
           chain.toggleUnderline().run()
           setToolbarState({
-            ...editor.getAttributes('textStyle'),
             bold: editor.isActive('bold'),
             italic: editor.isActive('italic'),
             underline: editor.isActive('underline'),
             link: editor.isActive('link'),
+            linkUrl: editor.getAttributes('link').href || null,
           })
           break
         case 'link':
@@ -311,12 +361,15 @@ export default function EditableContent({
               chain.setLink({ href: editorCommand.payload.href }).run()
             }
             setToolbarState({
-              ...editor.getAttributes('textStyle'),
               bold: editor.isActive('bold'),
               italic: editor.isActive('italic'),
               underline: editor.isActive('underline'),
               link: editor.isActive('link'),
+              linkUrl: editorCommand.payload.href,
             })
+
+            // Update the selected link URL
+            setSelectedLinkUrl(editorCommand.payload.href)
           }
           break
         case 'insertText':
@@ -337,12 +390,17 @@ export default function EditableContent({
   // Update toolbar state when selection or focus changes
   useEffect(() => {
     if (editor && isSelected) {
+      const linkAttrs = editor.getAttributes('link')
       setToolbarState({
         bold: editor.isActive('bold'),
         italic: editor.isActive('italic'),
         underline: editor.isActive('underline'),
         link: editor.isActive('link'),
+        linkUrl: linkAttrs.href || null,
       })
+
+      // Update the selected link URL
+      setSelectedLinkUrl(linkAttrs.href || null)
     }
   }, [editor, isSelected, setToolbarState])
 
@@ -389,6 +447,27 @@ export default function EditableContent({
       const emailContainer = e.currentTarget.closest('[data-email-container]')
       const scrollPosition = emailContainer?.scrollTop
 
+      // Check if a link was clicked
+      const target = e.target as HTMLElement
+      const linkNode = target.closest('a')
+
+      if (linkNode) {
+        // Prevent default navigation
+        e.preventDefault()
+
+        // Get the href attribute
+        const href = linkNode.getAttribute('href')
+
+        // Update the toolbar state with the link info
+        setToolbarState({
+          link: true,
+          linkUrl: href,
+        })
+
+        // Set the selected link URL
+        setSelectedLinkUrl(href)
+      }
+
       onSelect()
 
       // Focus editor but prevent scrolling by restoring position afterwards
@@ -401,7 +480,7 @@ export default function EditableContent({
         }, 0)
       }
     },
-    [onSelect, editor]
+    [onSelect, editor, setToolbarState]
   )
 
   // Initial setup for list content if needed

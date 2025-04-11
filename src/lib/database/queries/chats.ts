@@ -11,7 +11,7 @@ export async function createChat({
   title = '',
   email = null,
   companyId = null,
-  color = '#FED776',
+  color = '#fff8eb',
   borderRadius = 'rounded',
 }: {
   id: string

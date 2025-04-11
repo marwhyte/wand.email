@@ -4,8 +4,7 @@ import { useEmailStore } from '@/lib/stores/emailStore'
 import { useToolbarStore } from '@/lib/stores/toolbarStore'
 import { getBlockProps } from '@/lib/utils/attributes'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import HrefEditor from '../../href-editor'
-import { ButtonBlockAttributes, EmailBlock, LinkBlockAttributes, TextBlockAttributes } from '../../types'
+import { EmailBlock, TextBlockAttributes } from '../../types'
 import { useToolbarStateStore } from '../editable-content'
 import { AlignmentControls } from './AlignmentControls'
 import { FormattingControls } from './FormattingControls'
@@ -56,38 +55,6 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
     [currentBlock, setCurrentBlock, email, handleSave]
   )
 
-  // Handle href change specifically for buttons and links
-  const onHrefChange = useCallback(
-    (href: string) => {
-      if (currentBlock && (currentBlock.type === 'button' || currentBlock.type === 'link')) {
-        const updatedBlock = {
-          ...currentBlock,
-          attributes: { ...currentBlock.attributes, href },
-        } as EmailBlock
-
-        // Check if there's an actual change
-        if (JSON.stringify(updatedBlock) !== JSON.stringify(currentBlock)) {
-          setCurrentBlock(updatedBlock)
-
-          if (!email) return
-          const updatedEmail = {
-            ...email,
-            rows: email.rows.map((row) => ({
-              ...row,
-              columns: row.columns.map((column) => ({
-                ...column,
-                blocks: column.blocks.map((block) => (block.id === updatedBlock.id ? updatedBlock : block)),
-              })),
-            })),
-          }
-
-          handleSave(updatedEmail)
-        }
-      }
-    },
-    [currentBlock, setCurrentBlock, email, handleSave]
-  )
-
   const processedProps =
     parentRow && currentBlock && currentBlock.type !== 'row'
       ? getBlockProps(currentBlock, parentRow, company, email)
@@ -100,19 +67,6 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
   const linkContainerRef = useRef<HTMLDivElement>(null)
   const [showSpecialLinksDialog, setShowSpecialLinksDialog] = useState(false)
   const [specialLinksTab, setSpecialLinksTab] = useState<'merge-tags' | 'special-links'>('merge-tags')
-
-  // Get current href for button or link
-  const getCurrentHref = (): string | undefined => {
-    if (!currentBlock) return undefined
-
-    if (currentBlock.type === 'button') {
-      return (currentBlock.attributes as ButtonBlockAttributes).href
-    } else if (currentBlock.type === 'link') {
-      return (currentBlock.attributes as LinkBlockAttributes).href
-    }
-
-    return undefined
-  }
 
   // Handle click outside for link input
   useEffect(() => {
@@ -145,6 +99,7 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
     setToolbarState({
       ...toolbarState,
       link: true,
+      linkUrl: url,
     })
     executeCommand({ type: 'link', payload: { href: url } })
     setShowLinkInput(false)
@@ -180,13 +135,28 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
         executeCommand({ type: 'link', payload: { href: value, text: label } })
       } else if (currentBlock.type === 'link') {
         // If current block is a link, update its href
-        onHrefChange(value)
+        onChange({ href: value } as any)
       } else {
         // If current block is text or other type, wrap it in a link with the label
         executeCommand({ type: 'link', payload: { href: value, text: label } })
       }
     }
     setShowSpecialLinksDialog(false)
+  }
+
+  // Handle link button click
+  const handleLinkButtonClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    // If a link is already active, prepopulate with the link URL
+    if (toolbarState.link && toolbarState.linkUrl) {
+      setIsEditingLink(true)
+    } else {
+      setIsEditingLink(false)
+    }
+
+    setShowLinkInput(!showLinkInput)
   }
 
   // Add escape key handler
@@ -207,21 +177,12 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
     <>
       <div className="floating-toolbar" style={style}>
         <div ref={linkContainerRef}>
-          {isButtonOrLink && (
-            <div
-              className="absolute bottom-full left-1/2 mb-2 w-72 -translate-x-1/2 transform rounded-lg border bg-white p-2"
-              style={{ zIndex: 1000 }}
-            >
-              <div>
-                <HrefEditor href={getCurrentHref()} onChange={onHrefChange} compact={true} />
-              </div>
-            </div>
-          )}
           {showLinkInput && (
             <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 transform" style={{ zIndex: 1000 }}>
               <LinkInput
                 isVisible={showLinkInput}
                 isEditing={isEditingLink}
+                initialUrl={toolbarState.linkUrl || ''}
                 onClose={() => setShowLinkInput(false)}
                 onSubmit={handleLinkSubmit}
               />
@@ -233,12 +194,12 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
           {showSpecialLinks && (
             <div className="flex items-center gap-2 p-1">
               <button
-                onClick={(e: React.MouseEvent) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setShowLinkInput(!showLinkInput)
-                }}
-                className="inline-flex items-center gap-x-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                onClick={handleLinkButtonClick}
+                className={`inline-flex items-center gap-x-1 rounded-md px-2 py-1 text-xs font-medium shadow-sm ring-1 ring-inset ${
+                  toolbarState.link
+                    ? 'bg-indigo-100 text-indigo-700 ring-indigo-300'
+                    : 'bg-white text-gray-900 ring-gray-300 hover:bg-gray-50'
+                }`}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -254,6 +215,7 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
                     d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
                   />
                 </svg>
+                {toolbarState.link && toolbarState.linkUrl ? 'Edit Link' : 'Add Link'}
               </button>
 
               <div className="h-4 w-px bg-gray-200" />
@@ -285,11 +247,7 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
                 link={toolbarState.link}
                 showLinkButton={false}
                 onFormatClick={handleFormatClick}
-                onLinkClick={(e) => {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  setShowLinkInput(!showLinkInput)
-                }}
+                onLinkClick={handleLinkButtonClick}
               />
             </div>
 

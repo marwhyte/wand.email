@@ -15,7 +15,7 @@ import type {
 import { Email } from '@/app/components/email-workspace/types'
 import { Company } from '@/lib/database/types'
 import type { Button, Heading, Hr, Img, Link, Section, Text } from '@react-email/components'
-import { shouldUseDarkText } from '../../colors'
+import { getThemeColors } from '../../colors'
 import { ensurePx } from '../../misc'
 import { getButtonAttributes, getEmailAttributes } from '../attributes'
 import { getBlockCSSProperties } from './rowTypeBlocks'
@@ -221,12 +221,9 @@ export const getAdditionalButtonStyles = (
         borderBottom: '0px solid transparent',
       }
 
-  const backgroundColor = styleAttributes.backgroundColor || emailAttributes.themeColor
-  const color = styleAttributes.backgroundColor
-    ? styleAttributes.color
-    : shouldUseDarkText(emailAttributes.themeColor)
-      ? '#000000'
-      : '#ffffff'
+  const theme = getThemeColors(emailAttributes.themeColor)
+  const backgroundColor = styleAttributes.backgroundColor || theme.action
+  const color = styleAttributes.color || theme.textColor
 
   return {
     ...baseDefaults,

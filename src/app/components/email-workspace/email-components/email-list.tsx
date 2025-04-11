@@ -230,6 +230,7 @@ const EmailList = ({ block, parentRow, email }: Props) => {
             >
               <EditableContent
                 content={item}
+                block={block}
                 isSelected={selectedItemIndex === index}
                 onSelect={() => handleItemSelect(index)}
                 className="w-full"
@@ -268,6 +269,7 @@ const EmailList = ({ block, parentRow, email }: Props) => {
             >
               <EditableContent
                 content={item}
+                block={block}
                 isSelected={selectedItemIndex === index}
                 onSelect={() => handleItemSelect(index)}
                 className="w-full"

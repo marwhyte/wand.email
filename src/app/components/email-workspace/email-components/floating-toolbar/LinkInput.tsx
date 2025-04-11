@@ -2,9 +2,16 @@ import { XMarkIcon } from '@heroicons/react/24/solid'
 import { useEffect, useRef, useState } from 'react'
 import { LinkInputProps } from './types'
 
-export const LinkInput = ({ isVisible, isEditing, onClose, onSubmit }: LinkInputProps) => {
-  const [linkUrl, setLinkUrl] = useState('')
+export const LinkInput = ({ isVisible, isEditing, initialUrl = '', onClose, onSubmit }: LinkInputProps) => {
+  const [linkUrl, setLinkUrl] = useState(initialUrl)
   const inputRef = useRef<HTMLInputElement>(null)
+
+  // Update linkUrl when initialUrl changes
+  useEffect(() => {
+    if (initialUrl) {
+      setLinkUrl(initialUrl)
+    }
+  }, [initialUrl])
 
   useEffect(() => {
     if (isVisible && inputRef.current) {

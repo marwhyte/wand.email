@@ -32,6 +32,7 @@ export default function EmailText({ block, parentRow }: Props) {
   return (
     <div style={divStyle}>
       <EditableContent
+        block={block}
         content={block.attributes.content || ''}
         isSelected={currentBlock?.id === block.id}
         onSelect={handleSelect}

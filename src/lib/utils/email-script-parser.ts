@@ -716,9 +716,6 @@ export function parseEmailScript(
 
       // Special handling for footers if organizeFooter is true
       if (rowAttrs.type === 'footer' && organizeFooter) {
-        console.log(`🦶 Found footer row at line ${i}, organizingFooter=${organizeFooter}`)
-        console.log(`🔍 Row attributes:`, rowAttrs)
-
         // Process the footer row specially to organize content
         const footerRowResult = processOrganizedFooterRow(i, lines, rowAttrs)
 
@@ -728,8 +725,6 @@ export function parseEmailScript(
         // Update our line index to skip processed lines
         i = footerRowResult.newIndex - 1 // Adjust for the loop increment
         continue
-      } else if (rowAttrs.type === 'footer') {
-        console.log(`🦶 Found footer row at line ${i}, but not organizing it (organizeFooter=${organizeFooter})`)
       }
 
       // Special handling for HEADING and TEXT blocks outside of columns in any row type
@@ -1861,9 +1856,6 @@ function processOrganizedFooterRow(
   lines: string[],
   rowAttributes: RawAttributes
 ): { rows: RowBlock[]; newIndex: number } {
-  console.log('🔍 Starting footer organization...')
-  console.log('📌 Row attributes:', rowAttributes)
-
   // Find the closing row tag to determine the full content range
   let i = startIndex + 1
   let endRowIndex = i
@@ -1879,8 +1871,6 @@ function processOrganizedFooterRow(
     endRowIndex++
   }
 
-  console.log(`📋 Scanning content from line ${startIndex + 1} to ${endRowIndex}`)
-
   // Scan the content to identify logo, socials, and other content
   let hasLogo = false
   let hasSocials = false
@@ -1890,18 +1880,6 @@ function processOrganizedFooterRow(
   let footerContent = ''
   for (let j = i; j < endRowIndex; j++) {
     footerContent += lines[j].trim() + '\n'
-  }
-
-  // Log the entire footer content for inspection
-  console.log('📄 FOOTER CONTENT:\n', footerContent)
-
-  // Check for the specific pattern in the example
-  if (
-    footerContent.includes('<COLUMN>') &&
-    footerContent.includes('<IMAGE src="logo"') &&
-    footerContent.includes('<SOCIALS')
-  ) {
-    console.log('🚨 Found the problematic footer pattern with COLUMN, logo, and SOCIALS in one column!')
   }
 
   for (let j = i; j < endRowIndex; j++) {
@@ -1917,15 +1895,12 @@ function processOrganizedFooterRow(
       const attrMatch = line.match(/<IMAGE\s*([^>\/]*)(?:\/>|>)/)
       if (attrMatch) {
         const attrs = parseAttributes(attrMatch[1])
-        console.log('🔍 Checking image attributes:', attrs)
         if (attrs.src === 'logo') {
-          console.log(`🖼️ Found logo image at line ${j}: ${line}`)
           hasLogo = true
           // Add to content for processing
           contentElements.push({ type: 'logo', lineIndex: j })
           continue
         } else {
-          console.log(`🖼️ Found non-logo image at line ${j}: ${line} with src=${attrs.src || 'undefined'}`)
           contentElements.push({
             type: 'image',
             lineIndex: j,
@@ -1935,7 +1910,6 @@ function processOrganizedFooterRow(
     }
 
     if (line.startsWith('<SOCIALS')) {
-      console.log(`🔗 Found socials at line ${j}: ${line}`)
       hasSocials = true
       // Add to content for processing
       contentElements.push({ type: 'socials', lineIndex: j })
@@ -1955,7 +1929,6 @@ function processOrganizedFooterRow(
       // Get tag name for proper categorization
       const tagMatch = line.match(/<(\w+)/)
       if (tagMatch && tagMatch[1]) {
-        console.log(`📄 Found content element ${tagMatch[1]} at line ${j}: ${line}`)
         contentElements.push({
           type: tagMatch[1].toLowerCase(),
           lineIndex: j,
@@ -1964,24 +1937,17 @@ function processOrganizedFooterRow(
     }
   }
 
-  console.log(`📊 Content summary: logo=${hasLogo}, socials=${hasSocials}, other elements=${contentElements.length}`)
-  console.log('📑 All content elements:', contentElements)
-
   // Prepare the rows based on content
   const footerRows: RowBlock[] = []
 
   // If we have both logo and socials, create a top row with two columns
   if (hasLogo && hasSocials) {
-    console.log('✅ Creating organized footer with logo and socials')
-
     // Special handling for the case where both logo and socials were inside a single column
     if (
       footerContent.includes('<COLUMN>') &&
       footerContent.includes('<IMAGE src="logo"') &&
       footerContent.includes('<SOCIALS')
     ) {
-      console.log('🔧 Applying special fix for logo+socials in one column pattern')
-
       // Create more targeted content extraction
       const logoElements: number[] = []
       const socialsElements: number[] = []
@@ -1997,10 +1963,6 @@ function processOrganizedFooterRow(
           otherElements.push(element)
         }
       }
-
-      console.log(
-        `🔍 After extraction: logo=${logoElements.length}, socials=${socialsElements.length}, other=${otherElements.length}`
-      )
     }
 
     const headerRow = createRow(parseRowAttributes({ ...rowAttributes, type: 'footer' }))
@@ -2024,23 +1986,19 @@ function processOrganizedFooterRow(
     for (const element of contentElements) {
       switch (element.type) {
         case 'logo':
-          console.log(`🔄 Processing logo at line ${element.lineIndex}`)
           processImageBlock(element.lineIndex, lines, logoColumn)
           break
         case 'socials':
-          console.log(`🔄 Processing socials at line ${element.lineIndex}`)
           processSocialsBlock(element.lineIndex, lines, socialsColumn)
           break
         default:
           // All other content goes to the full width column
-          console.log(`🔄 Processing ${element.type} content at line ${element.lineIndex}`)
           processBlockInColumn(element.type, element.lineIndex, lines, fullWidthColumn)
           break
       }
     }
   } else {
     // If we don't have both logo and socials, create a regular row and process normally
-    console.log('ℹ️ Creating regular footer (missing logo or socials)')
     const row = createRow(parseRowAttributes(rowAttributes))
     const column = createColumn([], '100%', {})
     row.columns.push(column)
@@ -2048,19 +2006,15 @@ function processOrganizedFooterRow(
 
     // Process each content element in the normal column
     for (const element of contentElements) {
-      console.log(`🔄 Processing ${element.type} in regular column at line ${element.lineIndex}`)
       processBlockInColumn(element.type, element.lineIndex, lines, column)
     }
   }
 
-  console.log(`🏁 Footer processing complete. Created ${footerRows.length} rows.`)
   return { rows: footerRows, newIndex: endRowIndex + 1 }
 }
 
 // Helper function to process a block and add it to a column
 function processBlockInColumn(blockType: string, lineIndex: number, lines: string[], column: ColumnBlock) {
-  const blockLine = lines[lineIndex].trim()
-
   // Handle different block types
   switch (blockType.toLowerCase()) {
     case 'text':

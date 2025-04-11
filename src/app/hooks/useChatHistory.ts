@@ -26,7 +26,6 @@ export function useChatHistory({ chat, chatId, company }: Props) {
       setTitle(undefined)
 
       if (themeColor === '#8e6ff7') {
-        console.log('getting last chat')
         getLastChat().then((lastChat) => {
           if (lastChat) {
             setThemeColor(lastChat.color)

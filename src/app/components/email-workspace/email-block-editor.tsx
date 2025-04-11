@@ -13,6 +13,7 @@ import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
 import { capitalizeFirstLetter, safeParseInt } from '@/lib/utils/misc'
 import { useMemo } from 'react'
 import { Select } from '../select'
+import HrefEditor from './href-editor'
 import IconEditor from './icon-editor'
 import ListEditor from './list-editor'
 import SocialsEditor from './socials-editor'
@@ -30,6 +31,7 @@ import {
   ImageBlock,
   ImageBlockAttributes,
   LinkBlock,
+  LinkBlockAttributes,
   ListBlock,
   ListBlockAttributes,
   PaddingAttributes,
@@ -216,6 +218,43 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                     <option value="h6">H6</option>
                   </Select>
                 </div>
+              </Field>
+            )}
+
+            {options.includes(Options.HREF) && (block.type === 'button' || block.type === 'link') && (
+              <Field labelPosition="top">
+                <Label>Link</Label>
+                <HrefEditor
+                  href={(blockAttributes as any).href || ''}
+                  onChange={(href: string) => {
+                    if (block.type === 'button') {
+                      onChange({ href } as Partial<ButtonBlockAttributes>)
+                    } else if (block.type === 'link') {
+                      onChange({ href } as Partial<LinkBlockAttributes>)
+                    }
+                  }}
+                />
+              </Field>
+            )}
+
+            {options.includes(Options.TEXT) && block.type !== 'list' && (
+              <Field labelPosition="top">
+                <Label>Text</Label>
+                <Input
+                  value={(blockAttributes as any).text || ''}
+                  onChange={(e) => {
+                    if (block.type === 'button') {
+                      onChange({ text: e.target.value } as Partial<ButtonBlockAttributes>)
+                    } else if (block.type === 'link') {
+                      onChange({ text: e.target.value } as Partial<LinkBlockAttributes>)
+                    } else if (block.type === 'heading') {
+                      onChange({ text: e.target.value } as Partial<HeadingBlockAttributes>)
+                    } else {
+                      onChange({ text: e.target.value } as any)
+                    }
+                  }}
+                  placeholder="Enter text"
+                />
               </Field>
             )}
 

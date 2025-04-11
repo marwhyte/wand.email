@@ -23,7 +23,7 @@ type ThemeColorPickerPopoverProps = {
 } & React.HTMLAttributes<HTMLDivElement>
 
 // Available themes for the color picker
-const availableThemes = ['#8e6ff7', '#fed776', '#059669', '#3b82f6', '#fcf8f2']
+const availableThemes = ['#8e6ff7', '#fed776', '#059669', '#3b82f6', '#fff8eb']
 
 export const ThemeColorPickerPopover: React.FC<ThemeColorPickerPopoverProps> = ({
   className = '',

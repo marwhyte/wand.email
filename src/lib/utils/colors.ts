@@ -80,6 +80,12 @@ export function getThemeColors(themeColor: string): ThemeColors {
   // Set the action color to the input color
   let actionColor = themeColor
 
+  // For very light colors, use black as the action color
+  // High luminance indicates a very light color
+  if (luminance > 0.86) {
+    actionColor = '#000000'
+  }
+
   // Base color is always white to ensure maximum contrast with gradients
   let baseColor = '#ffffff'
 
@@ -206,7 +212,18 @@ export function getThemeColors(themeColor: string): ThemeColors {
   }
 
   // Define color family type for TypeScript type safety
-  type ColorFamily = 'purple' | 'blue' | 'green' | 'red' | 'yellow' | 'orange' | 'pink' | 'teal' | 'indigo' | 'gray'
+  type ColorFamily =
+    | 'purple'
+    | 'blue'
+    | 'green'
+    | 'red'
+    | 'yellow'
+    | 'orange'
+    | 'pink'
+    | 'teal'
+    | 'indigo'
+    | 'gray'
+    | 'cream'
 
   // Define gradient type
   type GradientPair = {
@@ -268,6 +285,11 @@ export function getThemeColors(themeColor: string): ThemeColors {
       start: '#f9fafb', // gray-50
       end: '#f8fafc', // slate-50
     },
+    // Cream family gradients - warm cream tones
+    cream: {
+      start: '#fffcf7', // cream-light
+      end: '#fff8eb', // cream-warm
+    },
   }
 
   const darkGradients: Record<ColorFamily, GradientPair> = {
@@ -321,6 +343,11 @@ export function getThemeColors(themeColor: string): ThemeColors {
       start: '#f3f4f6', // gray-100
       end: '#f1f5f9', // slate-100
     },
+    // Cream family gradients - warm cream tones
+    cream: {
+      start: '#fff5e6', // cream-medium
+      end: '#ffedd5', // cream-darker
+    },
   }
 
   // Determine color family based on RGB analysis with improved classification
@@ -329,8 +356,12 @@ export function getThemeColors(themeColor: string): ThemeColors {
   // Identify the dominant color channel and classify
   const maxChannel = Math.max(r, g, b)
 
+  // Special case for the cream color #fcf8f2 and similar cream tones
+  if (r > 240 && g > 230 && b > 210 && r >= g && g >= b) {
+    colorFamily = 'cream'
+  }
   // Improved purple detection to ensure purple hex codes map to purple gradients
-  if (r > 120 && b > 220 && r < b) {
+  else if (r > 120 && b > 220 && r < b) {
     colorFamily = 'purple'
   } else if (r > 100 && b > 190 && g < 150 && r < b) {
     colorFamily = 'purple'
@@ -361,9 +392,11 @@ export function getThemeColors(themeColor: string): ThemeColors {
     }
   }
 
-  // Special case for #8e6ff7 (the specific purple color mentioned)
+  // Special case for specific colors
   if (themeColor.toLowerCase() === '#8e6ff7') {
     colorFamily = 'purple'
+  } else if (themeColor.toLowerCase() === '#fcf8f2') {
+    colorFamily = 'cream'
   }
 
   // Get gradient pairs based on color family

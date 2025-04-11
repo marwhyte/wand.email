@@ -254,6 +254,7 @@ export default function EmailIcon({ block, parentRow, email }: Props) {
       <>
         {title && (
           <EditableContent
+            block={block}
             content={title}
             className="email-icon-title"
             style={{
@@ -268,6 +269,7 @@ export default function EmailIcon({ block, parentRow, email }: Props) {
         )}
         {description && (
           <EditableContent
+            block={block}
             content={description}
             className="email-icon-description"
             style={{

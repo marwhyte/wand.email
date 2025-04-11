@@ -34,6 +34,7 @@ export default function EmailLink({ block, parentRow }: Props) {
     // @ts-ignore
     <div style={divStyle} align={blockAttributes.align}>
       <EditableContent
+        block={block}
         content={block.attributes.content || ''}
         isSelected={currentBlock?.id === block.id}
         onSelect={handleSelect}

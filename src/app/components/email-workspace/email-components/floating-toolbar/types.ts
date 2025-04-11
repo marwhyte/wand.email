@@ -37,6 +37,7 @@ export type LineHeightControlsProps = {
 export type LinkInputProps = {
   isVisible: boolean
   isEditing: boolean
+  initialUrl?: string
   onClose: () => void
   onSubmit: (url: string) => void
 }

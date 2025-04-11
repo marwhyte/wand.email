@@ -15,7 +15,7 @@ import { updateEmailForMessage } from '../(chat)/actions'
 import { notifySlack } from '../actions/notifySlack'
 
 const logger = createScopedLogger('MessageParser')
-const FREE_IMAGE_LIMIT = 15
+const FREE_IMAGE_LIMIT = 5
 
 // Get AI-friendly color description without the hexcode
 const getColorDescription = (hexColor: string): string => {

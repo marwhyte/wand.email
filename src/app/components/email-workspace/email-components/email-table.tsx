@@ -116,6 +116,7 @@ export default function EmailTable({ block, parentRow }: Props) {
                 >
                   <EditableContent
                     content={cell}
+                    block={block}
                     isSelected={selectedCell?.row === rowIndex && selectedCell?.column === cellIndex}
                     onSelect={() => handleCellSelect(rowIndex, cellIndex, cell)}
                     className="w-full"

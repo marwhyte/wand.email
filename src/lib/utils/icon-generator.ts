@@ -8,7 +8,6 @@ const ICON_VARIANT = 'outlined'
 
 // Local development paths
 const BASE_ICONS_DIR = path.join(process.cwd(), 'public/icons')
-console.log('BASE_ICONS_DIR path:', BASE_ICONS_DIR)
 
 /**
  * Generates an icon as a PNG buffer
@@ -21,26 +20,10 @@ export async function generateIconPng(iconName: string, themeColor: string, size
   try {
     const theme = getThemeColors(themeColor)
 
-    console.log('generating icon', iconName, themeColor, size)
     // Convert kebab-case to camelCase for the filename (e.g., local-shipping -> local_shipping)
     const normalizedIconName = iconName.replace(/-/g, '_')
 
     let svgContent = null
-
-    // // For development: try to read from the local file system
-    // if (process.env.NODE_ENV === 'development') {
-    //   try {
-    //     const variantDir = path.join(BASE_ICONS_DIR, ICON_VARIANT)
-    //     const iconPath = path.join(variantDir, `${normalizedIconName}.svg`)
-
-    //     if (fs.existsSync(iconPath)) {
-    //       svgContent = fs.readFileSync(iconPath, 'utf8')
-    //       console.log(`Found icon ${normalizedIconName} in development environment`)
-    //     }
-    //   } catch (err) {
-    //     console.warn('Error reading icon from file system:', err)
-    //   }
-    // }
 
     // If still no SVG content, try to fetch from CloudFront/S3
     if (!svgContent) {
@@ -48,12 +31,10 @@ export async function generateIconPng(iconName: string, themeColor: string, size
         // Build the path to the icon in CloudFront
         const iconKey = `icons/outlined/${normalizedIconName}.svg`
         const iconUrl = getImgFromKey(iconKey)
-        console.log(`Fetching icon from CloudFront: ${iconUrl}`)
 
         const response = await fetch(iconUrl)
         if (response.ok) {
           svgContent = await response.text()
-          console.log(`Successfully fetched icon ${normalizedIconName} from CloudFront`)
         } else {
           console.warn(`Icon ${normalizedIconName} not found in CloudFront, status: ${response.status}`)
         }
@@ -64,7 +45,7 @@ export async function generateIconPng(iconName: string, themeColor: string, size
 
     // If still no SVG content, use fallback
     if (!svgContent) {
-      console.log(`Using fallback for icon: ${iconName} (not found in any source)`)
+      console.error(`Using fallback for icon: ${iconName} (not found in any source)`)
       return generateFallbackIconPng(normalizedIconName, size, theme)
     }
 

@@ -46,6 +46,7 @@ export default function EmailButton({ block, parentRow, email }: Props) {
     // @ts-expect-error align is not a valid prop for the div
     <div style={divStyle} align={attributes.align}>
       <EditableContent
+        block={block}
         content={block.attributes.content || ''}
         isSelected={currentBlock?.id === block.id}
         onSelect={handleSelect}
