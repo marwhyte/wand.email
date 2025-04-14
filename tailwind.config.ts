@@ -69,6 +69,20 @@ const config: Config = {
           '0%': { backgroundPosition: '0% 50%' },
           '100%': { backgroundPosition: '200% 50%' },
         },
+        'pulse-error': {
+          '0%': {
+            boxShadow: '0 0 0 0 rgba(239, 68, 68, 0.7)',
+            outlineWidth: '2px',
+          },
+          '70%': {
+            boxShadow: '0 0 0 10px rgba(239, 68, 68, 0)',
+            outlineWidth: '4px',
+          },
+          '100%': {
+            boxShadow: '0 0 0 0 rgba(239, 68, 68, 0)',
+            outlineWidth: '2px',
+          },
+        },
       },
       animation: {
         'animate-gradient': 'gradient 8s ease-in-out infinite',
@@ -76,6 +90,7 @@ const config: Config = {
         'grow-width': 'grow-width 0.3s ease-in-out forwards',
         'shrink-width': 'shrink-width 0.3s ease-in-out forwards',
         glow: 'animate-glow 1.25s linear infinite',
+        'pulse-error': 'pulse-error 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
       },
       boxShadow: {
         input:

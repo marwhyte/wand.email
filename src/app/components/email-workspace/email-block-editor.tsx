@@ -361,6 +361,43 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
         <Disclosure title="Text Properties" defaultOpen>
           <FieldGroup>
             <Field>
+              <Label>Font Size</Label>
+              <div className="ml-auto w-24">
+                <NumberInput
+                  min={1}
+                  max={144}
+                  value={
+                    processedProps.style?.fontSize
+                      ? parseInt(String(processedProps.style.fontSize).replace('px', ''))
+                      : 16
+                  }
+                  onChange={(value) => onChange({ fontSize: `${value}px` })}
+                />
+              </div>
+            </Field>
+
+            <Field>
+              <Label>Font Weight</Label>
+              <div className="ml-auto w-24">
+                <Select
+                  value={String(processedProps.style?.fontWeight) || 'normal'}
+                  onChange={(e) => onChange({ fontWeight: e.target.value as 'normal' | 'bold' })}
+                >
+                  <option value="normal">Normal</option>
+                  <option value="bold">Bold</option>
+                </Select>
+              </div>
+            </Field>
+
+            <Field>
+              <Label>Text Color</Label>
+              <ColorInput
+                value={processedProps.style?.color || '#000000'}
+                onChange={(value) => onChange({ color: value })}
+              />
+            </Field>
+
+            <Field>
               <Label>Letter Spacing</Label>
               <NumberInput
                 className="ml-auto"
@@ -374,6 +411,54 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                 onChange={(value) => onChange({ letterSpacing: value === 0 ? 'normal' : `${value}px` })}
               />
             </Field>
+
+            {block.type === 'text' || block.type === 'heading' ? (
+              <Field>
+                <Label>Text Alignment</Label>
+                <div className="ml-auto w-24">
+                  <Select
+                    value={(processedProps.style?.textAlign as 'left' | 'center' | 'right') || 'left'}
+                    onChange={(e) => onChange({ textAlign: e.target.value as 'left' | 'center' | 'right' })}
+                  >
+                    <option value="left">Left</option>
+                    <option value="center">Center</option>
+                    <option value="right">Right</option>
+                  </Select>
+                </div>
+              </Field>
+            ) : null}
+
+            {block.type !== 'link' && block.type !== 'button' && block.type !== 'list' ? (
+              <Field>
+                <Label>Line Height</Label>
+                <div className="ml-auto w-24">
+                  <Select
+                    value={(() => {
+                      const lineHeight = String(processedProps.style?.lineHeight) || '120%'
+                      if (lineHeight === '100%') return 'small'
+                      if (lineHeight === '120%') return 'medium'
+                      if (lineHeight === '180%') return 'large'
+                      if (lineHeight === '200%') return 'extra-large'
+                      return 'medium'
+                    })()}
+                    onChange={(e) => {
+                      const value = e.target.value
+                      let lineHeight = '120%'
+                      if (value === 'small') lineHeight = '100%'
+                      if (value === 'medium') lineHeight = '120%'
+                      if (value === 'large') lineHeight = '180%'
+                      if (value === 'extra-large') lineHeight = '200%'
+                      onChange({ lineHeight })
+                    }}
+                  >
+                    <option value="small">Small</option>
+                    <option value="medium">Medium</option>
+                    <option value="large">Large</option>
+                    <option value="extra-large">XL</option>
+                  </Select>
+                </div>
+              </Field>
+            ) : null}
           </FieldGroup>
         </Disclosure>
       )}

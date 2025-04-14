@@ -372,11 +372,8 @@ const EmailRenderer = ({ email }: Props) => {
       {position.visible && !isMobile && (
         <FloatingToolbar
           style={{
-            position: 'absolute',
             top: position.top,
             left: position.left,
-            transform: 'translateX(-50%)',
-            zIndex: 50,
           }}
         />
       )}

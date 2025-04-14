@@ -90,7 +90,7 @@ const HrefEditor = ({ href, onChange, compact = false }: HrefEditorProps) => {
   const labelClassName = compact ? 'text-xs mb-1' : ''
 
   return (
-    <div className={`${compact ? 'space-y-2' : 'space-y-4'}`}>
+    <div className={`${compact ? 'space-y-2' : 'space-y-4'} href-editor-container`}>
       <div className="flex gap-2">
         <div className={`w-36`}>
           <span className={labelClassName}>Link Type</span>

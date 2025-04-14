@@ -1,10 +1,13 @@
 import DragLine from '@/app/components/drag-line'
+import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { classNames } from '@/lib/utils/misc'
-import { ArrowsPointingOutIcon } from '@heroicons/react/24/solid'
+import { ArrowsPointingOutIcon, Square2StackIcon, TrashIcon } from '@heroicons/react/24/solid'
+import { motion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { DragPreviewImage, useDrag, useDrop } from 'react-dnd'
 import { createPortal } from 'react-dom'
+import { v4 as uuidv4 } from 'uuid'
 import RenderBlock from '../render-block'
 import { EmailBlock as EmailBlockType, RowBlock } from '../types'
 
@@ -20,10 +23,10 @@ type Props = {
 }
 
 export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDropTarget, parentRow }: Props) {
-  const { currentBlock, setCurrentBlock } = useEmailStore()
+  const { currentBlock, setCurrentBlock, email } = useEmailStore()
   const [isHovered, setIsHovered] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
-  const dragHandleRef = useRef<HTMLDivElement>(null)
+  const handleSave = useEmailSave()
 
   const [{ isDraggingBlock }, drag, preview] = useDrag({
     type: 'block',
@@ -51,6 +54,119 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
     },
     [block, onSelect, setCurrentBlock]
   )
+
+  // Delete the current block
+  const deleteBlock = useCallback(() => {
+    if (!currentBlock || !email) return
+
+    if (currentBlock.type === 'row') {
+      // Delete row
+      const updatedRows = email.rows.filter((row) => row.id !== currentBlock.id)
+      handleSave({ ...email, rows: updatedRows })
+    } else {
+      // Delete a regular block
+      const updatedRows = email.rows.map((row) => ({
+        ...row,
+        columns: row.columns.map((column) => ({
+          ...column,
+          blocks: column.blocks.filter((block) => block.id !== currentBlock.id),
+        })),
+      }))
+
+      handleSave({ ...email, rows: updatedRows })
+    }
+
+    // Clear the current block selection
+    setCurrentBlock(null)
+  }, [currentBlock, email, handleSave, setCurrentBlock])
+
+  // Duplicate the current block
+  const duplicateBlock = useCallback(() => {
+    if (!currentBlock || !email) return
+
+    if (currentBlock.type === 'row') {
+      // Duplicate row
+      const rowToDuplicate = email.rows.find((row) => row.id === currentBlock.id) as RowBlock
+      if (!rowToDuplicate) return
+
+      // Create a deep copy with new IDs
+      const newRow: RowBlock = {
+        ...rowToDuplicate,
+        id: uuidv4(),
+        columns: rowToDuplicate.columns.map((column) => ({
+          ...column,
+          id: uuidv4(),
+          blocks: column.blocks.map((block) => ({
+            ...block,
+            id: uuidv4(),
+          })),
+        })),
+      }
+
+      // Find the index of the current row
+      const rowIndex = email.rows.findIndex((row) => row.id === currentBlock.id)
+      if (rowIndex === -1) return
+
+      // Insert the new row after the current row
+      const updatedRows = [...email.rows]
+      updatedRows.splice(rowIndex + 1, 0, newRow)
+
+      handleSave({ ...email, rows: updatedRows })
+      setCurrentBlock(newRow)
+    } else {
+      // Find the block to duplicate
+      let blockToDuplicate: EmailBlockType | null = null
+      let parentRow: RowBlock | null = null
+      let columnIndex = -1
+
+      for (const row of email.rows) {
+        for (let i = 0; i < row.columns.length; i++) {
+          const column = row.columns[i]
+          const block = column.blocks.find((b) => b.id === currentBlock.id)
+          if (block) {
+            blockToDuplicate = block
+            parentRow = row
+            columnIndex = i
+            break
+          }
+        }
+        if (blockToDuplicate) break
+      }
+
+      if (!blockToDuplicate || !parentRow || columnIndex === -1) return
+
+      // Create a deep copy with a new ID
+      const newBlock: EmailBlockType = {
+        ...blockToDuplicate,
+        id: uuidv4(),
+      }
+
+      // Find the block index
+      const blockIndex = parentRow.columns[columnIndex].blocks.findIndex((block) => block.id === currentBlock.id)
+      if (blockIndex === -1) return
+
+      // Clone the email structure and insert the new block
+      const updatedRows = email.rows.map((row) => {
+        if (row.id === parentRow?.id) {
+          return {
+            ...row,
+            columns: row.columns.map((column, idx) => {
+              if (idx === columnIndex) {
+                const updatedBlocks = [...column.blocks]
+                updatedBlocks.splice(blockIndex + 1, 0, newBlock)
+                return { ...column, blocks: updatedBlocks }
+              }
+              return column
+            }),
+          }
+        }
+        return row
+      })
+
+      handleSave({ ...email, rows: updatedRows })
+      setCurrentBlock(newBlock)
+    }
+  }, [currentBlock, email, handleSave, setCurrentBlock])
 
   const [{ isOver }, drop] = useDrop({
     accept: ['block', 'newBlock'],
@@ -81,13 +197,6 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
       drop(ref.current)
     }
   }, [drop])
-
-  // Connect the drag handle to the drag icon
-  useEffect(() => {
-    if (dragHandleRef.current) {
-      drag(dragHandleRef.current)
-    }
-  }, [drag])
 
   const [labelPosition, setLabelPosition] = useState({ top: 0, left: 0 })
 
@@ -122,16 +231,84 @@ export default function EmailBlock({ block, onHover, onSelect, dropTarget, setDr
           )}
           style={{ backgroundColor: 'rgb(59, 130, 246)', zIndex: 5 }}
         />
-        <div
-          ref={dragHandleRef}
-          className={classNames(
-            'absolute -right-5 top-1/2 flex h-8 w-8 -translate-y-1/2 cursor-move items-center justify-center rounded-full bg-blue-500 shadow-md transition-all hover:bg-blue-600',
-            currentBlock?.id === block.id || isHovered ? 'opacity-100' : 'opacity-0 transition-opacity duration-200'
-          )}
-          style={{ zIndex: 11 }}
-        >
-          <ArrowsPointingOutIcon className="h-4 w-4 text-white" />
-        </div>
+
+        {/* Invisible hover bridge */}
+        {isHovered && (
+          <div
+            className="z-5 absolute"
+            style={{
+              top: '0',
+              right: '-42px',
+              width: '42px',
+              height: '100%',
+              pointerEvents: 'auto',
+              zIndex: 50,
+            }}
+            onMouseEnter={handleMouseEnter}
+          />
+        )}
+
+        {/* Toolbar when only hovering (not selected) */}
+        {isHovered && currentBlock?.id !== block.id && (
+          <motion.div
+            className="absolute flex flex-col gap-1 rounded-lg border bg-white p-1 shadow-lg"
+            style={{
+              top: 'calc(50% - 19px)', // Adjusted up by 5px from previous -14px
+              right: '-42px',
+              zIndex: 200,
+            }}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2 }}
+            onMouseEnter={handleMouseEnter}
+          >
+            <div
+              className="cursor-move rounded p-1.5 text-blue-500 hover:bg-blue-50"
+              title="Drag to reorder"
+              // @ts-ignore
+              ref={drag}
+            >
+              <ArrowsPointingOutIcon className="h-4 w-4" />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Toolbar when selected - with buttons in different order to maintain center */}
+        {currentBlock?.id === block.id && (
+          <motion.div
+            className="absolute flex flex-col gap-1 rounded-lg border bg-white p-1 shadow-lg"
+            style={{
+              top: 'calc(50% - 57px)', // Adjusted up by 5px from previous -52px
+              right: '-42px',
+              zIndex: 200,
+            }}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.2 }}
+            onMouseEnter={handleMouseEnter}
+          >
+            <button onClick={deleteBlock} className="rounded p-1.5 text-red-500 hover:bg-red-50" title="Delete Block">
+              <TrashIcon className="h-4 w-4" />
+            </button>
+
+            <div
+              className="cursor-move rounded p-1.5 text-blue-500 hover:bg-blue-50"
+              title="Drag to reorder"
+              // @ts-ignore
+              ref={drag}
+            >
+              <ArrowsPointingOutIcon className="h-4 w-4" />
+            </div>
+
+            <button
+              onClick={duplicateBlock}
+              className="rounded p-1.5 text-gray-600 hover:bg-gray-100"
+              title="Duplicate Block"
+            >
+              <Square2StackIcon className="h-4 w-4" />
+            </button>
+          </motion.div>
+        )}
 
         <DragPreviewImage connect={preview} src="/block.svg" />
 

@@ -23,6 +23,19 @@ table {
     border-collapse: separate;
 }
 
+/* Pulsing outline animation for error highlighting - using Tailwind animation */
+@layer components {
+  .outline-pulse {
+    @apply outline-2 outline outline-red-500 animate-pulse-error;
+  }
+  
+  /* Better styling for floating toolbar */
+  .floating-toolbar {
+    @apply z-50 fixed drop-shadow-xl;
+    transform: translateX(-50%); /* Center horizontally */
+  }
+}
+
 .bg-checkerboard {
   background-image:
     linear-gradient(45deg, #ccc 25%, transparent 25%),

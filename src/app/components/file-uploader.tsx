@@ -14,7 +14,7 @@ const FileUploader = ({ onUpload }: FileUploaderProps) => {
   return (
     <>
       {opener.isOpen && <FileUploaderDialog onUpload={onUpload} opener={opener} />}
-      <Button color="purple" onClick={opener.open}>
+      <Button color="purple" onClick={opener.open} className="image-src-input">
         Browse
       </Button>
     </>

@@ -97,8 +97,6 @@ export default function EditableContent({
         attributes: { ...block.attributes, ...attributes },
       } as EmailBlock
 
-      console.log('updatedBlock', updatedBlock)
-
       // Check if there's an actual change
 
       setCurrentBlock(updatedBlock)
@@ -114,8 +112,6 @@ export default function EditableContent({
           })),
         })),
       }
-
-      console.log('updatedEmail', updatedEmail)
 
       saveEmail(updatedEmail)
     },
@@ -309,6 +305,10 @@ export default function EditableContent({
 
     // Execute command on this editor only if this component is selected
     if (isSelected) {
+      // Store the current selection state
+      const selection = window.getSelection()
+      const savedRange = selection?.getRangeAt(0)?.cloneRange()
+
       const chain = editor.chain().focus()
 
       switch (editorCommand.type) {
@@ -345,8 +345,12 @@ export default function EditableContent({
           break
         case 'link':
           if (editorCommand.payload?.href) {
-            const chain = editor.chain().focus()
-            if (editorCommand.payload.text) {
+            // Save editor selection state if not inserting new text
+            const hasTextSelection = !editor.state.selection.empty
+
+            if (editor.isActive('link')) {
+              chain.unsetLink().setLink({ href: editorCommand.payload.href }).run()
+            } else if (editorCommand.payload.text) {
               // If we have text, insert it as a link
               chain
                 .insertContent({
@@ -355,11 +359,14 @@ export default function EditableContent({
                   text: editorCommand.payload.text,
                 })
                 .run()
-            } else if (editor.isActive('link')) {
-              chain.unsetLink().setLink({ href: editorCommand.payload.href }).run()
+            } else if (hasTextSelection) {
+              // Apply link to selected text
+              chain.setLink({ href: editorCommand.payload.href }).run()
             } else {
+              // No text selected, just set the link
               chain.setLink({ href: editorCommand.payload.href }).run()
             }
+
             setToolbarState({
               bold: editor.isActive('bold'),
               italic: editor.isActive('italic'),
@@ -370,6 +377,21 @@ export default function EditableContent({
 
             // Update the selected link URL
             setSelectedLinkUrl(editorCommand.payload.href)
+
+            // Restore selection if needed
+            setTimeout(() => {
+              if (savedRange && (!editorCommand.payload.text || editor.isActive('link'))) {
+                try {
+                  const selection = window.getSelection()
+                  if (selection) {
+                    selection.removeAllRanges()
+                    selection.addRange(savedRange)
+                  }
+                } catch (e) {
+                  // Ignore errors from invalid ranges
+                }
+              }
+            }, 10)
           }
           break
         case 'insertText':
@@ -417,25 +439,35 @@ export default function EditableContent({
       const elementRect = element.getBoundingClientRect()
 
       const toolbarHeight = 40
-      const spacing = 60
-      const toolbarWidth = 400 // Reduced from 600px to 400px to match actual width
+      const spacing = 10
 
       // Account for container scroll position
       const containerScrollTop = emailContainer.scrollTop
-      const containerScrollLeft = emailContainer.scrollLeft
 
-      // Calculate initial left position (centered on element)
-      let left = elementRect.left - containerRect.left + elementRect.width / 2 + containerScrollLeft
+      // Get current selection to better position the toolbar
+      const selection = window.getSelection()
+      let targetRect = elementRect
 
-      // Ensure toolbar doesn't go off the right edge
-      const maxLeft = containerRect.width - toolbarWidth / 2 - 8 // Reduced padding to 8px
-      left = Math.min(left, maxLeft)
+      // If there's a text selection, get its rect for more precise positioning
+      if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
+        const range = selection.getRangeAt(0)
+        const selectionRect = range.getBoundingClientRect()
+        // Only use selection rect if it's not empty
+        if (selectionRect.width > 0 || selectionRect.height > 0) {
+          targetRect = selectionRect
+        }
+      } else if (editor?.isActive('link')) {
+        // For links, try to position over the link
+        const linkElement = editor.view.dom.querySelector('a')
+        if (linkElement) {
+          const linkRect = linkElement.getBoundingClientRect()
+          targetRect = linkRect
+        }
+      }
 
-      // Ensure toolbar doesn't go off the left edge
-      const minLeft = toolbarWidth / 2 + 8 // Reduced padding to 8px
-      left = Math.max(left, minLeft)
-
-      const top = elementRect.top - containerRect.top - toolbarHeight - spacing + containerScrollTop
+      // Calculate positions for the toolbar
+      const top = targetRect.top - containerRect.top - toolbarHeight - spacing + containerScrollTop
+      const left = targetRect.left - containerRect.left + targetRect.width / 2
 
       show(top, left)
     }

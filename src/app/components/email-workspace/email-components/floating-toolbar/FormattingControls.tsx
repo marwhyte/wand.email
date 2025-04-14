@@ -54,7 +54,13 @@ export const FormattingControls = ({
         icon={<UnderlineIcon className="h-4 w-4" />}
       />
       {showLinkButton && (
-        <FormattingButton active={link} onClick={onLinkClick} icon={<LinkIcon className="h-4 w-4" />} />
+        <button
+          className={`rounded p-1 ${link ? 'bg-purple-100 text-purple-800' : 'text-gray-700 hover:bg-gray-100'}`}
+          onClick={onLinkClick}
+          title="Link"
+        >
+          <LinkIcon className="h-4 w-4" />
+        </button>
       )}
     </>
   )

@@ -8,7 +8,7 @@ import { Text } from '@/app/components/text'
 import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { capitalizeFirstLetter } from '@/lib/utils/misc'
-import { Square2StackIcon, TrashIcon, XMarkIcon } from '@heroicons/react/20/solid'
+import { XMarkIcon } from '@heroicons/react/20/solid'
 import { v4 as uuidv4 } from 'uuid'
 import EmailBlockEditor from './email-block-editor'
 import RowEditor from './row-editor'
@@ -226,27 +226,9 @@ const BlockEditor = ({ email }: BlockEditorProps) => {
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between gap-4">
         <Text>{capitalizeFirstLetter(currentBlock.type)} Properties</Text>
-        <div className="flex gap-2">
-          <Button
-            onClick={deleteBlock}
-            outline
-            tooltip={currentBlock.type === 'row' ? 'Delete Row' : 'Delete Block'}
-            tooltipId="delete-block"
-          >
-            <TrashIcon className="!h-4 !w-4" />
-          </Button>
-          <Button
-            onClick={duplicateBlock}
-            outline
-            tooltip={currentBlock.type === 'row' ? 'Duplicate Row' : 'Duplicate Block'}
-            tooltipId="duplicate-block"
-          >
-            <Square2StackIcon className="!h-4 !w-4" />
-          </Button>
-          <Button onClick={() => setCurrentBlock(null)} outline tooltip="Close Editor" tooltipId="close-editor">
-            <XMarkIcon className="!h-4 !w-4" />
-          </Button>
-        </div>
+        <Button onClick={() => setCurrentBlock(null)} outline aria-label="Close Editor">
+          <XMarkIcon className="!h-4 !w-4" />
+        </Button>
       </div>
       <Divider className="mb-2" />
       {currentBlock.type === 'row' && (

@@ -2,16 +2,13 @@ import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useToolbarStore } from '@/lib/stores/toolbarStore'
-import { getBlockProps } from '@/lib/utils/attributes'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { CheckIcon, XMarkIcon } from '@heroicons/react/24/solid'
+import { AnimatePresence, motion } from 'motion/react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { EmailBlock, TextBlockAttributes } from '../../types'
 import { useToolbarStateStore } from '../editable-content'
-import { AlignmentControls } from './AlignmentControls'
 import { FormattingControls } from './FormattingControls'
-import { LineHeightControls } from './LineHeightControls'
-import { LinkInput } from './LinkInput'
 import { SpecialLinksMenu } from './SpecialLinksMenu'
-import { TextControls } from './TextControls'
 import { ToolbarProps } from './types'
 
 export const FloatingToolbar = ({ style }: ToolbarProps) => {
@@ -24,6 +21,55 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
     row.columns.some((column) => column.blocks.some((b) => b.id === currentBlock?.id))
   )
 
+  const { state: toolbarState, setState: setToolbarState } = useToolbarStateStore()
+  const [showLinkInput, setShowLinkInput] = useState(false)
+  const [isEditingLink, setIsEditingLink] = useState(false)
+  const [linkUrl, setLinkUrl] = useState('')
+  const linkInputRef = useRef<HTMLInputElement>(null)
+  const [showSpecialLinksDialog, setShowSpecialLinksDialog] = useState(false)
+  const [specialLinksTab, setSpecialLinksTab] = useState<'merge-tags' | 'special-links'>('merge-tags')
+  const toolbarRef = useRef<HTMLDivElement>(null)
+  const [toolbarStyle, setToolbarStyle] = useState<React.CSSProperties>({})
+
+  // Calculate and set the correct toolbar position
+  useLayoutEffect(() => {
+    if (!toolbarRef.current) return
+
+    const container = document.querySelector('[data-email-container]')
+    if (!container) return
+
+    const containerRect = container.getBoundingClientRect()
+    const toolbarRect = toolbarRef.current.getBoundingClientRect()
+    const toolbarWidth = toolbarRect.width
+
+    // Calculate initial position centered on target
+    let left = (style?.left as number) || 0
+
+    // Account for container edges
+    const maxLeft = containerRect.width - 10 // 10px from right edge
+    const minLeft = 10 // 10px from left edge
+
+    // Calculate the ideal centered position (offset by half the toolbar width)
+    const idealLeft = left - toolbarWidth / 2
+
+    // Adjust if going beyond right edge
+    if (idealLeft + toolbarWidth > maxLeft) {
+      left = maxLeft - toolbarWidth + toolbarWidth / 2
+    }
+
+    // Adjust if going beyond left edge
+    if (idealLeft < minLeft) {
+      left = minLeft + toolbarWidth / 2
+    }
+
+    // Set the position
+    setToolbarStyle({
+      top: style?.top || 0,
+      left,
+    })
+  }, [style?.top, style?.left, toolbarRef.current, showLinkInput])
+
+  // Define all callbacks before any conditional returns
   const onChange = useCallback(
     (attributes: Partial<TextBlockAttributes>) => {
       if (currentBlock) {
@@ -55,35 +101,47 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
     [currentBlock, setCurrentBlock, email, handleSave]
   )
 
-  const processedProps =
-    parentRow && currentBlock && currentBlock.type !== 'row'
-      ? getBlockProps(currentBlock, parentRow, company, email)
-      : {}
-
-  const { state: toolbarState, setState: setToolbarState } = useToolbarStateStore()
-
-  const [showLinkInput, setShowLinkInput] = useState(false)
-  const [isEditingLink, setIsEditingLink] = useState(false)
-  const linkContainerRef = useRef<HTMLDivElement>(null)
-  const [showSpecialLinksDialog, setShowSpecialLinksDialog] = useState(false)
-  const [specialLinksTab, setSpecialLinksTab] = useState<'merge-tags' | 'special-links'>('merge-tags')
-
-  // Handle click outside for link input
+  // Add escape key handler
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (linkContainerRef.current && !linkContainerRef.current.contains(event.target as Node)) {
-        setShowLinkInput(false)
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (showLinkInput) {
+          setShowLinkInput(false)
+        }
+        // We no longer close the toolbar with Escape, only the link input
       }
     }
 
-    if (showLinkInput) {
-      document.addEventListener('mousedown', handleClickOutside)
-    }
-
+    document.addEventListener('keydown', handleEscape)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
     }
   }, [showLinkInput])
+
+  // Auto-focus the link input when it becomes visible
+  useEffect(() => {
+    if (showLinkInput && linkInputRef.current) {
+      setTimeout(() => {
+        linkInputRef.current?.focus()
+      }, 10)
+    }
+  }, [showLinkInput])
+
+  // If no current block is selected, don't show the toolbar
+  if (!currentBlock) return null
+
+  // Show toolbar only for text-based blocks and hide for all others
+  const allowedTypes = ['text', 'heading', 'list']
+  if (!allowedTypes.includes(currentBlock.type)) {
+    return null
+  }
+
+  // Only show toolbar when text is selected or a link is active
+  const hasTextSelection = window.getSelection()?.toString().length !== 0
+  const hasActiveLink = toolbarState.link
+  if (!hasTextSelection && !hasActiveLink && !showLinkInput) {
+    return null
+  }
 
   // Handle formatting button clicks
   const handleFormatClick = (type: 'bold' | 'italic' | 'underline') => {
@@ -95,28 +153,32 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
   }
 
   // Handle link submission
-  const handleLinkSubmit = (url: string) => {
-    setToolbarState({
-      ...toolbarState,
-      link: true,
-      linkUrl: url,
-    })
-    executeCommand({ type: 'link', payload: { href: url } })
-    setShowLinkInput(false)
-    setIsEditingLink(false)
-  }
+  const handleLinkSubmit = () => {
+    if (!linkUrl) {
+      setShowLinkInput(false)
+      return
+    }
 
-  const showLinkButton = currentBlock?.type !== 'link' && currentBlock?.type !== 'button'
-  const showLineHeightControls =
-    currentBlock?.type !== 'link' && currentBlock?.type !== 'button' && currentBlock?.type !== 'list'
-  const showAlignmentControls = currentBlock?.type === 'text' || currentBlock?.type === 'heading'
-  const isButtonOrLink = currentBlock?.type === 'button' || currentBlock?.type === 'link'
-  const showSpecialLinks =
-    currentBlock?.type === 'text' ||
-    currentBlock?.type === 'heading' ||
-    currentBlock?.type === 'link' ||
-    currentBlock?.type === 'list' ||
-    currentBlock?.type === 'table'
+    try {
+      // Add https:// if not present
+      const url = linkUrl.startsWith('http://') || linkUrl.startsWith('https://') ? linkUrl : `https://${linkUrl}`
+
+      // Validate URL
+      new URL(url)
+
+      setToolbarState({
+        ...toolbarState,
+        link: true,
+        linkUrl: url,
+      })
+      executeCommand({ type: 'link', payload: { href: url } })
+      setShowLinkInput(false)
+      setIsEditingLink(false)
+      setLinkUrl('')
+    } catch (e) {
+      alert('Please enter a valid URL')
+    }
+  }
 
   // Handle special link selection
   const handleSpecialLinkSelect = (tab: 'merge-tags' | 'special-links') => {
@@ -152,135 +214,113 @@ export const FloatingToolbar = ({ style }: ToolbarProps) => {
     // If a link is already active, prepopulate with the link URL
     if (toolbarState.link && toolbarState.linkUrl) {
       setIsEditingLink(true)
+      setLinkUrl(toolbarState.linkUrl)
     } else {
       setIsEditingLink(false)
+      setLinkUrl('')
     }
 
     setShowLinkInput(!showLinkInput)
   }
 
-  // Add escape key handler
-  useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        hide()
-      }
-    }
-
-    document.addEventListener('keydown', handleEscape)
-    return () => {
-      document.removeEventListener('keydown', handleEscape)
-    }
-  }, [hide])
+  // Cancel link creation
+  const handleCancelLink = () => {
+    setShowLinkInput(false)
+    setLinkUrl('')
+  }
 
   return (
     <>
-      <div className="floating-toolbar" style={style}>
-        <div ref={linkContainerRef}>
-          {showLinkInput && (
-            <div className="absolute bottom-full left-1/2 mb-2 -translate-x-1/2 transform" style={{ zIndex: 1000 }}>
-              <LinkInput
-                isVisible={showLinkInput}
-                isEditing={isEditingLink}
-                initialUrl={toolbarState.linkUrl || ''}
-                onClose={() => setShowLinkInput(false)}
-                onSubmit={handleLinkSubmit}
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col divide-y divide-transparent rounded-lg border bg-white shadow-lg">
-          {showSpecialLinks && (
-            <div className="flex items-center gap-2 p-1">
-              <button
-                onClick={handleLinkButtonClick}
-                className={`inline-flex items-center gap-x-1 rounded-md px-2 py-1 text-xs font-medium shadow-sm ring-1 ring-inset ${
-                  toolbarState.link
-                    ? 'bg-indigo-100 text-indigo-700 ring-indigo-300'
-                    : 'bg-white text-gray-900 ring-gray-300 hover:bg-gray-50'
-                }`}
+      <motion.div
+        ref={toolbarRef}
+        className="absolute z-50 !-translate-x-1/2"
+        style={{
+          position: 'absolute',
+          whiteSpace: 'nowrap',
+          ...toolbarStyle,
+        }}
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -10 }}
+        transition={{ duration: 0.15 }}
+      >
+        <div className="flex divide-transparent rounded-lg border bg-white shadow-lg">
+          <AnimatePresence mode="wait">
+            {!showLinkInput ? (
+              // Default toolbar content
+              <motion.div
+                key="formatting-toolbar"
+                className="flex items-center gap-2 p-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="h-4 w-4"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244"
-                  />
-                </svg>
-                {toolbarState.link && toolbarState.linkUrl ? 'Edit Link' : 'Add Link'}
-              </button>
-
-              <div className="h-4 w-px bg-gray-200" />
-
-              <button
-                onClick={() => handleSpecialLinkSelect('merge-tags')}
-                className="inline-flex items-center gap-x-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                Merge Tags
-              </button>
-
-              <div className="h-4 w-px bg-gray-200" />
-
-              <button
-                onClick={() => handleSpecialLinkSelect('special-links')}
-                className="inline-flex items-center gap-x-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-              >
-                Special Links
-              </button>
-            </div>
-          )}
-
-          <div className="flex flex-wrap items-center gap-2 p-1">
-            <div className="flex items-center gap-2">
-              <FormattingControls
-                bold={toolbarState.bold}
-                italic={toolbarState.italic}
-                underline={toolbarState.underline}
-                link={toolbarState.link}
-                showLinkButton={false}
-                onFormatClick={handleFormatClick}
-                onLinkClick={handleLinkButtonClick}
-              />
-            </div>
-
-            <div className="h-4 w-px bg-gray-200" />
-
-            <div className="flex items-center gap-2">
-              <TextControls
-                fontSize={processedProps.style?.fontSize ? parseInt(String(processedProps.style.fontSize)) : 16}
-                fontWeight={String(processedProps.style?.fontWeight) || 'normal'}
-                color={processedProps.style?.color || '#000000'}
-                onChange={onChange}
-              />
-
-              {showAlignmentControls && (
-                <AlignmentControls
-                  textAlign={(processedProps.style?.textAlign as 'left' | 'center' | 'right') || 'left'}
-                  onChange={(value) => onChange({ textAlign: value })}
+                <FormattingControls
+                  bold={toolbarState.bold}
+                  italic={toolbarState.italic}
+                  underline={toolbarState.underline}
+                  link={toolbarState.link}
+                  showLinkButton={true}
+                  onFormatClick={handleFormatClick}
+                  onLinkClick={handleLinkButtonClick}
                 />
-              )}
-            </div>
 
-            {showLineHeightControls && (
-              <>
                 <div className="h-4 w-px bg-gray-200" />
-                <LineHeightControls
-                  lineHeight={String(processedProps.style?.lineHeight) || '120%'}
-                  onChange={(value) => onChange({ lineHeight: value })}
+
+                <button
+                  onClick={() => handleSpecialLinkSelect('merge-tags')}
+                  className="inline-flex items-center gap-x-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  Merge Tags
+                </button>
+
+                <button
+                  onClick={() => handleSpecialLinkSelect('special-links')}
+                  className="inline-flex items-center gap-x-1 rounded-md bg-white px-2 py-1 text-xs font-medium text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+                >
+                  Special Links
+                </button>
+              </motion.div>
+            ) : (
+              // Link input content
+              <motion.div
+                key="link-input"
+                className="flex w-full items-center p-1"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15 }}
+              >
+                <input
+                  ref={linkInputRef}
+                  type="text"
+                  placeholder="Enter URL"
+                  value={linkUrl}
+                  onChange={(e) => setLinkUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleLinkSubmit()}
+                  className="flex-1 rounded-md border-0 px-3 py-1 text-sm focus:border-transparent focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  autoFocus
                 />
-              </>
+                <button
+                  onClick={handleLinkSubmit}
+                  className="ml-2 inline-flex items-center rounded px-2 py-1 text-green-600 hover:bg-green-50"
+                  title={isEditingLink ? 'Update Link' : 'Add Link'}
+                >
+                  <CheckIcon className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={handleCancelLink}
+                  className="inline-flex items-center rounded px-2 py-1 text-red-500 hover:bg-red-50"
+                  title="Cancel"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+              </motion.div>
             )}
-          </div>
+          </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
 
       <SpecialLinksMenu
         isOpen={showSpecialLinksDialog}

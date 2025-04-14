@@ -59,7 +59,7 @@ const SocialsEditor = ({ block, onChange, parentRow, email }: SocialIconsEditorP
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="socials-editor-container flex flex-col gap-4">
       <Field>
         <Label>Icon Style</Label>
         <Select

@@ -45,7 +45,7 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
   )
 
   const handleSelectBlock = useCallback(
-    (blockId: string, close: () => void) => {
+    (blockId: string, close: () => void, issue?: ValidationIssue) => {
       const block = findBlockById(blockId)
       if (block) {
         setCurrentBlock(block)
@@ -57,6 +57,112 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
           const element = document.querySelector(`[data-block-id="${blockId}"]`)
           if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' })
+
+            // Find the appropriate input to focus based on block type and issue type
+            setTimeout(() => {
+              // Add a pulsing outline to help user identify where to look
+              const addPulsingOutline = (element: HTMLElement) => {
+                // Remove any existing outline classes first
+                document.querySelectorAll('.outline-pulse').forEach((el) => {
+                  el.classList.remove('outline-pulse')
+                })
+
+                element.classList.add('outline-pulse')
+
+                // Remove the pulse after a few seconds
+                setTimeout(() => {
+                  element.classList.remove('outline-pulse')
+                }, 4000)
+              }
+
+              if (block.type === 'button' || block.type === 'link') {
+                // Focus the href input in EmailBlockEditor
+                const hrefEditor = document.querySelector(
+                  '.href-editor-container input[type="url"], .href-editor-container input[type="tel"], .href-editor-container input[type="email"]'
+                )
+                if (hrefEditor instanceof HTMLInputElement) {
+                  hrefEditor.focus()
+                  addPulsingOutline(hrefEditor)
+                }
+              } else if (
+                block.type === 'socials' &&
+                issue?.type === 'invalidSocialLink' &&
+                issue.socialIndex !== undefined
+              ) {
+                // Target the specific social link input by index
+                const socialInputs = document.querySelectorAll('.socials-editor-container input[type="url"]')
+                if (socialInputs && socialInputs[issue.socialIndex]) {
+                  const input = socialInputs[issue.socialIndex] as HTMLInputElement
+                  input.focus()
+                  addPulsingOutline(input)
+                }
+              } else if (block.type === 'text') {
+                // For text blocks, we need to trigger the floating toolbar
+                const textContent = element.querySelector('.ProseMirror')
+                if (textContent) {
+                  // Simulate a click to focus the editor
+                  textContent.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+
+                  // Find any link in the content and select it
+                  const links = textContent.querySelectorAll('a')
+                  if (links.length > 0) {
+                    // Try to find an invalid link - look for each URL in the error message
+                    let targetLink = links[0] // Default to first link if we can't match
+
+                    if (issue?.message) {
+                      // Extract URL from error message
+                      const urlMatch = issue.message.match(/invalid link: (.*?)($|,|\s)/i)
+                      if (urlMatch && urlMatch[1]) {
+                        const badUrl = urlMatch[1]
+                        // Find link with this URL
+                        for (const link of links) {
+                          if (link.getAttribute('href') === badUrl) {
+                            targetLink = link
+                            break
+                          }
+                        }
+                      }
+                    }
+
+                    // Select the link
+                    const range = document.createRange()
+                    range.selectNodeContents(targetLink)
+                    const selection = window.getSelection()
+                    if (selection) {
+                      selection.removeAllRanges()
+                      selection.addRange(range)
+
+                      // The editable-content component will detect this selection
+                      // and position the toolbar appropriately above the selected link
+
+                      // Wait for floating toolbar to appear, then focus its input when it appears
+                      setTimeout(() => {
+                        const linkButton = document.querySelector('.floating-toolbar button[title="Link"]')
+                        if (linkButton instanceof HTMLButtonElement) {
+                          linkButton.click()
+
+                          // Wait for link input to appear
+                          setTimeout(() => {
+                            const linkInput = document.querySelector('.floating-toolbar input[type="text"]')
+                            if (linkInput instanceof HTMLInputElement) {
+                              linkInput.focus()
+                              addPulsingOutline(linkInput)
+                            }
+                          }, 100)
+                        }
+                      }, 150) // Slightly increased delay to ensure toolbar appears
+                    }
+                  }
+                }
+              } else if (block.type === 'image' && issue?.type === 'missingImageSrc') {
+                // Focus the image src input
+                const imgSrcInput = document.querySelector('.image-src-input')
+                if (imgSrcInput instanceof HTMLInputElement) {
+                  imgSrcInput.focus()
+                  addPulsingOutline(imgSrcInput)
+                }
+              }
+            }, 300) // Increased delay to ensure editors are mounted
           }
         }, 100)
       }
@@ -212,7 +318,7 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
                         <div
                           key={index}
                           className="mb-2 cursor-pointer rounded border border-gray-200 p-2 hover:bg-gray-50"
-                          onClick={() => handleSelectBlock(issue.blockId, close)}
+                          onClick={() => handleSelectBlock(issue.blockId, close, issue)}
                         >
                           <div className="flex items-center">
                             <ExclamationCircleIcon className="mr-2 h-4 w-4 text-red-500" />
