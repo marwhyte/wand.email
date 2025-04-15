@@ -4,6 +4,7 @@ import { classNames } from '@/lib/utils/misc'
 import { SparklesIcon } from '@heroicons/react/24/outline'
 import { motion } from 'motion/react'
 import React from 'react'
+import { ExportTypePickerPopover } from '../export-type-picker-popover'
 import { IconButton } from '../icon-button'
 import Loading from '../loading'
 import { ThemeColorPickerPopover } from '../theme-color-picker-popover'
@@ -179,6 +180,7 @@ export function ChatInput({
           {!chatStarted && (
             <div className="flex items-center gap-2">
               <ThemeColorPickerPopover tooltip="Select theme" tooltipPosition="top" popoverDirection="down" />
+              <ExportTypePickerPopover tooltip="Export format" tooltipPosition="top" popoverDirection="down" />
               <CompanySection chat={chat} tooltip="Select branding" tooltipPosition="top" popoverDirection="down" />
             </div>
           )}

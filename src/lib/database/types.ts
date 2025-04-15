@@ -12,9 +12,10 @@ export interface Database {
   Session: SessionTable
   User: UserTable
   VerificationToken: VerificationTokenTable
+  OAuthToken: OAuthTokenTable
 }
 
-export type ExportType = 'react' | 'html'
+export type ExportType = 'react' | 'html' | 'mailchimp'
 
 export type Plan = 'free' | 'starter' | 'pro'
 export type BillingCycle = 'monthly' | 'yearly'
@@ -55,6 +56,7 @@ export interface ChatTable {
   hasConfirmedOutline: boolean
   color: string
   borderRadius: BorderRadius
+  exportType: ExportType
 }
 
 export type Chat = Omit<ChatTable, 'id' | 'createdAt' | 'updatedAt'> & {
@@ -184,4 +186,24 @@ export interface AIImageUsageTable {
 export type AIImageUsage = Omit<AIImageUsageTable, 'id' | 'createdAt'> & {
   id: string
   createdAt: Date
+}
+
+export interface OAuthTokenTable {
+  id: GeneratedAlways<string>
+  userId: string
+  provider: string
+  accessToken: string
+  refreshToken: string | null
+  expiresAt: Date | null
+  serverPrefix: string | null
+  providerAccountId: string | null
+  providerAccountName: string | null
+  createdAt: GeneratedAlways<Date>
+  updatedAt: Generated<Date>
+}
+
+export type OAuthToken = Omit<OAuthTokenTable, 'id' | 'createdAt' | 'updatedAt'> & {
+  id: string
+  createdAt: Date
+  updatedAt: Date
 }

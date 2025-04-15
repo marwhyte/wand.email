@@ -23,15 +23,21 @@ export default auth(async (req) => {
     }
   }
 
+  // Check if this is a public route
   const isPublicRoute = PUBLIC_ROUTES.some(
     (route) =>
       nextUrl.pathname === route || (route.endsWith('/:id') && nextUrl.pathname.startsWith(route.replace('/:id', '/')))
   )
 
-  // Only redirect unauthenticated users when accessing root with id param
-  if (!isAuthenticated && !isPublicRoute) return Response.redirect(new URL(ROOT, nextUrl))
+  // Special case for OAuth callback pages - these need to be public
+  const isOAuthCallbackPage = nextUrl.pathname.startsWith('/oauth-callback/')
+
+  // Only redirect unauthenticated users when accessing protected routes
+  if (!isAuthenticated && !isPublicRoute && !isOAuthCallbackPage) {
+    return Response.redirect(new URL(ROOT, nextUrl))
+  }
 })
 
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc|oauth-callback)(.*)'],
 }

@@ -6,17 +6,15 @@ import { ExportType } from '@/lib/database/types'
 import { useAccountStore } from '@/lib/stores/accountStore'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
-import { ChevronLeftIcon, CodeBracketIcon, PencilIcon } from '@heroicons/react/20/solid'
-import { render } from '@react-email/components'
+import { ChevronLeftIcon, PencilIcon } from '@heroicons/react/20/solid'
 import { useSession } from 'next-auth/react'
-import { useState } from 'react'
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { dracula as draculaSyntaxHighlighter } from 'react-syntax-highlighter/dist/cjs/styles/prism'
+import { useEffect, useState } from 'react'
 import { useSWRConfig } from 'swr'
 import AlertBox from '../alert-box'
 import { Button } from '../button'
 import ButtonCard from '../button-card'
-import EmailRendererFinal from '../email-workspace/email-renderer-final'
+import { exportTypes } from '../export-types'
+import { ExportTypeComponent } from '../export-types/export-type'
 import { Input } from '../input'
 import Notification from '../notification'
 import { usePlan } from '../payment/plan-provider'
@@ -29,117 +27,50 @@ type Props = {
   monthlyExportCount: number | null
 }
 
-function formatHTML(html: string): string {
-  // Remove excess whitespace first
-  html = html.replace(/>\s+</g, '><').trim()
-
-  let formatted = ''
-  let indentLevel = 0
-  let inTag = false
-  let inContent = false
-  let skipIndent = false
-
-  // Define self-closing tags that shouldn't increase indent
-  const selfClosingTags = ['img', 'br', 'hr', 'input', 'meta', 'link']
-  let currentTag = ''
-  let isSelfClosing = false
-
-  for (let i = 0; i < html.length; i++) {
-    const char = html[i]
-
-    // Collect tag name to detect self-closing tags
-    if (inTag && char !== ' ' && char !== '>' && char !== '/') {
-      currentTag += char
-    } else if (inTag && (char === ' ' || char === '>' || char === '/')) {
-      isSelfClosing = selfClosingTags.includes(currentTag.toLowerCase()) || html.substring(i - 1, i + 1) === '/>'
-      if (char !== '>') currentTag = ''
-    }
-
-    if (char === '<') {
-      // Handle opening tag
-      if (html[i + 1] !== '/') {
-        if (inContent) {
-          formatted += '\n' + '  '.repeat(indentLevel)
-          inContent = false
-        }
-
-        formatted += '\n' + '  '.repeat(indentLevel)
-        formatted += char
-        inTag = true
-        currentTag = ''
-
-        // Only increase indent if not a self-closing tag
-        if (!html.substring(i, i + 4).includes('<!--')) {
-          indentLevel++
-          skipIndent = false
-        } else {
-          skipIndent = true
-        }
-      }
-      // Handle closing tag
-      else {
-        indentLevel--
-        if (inContent) {
-          formatted += '\n' + '  '.repeat(indentLevel)
-          inContent = false
-        } else {
-          formatted += '\n' + '  '.repeat(indentLevel)
-        }
-        formatted += char
-        inTag = true
-      }
-    }
-    // End of tag
-    else if (char === '>') {
-      formatted += char
-      inTag = false
-
-      // If it was a self-closing tag, reduce indent level immediately
-      if (isSelfClosing || skipIndent) {
-        indentLevel--
-        isSelfClosing = false
-      }
-
-      currentTag = ''
-
-      // Check if there's content after this tag
-      let j = i + 1
-      while (j < html.length && html[j].trim() === '') j++
-      if (j < html.length && html[j] !== '<') {
-        inContent = true
-      }
-    }
-    // Regular character
-    else {
-      formatted += char
-    }
-  }
-
-  return formatted
-}
-
 const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
   const { email } = useEmailStore()
-  const { company } = useChatStore()
+  const { company, exportType: currentExportType } = useChatStore()
   const saveEmail = useEmailSave()
   const { data: session } = useSession()
   const { plan } = usePlan()
   const { mutate } = useSWRConfig()
   const [isLoading, setIsLoading] = useState(false)
   const { setStepType, setShowAccountDialog } = useAccountStore()
-  const [exportType, setExportType] = useState<ExportType | null>(null)
+  const [selectedExportType, setSelectedExportType] = useState<ExportTypeComponent | null>(null)
   const [notificationMessage, setNotificationMessage] = useState<string | null>(null)
   const [notificationStatus, setNotificationStatus] = useState<'success' | 'failure'>('success')
   const [isEditingPreview, setIsEditingPreview] = useState(false)
   const [previewText, setPreviewText] = useState(email?.preview || '')
+  const [hasExportSucceeded, setHasExportSucceeded] = useState(false)
   const { preprocessAndGetEmail } = useEmailPreprocessor()
   const canExport = plan === 'pro' || (monthlyExportCount !== null && monthlyExportCount < 5) || isLocalDev
 
-  const handleExport = async (type: ExportType) => {
+  // Find the default export type component based on the current export type from chat store
+  const defaultExportTypeComponent = exportTypes.find((et) => et.name === currentExportType) || null
+
+  const handleExportTypeSelection = (exportType: ExportTypeComponent) => {
+    // Just set the selected export type to show its component
+    // The export will be recorded on success
+    setSelectedExportType(exportType)
+
+    // For HTML export type, immediately record success since it's a direct export
+    if (exportType.name === 'html' && email) {
+      recordExport('html')
+    }
+  }
+
+  // Add debugging for state changes
+  useEffect(() => {
+    console.log('selectedExportType changed:', selectedExportType?.name)
+  }, [selectedExportType])
+
+  const recordExport = async (type: ExportType) => {
     if (!email) return
     if (!canExport) return
 
-    setIsLoading(true)
+    if (type === 'html') {
+      setIsLoading(true)
+    }
 
     try {
       // Preprocess the email to upload all icons to S3 using our hook
@@ -149,25 +80,17 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
         throw new Error('Failed to process email')
       }
 
-      // Continue with the export
-      setExportType(type)
+      // Record the export
       await addExport(emailWithIcons, type)
       mutate('/api/exports/count')
-
-      // Show a success message if we're not displaying the HTML code
-      if (type !== 'html') {
-        setNotificationMessage('Email exported successfully')
-        // Close the dialog after a short delay
-        setTimeout(() => {
-          onClose()
-        }, 1500)
-      }
     } catch (error) {
       console.error('Error preprocessing email:', error)
-      setNotificationMessage('Failed to export email.')
+      setNotificationMessage('Failed to record export.')
       setNotificationStatus('failure')
     } finally {
-      setIsLoading(false)
+      if (type === 'html') {
+        setIsLoading(false)
+      }
     }
   }
 
@@ -181,17 +104,48 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
     setIsEditingPreview(false)
   }
 
-  const htmlEmailCode =
-    open && exportType === 'html'
-      ? formatHTML(
-          render(
-            EmailRendererFinal({
-              email: email,
-              company: company,
-            })
-          )
-        )
-      : ''
+  const handleExportSuccess = async () => {
+    console.log('Export success called')
+
+    // Mark export as succeeded before doing anything else
+    setHasExportSucceeded(true)
+    console.log('Export marked as succeeded')
+
+    // Delay recording the export to ensure component updates are completed first
+    setTimeout(async () => {
+      try {
+        // Only record the export if it was successful
+        if (selectedExportType && email) {
+          console.log('Recording export for:', selectedExportType.name)
+          await recordExport(selectedExportType.name as ExportType)
+        }
+
+        // Update export count
+        mutate('/api/exports/count')
+      } catch (error) {
+        console.error('Error recording export:', error)
+        // Don't set notification message here to avoid UI updates
+      }
+    }, 500) // Half-second delay
+
+    // We intentionally don't reset selectedExportType here to preserve the export view
+  }
+
+  // Custom close handler that respects export success state
+  const handleDialogClose = () => {
+    // Reset the success state when manually closing
+    setHasExportSucceeded(false)
+    // Reset selected export type
+    setSelectedExportType(null)
+    // Call the parent onClose
+    onClose()
+  }
+
+  const handleExportError = (message: string) => {
+    console.error('Export error:', message)
+    setNotificationMessage(message)
+    setNotificationStatus('failure')
+  }
 
   if (!monthlyExportCount) {
     return (
@@ -205,13 +159,18 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
 
   return (
     <>
-      <Dialog size="xl" open={open} onClose={onClose}>
+      <Dialog size="xl" open={open} onClose={handleDialogClose}>
         <DialogTitle>
-          {exportType ? (
-            <Button className="-ml-4" plain onClick={() => setExportType(null)}>
-              <ChevronLeftIcon className="size-4" />
-              Back to export options
-            </Button>
+          {selectedExportType ? (
+            <div className="flex items-center justify-between">
+              <Button className="-ml-4" plain onClick={() => setSelectedExportType(null)}>
+                <ChevronLeftIcon className="size-4" />
+                Back to export options
+              </Button>
+              <div className="flex items-center text-sm">
+                <Text className="mr-1 text-gray-500">Exporting as {selectedExportType.title}</Text>
+              </div>
+            </div>
           ) : (
             'Select an export type'
           )}
@@ -253,17 +212,41 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
               <Text className="mt-4">Processing your email...</Text>
             </div>
           )}
-          {!isLoading && exportType === null && (
+          {!isLoading && !selectedExportType && (
             <>
-              <ButtonCard
-                icon={<CodeBracketIcon className="mr-3 h-12 w-12 text-blue-500" />}
-                title="HTML Code"
-                description="Export as HTML code"
-                onClick={() => {
-                  handleExport('html')
-                }}
-                disabled={!canExport}
-              />
+              {defaultExportTypeComponent && (
+                <div className="mb-6">
+                  <Text className="mb-3 text-sm font-medium">Current Export Format</Text>
+                  <ButtonCard
+                    key={defaultExportTypeComponent.name}
+                    icon={defaultExportTypeComponent.icon}
+                    title={defaultExportTypeComponent.title}
+                    description={defaultExportTypeComponent.description}
+                    onClick={() => handleExportTypeSelection(defaultExportTypeComponent)}
+                    disabled={!canExport}
+                    highlight={true}
+                  />
+                </div>
+              )}
+
+              <div className="mb-6">
+                <Text className="mb-3 text-sm font-medium">Other Export Options</Text>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-1">
+                  {exportTypes
+                    .filter((et) => et.name !== currentExportType)
+                    .map((exportType) => (
+                      <ButtonCard
+                        key={exportType.name}
+                        icon={exportType.icon}
+                        title={exportType.title}
+                        description={exportType.description}
+                        onClick={() => handleExportTypeSelection(exportType)}
+                        disabled={!canExport}
+                      />
+                    ))}
+                </div>
+              </div>
+
               <div className="mb-6">
                 <div className="mb-2 flex items-center justify-between">
                   <Text className="text-sm font-medium">Email Preview</Text>
@@ -302,40 +285,13 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
               </div>
             </>
           )}
-          {!isLoading && exportType === 'html' && (
-            <div>
-              <div className="relative">
-                <div className="absolute bottom-2 right-2 mt-4 text-end">
-                  <Button
-                    color="light"
-                    onClick={() => {
-                      try {
-                        navigator.clipboard.writeText(htmlEmailCode)
-                        setNotificationMessage('HTML copied to clipboard')
-                        setNotificationStatus('success')
-                      } catch (err) {
-                        console.error('Failed to copy HTML: ', err)
-                        setNotificationMessage('Failed to copy HTML')
-                        setNotificationStatus('failure')
-                      }
-                    }}
-                  >
-                    Copy HTML Code
-                  </Button>
-                </div>
-                <div className="rounded border border-gray-700 bg-gray-900">
-                  <SyntaxHighlighter
-                    style={draculaSyntaxHighlighter}
-                    language="html"
-                    showLineNumbers={true}
-                    wrapLines
-                    customStyle={{ maxHeight: '400px', overflow: 'auto' }}
-                  >
-                    {htmlEmailCode}
-                  </SyntaxHighlighter>
-                </div>
-              </div>
-            </div>
+          {!isLoading && selectedExportType && (
+            <selectedExportType.component
+              email={email}
+              company={company}
+              onExportSuccess={handleExportSuccess}
+              onExportError={handleExportError}
+            />
           )}
         </DialogBody>
       </Dialog>

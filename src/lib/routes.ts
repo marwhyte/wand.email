@@ -25,5 +25,11 @@ export const PUBLIC_ROUTES = [
   '/api/auth/signout',
   '/api/auth/signin/resend',
   '/api/auth/callback/resend',
+  // OAuth routes
+  '/oauth-callback/mailchimp',
+  '/oauth-callback/hubspot',
+  // OAuth API routes
+  '/api/oauth/callback/mailchimp',
+  '/api/oauth/callback/hubspot',
 ]
 export const DEFAULT_REDIRECT = ROOT

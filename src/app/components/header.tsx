@@ -137,6 +137,11 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
     }
   }
 
+  // This is called when export dialog is manually closed
+  const handleExportDialogClose = () => {
+    exportOpener.close()
+  }
+
   return (
     <header>
       <div
@@ -267,7 +272,11 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
       </div>
       {emailStatus === 'success' && <Notification title="Test email sent successfully!" status="success" />}
       {emailStatus === 'error' && <Notification title="Failed to send test email" status="failure" />}
-      <ExportDialog open={exportOpener.isOpen} onClose={exportOpener.close} monthlyExportCount={monthlyExportCount} />
+      <ExportDialog
+        open={exportOpener.isOpen}
+        onClose={handleExportDialogClose}
+        monthlyExportCount={monthlyExportCount}
+      />
 
       <AuthDialog
         open={showSignUpDialog}

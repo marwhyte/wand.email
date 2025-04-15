@@ -5,6 +5,7 @@ import { ArrowsPointingOutIcon } from '@heroicons/react/24/outline'
 import { Button } from '../button'
 import { CompanySection } from '../chat/company-section'
 import PreviewDialog from '../dialogs/preview-dialog'
+import { ExportTypePickerPopover } from '../export-type-picker-popover'
 import { ThemeColorPickerPopover } from '../theme-color-picker-popover'
 
 export function EmailWorkspaceFooter() {
@@ -14,6 +15,7 @@ export function EmailWorkspaceFooter() {
     <>
       <div className="sticky bottom-0 z-10 flex items-center justify-end gap-3 border-t border-gray-200 bg-white/95 px-6 pb-3 pt-2 backdrop-blur-sm">
         <ThemeColorPickerPopover size="large" tooltip="Select theme" tooltipPosition="top" popoverDirection="up" />
+        <ExportTypePickerPopover size="large" tooltip="Export format" tooltipPosition="top" popoverDirection="up" />
         <CompanySection
           size="large"
           chat={null}

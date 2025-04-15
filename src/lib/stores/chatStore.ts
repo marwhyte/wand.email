@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { Company } from '../database/types'
+import { Company, ExportType } from '../database/types'
 
 type BorderRadiusOption = 'square' | 'rounded' | 'default'
 
@@ -11,6 +11,7 @@ interface ChatStore {
   themeColor: string
   borderRadius: BorderRadiusOption
   hasConfirmedOutline: boolean
+  exportType: ExportType
   setChatId: (id: string | undefined) => void
   setTitle: (title: string | undefined) => void
   setCompany: (company: Company | undefined) => void
@@ -18,6 +19,7 @@ interface ChatStore {
   setThemeColor: (color: string) => void
   setBorderRadius: (radius: BorderRadiusOption) => void
   setHasConfirmedOutline: (hasConfirmedOutline: boolean) => void
+  setExportType: (exportType: ExportType) => void
 }
 
 export const useChatStore = create<ChatStore>((set) => ({
@@ -28,6 +30,7 @@ export const useChatStore = create<ChatStore>((set) => ({
   themeColor: '#8e6ff7',
   borderRadius: 'default',
   hasConfirmedOutline: false,
+  exportType: 'html',
   setChatId: (id) => set({ chatId: id }),
   setTitle: (title) => set({ title }),
   setCompany: (company) => set({ company }),
@@ -35,4 +38,5 @@ export const useChatStore = create<ChatStore>((set) => ({
   setThemeColor: (color) => set({ themeColor: color }),
   setBorderRadius: (radius) => set({ borderRadius: radius }),
   setHasConfirmedOutline: (hasConfirmedOutline) => set({ hasConfirmedOutline }),
+  setExportType: (exportType) => set({ exportType }),
 }))

@@ -3,7 +3,7 @@
 import { auth } from '@/auth'
 import type { Message } from 'ai'
 import { db } from '../db'
-import { BorderRadius } from '../types'
+import { BorderRadius, ExportType } from '../types'
 
 export async function createChat({
   id,
@@ -13,6 +13,7 @@ export async function createChat({
   companyId = null,
   color = '#fff8eb',
   borderRadius = 'rounded',
+  exportType = 'html',
 }: {
   id: string
   messages?: Message[]
@@ -21,6 +22,7 @@ export async function createChat({
   companyId?: string | null
   color?: string
   borderRadius?: BorderRadius
+  exportType?: ExportType
 }) {
   const session = await auth()
 
@@ -38,6 +40,7 @@ export async function createChat({
         hasConfirmedOutline: false,
         color,
         borderRadius,
+        exportType,
       })
       .returningAll()
       .executeTakeFirst()
@@ -125,6 +128,7 @@ export async function updateChat(
     companyId?: string
     color?: string
     borderRadius?: string
+    exportType?: string
   }
 ) {
   const session = await auth()
@@ -184,7 +188,7 @@ export async function updateChat(
           .execute()
       }
 
-      if (updates.color !== undefined || updates.borderRadius !== undefined) {
+      if (updates.color !== undefined || updates.borderRadius !== undefined || updates.exportType !== undefined) {
         const updateData: any = { updatedAt: new Date() }
 
         if (updates.color !== undefined) {
@@ -193,6 +197,10 @@ export async function updateChat(
 
         if (updates.borderRadius !== undefined) {
           updateData.borderRadius = updates.borderRadius
+        }
+
+        if (updates.exportType !== undefined) {
+          updateData.exportType = updates.exportType
         }
 
         await trx
@@ -380,7 +388,7 @@ export async function getLastChat() {
   // Get the most recent chat for this user
   const lastChat = await db
     .selectFrom('Chat')
-    .select(['color', 'borderRadius'])
+    .select(['color', 'borderRadius', 'exportType'])
     .where('userId', '=', session.user.id)
     .where('deletedAt', 'is', null)
     .orderBy('updatedAt', 'desc')
