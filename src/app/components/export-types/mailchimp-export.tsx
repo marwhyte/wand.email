@@ -114,11 +114,26 @@ const MailchimpExport = ({ email, company, onExportSuccess, onExportError }: Exp
 
   // Clear cache and reset on unmount
   useEffect(() => {
+    console.log('[MailchimpExport] Component mounted')
+
     return () => {
-      // Reset OAuth state when component unmounts
-      resetOAuth()
+      console.log('[MailchimpExport] Component unmounting, OAuth states:', {
+        isOAuthLoading,
+        isOAuthSuccess,
+        isOAuthError,
+      })
+
+      // Only reset OAuth state when component unmounts if we're not in the middle of authentication
+      // This prevents the popup from being closed prematurely
+      if (!isOAuthLoading) {
+        console.log('[MailchimpExport] Safe to reset OAuth - not in the middle of authentication')
+        resetOAuth()
+      } else {
+        console.log('[MailchimpExport] NOT resetting OAuth - authentication in progress')
+        // Don't reset while authentication is in progress
+      }
     }
-  }, [resetOAuth])
+  }, [resetOAuth, isOAuthLoading, isOAuthSuccess, isOAuthError])
 
   if (!email) {
     return <Text>Email is required to export to Mailchimp</Text>
