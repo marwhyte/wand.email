@@ -5,6 +5,7 @@ import { EmailTheme, EmailType } from '@/app/components/email-workspace/types'
 import { auth } from '@/auth'
 import { MAX_RESPONSE_SEGMENTS, MAX_TOKENS } from '@/constants'
 import { createChat, getChat, getUserMessageCount, updateChat } from '@/lib/database/queries/chats'
+import { BorderRadius, ExportType } from '@/lib/database/types'
 import { CONTINUE_PROMPT } from '@/lib/llm/prompts'
 import { DEFAULT_PROVIDER, StreamingOptions, streamText } from '@/lib/llm/stream-text'
 import SwitchableStream from '@/lib/llm/switchable-stream'
@@ -47,6 +48,9 @@ export async function POST(req: NextRequest) {
       companyAddress,
       emailType,
       emailTheme,
+      emailBorderRadius,
+      emailColor,
+      emailExportType,
       isGeneratingOutline = true,
     }: {
       id: string
@@ -57,6 +61,9 @@ export async function POST(req: NextRequest) {
       companyAddress?: string
       emailType?: EmailType
       emailTheme: EmailTheme
+      emailBorderRadius: BorderRadius
+      emailColor: string
+      emailExportType: ExportType
       isGeneratingOutline?: boolean
     } = await req.json()
 
@@ -69,7 +76,14 @@ export async function POST(req: NextRequest) {
     const chat = await getChat(id)
 
     if (!chat) {
-      await createChat({ messages, companyId, id })
+      await createChat({
+        messages,
+        companyId,
+        id,
+        color: emailColor,
+        borderRadius: emailBorderRadius,
+        exportType: emailExportType,
+      })
       notifySlack(`User ${session.user.email} created a new chat.`, 'upgrade')
     } else {
       if (chat.userId !== session.user.id) {

@@ -95,7 +95,7 @@ function ScrollToBottom({ textareaHeight }: { textareaHeight: number }) {
 export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarted = false }: Props) {
   // Add email store access
   const { email } = useEmailStore()
-  const { themeColor, borderRadius } = useChatStore()
+  const { themeColor, borderRadius, exportType } = useChatStore()
 
   const session = useSession()
 
@@ -141,6 +141,7 @@ export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarte
       isGeneratingOutline: !hasConfirmedOutline,
       emailThemeColor: themeColor,
       emailBorderRadius: borderRadius,
+      emailExportType: exportType,
     },
     onFinish: () => {
       logger.debug('Finished streaming')
@@ -435,6 +436,7 @@ export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarte
           isGeneratingOutline,
           emailThemeColor: themeColor,
           emailBorderRadius: borderRadius,
+          emailExportType: exportType,
         },
       }
     )
