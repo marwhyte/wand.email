@@ -1724,132 +1724,6 @@ export function parseEmailScript(
   }
 }
 
-// Special handling for footer rows
-function processFooterRow(
-  startIndex: number,
-  lines: string[],
-  rowAttributes: RawAttributes
-): { rows: RowBlock[]; newIndex: number } {
-  const footerRows: RowBlock[] = []
-
-  // Create two rows for the footer
-  const headerRow = createRow(parseRowAttributes(rowAttributes))
-  const contentRow = createRow(parseRowAttributes(rowAttributes))
-
-  // Create columns for both rows
-  const logoColumn = createColumn([], '50%', {})
-  const socialsColumn = createColumn([], '50%', {})
-  const contentColumn = createColumn([], '100%', {})
-
-  // Add columns to rows
-  headerRow.columns.push(logoColumn)
-  headerRow.columns.push(socialsColumn)
-  contentRow.columns.push(contentColumn)
-
-  // Add divider at the top of the content row
-  createBlock('divider', '', blockParsers.divider({}), contentColumn)
-
-  // Add rows to footer
-  footerRows.push(headerRow)
-  footerRows.push(contentRow)
-
-  let i = startIndex + 1
-  let depth = 1 // Start at 1 for the ROW tag
-  let inColumn = false
-
-  // Arrays to categorize footer content for proper distribution
-  const logoBlocks: number[] = []
-  const socialsBlocks: number[] = []
-  const contentBlocks: number[] = []
-
-  // First pass: categorize all blocks in the footer
-  let scanIndex = i
-  while (scanIndex < lines.length) {
-    const line = lines[scanIndex].trim()
-
-    // Skip empty lines
-    if (!line) {
-      scanIndex++
-      continue
-    }
-
-    // End of row
-    if (line.startsWith('</ROW>')) {
-      if (depth === 1) break
-      depth--
-    } else if (line.startsWith('<ROW')) {
-      depth++
-    } else if (line.startsWith('<COLUMN')) {
-      inColumn = true
-    } else if (line.startsWith('</COLUMN>')) {
-      inColumn = false
-    }
-    // Look for content elements
-    else if (line.startsWith('<')) {
-      // Extract tag name
-      const tagMatch = line.match(/<(\w+)/)
-      if (tagMatch) {
-        const blockType = tagMatch[1].toLowerCase()
-        if (blockType !== 'row' && blockType !== 'column') {
-          // Categorize by block type
-          if (blockType === 'image') {
-            const attrMatch = line.match(/<IMAGE\s*([^>\/]*)(?:\/>|>)/)
-            if (attrMatch) {
-              const attrs = parseAttributes(attrMatch[1])
-              if (attrs.src === 'logo') {
-                logoBlocks.push(scanIndex)
-              } else {
-                contentBlocks.push(scanIndex)
-              }
-            }
-          } else if (blockType === 'socials') {
-            socialsBlocks.push(scanIndex)
-          } else {
-            contentBlocks.push(scanIndex)
-          }
-        }
-      }
-    }
-
-    scanIndex++
-  }
-
-  // Second pass: process blocks in the right order and place them in the correct columns
-
-  // 1. Process logo blocks for the top-left
-  for (const blockIndex of logoBlocks) {
-    const line = lines[blockIndex].trim()
-    const tagMatch = line.match(/<(\w+)/)
-    if (tagMatch) {
-      const blockType = tagMatch[1].toLowerCase()
-      processBlockInColumn(blockType, blockIndex, lines, logoColumn)
-    }
-  }
-
-  // 2. Process socials blocks for the top-right
-  for (const blockIndex of socialsBlocks) {
-    const line = lines[blockIndex].trim()
-    const tagMatch = line.match(/<(\w+)/)
-    if (tagMatch) {
-      const blockType = tagMatch[1].toLowerCase()
-      processBlockInColumn(blockType, blockIndex, lines, socialsColumn)
-    }
-  }
-
-  // 3. Process all other content for the bottom row
-  for (const blockIndex of contentBlocks) {
-    const line = lines[blockIndex].trim()
-    const tagMatch = line.match(/<(\w+)/)
-    if (tagMatch) {
-      const blockType = tagMatch[1].toLowerCase()
-      processBlockInColumn(blockType, blockIndex, lines, contentColumn)
-    }
-  }
-
-  // Return the last line index and the generated rows
-  return { rows: footerRows, newIndex: scanIndex }
-}
-
 // Special handling for footer rows with organization
 function processOrganizedFooterRow(
   startIndex: number,
@@ -1974,7 +1848,7 @@ function processOrganizedFooterRow(
     footerRows.push(headerRow)
 
     // Create a second row for all other content
-    const contentRow = createRow(parseRowAttributes({ ...rowAttributes, type: 'footer' }))
+    const contentRow = createRow(parseRowAttributes({ ...rowAttributes, type: 'footer', stackOnMobile: 'false' }))
     const fullWidthColumn = createColumn([], '100%', {})
     contentRow.columns.push(fullWidthColumn)
 
