@@ -8,10 +8,10 @@ import { NextRequest, NextResponse } from 'next/server'
  *
  * @example GET /api/oauth/mailchimp
  */
-export async function GET(request: NextRequest, context: { params: { provider: string } }) {
+export async function GET(request: NextRequest, { params }: { params: { provider: string } }) {
   try {
     // Get the provider parameter - params must be awaited
-    const { provider } = await context.params
+    const { provider } = params
     const providerName = provider as OAuthProvider
 
     // Verify user is authenticated
