@@ -9,10 +9,10 @@ import { NextRequest, NextResponse } from 'next/server'
  * @example POST /api/oauth/callback/mailchimp
  * with body { code: string, state: string }
  */
-export async function POST(request: NextRequest, context: { params: { provider: string } }) {
+export async function POST(request: NextRequest, { params }: { params: Promise<{ provider: string }> }) {
   try {
     // Get the provider parameter - params must be awaited
-    const { provider } = await context.params
+    const { provider } = await params
     const providerName = provider as OAuthProvider
 
     const body = await request.json()
