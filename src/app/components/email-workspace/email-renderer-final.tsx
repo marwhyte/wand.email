@@ -1,4 +1,4 @@
-import { Company } from '@/lib/database/types'
+import { Company, ExportType } from '@/lib/database/types'
 import {
   getBlockProps,
   getBodyProps,
@@ -10,6 +10,7 @@ import {
   OmitChildren,
 } from '@/lib/utils/attributes'
 import { getBlockAttributes } from '@/lib/utils/attributes/attributes'
+import { parseText } from '@/lib/utils/misc'
 import {
   Body,
   Button,
@@ -25,7 +26,6 @@ import {
   Row,
   Text,
 } from '@react-email/components'
-import parse from 'html-react-parser'
 import React from 'react'
 import { Table } from '../table'
 import EmailIconFinal from './email-components/email-icon-final'
@@ -37,6 +37,7 @@ import { ColumnBlock, Email, EmailBlock, RowBlock } from './types'
 type Props = {
   email: Email | null
   company: Company | null
+  exportType: ExportType
 }
 
 const RenderBlockFinal = ({
@@ -44,11 +45,13 @@ const RenderBlockFinal = ({
   parentRow,
   email,
   company,
+  exportType,
 }: {
   block: EmailBlock
   parentRow: RowBlock
   email: Email | null
   company: Company | null
+  exportType?: ExportType
 }) => {
   const blockProps = getBlockProps(block, parentRow, company, email)
   const rowProps = getRowProps(parentRow, email)
@@ -98,11 +101,29 @@ const RenderBlockFinal = ({
       case 'text':
         const textProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Text>>
         const textAttributes = getBlockAttributes(block, parentRow, email)
-        return <Text {...textProps}>{parse(textAttributes.content, options)}</Text>
+        return (
+          <Text {...textProps}>
+            {parseText(
+              textAttributes.content || '',
+              emailAttributes.linkColor ?? '#0066CC',
+              exportType,
+              company?.address || undefined
+            )}
+          </Text>
+        )
       case 'heading':
         const headingProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Heading>>
         const headingAttributes = getBlockAttributes(block, parentRow, email)
-        return <Heading {...headingProps}>{parse(headingAttributes.content, options)}</Heading>
+        return (
+          <Heading {...headingProps}>
+            {parseText(
+              headingAttributes.content || '',
+              emailAttributes.linkColor ?? '#0066CC',
+              exportType,
+              company?.address || undefined
+            )}
+          </Heading>
+        )
       case 'image':
         const imageProps = { ...blockProps, style: restStyle } as OmitChildren<React.ComponentProps<typeof Img>>
         const imageAttributes = getBlockAttributes(block, parentRow, email)
@@ -137,7 +158,12 @@ const RenderBlockFinal = ({
           // @ts-expect-error
           <div align={buttonAlign}>
             <Button {...buttonProps} style={buttonStyle}>
-              {parse(buttonAttributes.content)}
+              {parseText(
+                buttonAttributes.content || '',
+                emailAttributes.linkColor ?? '#0066CC',
+                exportType,
+                company?.address || undefined
+              )}
             </Button>
           </div>
         )
@@ -148,7 +174,14 @@ const RenderBlockFinal = ({
         return (
           // @ts-expect-error
           <div align={linkAlign}>
-            <Link {...linkProps}>{parse(linkAttributes.content)}</Link>
+            <Link {...linkProps}>
+              {parseText(
+                linkAttributes.content || '',
+                emailAttributes.linkColor ?? '#0066CC',
+                exportType,
+                company?.address || undefined
+              )}
+            </Link>
           </div>
         )
       case 'divider':
@@ -206,7 +239,12 @@ const RenderBlockFinal = ({
                       position: 'relative',
                     }}
                   >
-                    {parse(item)}
+                    {parseText(
+                      item || '',
+                      emailAttributes.linkColor ?? '#0066CC',
+                      exportType,
+                      company?.address || undefined
+                    )}
                   </li>
                 ))}
               </ul>
@@ -231,7 +269,12 @@ const RenderBlockFinal = ({
                       position: 'relative',
                     }}
                   >
-                    {parse(item)}
+                    {parseText(
+                      item || '',
+                      emailAttributes.linkColor ?? '#0066CC',
+                      exportType,
+                      company?.address || undefined
+                    )}
                   </li>
                 ))}
               </ol>
@@ -258,7 +301,12 @@ const RenderBlockFinal = ({
                       borderLeft: '1px solid #dddddd',
                     }}
                   >
-                    {parse(cell)}
+                    {parseText(
+                      cell || '',
+                      emailAttributes.linkColor ?? '#0066CC',
+                      exportType,
+                      company?.address || undefined
+                    )}
                   </td>
                 ))}
               </tr>
@@ -294,6 +342,7 @@ const RenderColumns = ({
   needsRounding,
   isFirstRow,
   isLastRow,
+  exportType,
 }: {
   row: RowBlock
   email: Email
@@ -301,6 +350,7 @@ const RenderColumns = ({
   needsRounding?: boolean
   isFirstRow: boolean
   isLastRow: boolean
+  exportType?: ExportType
 }) => {
   const emailAttributes = getEmailAttributes(email)
   const rowAttributes = getRowAttributes(row, email)
@@ -312,7 +362,14 @@ const RenderColumns = ({
 
   const renderColumnContent = (column: ColumnBlock) =>
     column.blocks.map((block) => (
-      <RenderBlockFinal key={block.id} block={block} parentRow={row} email={email} company={company} />
+      <RenderBlockFinal
+        key={block.id}
+        block={block}
+        parentRow={row}
+        email={email}
+        company={company}
+        exportType={exportType}
+      />
     ))
 
   const renderSpacer = (index: number) =>
@@ -392,7 +449,15 @@ const RenderRowSpacer = ({ height }: { height: number }) => {
   )
 }
 
-export const EmailContent = ({ email, company }: { email: Email; company: Company | null }) => {
+export const EmailContent = ({
+  email,
+  company,
+  exportType,
+}: {
+  email: Email
+  company: Company | null
+  exportType?: ExportType
+}) => {
   const emailAttributes = getEmailAttributes(email)
   return (
     <Container {...getContentProps(email)}>
@@ -411,6 +476,7 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
               row={row}
               email={email}
               company={company}
+              exportType={exportType}
             />
             {index < email.rows.length - 1 &&
               emailAttributes.styleVariant === 'outline' &&
@@ -424,7 +490,7 @@ export const EmailContent = ({ email, company }: { email: Email; company: Compan
   )
 }
 
-const EmailRendererFinal = ({ email, company }: Props) => {
+const EmailRendererFinal = ({ email, company, exportType }: Props) => {
   if (!email) return <></>
 
   const emailAttributes = getEmailAttributes(email)
@@ -522,7 +588,7 @@ const EmailRendererFinal = ({ email, company }: Props) => {
       </Head>
       <Body {...getBodyProps(email)}>
         <Preview>{email.preview ?? 'Preview'}</Preview>
-        <EmailContent email={email} company={company} />
+        <EmailContent email={email} company={company} exportType={exportType} />
       </Body>
     </Html>
   )

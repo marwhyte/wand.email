@@ -1,114 +1,63 @@
-import { Dialog, Transition } from '@headlessui/react'
+import { ExportType } from '@/lib/database/types'
+import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@headlessui/react'
+import { LinkIcon } from '@heroicons/react/24/outline'
 import { Fragment, useEffect, useState } from 'react'
-
-type MergeTag = {
-  name: string
-  value: string
-  category: string
-}
-
-type SpecialLink = {
-  name: string
-  value: string
-  category: string
-}
-
-const mergeTags: MergeTag[] = [
-  // Mailchimp
-  { name: 'Email', value: '*|EMAIL|*', category: 'Mailchimp' },
-  { name: 'First Name', value: '*|FNAME|*', category: 'Mailchimp' },
-  { name: 'Last Name', value: '*|LNAME|*', category: 'Mailchimp' },
-  { name: 'Subscribe', value: '*|LIST:SUBSCRIBE|*', category: 'Mailchimp' },
-  { name: 'Archive', value: '*|ARCHIVE|*', category: 'Mailchimp' },
-
-  // MailUp
-  { name: 'Email', value: '[email]', category: 'MailUp' },
-  { name: 'First Name', value: '[firstname]', category: 'MailUp' },
-  { name: 'Last Name', value: '[lastname]', category: 'MailUp' },
-  { name: 'Company', value: '[company]', category: 'MailUp' },
-
-  // SendGrid
-  { name: 'Email', value: '-email-', category: 'SendGrid' },
-  { name: 'First Name', value: '-first_name-', category: 'SendGrid' },
-  { name: 'Last Name', value: '-last_name-', category: 'SendGrid' },
-
-  // Autopilot
-  { name: 'Email', value: '--Email--', category: 'Autopilot' },
-  { name: 'First Name', value: '--First Name--', category: 'Autopilot' },
-  { name: 'Last Name', value: '--Last Name--', category: 'Autopilot' },
-  { name: 'Company', value: '--Company--', category: 'Autopilot' },
-
-  // Campaign Monitor
-  { name: 'Email', value: '[email]', category: 'Campaign Monitor' },
-  { name: 'First Name', value: '[firstname]', category: 'Campaign Monitor' },
-  { name: 'Last Name', value: '[lastname]', category: 'Campaign Monitor' },
-
-  // HubSpot
-  { name: 'Company City', value: '{{ site_settings.company_city }}', category: 'HubSpot' },
-  { name: 'Company Name', value: '{{ site_settings.company_name }}', category: 'HubSpot' },
-  { name: 'Company State', value: '{{ site_settings.company_state }}', category: 'HubSpot' },
-  { name: 'Company Street Address', value: '{{ site_settings.company_street_address_1 }}', category: 'HubSpot' },
-]
-
-const specialLinks: SpecialLink[] = [
-  // Mailchimp
-  { name: 'Unsubscribe', value: '*|UNSUB|*', category: 'Mailchimp' },
-
-  // MailUp
-  { name: 'Unsubscribe', value: 'http://[unsubscribe]/', category: 'MailUp' },
-  { name: 'Subscribe', value: 'http://[subscribelink]/', category: 'MailUp' },
-  { name: 'Preferences', value: 'http://[prefcenter]/', category: 'MailUp' },
-  { name: 'Static Link', value: 'http://[staticnl]/', category: 'MailUp' },
-
-  // SendGrid
-  { name: 'Unsubscribe', value: '[Unsubscribe]', category: 'SendGrid' },
-  { name: 'Web Version', value: '[weblink]', category: 'SendGrid' },
-
-  // Autopilot
-  { name: 'Unsubscribe', value: '--unsubscribe--', category: 'Autopilot' },
-
-  // Campaign Monitor
-  { name: 'Unsubscribe', value: '<unsubscribe>Unsubscribe</unsubscribe>', category: 'Campaign Monitor' },
-  { name: 'Web Version', value: '<webversion>Open in a browser</webversion>', category: 'Campaign Monitor' },
-
-  // HubSpot
-  { name: 'Unsubscribe', value: '{{ unsubscribe_link }}', category: 'HubSpot' },
-  { name: 'View as Web Page', value: '{{ view_as_page_url }}', category: 'HubSpot' },
-]
+import { EmailElement, emailElements, exportTypeToCategory } from './email-elements'
 
 type SpecialLinksMenuProps = {
   isOpen: boolean
   onClose: () => void
   onSelect: (value: string, label?: string) => void
   initialTab: 'merge-tags' | 'special-links'
+  currentExportType: ExportType
 }
 
-export const SpecialLinksMenu = ({ isOpen, onClose, onSelect, initialTab }: SpecialLinksMenuProps) => {
-  const [activeTab, setActiveTab] = useState<'merge-tags' | 'special-links'>(initialTab)
+export const SpecialLinksMenu = ({
+  isOpen,
+  onClose,
+  onSelect,
+  initialTab,
+  currentExportType,
+}: SpecialLinksMenuProps) => {
   const [searchQuery, setSearchQuery] = useState('')
+  const [showAllProviders, setShowAllProviders] = useState(false)
 
+  // Reset showAllProviders when dialog opens/closes
   useEffect(() => {
-    setActiveTab(initialTab)
-  }, [initialTab])
+    if (!isOpen) {
+      setShowAllProviders(false)
+    }
+  }, [isOpen])
 
-  const categories = [...new Set([...mergeTags, ...specialLinks].map((item) => item.category))]
+  // Get the current provider name based on export type
+  const currentProvider = exportTypeToCategory[currentExportType] || null
 
-  const filteredItems =
+  // If showing all providers, show all categories, otherwise filter to just the current provider
+  const categories = showAllProviders
+    ? [...new Set(emailElements.map((item: EmailElement) => item.category))]
+    : currentProvider === 'Mailchimp'
+      ? ['Mailchimp']
+      : [...new Set(emailElements.map((item: EmailElement) => item.category))]
+
+  // Filter items based on search and current provider
+  const filteredElements =
     searchQuery === ''
-      ? activeTab === 'merge-tags'
-        ? mergeTags
-        : specialLinks
-      : (activeTab === 'merge-tags' ? mergeTags : specialLinks).filter(
-          (item) =>
-            item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.category.toLowerCase().includes(searchQuery.toLowerCase())
+      ? emailElements.filter(
+          (item: EmailElement) =>
+            showAllProviders || !currentProvider || currentProvider === 'HTML' || item.category === currentProvider
+        )
+      : emailElements.filter(
+          (item: EmailElement) =>
+            (showAllProviders || !currentProvider || currentProvider === 'HTML' || item.category === currentProvider) &&
+            (item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.value.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              item.category.toLowerCase().includes(searchQuery.toLowerCase()))
         )
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child
+        <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
           enterFrom="opacity-0"
@@ -118,11 +67,11 @@ export const SpecialLinksMenu = ({ isOpen, onClose, onSelect, initialTab }: Spec
           leaveTo="opacity-0"
         >
           <div className="fixed inset-0 bg-black bg-opacity-25" />
-        </Transition.Child>
+        </TransitionChild>
 
         <div className="fixed inset-0 overflow-y-auto">
           <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
+            <TransitionChild
               as={Fragment}
               enter="ease-out duration-300"
               enterFrom="opacity-0 scale-95"
@@ -131,35 +80,14 @@ export const SpecialLinksMenu = ({ isOpen, onClose, onSelect, initialTab }: Spec
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">
-                  Insert Special Link or Merge Tag
-                </Dialog.Title>
+              <DialogPanel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <DialogTitle as="h3" className="text-lg font-medium leading-6 text-gray-900">
+                  {currentProvider && currentProvider !== 'HTML'
+                    ? `Insert ${currentProvider} Elements`
+                    : `Insert Email Elements`}
+                </DialogTitle>
                 <div className="mt-4">
-                  <div className="flex space-x-4 border-b border-gray-200">
-                    <button
-                      onClick={() => setActiveTab('merge-tags')}
-                      className={`border-b-2 px-1 py-2 text-sm font-medium ${
-                        activeTab === 'merge-tags'
-                          ? 'border-purple-500 text-purple-600'
-                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                      }`}
-                    >
-                      Merge Tags
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('special-links')}
-                      className={`border-b-2 px-1 py-2 text-sm font-medium ${
-                        activeTab === 'special-links'
-                          ? 'border-purple-500 text-purple-600'
-                          : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700'
-                      }`}
-                    >
-                      Special Links
-                    </button>
-                  </div>
-
-                  <div className="mt-4">
+                  <div className="mt-2">
                     <input
                       type="text"
                       placeholder="Search..."
@@ -169,25 +97,50 @@ export const SpecialLinksMenu = ({ isOpen, onClose, onSelect, initialTab }: Spec
                     />
                   </div>
 
+                  {/* Show toggle for all providers */}
+                  {currentProvider && currentProvider !== 'HTML' && !showAllProviders && (
+                    <button
+                      onClick={() => setShowAllProviders(true)}
+                      className="mt-2 text-xs font-medium text-purple-600 hover:text-purple-800"
+                    >
+                      Looking for another mailing service?
+                    </button>
+                  )}
+
                   <div className="mt-4 max-h-[400px] overflow-y-auto">
-                    {categories.map((category) => {
-                      const categoryItems = filteredItems.filter((item) => item.category === category)
+                    {categories.map((category: string) => {
+                      const categoryItems = filteredElements.filter((item: EmailElement) => item.category === category)
                       if (categoryItems.length === 0) return null
 
                       return (
                         <div key={category} className="mb-4">
                           <div className="text-xs font-semibold uppercase tracking-wider text-gray-500">{category}</div>
                           <div className="mt-2 space-y-1">
-                            {categoryItems.map((item) => (
+                            {categoryItems.map((item: EmailElement) => (
                               <button
                                 key={item.value}
                                 onClick={() => {
                                   onSelect(item.value, item.name)
                                   onClose()
                                 }}
-                                className="flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                className={`flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 ${
+                                  item.type === 'link' ? 'border-l-2 border-blue-500' : 'border-l-2 border-green-500'
+                                }`}
                               >
-                                <span>{item.name}</span>
+                                <div className="flex items-center gap-2">
+                                  {item.type === 'link' && <LinkIcon className="h-4 w-4 text-blue-500" />}
+                                  <span>{item.name}</span>
+                                  {item.type === 'link' && (
+                                    <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-800">
+                                      Link
+                                    </span>
+                                  )}
+                                  {item.type === 'tag' && (
+                                    <span className="rounded-full bg-green-100 px-2 py-0.5 text-xs text-green-800">
+                                      Tag
+                                    </span>
+                                  )}
+                                </div>
                                 <span className="text-xs text-gray-500">{item.value}</span>
                               </button>
                             ))}
@@ -207,8 +160,8 @@ export const SpecialLinksMenu = ({ isOpen, onClose, onSelect, initialTab }: Spec
                     Close
                   </button>
                 </div>
-              </Dialog.Panel>
-            </Transition.Child>
+              </DialogPanel>
+            </TransitionChild>
           </div>
         </div>
       </Dialog>

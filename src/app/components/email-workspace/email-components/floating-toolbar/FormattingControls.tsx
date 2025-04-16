@@ -58,6 +58,7 @@ export const FormattingControls = ({
           className={`rounded p-1 ${link ? 'bg-purple-100 text-purple-800' : 'text-gray-700 hover:bg-gray-100'}`}
           onClick={onLinkClick}
           title="Link"
+          data-link-button="true"
         >
           <LinkIcon className="h-4 w-4" />
         </button>

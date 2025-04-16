@@ -29,10 +29,32 @@ table {
     @apply outline-2 outline outline-red-500 animate-pulse-error;
   }
   
+  /* Address field highlighting for company dialog */
+  .outline-pulse-address {
+    @apply outline-2 outline outline-indigo-500 outline-offset-2 rounded-md;
+    animation: pulse-outline-address 2s infinite;
+  }
+  
   /* Better styling for floating toolbar */
   .floating-toolbar {
     @apply z-50 fixed drop-shadow-xl;
     transform: translateX(-50%); /* Center horizontally */
+  }
+}
+
+/* Animation for address field highlighting */
+@keyframes pulse-outline-address {
+  0% {
+    outline-color: rgba(79, 70, 229, 0.4);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
+  }
+  50% {
+    outline-color: rgba(79, 70, 229, 0.7);
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+  }
+  100% {
+    outline-color: rgba(79, 70, 229, 0.4);
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
   }
 }
 

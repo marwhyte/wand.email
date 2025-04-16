@@ -8,9 +8,10 @@ import { Text } from '@/app/components/text'
 import { addCompany, updateCompany } from '@/lib/database/queries/companies'
 import { getFile } from '@/lib/database/queries/files'
 import { Company, File } from '@/lib/database/types'
+import { useCompanyDialogStore } from '@/lib/stores/companyDialogStore'
 import { formatFileSize, getImgFromKey } from '@/lib/utils/misc'
 import clsx from 'clsx'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Dialog, DialogTitle } from './dialog'
 
 interface FormData {
@@ -27,6 +28,8 @@ interface CompanyDialogProps {
 }
 
 export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: CompanyDialogProps) {
+  const { focusAddressField } = useCompanyDialogStore()
+  const addressInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState<FormData>({
     name: '',
     logoFileId: '',
@@ -37,6 +40,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
   const [fieldErrors, setFieldErrors] = useState<{
     name?: string
     logo?: string
+    address?: string
   }>({})
 
   useEffect(() => {
@@ -54,6 +58,30 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
       })
     }
   }, [company])
+
+  // Focus on address field when requested
+  useEffect(() => {
+    if (isOpen && focusAddressField && addressInputRef.current) {
+      // Small delay to ensure the dialog is fully rendered
+      const timer = setTimeout(() => {
+        if (addressInputRef.current) {
+          addressInputRef.current.focus()
+
+          // Add a pulsing outline to help user identify where to look
+          addressInputRef.current.classList.add('outline-pulse-address')
+
+          // Remove the pulse after a few seconds
+          setTimeout(() => {
+            if (addressInputRef.current) {
+              addressInputRef.current.classList.remove('outline-pulse-address')
+            }
+          }, 4000)
+        }
+      }, 300)
+
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen, focusAddressField])
 
   useEffect(() => {
     async function fetchFileDetails() {
@@ -83,6 +111,13 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
 
       if (!formData.logoFileId) {
         setFieldErrors((prev) => ({ ...prev, logo: 'Please upload a company logo' }))
+        return
+      }
+
+      if (focusAddressField && !formData.address?.trim()) {
+        setFieldErrors((prev) => ({ ...prev, address: 'Address is required for using Mailchimp address merge tags' }))
+        addressInputRef.current?.focus()
+        setIsSubmitting(false)
         return
       }
 
@@ -187,12 +222,15 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
           </Field>
 
           <Field labelPosition="top">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="address">Address {focusAddressField && <span className="text-red-500">*</span>}</Label>
             <Input
               id="address"
+              ref={addressInputRef}
               value={formData.address ?? ''}
               onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              className={clsx(fieldErrors.address && 'border-red-500')}
             />
+            {fieldErrors.address && <Text className="mt-1 !text-sm !text-red-500">{fieldErrors.address}</Text>}
             <span className="pt-2 text-xs text-gray-500">
               A complete, valid mailing address where you are able to receive business mail is required on all
               commercial email communications in order to comply with anti-spam regulations in the US. This is a legal

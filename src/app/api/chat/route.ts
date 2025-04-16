@@ -45,7 +45,6 @@ export async function POST(req: NextRequest) {
       companyName,
       companyId,
       companyDescription,
-      companyAddress,
       emailType,
       emailTheme,
       emailBorderRadius,
@@ -58,7 +57,6 @@ export async function POST(req: NextRequest) {
       companyName?: string
       companyId?: string
       companyDescription?: string
-      companyAddress?: string
       emailType?: EmailType
       emailTheme: EmailTheme
       emailBorderRadius: BorderRadius
@@ -143,7 +141,6 @@ export async function POST(req: NextRequest) {
           options,
           companyName,
           companyDescription,
-          companyAddress,
           provider: DEFAULT_PROVIDER,
           assistantMessageId,
           emailType,
@@ -160,7 +157,6 @@ export async function POST(req: NextRequest) {
       options,
       companyName,
       companyDescription,
-      companyAddress,
       provider: DEFAULT_PROVIDER,
       assistantMessageId,
       emailType,

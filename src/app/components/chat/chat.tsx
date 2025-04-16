@@ -10,6 +10,7 @@ import { Chat as ChatType, Company } from '@/lib/database/types'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { chatStore } from '@/lib/stores/chat'
 import { useChatStore } from '@/lib/stores/chatStore'
+import { useCompanyDialogStore } from '@/lib/stores/companyDialogStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { cubicEasingFn } from '@/lib/utils/easings'
 import { generateEmailScript } from '@/lib/utils/email-script-generator'
@@ -33,6 +34,7 @@ import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 import { v4 as uuidv4 } from 'uuid'
 import { BackgroundGradients } from '../background-gradients'
 import { Button } from '../button'
+import CompanyDialog from '../dialogs/company-dialog'
 import { MobileWarningDialog } from '../dialogs/mobile-warning-dialog'
 import UpgradeDialog from '../dialogs/upgrade-dialog'
 import Workspace from '../email-workspace/email-workspace'
@@ -109,6 +111,12 @@ export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarte
 
   const { mutate } = useSWRConfig()
   const { setTitle, setCompany, company, title, hasConfirmedOutline, setHasConfirmedOutline } = useChatStore()
+  const { isOpen, close, focusAddressField } = useCompanyDialogStore()
+
+  const handleCompanySuccess = (updatedCompany: Company) => {
+    setCompany(updatedCompany)
+    close()
+  }
   useChatHistory({ chat: chat, chatId: id, company: chatCompany })
 
   // Chat state and handlers
@@ -136,7 +144,6 @@ export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarte
       companyName: company?.name,
       companyId: company?.id,
       companyDescription: company?.description,
-      companyAddress: company?.address,
       emailType: email?.type,
       isGeneratingOutline: !hasConfirmedOutline,
       emailThemeColor: themeColor,
@@ -789,6 +796,8 @@ export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarte
             />
 
             <UpgradeDialog />
+            {/* Company Dialog managed by shared store */}
+            <CompanyDialog company={company} isOpen={isOpen} onClose={close} onSuccess={handleCompanySuccess} />
           </div>
         </>
       </div>

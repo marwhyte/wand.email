@@ -1,5 +1,6 @@
 import { EmailBlock, TextBlockAttributes } from '@/app/components/email-workspace/types'
 import { useEmailSave } from '@/app/hooks/useEmailSave'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useToolbarStore } from '@/lib/stores/toolbarStore'
 import Color from '@tiptap/extension-color'
@@ -85,10 +86,27 @@ export default function EditableContent({
 }: Props) {
   const { email, editorCommand, clearCommand, setCurrentBlock, executeCommand } = useEmailStore()
   const { show, hide } = useToolbarStore()
+  const { exportType, company } = useChatStore()
   const saveEmail = useEmailSave()
   const { setState: setToolbarState } = useToolbarStateStore()
   const editorRef = useRef<Editor | null>(null)
   const [selectedLinkUrl, setSelectedLinkUrl] = useState<string | null>(null)
+
+  // Add refs to track last known values
+  const lastExportTypeRef = useRef<string | null>(null)
+  const lastCompanyAddressRef = useRef<string | null>(null)
+
+  // Process content based on export type
+  const processedContent = useMemo(() => {
+    if (!content) return content
+
+    // Only replace the merge tag for HTML or React export types
+    if ((exportType === 'html' || exportType === 'react') && company?.address) {
+      return content.replace(/\*\|LIST:ADDRESSLINE\|\*/g, company.address)
+    }
+
+    return content
+  }, [content, exportType, company?.address])
 
   const onChangeInternal = useCallback(
     (attributes: Partial<TextBlockAttributes>) => {
@@ -228,7 +246,7 @@ export default function EditableContent({
         return false
       },
     },
-    content: forceListItem ? content : content,
+    content: processedContent,
     onUpdate: ({ editor }) => {
       let html = editor.getHTML()
 
@@ -298,6 +316,71 @@ export default function EditableContent({
   useEffect(() => {
     editorRef.current = editor
   }, [editor])
+
+  // Initialize editor with the correct content based on export type on first load
+  useEffect(() => {
+    if (editor && processedContent) {
+      // Only set on first load or if export type changed
+      if (lastExportTypeRef.current === null || lastExportTypeRef.current !== exportType) {
+        editor.commands.setContent(processedContent)
+        lastExportTypeRef.current = exportType
+        lastCompanyAddressRef.current = company?.address || null
+      }
+    }
+  }, [editor, processedContent, exportType, company?.address])
+
+  // Update editor content when export type or company changes
+  useEffect(() => {
+    if (!editor || !content) return
+
+    // Only update if export type or company address actually changed
+    if (exportType === lastExportTypeRef.current && company?.address === lastCompanyAddressRef.current) {
+      return
+    }
+
+    // Update refs with new values
+    lastExportTypeRef.current = exportType
+    lastCompanyAddressRef.current = company?.address || null
+
+    // Skip update if editor is currently focused to avoid disrupting active editing
+    if (editor.isFocused && document.activeElement === editor.view.dom) {
+      return
+    }
+
+    // Process content based on current export type and company
+    let updatedContent = content
+
+    // Only replace the merge tag for HTML or React export types
+    if ((exportType === 'html' || exportType === 'react') && company?.address) {
+      updatedContent = content.replace(/\*\|LIST:ADDRESSLINE\|\*/g, company.address)
+    } else {
+      // For other export types, ensure the merge tag is present (in case it was previously replaced)
+      if (!content.includes('*|LIST:ADDRESSLINE|*') && company?.address && content.includes(company.address)) {
+        updatedContent = content.replace(new RegExp(company.address, 'g'), '*|LIST:ADDRESSLINE|*')
+      }
+    }
+
+    // Only update if content actually changed
+    if (updatedContent !== editor.getHTML()) {
+      // Store current selection state
+      const { from, to } = editor.state.selection
+
+      // Update content
+      editor.commands.setContent(updatedContent)
+
+      // Try to restore selection if possible (approximate position)
+      if (from !== to) {
+        // If there was a selection, try to restore something similar
+        setTimeout(() => {
+          editor.commands.setTextSelection({ from, to })
+        }, 0)
+      }
+
+      // NOTE: We don't call onChange here because we don't want to save the
+      // visual representation of the merge tag (with the company address).
+      // We always save the merge tag in the data model.
+    }
+  }, [editor, content, exportType, company?.address])
 
   // Listen for commands from the store
   useEffect(() => {

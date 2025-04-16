@@ -29,7 +29,7 @@ const LogoUploader = ({ onUpload }: Props) => {
     }
     if (file.size > MAX_FILE_SIZE) {
       setError(
-        `File size exceeds the maximum limit of ${formatFileSize(MAX_FILE_SIZE)}. This is the maximum size recommended for images.`
+        `File size exceeds the maximum limit of ${formatFileSize(MAX_FILE_SIZE)}. This is the maximum size recommended for images in emails.`
       )
       return
     }

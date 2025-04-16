@@ -44,7 +44,7 @@ type Props = {
 export function Header({ chatStarted, monthlyExportCount }: Props) {
   const session = useSession()
   const { email, setEmail } = useEmailStore()
-  const { title, setTitle, company } = useChatStore()
+  const { title, setTitle, company, exportType } = useChatStore()
   const isMobile = useIsMobile()
   const emailAttributes = getEmailAttributes(email)
   const { mobileView, setMobileView } = useMobileViewStore()
@@ -118,7 +118,7 @@ export function Header({ chatStarted, monthlyExportCount }: Props) {
       const response = await fetch('/api/send', {
         method: 'POST',
         body: JSON.stringify({
-          html: render(EmailRendererFinal({ email: processedEmail, company: company })),
+          html: render(EmailRendererFinal({ email: processedEmail, company: company, exportType })),
           email: session?.data?.user?.email,
         }),
         headers: {

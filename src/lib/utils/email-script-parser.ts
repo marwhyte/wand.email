@@ -1848,7 +1848,7 @@ function processOrganizedFooterRow(
     footerRows.push(headerRow)
 
     // Create a second row for all other content
-    const contentRow = createRow(parseRowAttributes({ ...rowAttributes, type: 'footer', stackOnMobile: 'false' }))
+    const contentRow = createRow(parseRowAttributes({ ...rowAttributes, type: 'footer' }))
     const fullWidthColumn = createColumn([], '100%', {})
     contentRow.columns.push(fullWidthColumn)
 

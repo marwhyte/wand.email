@@ -26,6 +26,8 @@ const MailchimpExport = ({ email, company, onExportSuccess, onExportError }: Exp
   const authCheckPerformedRef = useRef(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [designUrl, setDesignUrl] = useState<string | null>(null)
+  const [mailchimpPlan, setMailchimpPlan] = useState<'paid' | 'free'>('paid')
+  const [rewardsBadgeAdded, setRewardsBadgeAdded] = useState(false)
 
   // Use our custom hooks
   const { initiateOAuth, isOAuthLoading, isOAuthSuccess, isOAuthError, oauthError, resetOAuth } = useOAuth({
@@ -140,6 +142,7 @@ const MailchimpExport = ({ email, company, onExportSuccess, onExportError }: Exp
   }
 
   // Handle connection to Mailchimp
+
   const handleConnect = () => {
     initiateOAuth('mailchimp')
   }
@@ -155,16 +158,51 @@ const MailchimpExport = ({ email, company, onExportSuccess, onExportError }: Exp
         throw new Error('Failed to process email')
       }
 
+      // Create a deep copy of the processed email for export to prevent modifying the UI state
+      const emailForExport = JSON.parse(JSON.stringify(emailWithIcons))
+
+      // Check if mailchimp plan is free and we need to add the rewards badge
+      if (mailchimpPlan === 'free' && !rewardsBadgeAdded) {
+        // Add the rewards badge to the last row of the email copy
+        if (emailForExport.rows && Array.isArray(emailForExport.rows) && emailForExport.rows.length > 0) {
+          // Get the last row (usually footer)
+          const lastRow = emailForExport.rows[emailForExport.rows.length - 1]
+
+          // If the last row has columns
+          if (lastRow.columns && Array.isArray(lastRow.columns) && lastRow.columns.length > 0) {
+            // Get the first column of the last row
+            const firstColumn = lastRow.columns[0]
+
+            // If the column has blocks
+            if (firstColumn.blocks && Array.isArray(firstColumn.blocks)) {
+              // Add a text block with the rewards tag
+              firstColumn.blocks.push({
+                type: 'text',
+                id: `rewards-${Date.now()}`,
+                attributes: {
+                  content: '*|REWARDS|*',
+                  textAlign: 'center',
+                  paddingTop: '20px',
+                },
+              })
+            }
+          }
+        }
+
+        setRewardsBadgeAdded(true)
+      }
+
       // Ensure the preview/template name is not too long for Mailchimp (max 50 chars)
-      if (emailWithIcons.preview && emailWithIcons.preview.length > 50) {
-        emailWithIcons.preview = emailWithIcons.preview.substring(0, 47) + '...'
+      if (emailForExport.preview && emailForExport.preview.length > 50) {
+        emailForExport.preview = emailForExport.preview.substring(0, 47) + '...'
       }
 
       // Render the email HTML on the client side
       const htmlEmail = render(
         EmailRendererFinal({
-          email: emailWithIcons,
+          email: emailForExport,
           company,
+          exportType: 'mailchimp',
         })
       )
 
@@ -175,7 +213,7 @@ const MailchimpExport = ({ email, company, onExportSuccess, onExportError }: Exp
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          email: emailWithIcons,
+          email: emailForExport,
           company,
           templateFolderId: selectedTemplateFolder,
           createCampaign,
@@ -365,6 +403,39 @@ const MailchimpExport = ({ email, company, onExportSuccess, onExportError }: Exp
                       </option>
                     ))}
                   </Select>
+                </div>
+
+                <div className="mb-6">
+                  <Text className="mb-2 font-medium">What type of Mailchimp plan do you have?</Text>
+                  <div className="mb-2 text-sm text-gray-500">
+                    This is needed to properly handle the Mailchimp badge requirement for free plans.
+                  </div>
+                  <div className="flex space-x-4">
+                    <div
+                      className={`cursor-pointer rounded-md border px-4 py-2 ${
+                        mailchimpPlan === 'paid' ? 'border-blue-500 bg-blue-100' : 'border-gray-300'
+                      }`}
+                      onClick={() => setMailchimpPlan('paid')}
+                    >
+                      <Text className="font-medium">Paid Plan</Text>
+                    </div>
+                    <div
+                      className={`cursor-pointer rounded-md border px-4 py-2 ${
+                        mailchimpPlan === 'free' ? 'border-blue-500 bg-blue-100' : 'border-gray-300'
+                      }`}
+                      onClick={() => setMailchimpPlan('free')}
+                    >
+                      <Text className="font-medium">Free Plan</Text>
+                    </div>
+                  </div>
+                  {mailchimpPlan === 'free' && (
+                    <div className="mt-2 rounded-md bg-yellow-50 p-3 text-sm text-gray-600">
+                      <p>
+                        We'll add the Mailchimp badge to the bottom of your email (*|REWARDS|* merge tag). If this badge
+                        is not included, Mailchimp will automatically add it to your email when sent.
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <div className="mb-6 flex items-center">

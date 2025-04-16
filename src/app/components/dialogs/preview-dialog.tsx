@@ -18,7 +18,7 @@ type Props = {
 
 const PreviewDialog = ({ open, onClose }: Props) => {
   const { email } = useEmailStore()
-  const { company } = useChatStore()
+  const { company, exportType } = useChatStore()
   const [selectedWidth, setSelectedWidth] = useState<'mobile' | 'desktop'>('desktop')
   const [selectedTab, setSelectedTab] = useState<'preview' | 'script'>('preview')
   const [processedEmail, setProcessedEmail] = useState<Email | null>(null)
@@ -46,7 +46,7 @@ const PreviewDialog = ({ open, onClose }: Props) => {
 
   // Generate the complete HTML string from the processed email
   const htmlContent =
-    open && processedEmail ? render(EmailRendererFinal({ email: processedEmail, company: company })) : ''
+    open && processedEmail ? render(EmailRendererFinal({ email: processedEmail, company: company, exportType })) : ''
 
   const widthOptions = [
     { name: 'Mobile', value: 'mobile', icon: DevicePhoneMobileIcon },

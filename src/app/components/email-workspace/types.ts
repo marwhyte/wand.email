@@ -116,7 +116,7 @@ export const componentLibrary: Record<RowBlockType, { note?: string; examples: s
     allowedBlocks: ['SOCIALS', 'TEXT', 'LINK', 'IMAGE'],
   },
   footer: {
-    note: 'The footer must include an address for all commercial emails.',
+    note: 'The footer must include an address (*|LIST:ADDRESSLINE|*) and unsubscribe link (*|UNSUB|*) for all commercial emails to comply with anti-spam laws.',
     examples: [
       `
       <ROW type="footer">
@@ -127,9 +127,9 @@ export const componentLibrary: Record<RowBlockType, { note?: string; examples: s
             <SOCIAL icon="x" url="#" title="X" alt="X" />
             <SOCIAL icon="instagram" url="#" title="Instagram" alt="Instagram" />
           </SOCIALS>
-          <TEXT>123 Main Street Anytown, CA 12345<br>United States</TEXT>
+          <TEXT>*|LIST:ADDRESSLINE|*</TEXT>
           <TEXT>© 2024 Company Name. All rights reserved.</TEXT>
-          <TEXT><a href="/">Unsubscribe</a> | <a href="/">Privacy Policy</a></TEXT>
+          <TEXT><a href="*|UNSUB|*">Unsubscribe</a></TEXT>
           <TEXT>This email was sent to you because you signed up for updates from Company Name.</TEXT>
         </COLUMN>
       </ROW>
@@ -431,6 +431,7 @@ export const blockLibrary = {
     },
   },
   LINK: {
+    note: 'Can use merge tags in href attribute, especially *|UNSUB|* for unsubscribe links in the footer.',
     attributes: {
       align: ['left', 'center', 'right'],
       href: ['#'],
@@ -493,6 +494,7 @@ export const blockLibrary = {
     },
   },
   TEXT: {
+    note: "Support for merge tags like *|FNAME|*, *|LNAME|*, *|EMAIL|*, *|LIST:ADDRESSLINE|* (sender's address), and *|UNSUB|* (unsubscribe link). Use these tags to personalize emails and comply with anti-spam requirements.",
     attributes: {
       textAlign: ['left', 'center', 'right'],
       color: ['#000000'],

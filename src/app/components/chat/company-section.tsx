@@ -4,6 +4,7 @@ import { deleteCompany } from '@/lib/database/queries/companies'
 import { Chat, Company } from '@/lib/database/types'
 import { useAuthStore } from '@/lib/stores/authStore'
 import { useChatStore } from '@/lib/stores/chatStore'
+import { useCompanyDialogStore } from '@/lib/stores/companyDialogStore'
 import { fetcher, getImgFromKey } from '@/lib/utils/misc'
 import { Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react'
 import { PencilSquareIcon, PlusCircleIcon, TagIcon, TrashIcon } from '@heroicons/react/24/outline'
@@ -12,7 +13,6 @@ import { useSession } from 'next-auth/react'
 import { Fragment, useEffect, useState } from 'react'
 import useSWR, { useSWRConfig } from 'swr'
 import { Button } from '../button'
-import CompanyDialog from '../dialogs/company-dialog'
 import { DeleteCompanyDialog } from '../dialogs/delete-company-dialog'
 import { Text } from '../text'
 import { Tooltip } from '../tooltip'
@@ -43,7 +43,7 @@ export function CompanySection({
   const { setShowSignUpDialog } = useAuthStore()
 
   // Dialog openers
-  const companyOpener = useOpener()
+  const { open: openCompanyDialog, close: closeCompanyDialog } = useCompanyDialogStore()
   const deleteOpener = useOpener()
 
   const { data: companies } = useSWR<Company[]>(session?.data?.user?.id ? '/api/companies' : null, fetcher, {
@@ -124,7 +124,7 @@ export function CompanySection({
   }
 
   const handleCompanySuccess = (updatedCompany: Company) => {
-    companyOpener.close()
+    closeCompanyDialog()
     setActiveCompany(null)
     setCompany(updatedCompany)
     if (chat) {
@@ -135,7 +135,7 @@ export function CompanySection({
     mutate('/api/companies')
   }
 
-  const tooltipId = `company-section`
+  const tooltipId = `company-section-${size}`
   const iconSize = size === 'large' ? 'h-6 w-6' : 'h-4 w-4'
   const textSize = size === 'large' ? 'text-sm' : 'text-xs'
 
@@ -158,7 +158,7 @@ export function CompanySection({
                           return
                         }
                         setActiveCompany(null)
-                        companyOpener.open()
+                        openCompanyDialog()
                         return
                       }
                       if (!handlePopoverOpen()) {
@@ -172,7 +172,7 @@ export function CompanySection({
                   {children}
                 </PopoverButton>
               ) : tooltip ? (
-                <Tooltip id="company-section" place={tooltipPosition} content={tooltip}>
+                <Tooltip id={tooltipId} place={tooltipPosition} content={tooltip}>
                   <PopoverButton
                     className={clsx(
                       'flex items-center space-x-1.5 rounded-md px-2 py-1 hover:bg-gray-200 focus:outline-none',
@@ -188,7 +188,7 @@ export function CompanySection({
                             return
                           }
                           setActiveCompany(null)
-                          companyOpener.open()
+                          openCompanyDialog()
                           return
                         }
                         if (!handlePopoverOpen()) {
@@ -222,7 +222,7 @@ export function CompanySection({
                           return
                         }
                         setActiveCompany(null)
-                        companyOpener.open()
+                        openCompanyDialog()
                         return
                       }
                       if (!handlePopoverOpen()) {
@@ -303,7 +303,8 @@ export function CompanySection({
                                       e.preventDefault()
                                       e.stopPropagation()
                                       setActiveCompany(c)
-                                      companyOpener.open()
+                                      openCompanyDialog()
+                                      close()
                                     }}
                                     tooltipId="edit-company"
                                   >
@@ -316,6 +317,7 @@ export function CompanySection({
                                       e.preventDefault()
                                       e.stopPropagation()
                                       handleDeleteCompany(c.id)
+                                      close()
                                     }}
                                     tooltipId="delete-company"
                                   >
@@ -333,7 +335,7 @@ export function CompanySection({
                           className="w-full"
                           onClick={() => {
                             setActiveCompany(null)
-                            companyOpener.open()
+                            openCompanyDialog()
                             close()
                           }}
                         >
@@ -349,23 +351,7 @@ export function CompanySection({
           )}
         </Popover>
       </div>
-      {tooltip && <Tooltip id="company-section" place={tooltipPosition} content={tooltip} />}
-
-      {/* Company Dialog */}
-      <CompanyDialog
-        company={activeCompany}
-        isOpen={companyOpener.isOpen}
-        onClose={() => {
-          companyOpener.close()
-          setActiveCompany(null)
-          // Reopen the popover
-          const popoverButton = document.querySelector('[aria-label="Company settings"]')
-          if (popoverButton) {
-            ;(popoverButton as HTMLElement).click()
-          }
-        }}
-        onSuccess={handleCompanySuccess}
-      />
+      {tooltip && !children && <Tooltip id={tooltipId} place={tooltipPosition} content={tooltip} />}
 
       {/* Delete Company Dialog */}
       <DeleteCompanyDialog

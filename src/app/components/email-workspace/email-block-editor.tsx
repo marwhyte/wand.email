@@ -314,7 +314,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
             {options.includes(Options.BORDER) && (block.type === 'button' || block.type === 'divider') && (
               <Field labelPosition="top">
                 <Label>Border</Label>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                   <div className="w-[106px]">
                     <Select
                       value={processedProps.style?.borderStyle || 'solid'}
@@ -337,6 +337,7 @@ const EmailBlockEditor = ({ block, onChange }: EmailBlockEditorProps) => {
                   />
 
                   <ColorInput
+                    showTransparent={false}
                     value={processedProps.style?.borderColor || ''}
                     onChange={(e) => onChange({ borderColor: e })}
                   />

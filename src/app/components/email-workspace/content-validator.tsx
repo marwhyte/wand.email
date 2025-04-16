@@ -1,17 +1,21 @@
 'use client'
 
+import { Tooltip } from '@/app/components/tooltip'
+import { useChatStore } from '@/lib/stores/chatStore'
+import { useCompanyDialogStore } from '@/lib/stores/companyDialogStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { isValidHttpUrl } from '@/lib/utils/misc'
 import { Popover, PopoverButton, PopoverPanel, Transition } from '@headlessui/react'
-import { ExclamationCircleIcon } from '@heroicons/react/20/solid'
+import { CheckCircleIcon, ExclamationCircleIcon } from '@heroicons/react/20/solid'
 import { Fragment, useCallback, useEffect, useState } from 'react'
 import { EmailBlock, RowBlock } from './types'
 
 interface ValidationIssue {
   blockId: string
-  type: 'invalidLink' | 'missingImageSrc' | 'invalidSocialLink'
+  type: 'invalidLink' | 'missingImageSrc' | 'invalidSocialLink' | 'missingCompanyAddress' | 'missingMailchimpTag'
   message: string
   socialIndex?: number // Added for social link issues to track which specific social link has an issue
+  tagType?: 'address' | 'unsubscribe' // Added to identify which mailchimp tag is missing
 }
 
 interface ContentValidatorProps {
@@ -21,6 +25,8 @@ interface ContentValidatorProps {
 
 const ContentValidator = ({ className = '', size = 'default' }: ContentValidatorProps) => {
   const { email, setCurrentBlock } = useEmailStore()
+  const { exportType, company } = useChatStore()
+  const { open: openCompanyDialog } = useCompanyDialogStore()
   const [issues, setIssues] = useState<ValidationIssue[]>([])
 
   const findBlockById = useCallback(
@@ -46,6 +52,15 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
 
   const handleSelectBlock = useCallback(
     (blockId: string, close: () => void, issue?: ValidationIssue) => {
+      // Handle address issues by opening the company dialog
+      if (issue?.type === 'missingCompanyAddress') {
+        // Close the issues popover
+        close()
+        // Open the company dialog with focus on address field
+        openCompanyDialog(true)
+        return
+      }
+
       const block = findBlockById(blockId)
       if (block) {
         setCurrentBlock(block)
@@ -135,13 +150,15 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
                       // The editable-content component will detect this selection
                       // and position the toolbar appropriately above the selected link
 
-                      // Wait for floating toolbar to appear, then focus its input when it appears
+                      // Wait for floating toolbar to appear, then directly click the link button
                       setTimeout(() => {
+                        // Find the link button in the floating toolbar - this is in FormattingControls component
                         const linkButton = document.querySelector('.floating-toolbar button[title="Link"]')
                         if (linkButton instanceof HTMLButtonElement) {
+                          // Click the link button to open link editor
                           linkButton.click()
 
-                          // Wait for link input to appear
+                          // Wait for the link input to appear and focus it
                           setTimeout(() => {
                             const linkInput = document.querySelector('.floating-toolbar input[type="text"]')
                             if (linkInput instanceof HTMLInputElement) {
@@ -149,8 +166,23 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
                               addPulsingOutline(linkInput)
                             }
                           }, 100)
+                        } else {
+                          // Fallback - try to find any link button in the toolbar
+                          const anyLinkButton = document.querySelector('.floating-toolbar [data-link-button="true"]')
+                          if (anyLinkButton instanceof HTMLButtonElement) {
+                            anyLinkButton.click()
+
+                            // Wait for the link input to appear and focus it
+                            setTimeout(() => {
+                              const linkInput = document.querySelector('.floating-toolbar input[type="text"]')
+                              if (linkInput instanceof HTMLInputElement) {
+                                linkInput.focus()
+                                addPulsingOutline(linkInput)
+                              }
+                            }, 100)
+                          }
                         }
-                      }, 150) // Slightly increased delay to ensure toolbar appears
+                      }, 150)
                     }
                   }
                 }
@@ -167,7 +199,52 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
         }, 100)
       }
     },
-    [findBlockById, setCurrentBlock]
+    [findBlockById, setCurrentBlock, openCompanyDialog]
+  )
+
+  // Helper function to check for Mailchimp address tags
+  const containsMailchimpAddressTag = (content: string): boolean => {
+    return content.includes('*|LIST:ADDRESSLINE|*')
+  }
+
+  // Helper function to check for Mailchimp unsubscribe tags
+  const containsMailchimpUnsubTag = (content: string): boolean => {
+    return content.includes('*|UNSUB|*')
+  }
+
+  // Helper to check if a string contains a specific mailchimp tag
+  const containsMailchimpTag = (content: string, tag: string): boolean => {
+    return content.includes(tag)
+  }
+
+  // Helper to check if email includes a specific mailchimp tag in any block
+  const emailContainsMailchimpTag = useCallback(
+    (tag: string): boolean => {
+      if (!email) return false
+
+      for (const row of email.rows) {
+        for (const column of row.columns) {
+          for (const block of column.blocks) {
+            if (
+              block.type === 'text' &&
+              block.attributes.content &&
+              containsMailchimpTag(block.attributes.content, tag)
+            ) {
+              return true
+            }
+            if (block.type === 'link' && block.attributes.href === tag) {
+              return true
+            }
+            if (block.type === 'button' && block.attributes.href === tag) {
+              return true
+            }
+          }
+        }
+      }
+
+      return false
+    },
+    [email]
   )
 
   // Validate email content for issues
@@ -220,6 +297,19 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
                 })
               }
             }
+
+            // Check for Mailchimp address tags when export type isn't mailchimp
+            if (
+              exportType !== 'mailchimp' &&
+              containsMailchimpAddressTag(block.attributes.content) &&
+              (!company || !company.address)
+            ) {
+              newIssues.push({
+                blockId: block.id,
+                type: 'missingCompanyAddress',
+                message: `Email contains address merge tag (*|LIST:ADDRESSLINE|*) but company has no address.`,
+              })
+            }
           }
 
           // Check for missing image sources
@@ -250,12 +340,49 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
       })
     })
 
+    // Special check for Mailchimp export type - required tags must be present
+    if (exportType === 'mailchimp') {
+      // Find the footer row (or last row if no explicit footer) for tag warnings
+      const footerRow = email.rows.find((row) => row.attributes.type === 'footer') || email.rows[email.rows.length - 1]
+
+      // If footer row exists, check for required Mailchimp tags
+      if (footerRow) {
+        // Check for address tag
+        if (!emailContainsMailchimpTag('*|LIST:ADDRESSLINE|*')) {
+          newIssues.push({
+            blockId: footerRow.id,
+            type: 'missingMailchimpTag',
+            message:
+              'Required Mailchimp address tag (*|LIST:ADDRESSLINE|*) is missing. This tag is required for compliance with anti-spam laws.',
+            tagType: 'address',
+          })
+        }
+
+        // Check for unsubscribe tag
+        if (!emailContainsMailchimpTag('*|UNSUB|*')) {
+          newIssues.push({
+            blockId: footerRow.id,
+            type: 'missingMailchimpTag',
+            message:
+              'Required Mailchimp unsubscribe tag (*|UNSUB|*) is missing. This tag is required for compliance with anti-spam laws.',
+            tagType: 'unsubscribe',
+          })
+        }
+      }
+    }
+
     setIssues(newIssues)
-  }, [email])
+  }, [email, exportType, company, emailContainsMailchimpTag])
 
   // Helper function to check if a URL is valid for links
   const isValidLinkUrl = (href: string): boolean => {
     if (!href || href.trim() === '') return false
+
+    // Check for Mailchimp merge tags if export type is mailchimp
+    if (exportType === 'mailchimp' && href === '*|UNSUB|*') {
+      // This is a Mailchimp merge tag (like *|UNSUB|*, *|ARCHIVE|*, etc.)
+      return true
+    }
 
     if (href.startsWith('mailto:')) {
       // Check email links (basic validation)
@@ -273,12 +400,26 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
     }
   }
 
-  if (issues.length === 0) return null
-
   // Increase icon sizes
   const iconSize = size === 'small' ? 'h-6 w-6' : 'h-7 w-7'
   const badgeSize = size === 'small' ? 'h-3.5 w-3.5' : 'h-4 w-4'
   const badgeTextSize = size === 'small' ? 'text-[8px]' : 'text-[10px]'
+
+  // If there are no issues and we have an email, show a success checkmark
+  if (issues.length === 0 && email) {
+    return (
+      <div className={`relative ${className}`}>
+        <Tooltip content="Validation successful" id="content-validator-tooltip">
+          <div className="flex items-center justify-center text-green-500">
+            <CheckCircleIcon className={iconSize} />
+          </div>
+        </Tooltip>
+      </div>
+    )
+  }
+
+  // If there are no issues and no email, return null
+  if (issues.length === 0) return null
 
   return (
     <div className={`relative ${className}`}>
@@ -327,11 +468,23 @@ const ContentValidator = ({ className = '', size = 'default' }: ContentValidator
                                 ? 'Invalid Link'
                                 : issue.type === 'missingImageSrc'
                                   ? 'Missing Image Source'
-                                  : 'Invalid Social Link'}
+                                  : issue.type === 'missingCompanyAddress'
+                                    ? 'Missing Company Address'
+                                    : issue.type === 'missingMailchimpTag'
+                                      ? issue.tagType === 'address'
+                                        ? 'Missing Address Tag'
+                                        : 'Missing Unsubscribe Tag'
+                                      : 'Invalid Social Link'}
                             </span>
                           </div>
                           <p className="mt-1 text-xs text-gray-600">{issue.message}</p>
-                          <p className="mt-1 text-xs text-purple-600">Click to select this block</p>
+                          <p className="mt-1 text-xs text-purple-600">
+                            {issue.type === 'missingCompanyAddress'
+                              ? 'Click to add company address'
+                              : issue.type === 'missingMailchimpTag'
+                                ? 'Click to select the footer section'
+                                : 'Click to select this block'}
+                          </p>
                         </div>
                       ))}
                     </div>

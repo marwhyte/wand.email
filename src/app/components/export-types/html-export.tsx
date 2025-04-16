@@ -112,6 +112,7 @@ const HtmlExport = ({ email, company, onExportSuccess, onExportError }: ExportTy
       EmailRendererFinal({
         email: email,
         company: company,
+        exportType: 'html',
       })
     )
   )

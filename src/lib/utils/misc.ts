@@ -77,7 +77,14 @@ export function getImgFromKey(imageKey: string, thumbnail = false) {
   return `https://${process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN}/${cleanedKey}`
 }
 
-export const parseText = (text: string, linkColor: string) => {
+export const parseText = (text: string, linkColor: string, exportType?: string, companyAddress?: string) => {
+  // Replace merge tags for non-mailchimp exports if company address is available
+  let processedText = text
+
+  if (text && exportType && companyAddress && (exportType === 'html' || exportType === 'react')) {
+    processedText = text.replace(/\*\|LIST:ADDRESSLINE\|\*/g, companyAddress)
+  }
+
   const options = {
     replace: (domNode: any) => {
       if (domNode.name === 'a' && (!domNode.attribs.style || !domNode.attribs.style.includes('color'))) {
@@ -87,7 +94,7 @@ export const parseText = (text: string, linkColor: string) => {
     },
   }
 
-  return parse(text, options)
+  return parse(processedText, options)
 }
 
 export function getEmailFromMessage(

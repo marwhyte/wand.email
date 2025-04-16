@@ -183,7 +183,6 @@ export type StreamTextParams = {
   options?: StreamingOptions
   companyName?: string
   companyDescription?: string
-  companyAddress?: string
   provider?: ModelProvider
   assistantMessageId?: string
   emailType?: EmailType
@@ -197,7 +196,6 @@ export async function streamText(params: StreamTextParams) {
     options,
     companyName,
     companyDescription,
-    companyAddress,
     provider = DEFAULT_PROVIDER,
     assistantMessageId,
     emailType,
@@ -257,13 +255,12 @@ export async function streamText(params: StreamTextParams) {
 
   // Use different prompts based on whether we're generating an outline or the actual email
   const systemPrompt = isGeneratingOutline
-    ? getOutlinePrompt({ companyName, companyDescription, companyAddress, emailType: detectedEmailType as EmailType })
+    ? getOutlinePrompt({ companyName, emailType: detectedEmailType })
     : getSystemPrompt({
         emailTheme: emailTheme,
-        emailType: detectedEmailType as EmailType,
+        emailType: detectedEmailType,
         companyName,
         companyDescription,
-        companyAddress,
       })
 
   // Process messages to only include email states from the 2 most recent user messages

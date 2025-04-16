@@ -274,7 +274,7 @@ export default function RowEditor({
           <FieldGroup>
             <Field labelPosition="top">
               <Label>Border</Label>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <div className="w-[106px]">
                   <Select
                     value={rowAttributes.borderStyle || 'solid'}
@@ -295,6 +295,7 @@ export default function RowEditor({
                 />
 
                 <ColorInput
+                  showTransparent={false}
                   value={rowAttributes.borderColor || ''}
                   onChange={(e) => handleRowBorderChange('borderColor', e)}
                 />

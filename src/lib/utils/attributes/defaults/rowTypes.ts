@@ -20,17 +20,18 @@ export const baseRowStyles: Record<
   cta: (row, themeColors) => ({
     borderRadius: '0px',
     backgroundColor: themeColors.gradientDark.start,
-    backgroundImage: `linear-gradient(to bottom right, ${themeColors.gradientDark.start}, ${themeColors.gradientDark.end})`,
+    // backgroundImage: `linear-gradient(to bottom right, ${themeColors.gradientDark.start}, ${themeColors.gradientDark.end})`,
   }),
   invoice: (row, themeColors) => ({}),
   hero: (row, themeColors) => ({
     backgroundColor: themeColors.gradientLight.start,
-    backgroundImage: `linear-gradient(to bottom right, ${themeColors.gradientLight.start}, ${themeColors.gradientLight.end})`,
+    // backgroundImage: `linear-gradient(to bottom right, ${themeColors.gradientLight.start}, ${themeColors.gradientLight.end})`,
   }),
   header: (row, themeColors) => ({
     paddingTop: '24px',
     paddingBottom: '24px',
     backgroundColor: themeColors.base,
+    stackOnMobile: false,
     borderRadius: '16px 16px 0 0',
   }),
   cart: (row, themeColors) => {
@@ -57,6 +58,7 @@ export const baseRowStyles: Record<
     backgroundColor: '#f3f4f6',
     borderRadius: '0 0 16px 16px',
     verticalAlign: 'middle',
+    stackOnMobile: false,
   }),
   gallery: (row, themeColors) => {
     const defaults: Partial<RowBlock['attributes']> = {

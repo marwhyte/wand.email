@@ -78,9 +78,6 @@ export const rowTypeBlockDefaults: Record<RowBlockType, BlockStyleModifier> = {
     },
   },
   'feature-list': {
-    column: {
-      width: '33.33',
-    },
     icon: {
       align: 'center',
     },
@@ -118,7 +115,6 @@ export const rowTypeBlockDefaults: Record<RowBlockType, BlockStyleModifier> = {
       borderRadius: '0px',
     },
     column: {
-      width: '50',
       backgroundColor: '#ffffff',
       borderRadius: '8px',
     },
@@ -158,9 +154,6 @@ export const rowTypeBlockDefaults: Record<RowBlockType, BlockStyleModifier> = {
       paddingRight: '0px',
       paddingBottom: '0px',
       paddingLeft: '0px',
-    },
-    column: {
-      width: '100',
     },
   },
   cta: {
@@ -228,9 +221,6 @@ export const rowTypeBlockDefaults: Record<RowBlockType, BlockStyleModifier> = {
     },
     heading: {
       fontSize: '32px',
-    },
-    column: {
-      width: '50',
     },
   },
   discount: {

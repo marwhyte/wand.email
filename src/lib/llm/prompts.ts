@@ -101,6 +101,19 @@ const templateStructureDefinition = `
   </EMAIL>
 </email_script_syntax>
 
+<merge_tags>
+When creating emails, always use merge tags for dynamic content like names, addresses, and unsubscribe links. These tags will be automatically replaced with the appropriate content when the email is sent.
+
+Important merge tags to use:
+- *|EMAIL|* - The recipient's email address
+- *|FNAME|* - The recipient's first name 
+- *|LNAME|* - The recipient's last name
+- *|LIST:ADDRESSLINE|* - The sender's physical address (required for compliance with anti-spam laws)
+- *|UNSUB|* - An unsubscribe link (required for compliance with anti-spam laws)
+
+Every commercial email footer MUST include both the address (*|LIST:ADDRESSLINE|*) and unsubscribe link (*|UNSUB|*) merge tags in the footer section.
+</merge_tags>
+
 <rich_text_support>
 All text content (in HEADING, TEXT, BUTTON, LINK, LI, TD elements) supports rich text formatting using the following HTML tags:
 - <a href="..."> for links
@@ -148,6 +161,7 @@ ${generateBlockAttributesDocs()}
   - TABLE component must have TR and TD child elements
   - SOCIALS component must have SOCIAL child elements
   - EVERY ROW MUST HAVE A TYPE ATTRIBUTE from the component library. If no specific type is needed, use type="default".
+  - FOOTER rows MUST include both *|LIST:ADDRESSLINE|* and *|UNSUB|* merge tags for compliance with anti-spam laws.
   
 </validation_rules>
 `
@@ -158,19 +172,17 @@ export type SystemPromptParams = {
   emailType: EmailType
   companyName?: string
   companyDescription?: string
-  companyAddress?: string
 }
 
 export type OutlinePromptParams = {
   companyName?: string
   companyDescription?: string
-  companyAddress?: string
   emailType?: EmailType
 }
 
 // Function to get the system prompt
 export const getSystemPrompt = (params: SystemPromptParams) => {
-  const { emailTheme, emailType, companyName, companyDescription, companyAddress } = params
+  const { emailTheme, emailType, companyName, companyDescription } = params
 
   return `
 You are Wand, an expert AI assistant for email template design. You generate and modify email templates using a specific XML-based syntax.
@@ -193,6 +205,8 @@ You are Wand, an expert AI assistant for email template design. You generate and
   15. Keep button text concise, especially in multi-column layouts (articles, cards) - use short, action-oriented phrases (1-3 words) rather than long sentences.
   16. When creating lists of items or features, use ICON components with type="feature-list" by default, rather than bullet lists (LIST component), unless the user specifically requests bullet points.
   17. IMPORTANT: If an IMAGE has a src attribute that contains a URL/link, preserve that exact URL in your response UNLESS the user specifically asks you to regenerate the image.
+  18. ALWAYS include *|LIST:ADDRESSLINE|* (for the sender's physical address) and *|UNSUB|* (for unsubscribe link) merge tags in the footer of every email that requires compliance with anti-spam laws.
+  19. Use merge tags like *|FNAME|*, *|LNAME|*, and *|EMAIL|* when you need to personalize content within the email.
 </instructions>
 ${
   companyName
@@ -202,15 +216,7 @@ ${
      and anywhere the company identity should be represented. Replace any generic company references with this name. -->
 </company_name>
 ${companyDescription ? `<company_description>${companyDescription}</company_description>` : ''}
-${
-  companyAddress
-    ? `<company_address>
-  ${companyAddress}
-  <!-- IMPORTANT: Add this address to the 
-   of the email. -->
-</company_address>`
-    : ''
-}`
+`
     : ''
 }
 
@@ -233,7 +239,7 @@ Do not include any explanatory text - continue the EMAIL script directly.
 `
 
 export const getOutlinePrompt = (params: OutlinePromptParams) => {
-  const { companyName, companyDescription, companyAddress, emailType } = params
+  const { companyName, companyDescription, emailType } = params
 
   return `
 You are Wand, an expert AI assistant for email template design. You generate clear, user-friendly email outlines that help users understand exactly what their email will contain.
@@ -255,7 +261,7 @@ Email Type: [type]
    • Socials
    • Address
    • Copyright
-   • Unsubscribe and privacy policy link
+   • Unsubscribe link
    • Reason for email
 
 Recommended sections based on email type:
@@ -281,7 +287,7 @@ Welcome Series:
    • Socials
    • Address
    • Copyright
-   • Unsubscribe and privacy policy link
+   • Unsubscribe link
    • Reason for email
 
 Ecommerce:
@@ -310,7 +316,7 @@ Ecommerce:
    • Socials
    • Address
    • Copyright
-   • Unsubscribe and privacy policy link
+   • Unsubscribe link
    • Reason for email
 
 Newsletter:
@@ -340,7 +346,7 @@ Newsletter:
    • Socials
    • Address
    • Copyright
-   • Unsubscribe and privacy policy link
+   • Unsubscribe link
    • Reason for email
 
 Transactional:
@@ -360,7 +366,7 @@ Transactional:
    • Socials
    • Address
    • Copyright
-   • Unsubscribe and privacy policy link
+   • Unsubscribe link
    • Reason for email
 
 Cart Abandonment:
@@ -390,7 +396,7 @@ Cart Abandonment:
    • Socials
    • Address
    • Copyright
-   • Unsubscribe and privacy policy link
+   • Unsubscribe link
    • Reason for email
 
 Default (if no specific type matches):
@@ -415,7 +421,7 @@ Default (if no specific type matches):
    • Socials
    • Address
    • Copyright
-   • Unsubscribe and privacy policy link
+   • Unsubscribe link
    • Reason for email
 
 Keep descriptions brief and focused on the main purpose of each section. Use 2-3 bullet points maximum per section.
@@ -425,6 +431,7 @@ Remember to:
 • Focus on main purpose
 • Include key actions
 • Always include header and footer sections
+• Always include *|LIST:ADDRESSLINE|* and *|UNSUB|* merge tags in the footer 
 • Include social links when they enhance the email's purpose
 • Add sections that best serve the email's primary goal
 </instructions>
@@ -436,14 +443,7 @@ ${
   <!-- IMPORTANT: Incorporate this company name in all relevant sections -->
 </company_name>
 ${companyDescription ? `<company_description>${companyDescription}</company_description>` : ''}
-${
-  companyAddress
-    ? `<company_address>
-  ${companyAddress}
-  <!-- IMPORTANT: Add this address to the footer section -->
-</company_address>`
-    : ''
-}`
+`
     : ''
 }
 
