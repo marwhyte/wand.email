@@ -431,8 +431,8 @@ const MailchimpExport = ({ email, company, onExportSuccess, onExportError }: Exp
                   {mailchimpPlan === 'free' && (
                     <div className="mt-2 rounded-md bg-yellow-50 p-3 text-sm text-gray-600">
                       <p>
-                        We'll add the Mailchimp badge to the bottom of your email (*|REWARDS|* merge tag). If this badge
-                        is not included, Mailchimp will automatically add it to your email when sent.
+                        We&apos;ll add the Mailchimp badge to the bottom of your email (*|REWARDS|* merge tag). If this
+                        badge is not included, Mailchimp will automatically add it to your email when sent.
                       </p>
                     </div>
                   )}
