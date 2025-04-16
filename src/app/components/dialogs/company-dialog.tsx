@@ -8,6 +8,7 @@ import { Text } from '@/app/components/text'
 import { addCompany, updateCompany } from '@/lib/database/queries/companies'
 import { getFile } from '@/lib/database/queries/files'
 import { Company, File } from '@/lib/database/types'
+import { useChatStore } from '@/lib/stores/chatStore'
 import { useCompanyDialogStore } from '@/lib/stores/companyDialogStore'
 import { formatFileSize, getImgFromKey } from '@/lib/utils/misc'
 import clsx from 'clsx'
@@ -29,6 +30,7 @@ interface CompanyDialogProps {
 
 export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: CompanyDialogProps) {
   const { focusAddressField } = useCompanyDialogStore()
+  const { exportType } = useChatStore()
   const addressInputRef = useRef<HTMLInputElement>(null)
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -42,6 +44,9 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
     logo?: string
     address?: string
   }>({})
+
+  // Hide address field for Mailchimp exports
+  const showAddressField = exportType !== 'mailchimp'
 
   useEffect(() => {
     if (company) {
@@ -61,7 +66,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
 
   // Focus on address field when requested
   useEffect(() => {
-    if (isOpen && focusAddressField && addressInputRef.current) {
+    if (isOpen && focusAddressField && addressInputRef.current && showAddressField) {
       // Small delay to ensure the dialog is fully rendered
       const timer = setTimeout(() => {
         if (addressInputRef.current) {
@@ -81,7 +86,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
 
       return () => clearTimeout(timer)
     }
-  }, [isOpen, focusAddressField])
+  }, [isOpen, focusAddressField, showAddressField])
 
   useEffect(() => {
     async function fetchFileDetails() {
@@ -114,12 +119,7 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
         return
       }
 
-      if (focusAddressField && !formData.address?.trim()) {
-        setFieldErrors((prev) => ({ ...prev, address: 'Address is required for using Mailchimp address merge tags' }))
-        addressInputRef.current?.focus()
-        setIsSubmitting(false)
-        return
-      }
+      // Address is never required
 
       if (company) {
         const updatedCompany = await updateCompany(company.id, {
@@ -189,14 +189,14 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
                 <div className="w-fit rounded-md p-2">
                   <img
                     className={clsx(
-                      'h-14 rounded-lg object-contain', // Scaled down from h-32 to h-21
+                      'h-14 rounded-lg object-contain',
                       fileDetails.width && fileDetails.height
                         ? fileDetails.width > fileDetails.height
                           ? 'w-auto' // Wider image
                           : fileDetails.width === fileDetails.height
-                            ? 'w-21' // Scaled down from w-32 to w-21 for square image
+                            ? 'w-21' // Square image
                             : 'w-auto' // Taller image
-                        : 'w-32' // Scaled down from w-48 to w-32 for default wider logo
+                        : 'w-32' // Default wider logo
                     )}
                     src={getImgFromKey(fileDetails?.imageKey)}
                     alt="Logo"
@@ -221,22 +221,24 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
             )}
           </Field>
 
-          <Field labelPosition="top">
-            <Label htmlFor="address">Address {focusAddressField && <span className="text-red-500">*</span>}</Label>
-            <Input
-              id="address"
-              ref={addressInputRef}
-              value={formData.address ?? ''}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              className={clsx(fieldErrors.address && 'border-red-500')}
-            />
-            {fieldErrors.address && <Text className="mt-1 !text-sm !text-red-500">{fieldErrors.address}</Text>}
-            <span className="pt-2 text-xs text-gray-500">
-              A complete, valid mailing address where you are able to receive business mail is required on all
-              commercial email communications in order to comply with anti-spam regulations in the US. This is a legal
-              requirement for all commercial email communications.
-            </span>
-          </Field>
+          {/* Only show address field for non-Mailchimp exports */}
+          {showAddressField && (
+            <Field labelPosition="top">
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                ref={addressInputRef}
+                value={formData.address ?? ''}
+                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                className={clsx(fieldErrors.address && 'border-red-500')}
+              />
+              {fieldErrors.address && <Text className="mt-1 !text-sm !text-red-500">{fieldErrors.address}</Text>}
+              <span className="pt-2 text-xs text-gray-500">
+                A complete mailing address in your email communications helps with deliverability and trust, though it's
+                entirely optional here.
+              </span>
+            </Field>
+          )}
         </FieldGroup>
 
         <div className="mt-6 flex justify-end gap-3">
