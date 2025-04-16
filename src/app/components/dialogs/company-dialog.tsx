@@ -234,8 +234,8 @@ export default function CompanyDialog({ isOpen, onClose, onSuccess, company }: C
               />
               {fieldErrors.address && <Text className="mt-1 !text-sm !text-red-500">{fieldErrors.address}</Text>}
               <span className="pt-2 text-xs text-gray-500">
-                A complete mailing address in your email communications helps with deliverability and trust, though it's
-                entirely optional here.
+                A complete mailing address in your email communications helps with deliverability and trust, though
+                it&apos;s entirely optional here.
               </span>
             </Field>
           )}
