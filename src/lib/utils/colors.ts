@@ -3,6 +3,7 @@ export type ThemeColors = {
   light: string
   base: string
   action: string
+  linkColor: string
   textColor: string
   gradientLight: {
     start: string
@@ -39,6 +40,21 @@ export function rgbToHex(r: number, g: number, b: number): string {
 export function getLuminance(hex: string): number {
   const { r, g, b } = hexToRgb(hex)
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255
+}
+
+// New function to ensure link colors have enough contrast on white backgrounds
+export function ensureLinkColorContrast(color: string): string {
+  const luminance = getLuminance(color)
+
+  // If the color is too light (high luminance), darken it to ensure visibility
+  if (luminance > 0.7) {
+    // For light colors, darken them to ensure visibility
+    // The amount of darkening depends on how light the color is
+    const darkenAmount = Math.min(0.6, (luminance - 0.5) * 1.2)
+    return darken(color, darkenAmount)
+  }
+
+  return color
 }
 
 export function lighten(hex: string, amount: number): string {
@@ -80,10 +96,18 @@ export function getThemeColors(themeColor: string): ThemeColors {
   // Set the action color to the input color
   let actionColor = themeColor
 
+  // Create a dedicated link color based on the theme color
+  let linkColor = themeColor
+
   // For very light colors, use black as the action color
   // High luminance indicates a very light color
   if (luminance > 0.86) {
     actionColor = '#000000'
+    // For very light themes, use a darker version of the theme color for links
+    linkColor = darken(themeColor, 0.4)
+  } else {
+    // Ensure the link color has enough contrast on white backgrounds
+    linkColor = ensureLinkColorContrast(themeColor)
   }
 
   // Base color is always white to ensure maximum contrast with gradients
@@ -116,6 +140,7 @@ export function getThemeColors(themeColor: string): ThemeColors {
         light: '#f0f0f0', // Light gray background
         base: '#ffffff', // White base
         action: '#000000', // Black action color
+        linkColor: '#000000', // Black link color
         textColor: '#000000', // Black text for light backgrounds
         gradientLight: {
           start: '#e0e0e0',
@@ -143,6 +168,7 @@ export function getThemeColors(themeColor: string): ThemeColors {
         light: '#f0f0f0', // Slightly gray background instead of pure white
         base: '#ffffff', // White base
         action: '#c0c0c0', // Light gray action color
+        linkColor: '#666666', // Darker gray for better link visibility
         textColor: '#000000', // Black text for light backgrounds
         gradientLight: {
           start: '#e8e8e8',
@@ -209,6 +235,9 @@ export function getThemeColors(themeColor: string): ThemeColors {
 
     // Set the light color to a dark but visible shade
     lightColor = '#f0f0f5' // Use a very light color instead of dark
+
+    // For dark themes, use a light blue-ish color for links
+    linkColor = '#a7c8ff'
   }
 
   // Define color family type for TypeScript type safety
@@ -411,6 +440,7 @@ export function getThemeColors(themeColor: string): ThemeColors {
     light: lightColor,
     base: baseColor,
     action: actionColor,
+    linkColor: linkColor,
     textColor: shouldUseDarkText(actionColor) ? '#000000' : '#ffffff',
     gradientLight: {
       start: lightGradient.start,

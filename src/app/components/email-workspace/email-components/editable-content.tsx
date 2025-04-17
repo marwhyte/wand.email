@@ -3,6 +3,7 @@ import { useEmailSave } from '@/app/hooks/useEmailSave'
 import { useChatStore } from '@/lib/stores/chatStore'
 import { useEmailStore } from '@/lib/stores/emailStore'
 import { useToolbarStore } from '@/lib/stores/toolbarStore'
+import { getEmailAttributes } from '@/lib/utils/attributes/attributes'
 import Color from '@tiptap/extension-color'
 import Link from '@tiptap/extension-link'
 import TextStyle from '@tiptap/extension-text-style'
@@ -96,6 +97,10 @@ export default function EditableContent({
   const lastExportTypeRef = useRef<string | null>(null)
   const lastCompanyAddressRef = useRef<string | null>(null)
 
+  // Get email attributes to access the link color
+  const emailAttributes = useMemo(() => (email ? getEmailAttributes(email) : null), [email])
+  const linkColor = emailAttributes?.linkColor || '#4F46E5' // Default to indigo if no email attributes
+
   // Process content based on export type
   const processedContent = useMemo(() => {
     if (!content) return content
@@ -181,7 +186,9 @@ export default function EditableContent({
         autolink: true,
         defaultProtocol: 'https',
         protocols: ['http', 'https'],
-        HTMLAttributes: {},
+        HTMLAttributes: {
+          style: `color: ${linkColor};`,
+        },
         validate: (url) => {
           try {
             new URL(url.startsWith('http') ? url : `https://${url}`)
@@ -613,6 +620,30 @@ export default function EditableContent({
       }, 10)
     }
   }, [editor, forceListItem, listType])
+
+  // Update link styling when the theme color changes
+  useEffect(() => {
+    if (editor && linkColor) {
+      // Update all existing links with the new color
+      const links = editor.view.dom.querySelectorAll('a')
+      links.forEach((link) => {
+        link.style.color = linkColor
+      })
+    }
+  }, [editor, linkColor])
+
+  // Update link styling after creating a link
+  useEffect(() => {
+    if (editor && editorCommand?.type === 'link' && linkColor) {
+      // Wait for the link to be created, then update its style
+      setTimeout(() => {
+        const links = editor.view.dom.querySelectorAll('a')
+        links.forEach((link) => {
+          link.style.color = linkColor
+        })
+      }, 10)
+    }
+  }, [editor, editorCommand, linkColor])
 
   if (!editor) {
     return null

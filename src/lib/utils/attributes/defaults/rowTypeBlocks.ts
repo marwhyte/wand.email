@@ -501,18 +501,83 @@ function getBlockSpecificOverrides(
       // Get column count
       const columnCount = parentRow.columns.length
 
-      // Base width is 22% for 1 column
-      // Each additional column adds 1/2 more instead of 1/3 (approximately 11% more per column)
-      const baseWidth = 22
-      let scaledWidth = baseWidth
+      // If company logo dimensions are available, use them directly
+      if (company?.logoWidth && company?.logoHeight) {
+        // Get aspect ratio to determine appropriate sizing
+        const logoWidth = company.logoWidth
+        const logoHeight = company.logoHeight
 
-      // Add 1/2 more for each additional column (22% + 11% per extra column)
-      if (columnCount > 1) {
-        const extraWidth = (baseWidth / 2) * (columnCount - 1)
-        scaledWidth = Math.min(baseWidth + extraWidth, 85) // Cap at 85%
+        if (logoWidth && logoHeight) {
+          const aspectRatio = logoWidth / logoHeight
+
+          // Set a reasonable width based on aspect ratio
+          let width = 140 // Default size in pixels
+
+          // For wider logos (landscape orientation), use larger width
+          if (aspectRatio > 2) {
+            width = 160
+          } else if (aspectRatio > 1) {
+            // For moderately wide logos
+            width = 120
+          } else {
+            // For square or tall logos (portrait orientation)
+            width = 60
+          }
+
+          imageStyles.width = `${width}px`
+        } else {
+          // Fallback if dimensions exist but are zero
+          let baseWidth = columnCount === 1 ? 140 : 120
+          imageStyles.width = `${baseWidth}px`
+        }
+      } else {
+        // Default fallback dimensions (will be used for SSR)
+        let baseWidth = columnCount === 1 ? 140 : 120
+        imageStyles.width = `${baseWidth}px`
+
+        // Try to detect if we're on the client side
+        if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+          // We're on the client side, we can try to load the image to get dimensions
+          const img = new Image()
+          img.src = getImgSrc(attributes.src, company) || ''
+
+          // Create the image element to load and get dimensions
+          img.onload = function () {
+            // Once the image loads, we can get its natural dimensions
+            const naturalWidth = img.naturalWidth
+            const naturalHeight = img.naturalHeight
+
+            if (naturalWidth && naturalHeight) {
+              const aspectRatio = naturalWidth / naturalHeight
+
+              // Calculate width based on aspect ratio
+              let width = 140 // Default size
+
+              // Adjust width based on aspect ratio
+              if (aspectRatio > 2) {
+                width = 160 // Wide logo
+              } else if (aspectRatio > 1) {
+                width = 120 // Moderately wide logo
+              } else {
+                width = 60 // Square or tall logo
+              }
+
+              // Directly set the width in the imageStyles
+              imageStyles.width = `${width}px`
+            }
+          }
+
+          // Start loading the image to trigger onload
+          if (img.src) {
+            // If the image is already cached, onload might not fire
+            // Check if complete and naturalWidth is available
+            if (img.complete && img.naturalWidth) {
+              // Call onload handler directly in this case
+              img.onload && (img.onload as Function)()
+            }
+          }
+        }
       }
-
-      imageStyles.width = `${scaledWidth}%`
     }
 
     // Return all image styles if we have any

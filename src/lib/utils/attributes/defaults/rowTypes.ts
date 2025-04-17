@@ -32,6 +32,7 @@ export const baseRowStyles: Record<
     paddingBottom: '24px',
     backgroundColor: themeColors.base,
     stackOnMobile: false,
+    verticalAlign: 'middle',
     borderRadius: '16px 16px 0 0',
   }),
   cart: (row, themeColors) => {

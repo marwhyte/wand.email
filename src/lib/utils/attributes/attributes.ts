@@ -100,7 +100,7 @@ export function getEmailAttributes(email: Email | null): EmailAttributes {
     backgroundColor: '#F9FAFB',
     color: '#111827',
     fontFamily: 'Arial, Helvetica, Arial, sans-serif',
-    linkColor: themeColors.action,
+    linkColor: themeColors.linkColor,
     rowBackgroundColor: themeColors.base,
     width: email?.type === 'transactional' ? '500' : '600',
     styleVariant: email?.styleVariant ?? 'default',
