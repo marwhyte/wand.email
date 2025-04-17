@@ -15,7 +15,7 @@ import { updateEmailForMessage } from '../(chat)/actions'
 import { notifySlack } from '../actions/notifySlack'
 
 const logger = createScopedLogger('MessageParser')
-const FREE_IMAGE_LIMIT = 5
+const FREE_IMAGE_LIMIT = 6
 
 // Get AI-friendly color description without the hexcode
 const getColorDescription = (hexColor: string): string => {
@@ -129,7 +129,7 @@ export function useMessageParser(message: Message) {
 
         if (imageGenRequests.size > 0) {
           // Check if the user has hit their monthly image limit
-          const hitLimit = await hasHitImageLimit()
+          const hitLimit = await hasHitImageLimit(FREE_IMAGE_LIMIT)
 
           // Update the image store with the limit status
           setHasHitLimit(hitLimit)
