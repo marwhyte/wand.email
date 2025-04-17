@@ -2,11 +2,13 @@ export const LOGIN = '/login'
 export const SIGNUP = '/signup'
 export const ROOT = '/'
 export const CHAT = '/chat'
+export const IMAGE_HOSTING = '/image-hosting'
 
 export const PUBLIC_ROUTES = [
   ROOT,
   LOGIN,
   SIGNUP,
+  IMAGE_HOSTING,
   '/api/auth/callback/google',
   '/api/auth/signin/google',
   '/api/auth/session',

@@ -15,6 +15,7 @@ import { Button } from '../button'
 import ButtonCard from '../button-card'
 import { exportTypes } from '../export-types'
 import { ExportTypeComponent } from '../export-types/export-type'
+import { ImageHostingNotice } from '../image-hosting-notice'
 import { Input } from '../input'
 import Notification from '../notification'
 import { usePlan } from '../payment/plan-provider'
@@ -193,6 +194,7 @@ const ExportDialog = ({ open, onClose, monthlyExportCount }: Props) => {
                 ? `You have made ${monthlyExportCount} exports. You have unlimited exports on your current plan.`
                 : `You have made ${monthlyExportCount} out of 5 monthly exports.`}
             </AlertBox>
+            <ImageHostingNotice />
           </div>
           {notificationMessage && (
             <div className="mt-2">
