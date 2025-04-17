@@ -540,18 +540,18 @@ export function Chat({ id, chatCompany, initialMessages, chat, initialChatStarte
 
   useEffect(() => {
     // Only run when status changes from 'streaming' to 'idle'
-    if (status === 'ready' && latestAssistantMessage) {
+    if (status === 'ready' && latestAssistantMessage && hasConfirmedOutline) {
       if (!isFirstAssistantMessageComplete) {
         // First assistant message just completed
         setIsFirstAssistantMessageComplete(true)
 
         // Automatically switch to preview when the first assistant message completes
-        if (isMobile && chatStarted) {
+        if (isMobile && chatStarted && hasConfirmedOutline) {
           setShowEmailPreview(true)
         }
       } else {
         // Subsequent messages - only switch when they complete (status becomes idle)
-        if (isMobile && chatStarted) {
+        if (isMobile && chatStarted && hasConfirmedOutline) {
           setShowEmailPreview(true)
         }
       }

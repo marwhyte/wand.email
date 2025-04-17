@@ -502,7 +502,7 @@ function getBlockSpecificOverrides(
       const columnCount = parentRow.columns.length
 
       // If company logo dimensions are available, use them directly
-      if (company?.logoWidth && company?.logoHeight) {
+      if (attributes.src === 'logo' && company?.logoWidth && company?.logoHeight) {
         // Get aspect ratio to determine appropriate sizing
         const logoWidth = company.logoWidth
         const logoHeight = company.logoHeight

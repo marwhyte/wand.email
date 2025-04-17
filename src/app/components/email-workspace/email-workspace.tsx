@@ -38,9 +38,11 @@ export default function Workspace({ isStreaming }: Props) {
         <div className="flex flex-row" style={{ height: 'calc(100vh - 78px)' }}>
           <div className="relative flex flex-1 flex-col overflow-hidden">
             <EmailRenderer email={email} />
-            <div className="flex-shrink-0">
-              <EmailWorkspaceFooter />
-            </div>
+            {!isMobile && (
+              <div className="flex-shrink-0">
+                <EmailWorkspaceFooter />
+              </div>
+            )}
           </div>
           {!isMobile && <EmailEditor email={email} />}
         </div>

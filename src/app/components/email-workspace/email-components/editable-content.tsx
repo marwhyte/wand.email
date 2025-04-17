@@ -358,8 +358,11 @@ export default function EditableContent({
     let updatedContent = content
 
     // Only replace the merge tag for HTML or React export types
-    if ((exportType === 'html' || exportType === 'react') && company?.address) {
-      updatedContent = content.replace(/\*\|LIST:ADDRESSLINE\|\*/g, company.address)
+    if (exportType === 'html' || exportType === 'react') {
+      updatedContent = content.replace(
+        /\*\|LIST:ADDRESSLINE\|\*/g,
+        company?.address || 'Add your address here or in branding'
+      )
     } else {
       // For other export types, ensure the merge tag is present (in case it was previously replaced)
       if (!content.includes('*|LIST:ADDRESSLINE|*') && company?.address && content.includes(company.address)) {
