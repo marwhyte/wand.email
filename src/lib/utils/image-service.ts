@@ -3,6 +3,7 @@
 import { uploadFile } from '@/app/actions/uploadFile'
 import { getImgFromKey } from '@/lib/utils/misc'
 import { google } from '@ai-sdk/google'
+import { GoogleGenAI, PersonGeneration } from '@google/genai'
 import { generateText, NoImageGeneratedError } from 'ai'
 import namer from 'color-namer'
 import { createClient } from 'pexels'
@@ -44,7 +45,58 @@ export async function resolveImageSrc(
       try {
         const colorDescription = getColorDescription(themeColor)
 
-        // Use Google's generative AI model for image generation
+        // Try Imagen-3 first (higher quality AI image generation)
+        try {
+          const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
+          if (!apiKey) {
+            throw new Error('Missing Google API key')
+          }
+
+          const genAI = new GoogleGenAI({ apiKey })
+
+          const prompt = `Create a marketing-style visual that shows: ${keyword}. 
+                  Modern, clean illustration in a light theme with ${colorDescription} color accents.
+                  Professional, minimalist style with soft glowing elements and a clean background.`
+
+          // Use the new Imagen model
+          const response = await genAI.models.generateImages({
+            model: 'imagen-3.0-generate-002',
+            prompt,
+            config: {
+              numberOfImages: 1,
+              aspectRatio,
+              personGeneration: PersonGeneration.ALLOW_ADULT, // Allow adult people in images
+            },
+          })
+
+          if (response.generatedImages && response.generatedImages.length > 0) {
+            const generatedImage = response.generatedImages[0]
+            if (generatedImage.image && generatedImage.image.imageBytes) {
+              const imageBytes = generatedImage.image.imageBytes
+
+              // Convert to file and upload
+              const imgFile = base64ToFile(
+                imageBytes,
+                `imagen-${encodeURIComponent(keyword.slice(0, 30))}-${Date.now()}.png`
+              )
+
+              console.log('Imagen-3 generated image:', imgFile)
+
+              const imageUrl = await uploadAiGeneratedImage(imgFile, keyword, aspectRatio)
+              return imageUrl
+            }
+          }
+
+          // If we get here with no image, fall back to Gemini
+          console.log('Imagen-3 did not return valid images, falling back to Gemini 2.0')
+        } catch (imagenError) {
+          console.error('Imagen-3 error, falling back to Gemini 2.0:', imagenError)
+          // Continue with the existing Gemini implementation
+        }
+
+        console.log('Falling back to Gemini 2.0 Flash')
+
+        // Use Google's generative AI model for image generation (Gemini 2.0 Flash)
         const result = await generateText({
           model: google('gemini-2.0-flash-exp'),
           providerOptions: {
@@ -54,9 +106,6 @@ export async function resolveImageSrc(
                   Modern, clean illustration in a light theme with ${colorDescription} color accents.
                   Professional, minimalist style with soft glowing elements and a clean background.`,
         })
-
-        // Capture a reference to the result for error handling
-        const resultRef = result
 
         // Handle the generated image
         const files = result.files || []
@@ -124,10 +173,31 @@ export async function resolveImageSrc(
   }
 }
 
+// Convert base64 to File object
+function base64ToFile(base64String: string, filename: string): File {
+  // Extract the base64 data if it's a data URL
+  let base64Data = base64String
+  if (base64String.startsWith('data:')) {
+    const matches = base64String.match(/^data:([A-Za-z-+/]+);base64,(.+)$/)
+    if (matches && matches.length === 3) {
+      base64Data = matches[2]
+    }
+  }
+
+  // Convert base64 to binary
+  const binaryString = atob(base64Data)
+  const bytes = new Uint8Array(binaryString.length)
+  for (let i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i)
+  }
+
+  // Create a blob and then a file
+  const blob = new Blob([bytes], { type: 'image/png' })
+  return new File([blob], filename, { type: 'image/png' })
+}
+
 // Convert aspect ratio to Pexels orientation format
-function aspectRatioToPexelsOrientation(
-  aspectRatio: '1:1' | '3:4' | '4:3' | '9:16' | '16:9'
-): 'landscape' | 'portrait' | 'square' {
+function aspectRatioToPexelsOrientation(aspectRatio: ImageAspectRatio): 'landscape' | 'portrait' | 'square' {
   switch (aspectRatio) {
     case '16:9':
     case '4:3':
@@ -143,10 +213,7 @@ function aspectRatioToPexelsOrientation(
 }
 
 // Helper function to get Pexels image
-async function getFallbackPexelsImage(
-  keyword: string,
-  aspectRatio: '1:1' | '3:4' | '4:3' | '9:16' | '16:9'
-): Promise<string> {
+async function getFallbackPexelsImage(keyword: string, aspectRatio: ImageAspectRatio): Promise<string> {
   try {
     // Convert aspect ratio to Pexels-compatible orientation format
     const pexelsOrientation = aspectRatioToPexelsOrientation(aspectRatio)
@@ -172,11 +239,7 @@ async function getFallbackPexelsImage(
 }
 
 // Helper to upload AI-generated image to S3
-async function uploadAiGeneratedImage(
-  file: any,
-  keyword: string,
-  aspectRatio: '1:1' | '3:4' | '4:3' | '9:16' | '16:9'
-): Promise<string> {
+async function uploadAiGeneratedImage(file: any, keyword: string, aspectRatio: ImageAspectRatio): Promise<string> {
   try {
     // Handle the image data based on its type
     let blob: Blob
