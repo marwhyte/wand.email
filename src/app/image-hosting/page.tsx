@@ -122,18 +122,6 @@ export default function ImageHostingPage() {
             <li>Optimize your images to reduce file size before uploading</li>
           </ul>
 
-          <h2 className="mt-8 text-xl font-semibold text-gray-800">Image Retention Policy</h2>
-
-          <p>Images are stored based on your subscription plan:</p>
-
-          <ul className="ml-5 list-disc space-y-2">
-            <li>Free Plan: Images are stored for up to 30 days</li>
-            <li>Pro Plan: Images are stored for up to 12 months</li>
-            <li>Enterprise Plan: Custom retention policies available</li>
-            <li>You&apos;ll always have the option to download your images for local storage</li>
-            <li>You&apos;ll receive notification before any images are scheduled for deletion</li>
-          </ul>
-
           <h2 className="mt-8 text-xl font-semibold text-gray-800">Best Practices</h2>
 
           <div className="rounded-md bg-blue-50 p-4">
@@ -166,7 +154,10 @@ export default function ImageHostingPage() {
 
           <p>
             We&apos;re committed to providing transparent information about our services. If you have any questions
-            about image hosting or potential future charges, please don&apos;t hesitate to contact our support team.
+            about image hosting or potential future charges, please don&apos;t hesitate to{' '}
+            <a href="mailto:support@wand.email" className="text-blue-500">
+              contact our support team.
+            </a>
           </p>
 
           <div className="mt-8 text-center">
