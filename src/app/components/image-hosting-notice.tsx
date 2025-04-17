@@ -21,7 +21,7 @@ export function ImageHostingNotice() {
               href={IMAGE_HOSTING}
               className="font-medium text-blue-600 hover:text-blue-800 hover:underline"
             >
-              Charges may apply for images hosted on wand.email
+              Data limits apply for images hosted on wand.email (Free: 10GB, Pro: 150GB)
             </Link>
           </p>
         </div>

@@ -31,8 +31,9 @@ export default function ImageHostingPage() {
                 <h3 className="text-sm font-medium text-yellow-800">Important Notice</h3>
                 <div className="mt-2 text-sm text-yellow-700">
                   <p>
-                    While image hosting is currently included with your subscription, future charges may apply based on
-                    usage and storage requirements. This page outlines our planned approach to image hosting.
+                    While image hosting is currently included with your subscription, usage limits and charges will
+                    apply based on your plan. Free plans do not allow data overages beyond the threshold. You can either
+                    host images yourself or upgrade your plan if you intend to send high volume campaigns with images.
                   </p>
                 </div>
               </div>
@@ -57,46 +58,80 @@ export default function ImageHostingPage() {
             </ol>
           </div>
 
-          <h2 className="mt-8 text-xl font-semibold text-gray-800">Future Hosting Plans</h2>
+          <h2 className="mt-8 text-xl font-semibold text-gray-800">Image Hosting Storage Limits</h2>
 
           <p>
-            In the future, we plan to implement tiered image hosting based on your usage needs. While the specific
-            details are still being finalized, here's what you can expect:
+            We provide different storage limits based on your subscription plan. Each plan includes a specific amount of
+            monthly image hosting bandwidth:
           </p>
 
           <div className="mt-4 grid gap-4 sm:grid-cols-3">
             <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
-              <h3 className="mb-2 text-lg font-medium text-gray-800">Basic Storage</h3>
+              <h3 className="mb-2 text-lg font-medium text-gray-800">Free Plan</h3>
               <p className="text-sm text-gray-600">
-                A generous allocation of image storage included with your subscription. Sufficient for most standard
-                email marketing campaigns.
+                Includes 10GB of monthly image hosting bandwidth. No overages allowed—once exceeded, images will not be
+                served until the next billing cycle or until you upgrade.
               </p>
             </div>
             <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
-              <h3 className="mb-2 text-lg font-medium text-gray-800">Advanced Storage</h3>
+              <h3 className="mb-2 text-lg font-medium text-gray-800">Pro Plan</h3>
               <p className="text-sm text-gray-600">
-                Additional storage for users with higher volume needs or who require extended retention periods for
-                their images.
+                Includes 150GB of monthly image hosting bandwidth. Additional storage beyond this will incur extra
+                charges based on usage.
               </p>
             </div>
             <div className="rounded-lg border border-gray-200 p-4 shadow-sm">
-              <h3 className="mb-2 text-lg font-medium text-gray-800">Premium Delivery</h3>
+              <h3 className="mb-2 text-lg font-medium text-gray-800">Enterprise Plan</h3>
               <p className="text-sm text-gray-600">
-                Enhanced delivery options for high-traffic campaigns, including higher bandwidth limits and global
-                content delivery networks.
+                Custom bandwidth limits tailored to your organization&apos;s needs with priority delivery network access
+                and advanced analytics.
               </p>
             </div>
           </div>
 
-          <h2 className="mt-8 text-xl font-semibold text-gray-800">Image Retention Policy</h2>
+          <h2 className="mt-8 text-xl font-semibold text-gray-800">How Usage Is Calculated</h2>
 
-          <p>Currently, images are stored indefinitely. In the future, we may implement a retention policy where:</p>
+          <p>Your image hosting usage is calculated based on the following formula:</p>
+
+          <div className="my-4 rounded-md bg-gray-100 p-4 font-mono text-sm">
+            <p className="mb-2">For emails:</p>
+            <p>Total size of images included in an email × Total emails sent × Total open rate</p>
+          </div>
+
+          <p>
+            For example, if you send an email with 500KB of images to 1,000 recipients and have a 20% open rate, that
+            would consume approximately 100MB of your bandwidth (500KB × 1,000 × 0.2 = 100MB).
+          </p>
+
+          <div className="mt-4 rounded-md border border-blue-200 bg-blue-50 p-4">
+            <h3 className="text-md font-medium text-blue-800">Tip:</h3>
+            <p className="mt-2 text-blue-700">
+              Optimize your images before uploading to reduce their size. A properly optimized image can be 70-80%
+              smaller than an unoptimized one, while maintaining visual quality.
+            </p>
+          </div>
+
+          <h2 className="mt-8 text-xl font-semibold text-gray-800">Alternative Options</h2>
+
+          <p>If you prefer not to use our image hosting service or anticipate exceeding your plan&apos;s limits:</p>
 
           <ul className="ml-5 list-disc space-y-2">
-            <li>Images may be stored for a specific period based on your subscription level</li>
-            <li>After this period, images may be archived or require additional storage fees</li>
-            <li>You'll always have the option to download your images for local storage</li>
-            <li>You'll receive notification before any changes to image availability</li>
+            <li>Host images on your own server and use absolute URLs in your emails</li>
+            <li>Use a third-party image hosting service and link to those images</li>
+            <li>Upgrade to a higher plan tier if you regularly send high-volume campaigns</li>
+            <li>Optimize your images to reduce file size before uploading</li>
+          </ul>
+
+          <h2 className="mt-8 text-xl font-semibold text-gray-800">Image Retention Policy</h2>
+
+          <p>Images are stored based on your subscription plan:</p>
+
+          <ul className="ml-5 list-disc space-y-2">
+            <li>Free Plan: Images are stored for up to 30 days</li>
+            <li>Pro Plan: Images are stored for up to 12 months</li>
+            <li>Enterprise Plan: Custom retention policies available</li>
+            <li>You&apos;ll always have the option to download your images for local storage</li>
+            <li>You&apos;ll receive notification before any images are scheduled for deletion</li>
           </ul>
 
           <h2 className="mt-8 text-xl font-semibold text-gray-800">Best Practices</h2>
@@ -119,7 +154,8 @@ export default function ImageHostingPage() {
                     <li>Optimize your images before uploading to reduce file size</li>
                     <li>Use appropriate image dimensions for your email layout</li>
                     <li>Consider downloading and storing important images locally as a backup</li>
-                    <li>Regularly review and remove unused images from your library</li>
+                    <li>Regularly review your bandwidth usage in your account dashboard</li>
+                    <li>For high-volume campaigns, use fewer or smaller images</li>
                   </ul>
                 </div>
               </div>
@@ -129,8 +165,8 @@ export default function ImageHostingPage() {
           <h2 className="mt-8 text-xl font-semibold text-gray-800">Questions?</h2>
 
           <p>
-            We're committed to providing transparent information about our services. If you have any questions about
-            image hosting or potential future charges, please don't hesitate to contact our support team.
+            We&apos;re committed to providing transparent information about our services. If you have any questions
+            about image hosting or potential future charges, please don&apos;t hesitate to contact our support team.
           </p>
 
           <div className="mt-8 text-center">
