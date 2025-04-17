@@ -3,7 +3,6 @@
 import { useOpener } from '../hooks/useOpener'
 import { Button } from './button'
 import FileUploaderDialog from './dialogs/file-uploader-dialog'
-import { ImageHostingNotice } from './image-hosting-notice'
 
 interface FileUploaderProps {
   onUpload: (src: string) => void
@@ -18,7 +17,6 @@ const FileUploader = ({ onUpload }: FileUploaderProps) => {
       <Button color="purple" onClick={opener.open} className="image-src-input">
         Browse
       </Button>
-      <ImageHostingNotice />
     </>
   )
 }
