@@ -114,6 +114,7 @@ export const getAdditionalIconStyles = (
     align: attributeAlign,
     title,
     description,
+    s3IconUrl,
     ...styleAttributes
   } = iconBlock.attributes
 

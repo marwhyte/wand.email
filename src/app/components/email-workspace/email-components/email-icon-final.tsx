@@ -15,10 +15,18 @@ export default function EmailIconFinal({ block, parentRow, email }: Props) {
   const { style, ...blockProps } = getIconProps(block, parentRow, email)
   const { padding, paddingTop, paddingRight, paddingBottom, paddingLeft, ...restStyles } = style || {}
 
-  const { icon, title, description, size, position = 'center', align = 'center' } = blockAttributes
+  const { icon, title, description, size = '64', position = 'center', align = 'center' } = blockAttributes
+  const iconSize = parseInt(size, 10)
 
   // Use the S3 URL if available, otherwise fall back to the API URL
   const iconUrl = block.attributes.s3IconUrl
+
+  // Merge the icon size into the style
+  const iconStyle = {
+    ...restStyles,
+    width: `${iconSize}px`,
+    height: `${iconSize}px`,
+  }
 
   return (
     <Section>
@@ -30,7 +38,7 @@ export default function EmailIconFinal({ block, parentRow, email }: Props) {
                 <>
                   <tr>
                     <td align={align} style={{ paddingBottom: '12px' }}>
-                      <img alt={`${icon} icon`} src={iconUrl} {...blockProps} style={restStyles} />
+                      <img alt={`${icon} icon`} src={iconUrl} {...blockProps} style={iconStyle} />
                     </td>
                   </tr>
                   <tr>
@@ -57,7 +65,7 @@ export default function EmailIconFinal({ block, parentRow, email }: Props) {
                 <tr>
                   {position === 'left' && (
                     <td valign="top" style={{ paddingRight: '8px' }}>
-                      <img alt={`${icon} icon`} src={iconUrl} {...blockProps} style={restStyles} />
+                      <img alt={`${icon} icon`} src={iconUrl} {...blockProps} style={iconStyle} />
                     </td>
                   )}
                   <td valign="top">
